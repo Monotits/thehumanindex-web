@@ -1,21 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 46" fill="none">
-  <!-- Hourglass — fits within text block height (y:4 to y:42) -->
-  <g transform="translate(4, 8)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 370 42" fill="none">
+  <!-- Hourglass: top bar aligns with THE baseline, bottom bar aligns with HUMAN INDEX baseline -->
+  <g transform="translate(2, 5)">
     <!-- Top bar -->
-    <rect x="0" y="0" width="22" height="2.2" rx="1.1" fill="white"/>
+    <rect x="0" y="0" width="24" height="2" rx="1" fill="white"/>
     <!-- Bottom bar -->
-    <rect x="0" y="27.8" width="22" height="2.2" rx="1.1" fill="white"/>
-    <!-- Top glass curve -->
-    <path d="M 2 3 C 2 3, 11 13, 11 14.5 C 11 13, 20 3, 20 3" stroke="white" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <!-- Bottom glass curve -->
-    <path d="M 2 27 C 2 27, 11 17, 11 15.5 C 11 17, 20 27, 20 27" stroke="white" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <!-- Sand in bottom -->
-    <path d="M 7 27 L 15 27 L 11 21 Z" fill="white" opacity="0.3"/>
-    <!-- Stream -->
-    <line x1="11" y1="14" x2="11" y2="16" stroke="white" stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>
+    <rect x="0" y="30" width="24" height="2" rx="1" fill="white"/>
+    <!-- Top glass -->
+    <path d="M 1.5 3 Q 12 15, 12 16" stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M 22.5 3 Q 12 15, 12 16" stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <!-- Bottom glass -->
+    <path d="M 1.5 29 Q 12 17, 12 16" stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M 22.5 29 Q 12 17, 12 16" stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <!-- Sand -->
+    <path d="M 6.5 29 L 17.5 29 L 12 22 Z" fill="white" opacity="0.25"/>
   </g>
-  <!-- THE -->
-  <text x="36" y="13" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="rgba(255,255,255,0.6)">THE</text>
-  <!-- HUMAN INDEX -->
-  <text x="36" y="40" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="27" font-weight="700" letter-spacing="1" fill="white">HUMAN INDEX</text>
+  <!-- THE: y=11 means baseline at 11 -->
+  <text x="36" y="11" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="rgba(255,255,255,0.6)">THE</text>
+  <!-- HUMAN INDEX: y=37 means baseline at 37 -->
+  <text x="36" y="37" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="27" font-weight="700" letter-spacing="1" fill="white">HUMAN INDEX</text>
 </svg>
