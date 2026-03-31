@@ -5,6 +5,13 @@ import { CompositeScore, Commentary, DOMAIN_LABELS, DOMAIN_ICONS, BAND_LABELS } 
 import { useTheme } from '@/lib/theme'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useState } from 'react'
+import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
+import WaterfallChart from '@/components/charts/WaterfallChart'
+import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
+import MultiDomainTrend from '@/components/charts/MultiDomainTrend'
+import StackedAreaDecomposition from '@/components/charts/StackedAreaDecomposition'
+import WeeklyHeatmap from '@/components/charts/WeeklyHeatmap'
+import DomainComparisonBar from '@/components/charts/DomainComparisonBar'
 
 interface Props {
   score: CompositeScore
@@ -161,35 +168,49 @@ export default function HomeBriefing({ score, pulse }: Props) {
           </div>
         </div>
 
-        {/* ═══ Two column: Domains + Editorial ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
-          {/* Domain Analysis */}
-          <div>
-            <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 8px' }}>Seven Domains of Stress</h2>
-            <p style={{ fontSize: 14, color: theme.textTertiary, margin: '0 0 20px', fontFamily: theme.fontBody }}>Each domain scored 0–100 using public economic, social, and governance data</p>
-            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, overflow: 'hidden' }}>
-              {sortedDomains.map(d => {
-                const color = d.value >= 65 ? '#dc2626' : d.value >= 45 ? '#d97706' : d.value >= 25 ? '#2563eb' : '#2d7d46'
-                return (
-                  <div key={d.domain} style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <span style={{ fontSize: 15, fontWeight: 600 }}>{DOMAIN_LABELS[d.domain] || d.domain}</span>
-                      <span style={{ fontSize: 20, fontWeight: 700, color }}>{d.value.toFixed(1)}</span>
-                    </div>
-                    <div style={{ width: '100%', height: 4, background: theme.isDark ? '#1a1a1a' : '#eee', borderRadius: 2 }}>
-                      <div style={{ width: `${d.value}%`, height: '100%', background: color, borderRadius: 2 }} />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+        {/* ═══ Enhanced Domain Analysis ═══ */}
+        <div style={{ padding: '40px 0 24px', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+          <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 8px' }}>Seven Domains of Stress</h2>
+          <p style={{ fontSize: 14, color: theme.textTertiary, margin: '0 0 24px', fontFamily: theme.fontBody }}>Each domain scored 0–100 using public economic, social, and governance data</p>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
+            <DomainComparisonBar domains={sortedDomains} />
           </div>
+        </div>
 
-          {/* Weekly Pulse / Editorial */}
+        {/* ═══ Composite Decomposition + Weekly Heatmap ═══ */}
+        <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 24, padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
+            <StackedAreaDecomposition domains={sortedDomains} />
+          </div>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
+            <WeeklyHeatmap currentScore={score.score_value} />
+          </div>
+        </div>
+
+        {/* ═══ Waterfall + Multi-Domain Trend ═══ */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
+            <WaterfallChart domains={sortedDomains} compositeScore={score.score_value} />
+          </div>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
+            <MultiDomainTrend domains={sortedDomains} />
+          </div>
+        </div>
+
+        {/* ═══ Risk Matrix + Correlation ═══ */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
+            <RiskBubbleChart domains={sortedDomains} />
+          </div>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
+            <CorrelationHeatmap domains={sortedDomains} />
+          </div>
+        </div>
+
+        {/* ═══ Weekly Pulse + Featured Insight ═══ */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <div>
-            <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 8px' }}>Weekly Pulse</h2>
-            <p style={{ fontSize: 14, color: theme.textTertiary, margin: '0 0 20px', fontFamily: theme.fontBody }}>AI-generated analysis in the editorial tradition</p>
-
+            <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 20px' }}>Weekly Pulse</h2>
             <article style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 28, marginBottom: 16 }}>
               <div style={{ fontSize: 11, color: theme.accent, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12, fontFamily: theme.fontBody }}>Analysis</div>
               <h3 style={{ fontSize: 22, fontWeight: 400, lineHeight: 1.3, margin: '0 0 12px' }}>{pulse.title}</h3>
@@ -200,11 +221,12 @@ export default function HomeBriefing({ score, pulse }: Props) {
                 Read full analysis →
               </Link>
             </article>
+          </div>
 
-            {/* Featured Insight */}
-            <div style={{ background: theme.surface, border: `1px solid ${theme.accent}22`, borderRadius: 8, padding: 24, borderLeft: `3px solid ${theme.accent}` }}>
-              <div style={{ fontSize: 11, color: theme.accent, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 8, fontFamily: theme.fontBody }}>Featured Insight</div>
-              <p style={{ fontSize: 17, fontStyle: 'italic', lineHeight: 1.6, margin: '0 0 8px', fontFamily: theme.fontHeading }}>
+          <div>
+            <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 20px' }}>Featured Insight</h2>
+            <div style={{ background: theme.surface, border: `1px solid ${theme.accent}22`, borderRadius: 8, padding: 28, borderLeft: `3px solid ${theme.accent}` }}>
+              <p style={{ fontSize: 19, fontStyle: 'italic', lineHeight: 1.6, margin: '0 0 12px', fontFamily: theme.fontHeading }}>
                 &ldquo;The convergence of displacement acceleration and policy lag creates a window of systemic vulnerability.&rdquo;
               </p>
               <p style={{ fontSize: 13, color: theme.textTertiary, margin: 0, fontFamily: theme.fontBody }}>THI Analysis Team</p>

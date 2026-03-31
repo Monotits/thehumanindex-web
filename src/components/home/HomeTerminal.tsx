@@ -5,6 +5,13 @@ import { CompositeScore, Commentary, DOMAIN_LABELS } from '@/lib/types'
 import { useTheme } from '@/lib/theme'
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts'
 import { useEffect, useState } from 'react'
+import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
+import WaterfallChart from '@/components/charts/WaterfallChart'
+import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
+import MultiDomainTrend from '@/components/charts/MultiDomainTrend'
+import StackedAreaDecomposition from '@/components/charts/StackedAreaDecomposition'
+import WeeklyHeatmap from '@/components/charts/WeeklyHeatmap'
+import DomainComparisonBar from '@/components/charts/DomainComparisonBar'
 
 interface Props {
   score: CompositeScore
@@ -32,24 +39,6 @@ function TickerBar({ score }: { score: CompositeScore }) {
       </div>
       <style>{`@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
     </div>
-  )
-}
-
-/* ─── Mini Sparkline (simple SVG) ─── */
-function Sparkline({ data, color, width = 80, height = 28 }: { data: number[]; color: string; width?: number; height?: number }) {
-  const min = Math.min(...data) - 2
-  const max = Math.max(...data) + 2
-  const points = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * width
-    const y = height - ((v - min) / (max - min)) * height
-    return `${x},${y}`
-  }).join(' ')
-
-  return (
-    <svg width={width} height={height} style={{ display: 'block' }}>
-      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={(data.length - 1) / (data.length - 1) * width} cy={height - ((data[data.length - 1] - min) / (max - min)) * height} r="2" fill={color} />
-    </svg>
   )
 }
 
@@ -95,14 +84,6 @@ export default function HomeTerminal({ score, pulse }: Props) {
   })) || []
 
   const domains = [...(score.sub_indexes || [])].sort((a, b) => b.value - a.value)
-
-  // Generate mock sparkline data for each domain
-  const sparklineData = (base: number) => {
-    const d = []
-    for (let i = 0; i < 6; i++) d.push(Math.max(5, base - (6 - i) * (0.5 + Math.random() * 1.5) + Math.random() * 3))
-    d.push(base)
-    return d
-  }
 
   // Movers — top 2 risers and top 1 faller (simulated deltas)
   const movers = domains.map(d => ({
@@ -175,27 +156,13 @@ export default function HomeTerminal({ score, pulse }: Props) {
           <div style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontMono }}>{keyStat.source}</div>
         </div>
 
-        {/* ═══ Domain Table + Radar ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, marginBottom: 24 }}>
-          {/* Domain Table */}
-          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20 }}>
-            {sectionHeader('Domain Breakdown')}
-            {domains.map(d => {
-              const color = d.value >= 65 ? '#ff3333' : d.value >= 45 ? '#ff6b35' : d.value >= 25 ? '#3b82f6' : '#00ff88'
-              return (
-                <div key={d.domain} style={{ display: 'flex', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
-                  <div style={{ flex: '0 0 150px', fontSize: 13, color: theme.textSecondary }}>{DOMAIN_LABELS[d.domain] || d.domain}</div>
-                  <div style={{ flex: 1, position: 'relative', height: 6, background: '#1a1a1a', borderRadius: 3, marginRight: 16 }}>
-                    <div style={{ position: 'absolute', height: '100%', width: `${d.value}%`, background: color, borderRadius: 3 }} />
-                  </div>
-                  <div style={{ flex: '0 0 48px', fontFamily: theme.fontMono, fontSize: 14, fontWeight: 600, color: '#fff', textAlign: 'right' }}>{d.value.toFixed(1)}</div>
-                  <div style={{ flex: '0 0 40px', fontSize: 11, color: theme.textTertiary, textAlign: 'right' }}>{(d.weight * 100).toFixed(0)}%</div>
-                </div>
-              )
-            })}
-          </div>
+        {/* ═══ Enhanced Domain Analysis (Score + Trend + Delta + Weight) ═══ */}
+        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20, marginBottom: 24 }}>
+          <DomainComparisonBar domains={domains} />
+        </div>
 
-          {/* Radar */}
+        {/* ═══ Analytics Row: Radar + Weekly Heatmap ═══ */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20 }}>
             {sectionHeader('Distribution')}
             <ResponsiveContainer width="100%" height={260}>
@@ -206,22 +173,33 @@ export default function HomeTerminal({ score, pulse }: Props) {
               </RadarChart>
             </ResponsiveContainer>
           </div>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20 }}>
+            <WeeklyHeatmap currentScore={score.score_value} />
+          </div>
         </div>
 
-        {/* ═══ Sparkline Grid — 7 Domains ═══ */}
+        {/* ═══ Composite Decomposition (Stacked Area) ═══ */}
         <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20, marginBottom: 24 }}>
-          {sectionHeader('6-Week Trend by Domain')}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
-            {domains.map(d => {
-              const color = d.value >= 65 ? '#ff3333' : d.value >= 45 ? '#ff6b35' : d.value >= 25 ? '#3b82f6' : '#00ff88'
-              return (
-                <div key={d.domain} style={{ padding: 12, background: '#0a0a0a', borderRadius: 4, border: `1px solid ${theme.surfaceBorder}` }}>
-                  <div style={{ fontSize: 10, color: theme.textTertiary, marginBottom: 6, fontFamily: theme.fontMono }}>{(DOMAIN_LABELS[d.domain] || d.domain).split(' ')[0]}</div>
-                  <Sparkline data={sparklineData(d.value)} color={color} width={100} height={24} />
-                  <div style={{ fontSize: 14, fontWeight: 600, color, fontFamily: theme.fontMono, marginTop: 6 }}>{d.value.toFixed(1)}</div>
-                </div>
-              )
-            })}
+          <StackedAreaDecomposition domains={domains} />
+        </div>
+
+        {/* ═══ Waterfall + Multi-Domain Trend ═══ */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20 }}>
+            <WaterfallChart domains={domains} compositeScore={score.score_value} />
+          </div>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20 }}>
+            <MultiDomainTrend domains={domains} />
+          </div>
+        </div>
+
+        {/* ═══ Risk Matrix + Correlation ═══ */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20 }}>
+            <RiskBubbleChart domains={domains} />
+          </div>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20 }}>
+            <CorrelationHeatmap domains={domains} />
           </div>
         </div>
 

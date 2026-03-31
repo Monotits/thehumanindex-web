@@ -1,24 +1,21 @@
 'use client'
 
 import Link from 'next/link'
-import { CompositeScore, Commentary, DOMAIN_LABELS, DOMAIN_ICONS, BAND_LABELS } from '@/lib/types'
+import { CompositeScore, Commentary, DOMAIN_LABELS, BAND_LABELS } from '@/lib/types'
 import { useTheme } from '@/lib/theme'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useEffect, useState } from 'react'
+import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
+import WaterfallChart from '@/components/charts/WaterfallChart'
+import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
+import MultiDomainTrend from '@/components/charts/MultiDomainTrend'
+import StackedAreaDecomposition from '@/components/charts/StackedAreaDecomposition'
+import WeeklyHeatmap from '@/components/charts/WeeklyHeatmap'
+import DomainComparisonBar from '@/components/charts/DomainComparisonBar'
 
 interface Props {
   score: CompositeScore
   pulse: Commentary
-}
-
-const DOMAIN_TAGLINES: Record<string, string> = {
-  work_risk: 'Machines are learning your job faster than policy can respond',
-  inequality: 'The gap between top earners and median income widens',
-  sentiment: 'Fear and uncertainty about AI rising in public discourse',
-  policy: 'Governments move slower than the technology they regulate',
-  unrest: 'Economic anxiety translating into social tension',
-  decay: 'Trust in institutions eroding under political dysfunction',
-  wellbeing: 'Health and stability metrics showing some resilience',
 }
 
 const SOCIAL_MENTIONS = [
@@ -124,11 +121,6 @@ export default function HomeSignal({ score, pulse }: Props) {
     return d
   }
 
-  const DOMAIN_COLORS: Record<string, string> = {
-    work_risk: '#ef4444', inequality: '#f97316', sentiment: '#f59e0b',
-    policy: '#eab308', unrest: '#3b82f6', decay: '#6366f1', wellbeing: '#22c55e',
-  }
-
   const movers = sortedDomains.map(d => ({
     ...d,
     delta: +(Math.random() * 4 - 1.5).toFixed(2),
@@ -229,31 +221,50 @@ export default function HomeSignal({ score, pulse }: Props) {
         </div>
       </section>
 
-      {/* ═══ 7 Domains ═══ */}
+      {/* ═══ Enhanced Domain Analysis ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <h2 style={{ fontSize: 24, fontWeight: 300, color: '#fff', margin: '0 0 8px' }}>Seven Signals We Track</h2>
           <p style={{ fontSize: 14, color: theme.textTertiary, margin: 0 }}>Each scored 0-100 from public data. Higher = more stress.</p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-          {sortedDomains.map(d => {
-            const color = DOMAIN_COLORS[d.domain] || '#888'
-            return (
-              <div key={d.domain} style={{ background: theme.surface, borderRadius: 12, padding: 24, border: `1px solid ${theme.surfaceBorder}`, transition: 'transform 0.2s', cursor: 'pointer' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLDivElement).style.borderColor = `${color}44` }}
-                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.borderColor = theme.surfaceBorder }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ fontSize: 24 }}>{DOMAIN_ICONS[d.domain] || '📈'}</span>
-                  <span style={{ fontSize: 28, fontWeight: 700, color }}>{d.value.toFixed(0)}</span>
-                </div>
-                <h3 style={{ fontSize: 15, fontWeight: 600, color: '#fff', margin: '0 0 6px' }}>{DOMAIN_LABELS[d.domain] || d.domain}</h3>
-                <p style={{ fontSize: 12, color: theme.textTertiary, lineHeight: 1.5, margin: 0 }}>{DOMAIN_TAGLINES[d.domain] || ''}</p>
-                <div style={{ width: '100%', height: 3, background: '#1a1a1a', borderRadius: 2, marginTop: 16 }}>
-                  <div style={{ width: `${d.value}%`, height: '100%', background: color, borderRadius: 2 }} />
-                </div>
-              </div>
-            )
-          })}
+        <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24, marginBottom: 16 }}>
+          <DomainComparisonBar domains={sortedDomains} />
+        </div>
+      </section>
+
+      {/* ═══ Composite Decomposition ═══ */}
+      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
+        <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
+          <StackedAreaDecomposition domains={sortedDomains} />
+        </div>
+      </section>
+
+      {/* ═══ Waterfall + Multi-Domain Trend ═══ */}
+      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
+            <WaterfallChart domains={sortedDomains} compositeScore={score.score_value} />
+          </div>
+          <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
+            <MultiDomainTrend domains={sortedDomains} />
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ Risk Matrix + Correlation + Heatmap ═══ */}
+      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
+            <RiskBubbleChart domains={sortedDomains} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
+              <WeeklyHeatmap currentScore={score.score_value} />
+            </div>
+            <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
+              <CorrelationHeatmap domains={sortedDomains} />
+            </div>
+          </div>
         </div>
       </section>
 

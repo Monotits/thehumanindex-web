@@ -1,0 +1,128 @@
+'use client'
+
+import { useTheme } from '@/lib/theme'
+import { DOMAIN_LABELS, DOMAIN_ICONS, Domain } from '@/lib/types'
+
+interface DomainData {
+  domain: Domain
+  value: number
+  weight: number
+}
+
+interface Props {
+  domains: DomainData[]
+}
+
+const DOMAIN_COLORS: Record<string, string> = {
+  work_risk: '#ef4444', inequality: '#f97316', sentiment: '#f59e0b',
+  policy: '#eab308', unrest: '#3b82f6', decay: '#6366f1', wellbeing: '#22c55e',
+}
+
+function MiniSparkline({ data, color }: { data: number[]; color: string }) {
+  const w = 48
+  const h = 16
+  const min = Math.min(...data) - 2
+  const max = Math.max(...data) + 2
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w
+    const y = h - ((v - min) / (max - min)) * h
+    return `${x},${y}`
+  }).join(' ')
+
+  return (
+    <svg width={w} height={h}>
+      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.7} />
+    </svg>
+  )
+}
+
+function generateTrend(base: number): number[] {
+  const d: number[] = []
+  for (let i = 0; i < 5; i++) d.push(Math.max(5, base - (5 - i) * 0.8 + (Math.random() - 0.3) * 3))
+  d.push(base)
+  return d
+}
+
+export default function DomainComparisonBar({ domains }: Props) {
+  const { theme } = useTheme()
+  const sorted = [...domains].sort((a, b) => b.value - a.value)
+
+  return (
+    <div>
+      <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16 }}>
+        Domain Analysis — Score, Trend &amp; Weight
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {sorted.map(d => {
+          const color = DOMAIN_COLORS[d.domain] || '#888'
+          const delta = +(Math.random() * 4 - 1.5).toFixed(2)
+          const trend = generateTrend(d.value)
+
+          return (
+            <div key={d.domain} style={{
+              display: 'grid',
+              gridTemplateColumns: '28px 130px 1fr 52px 48px 44px 32px',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 16px',
+              borderRadius: 6,
+              background: theme.surface,
+              border: `1px solid ${theme.surfaceBorder}`,
+            }}>
+              {/* Icon */}
+              <span style={{ fontSize: 16 }}>{DOMAIN_ICONS[d.domain] || '📈'}</span>
+
+              {/* Name */}
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: theme.text }}>{DOMAIN_LABELS[d.domain]}</div>
+              </div>
+
+              {/* Bar */}
+              <div style={{ position: 'relative', height: 8, background: theme.isDark ? '#1a1a1a' : '#eee', borderRadius: 4, overflow: 'hidden' }}>
+                <div style={{
+                  position: 'absolute', left: 0, top: 0, height: '100%',
+                  width: `${d.value}%`, background: color, borderRadius: 4,
+                  transition: 'width 0.5s ease',
+                }} />
+                {/* 50-mark */}
+                <div style={{ position: 'absolute', left: '50%', top: 0, width: 1, height: '100%', background: theme.textTertiary, opacity: 0.3 }} />
+              </div>
+
+              {/* Score */}
+              <div style={{ fontSize: 16, fontWeight: 700, color, fontFamily: theme.fontMono, textAlign: 'right' }}>
+                {d.value.toFixed(1)}
+              </div>
+
+              {/* Sparkline */}
+              <MiniSparkline data={trend} color={color} />
+
+              {/* Delta */}
+              <div style={{
+                fontSize: 11, fontFamily: theme.fontMono, textAlign: 'right',
+                color: delta > 0 ? '#ef4444' : '#22c55e',
+              }}>
+                {delta > 0 ? '+' : ''}{delta.toFixed(2)}
+              </div>
+
+              {/* Weight */}
+              <div style={{ fontSize: 10, color: theme.textTertiary, textAlign: 'right', fontFamily: theme.fontMono }}>
+                {(d.weight * 100).toFixed(0)}%
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Column headers hint */}
+      <div style={{ display: 'grid', gridTemplateColumns: '28px 130px 1fr 52px 48px 44px 32px', gap: 8, padding: '6px 16px', fontSize: 8, color: theme.textTertiary }}>
+        <span />
+        <span />
+        <span>Score bar (midline = 50)</span>
+        <span style={{ textAlign: 'right' }}>Score</span>
+        <span>6wk trend</span>
+        <span style={{ textAlign: 'right' }}>WoW Δ</span>
+        <span style={{ textAlign: 'right' }}>Wt</span>
+      </div>
+    </div>
+  )
+}
