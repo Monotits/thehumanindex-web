@@ -21,7 +21,7 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Image src="/logo.svg" alt="The Human Index" width={200} height={23} priority />
+            <Image src="/logo.svg" alt="The Human Index" width={260} height={30} priority />
           </Link>
 
           {/* Desktop links */}

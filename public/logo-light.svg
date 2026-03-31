@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 46" fill="none">
-  <g transform="translate(6, 8) scale(0.65)">
-    <path d="M 3 1 L 39 1 L 21 20 Z" stroke="#111827" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
-    <path d="M 3 43 L 39 43 L 21 24 Z" stroke="#111827" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
-    <path d="M 12 43 L 30 43 L 21 34 Z" fill="#111827" opacity="0.25"/>
-    <line x1="21" y1="19" x2="21" y2="25" stroke="#111827" stroke-width="1.2" stroke-linecap="round"/>
-    <line x1="0" y1="1" x2="42" y2="1" stroke="#111827" stroke-width="2.2" stroke-linecap="round"/>
-    <line x1="0" y1="43" x2="42" y2="43" stroke="#111827" stroke-width="2.2" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 46" fill="none">
+  <g transform="translate(0, 3)">
+    <rect x="2" y="0" width="30" height="3" rx="1.5" fill="#111827"/>
+    <rect x="2" y="37" width="30" height="3" rx="1.5" fill="#111827"/>
+    <path d="M 5 4 C 5 4, 17 17, 17 19 C 17 17, 29 4, 29 4" stroke="#111827" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 5 36 C 5 36, 17 23, 17 21 C 17 23, 29 36, 29 36" stroke="#111827" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 10 36 L 24 36 L 17 28 Z" fill="#111827" opacity="0.25"/>
+    <line x1="17" y1="18" x2="17" y2="22" stroke="#111827" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
   </g>
-  <text x="42" y="13" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="rgba(17,24,39,0.5)">THE</text>
-  <text x="42" y="40" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="27" font-weight="700" letter-spacing="1" fill="#111827">HUMAN INDEX</text>
+  <text x="44" y="13" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="rgba(17,24,39,0.5)">THE</text>
+  <text x="44" y="40" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="27" font-weight="700" letter-spacing="1" fill="#111827">HUMAN INDEX</text>
 </svg>
