@@ -4,21 +4,21 @@ import { useEffect, useState } from 'react'
 import { QuizResult } from '@/lib/types'
 import { ShareCard } from '@/components/ShareCard'
 import { BandLabel } from '@/components/BandLabel'
+import { useTheme } from '@/lib/theme'
 
 export default function ResultPage() {
+  const { theme } = useTheme()
   const [result, setResult] = useState<QuizResult | null>(null)
   const [showEmailModal, setShowEmailModal] = useState(true)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // Try to load from session storage first, fall back to mock data
     const stored = sessionStorage.getItem('quizResult')
     if (stored) {
       setResult(JSON.parse(stored))
       sessionStorage.removeItem('quizResult')
     } else {
-      // Mock result for demo
       setResult({
         id: 'result-1',
         exposure_band: 'elevated',
@@ -30,33 +30,12 @@ export default function ResultPage() {
           { task: 'Report writing and documentation', exposure: 0.68 },
         ],
         skill_recommendations: [
-          {
-            skill: 'Prompt Engineering',
-            reason: 'Critical for working effectively with AI systems',
-            course_url: 'https://example.com',
-          },
-          {
-            skill: 'Systems Thinking',
-            reason: 'Higher-order skills AI struggles with',
-            course_url: 'https://example.com',
-          },
-          {
-            skill: 'Strategic Communication',
-            reason: 'Leadership and influence remain distinctly human',
-            course_url: 'https://example.com',
-          },
+          { skill: 'Prompt Engineering', reason: 'Critical for working effectively with AI systems', course_url: 'https://example.com' },
+          { skill: 'Systems Thinking', reason: 'Higher-order skills AI struggles with', course_url: 'https://example.com' },
+          { skill: 'Strategic Communication', reason: 'Leadership and influence remain distinctly human', course_url: 'https://example.com' },
         ],
-        region_context: {
-          unemployment_rate: 3.8,
-          tech_industry_concentration: 'High',
-          ai_adoption_speed: 'Accelerating',
-        },
-        share_card_data: {
-          band: 'ELEVATED',
-          percentile_text: '65th percentile',
-          job_title: 'Data Analyst',
-          region: 'San Francisco, CA',
-        },
+        region_context: { unemployment_rate: 3.8, tech_industry_concentration: 'High', ai_adoption_speed: 'Accelerating' },
+        share_card_data: { band: 'ELEVATED', percentile_text: '65th percentile', job_title: 'Data Analyst', region: 'San Francisco, CA' },
       })
     }
   }, [])
@@ -64,57 +43,64 @@ export default function ResultPage() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-
     try {
-      // For now just close the modal, in production this would save to a list
       setShowEmailModal(false)
     } finally {
       setLoading(false)
     }
   }
 
-  if (!result) return <div className="bg-gray-950 min-h-screen" />
+  if (!result) return <div style={{ background: theme.bg, minHeight: '100vh' }} />
+
+  const cardStyle: React.CSSProperties = {
+    background: theme.surface,
+    border: `1px solid ${theme.surfaceBorder}`,
+    borderRadius: 12,
+    padding: 32,
+  }
+
+  const sectionTitle: React.CSSProperties = {
+    fontSize: 13,
+    fontWeight: 600,
+    color: theme.textTertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    marginBottom: 20,
+    fontFamily: theme.fontBody,
+  }
 
   return (
-    <div className="min-h-screen bg-gray-950 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div style={{ minHeight: '100vh', background: theme.bg, padding: '48px 16px' }}>
+      <div style={{ maxWidth: 960, margin: '0 auto' }}>
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Your Results</h1>
-          <p className="text-gray-400">
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <h1 style={{ fontSize: 36, fontWeight: 700, color: theme.text, marginBottom: 16, fontFamily: theme.fontHeading }}>Your Results</h1>
+          <p style={{ fontSize: 16, color: theme.textSecondary, fontFamily: theme.fontBody }}>
             Based on your job, skills, and region, here&apos;s your AI exposure assessment.
           </p>
         </div>
 
         {/* Email Modal Overlay */}
         {showEmailModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 max-w-md w-full">
-              <h2 className="text-2xl font-bold text-white mb-4">Get Your Full Report</h2>
-              <p className="text-gray-400 mb-6">
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 32, maxWidth: 420, width: '100%' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 700, color: theme.text, marginBottom: 16, fontFamily: theme.fontHeading }}>Get Your Full Report</h2>
+              <p style={{ fontSize: 14, color: theme.textSecondary, marginBottom: 24, lineHeight: 1.6, fontFamily: theme.fontBody }}>
                 Enter your email to download your complete assessment with personalized career recommendations.
               </p>
-              <form onSubmit={handleEmailSubmit} className="space-y-4">
+              <form onSubmit={handleEmailSubmit}>
                 <input
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  style={{ width: '100%', padding: '10px 16px', background: theme.bg, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, color: theme.text, fontSize: 14, fontFamily: theme.fontBody, outline: 'none', marginBottom: 12, boxSizing: 'border-box' }}
                   required
                 />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 text-white font-medium rounded-lg transition-colors"
-                >
+                <button type="submit" disabled={loading} style={{ width: '100%', padding: '10px 0', background: theme.accent, border: 'none', borderRadius: 8, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.fontBody, marginBottom: 8 }}>
                   {loading ? 'Sending...' : 'Get My Report'}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setShowEmailModal(false)}
-                  className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-lg transition-colors"
-                >
+                <button type="button" onClick={() => setShowEmailModal(false)} style={{ width: '100%', padding: '10px 0', background: theme.bg, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, color: theme.textSecondary, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: theme.fontBody }}>
                   Skip for Now
                 </button>
               </form>
@@ -122,37 +108,34 @@ export default function ResultPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 32 }}>
           {/* Main Results */}
-          <div className="lg:col-span-2 space-y-8">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Exposure Band */}
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
-              <h2 className="text-lg font-semibold text-gray-400 mb-4">EXPOSURE BAND</h2>
-              <div className="flex items-center justify-between">
+            <div style={cardStyle}>
+              <div style={sectionTitle}>Exposure Band</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                  <p className="text-gray-400 text-sm mb-2">You&apos;re in the</p>
-                  <p className="text-white text-2xl font-bold mb-1">{result.percentile_label}</p>
-                  <p className="text-gray-500 text-sm">for your role and region</p>
+                  <p style={{ fontSize: 13, color: theme.textTertiary, margin: '0 0 8px', fontFamily: theme.fontBody }}>You&apos;re in the</p>
+                  <p style={{ fontSize: 24, fontWeight: 700, color: theme.text, margin: '0 0 4px', fontFamily: theme.fontHeading }}>{result.percentile_label}</p>
+                  <p style={{ fontSize: 13, color: theme.textTertiary, margin: 0, fontFamily: theme.fontBody }}>for your role and region</p>
                 </div>
                 <BandLabel band={result.exposure_band} size="lg" />
               </div>
             </div>
 
             {/* Tasks at Risk */}
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
-              <h2 className="text-lg font-semibold text-gray-400 mb-6">TOP TASKS AT RISK</h2>
-              <div className="space-y-4">
+            <div style={cardStyle}>
+              <div style={sectionTitle}>Top Tasks at Risk</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {result.top_tasks_at_risk.map((item, idx) => (
                   <div key={idx}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-white text-sm">{item.task}</span>
-                      <span className="text-gray-400 text-sm font-mono">{Math.round(item.exposure * 100)}%</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <span style={{ fontSize: 14, color: theme.text, fontFamily: theme.fontBody }}>{item.task}</span>
+                      <span style={{ fontSize: 13, color: theme.textTertiary, fontFamily: theme.fontBody }}>{Math.round(item.exposure * 100)}%</span>
                     </div>
-                    <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-orange-500"
-                        style={{ width: `${item.exposure * 100}%` }}
-                      />
+                    <div style={{ width: '100%', height: 6, background: theme.isDark ? '#1a1a1a' : '#eee', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ width: `${item.exposure * 100}%`, height: '100%', background: theme.accent, borderRadius: 3 }} />
                     </div>
                   </div>
                 ))}
@@ -160,20 +143,15 @@ export default function ResultPage() {
             </div>
 
             {/* Skill Recommendations */}
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
-              <h2 className="text-lg font-semibold text-gray-400 mb-6">SKILL RECOMMENDATIONS</h2>
-              <div className="space-y-6">
+            <div style={cardStyle}>
+              <div style={sectionTitle}>Skill Recommendations</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {result.skill_recommendations.map((rec, idx) => (
-                  <div key={idx} className="border-b border-gray-800 pb-4 last:border-0 last:pb-0">
-                    <h3 className="text-white font-semibold mb-2">{rec.skill}</h3>
-                    <p className="text-gray-400 text-sm mb-3">{rec.reason}</p>
+                  <div key={idx} style={{ borderBottom: idx < result.skill_recommendations.length - 1 ? `1px solid ${theme.surfaceBorder}` : 'none', paddingBottom: idx < result.skill_recommendations.length - 1 ? 20 : 0 }}>
+                    <h3 style={{ fontSize: 15, fontWeight: 600, color: theme.text, margin: '0 0 8px', fontFamily: theme.fontHeading }}>{rec.skill}</h3>
+                    <p style={{ fontSize: 13, color: theme.textSecondary, margin: '0 0 10px', lineHeight: 1.5, fontFamily: theme.fontBody }}>{rec.reason}</p>
                     {rec.course_url && (
-                      <a
-                        href={rec.course_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:text-blue-400 text-sm font-medium transition-colors"
-                      >
+                      <a href={rec.course_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: theme.accent, fontWeight: 600, textDecoration: 'none', fontFamily: theme.fontBody }}>
                         Find Courses →
                       </a>
                     )}
@@ -183,20 +161,20 @@ export default function ResultPage() {
             </div>
 
             {/* CTA */}
-            <div className="bg-blue-900/20 border border-blue-900/50 rounded-lg p-8 text-center">
-              <h3 className="text-white font-bold mb-2">Download the App</h3>
-              <p className="text-gray-400 mb-4">
+            <div style={{ ...cardStyle, background: `${theme.accent}10`, borderColor: `${theme.accent}30`, textAlign: 'center' }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: theme.text, margin: '0 0 8px', fontFamily: theme.fontHeading }}>Download the App</h3>
+              <p style={{ fontSize: 14, color: theme.textSecondary, margin: '0 0 20px', fontFamily: theme.fontBody }}>
                 Get your full personalized report with detailed career roadmap and continuous exposure monitoring.
               </p>
-              <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+              <button style={{ padding: '10px 28px', background: theme.accent, border: 'none', borderRadius: 8, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.fontBody }}>
                 Download Now
               </button>
             </div>
           </div>
 
           {/* Share Card Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
+          <div>
+            <div style={{ position: 'sticky', top: 96 }}>
               <ShareCard result={result} />
             </div>
           </div>

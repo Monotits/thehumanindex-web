@@ -1,14 +1,19 @@
 'use client'
 
 import { QuizForm } from '@/components/QuizForm'
+import { useTheme } from '@/lib/theme'
 
 export default function QuizPage() {
+  const { theme } = useTheme()
+
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center py-12">
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Your Exposure Assessment</h1>
-          <p className="text-gray-400">
+    <div style={{ minHeight: '100vh', background: theme.bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 16px' }}>
+      <div style={{ width: '100%', maxWidth: 640 }}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <h1 style={{ fontSize: 36, fontWeight: 700, color: theme.text, marginBottom: 16, fontFamily: theme.fontHeading }}>
+            Your Exposure Assessment
+          </h1>
+          <p style={{ fontSize: 16, color: theme.textSecondary, fontFamily: theme.fontBody, lineHeight: 1.6 }}>
             Understand how exposed your job and skills are to AI displacement
           </p>
         </div>

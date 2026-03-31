@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { QuizInput } from '@/lib/types'
 import { useRouter } from 'next/navigation'
+import { useTheme } from '@/lib/theme'
 
 export function QuizForm() {
   const router = useRouter()
+  const { theme } = useTheme()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<QuizInput>({
     job_title: '',
@@ -61,63 +63,104 @@ export function QuizForm() {
     }
   }
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '10px 16px',
+    background: theme.surface,
+    border: `1px solid ${theme.surfaceBorder}`,
+    borderRadius: 8,
+    color: theme.text,
+    fontSize: 14,
+    fontFamily: theme.fontBody,
+    outline: 'none',
+    boxSizing: 'border-box',
+  }
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: 13,
+    fontWeight: 600,
+    color: theme.textSecondary,
+    marginBottom: 8,
+    fontFamily: theme.fontBody,
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto px-4 py-8">
-      <div className="space-y-6">
+    <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 640, margin: '0 auto', padding: '0 16px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         {/* Job Title */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Job Title</label>
+          <label style={labelStyle}>Job Title</label>
           <input
             type="text"
             value={formData.job_title}
             onChange={e => setFormData(prev => ({ ...prev, job_title: e.target.value }))}
             placeholder="e.g., Software Engineer, Data Analyst"
-            className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+            style={{ ...inputStyle }}
             required
           />
         </div>
 
         {/* Industry */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Industry</label>
+          <label style={labelStyle}>Industry</label>
           <input
             type="text"
             value={formData.industry}
             onChange={e => setFormData(prev => ({ ...prev, industry: e.target.value }))}
             placeholder="e.g., Technology, Finance, Healthcare"
-            className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+            style={{ ...inputStyle }}
             required
           />
         </div>
 
         {/* Main Tasks */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Main Tasks & Responsibilities</label>
-          <div className="flex gap-2 mb-3">
+          <label style={labelStyle}>Main Tasks &amp; Responsibilities</label>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
             <input
               type="text"
               value={currentTask}
               onChange={e => setCurrentTask(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddTask())}
               placeholder="Add a task (press Enter to add)"
-              className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+              style={{ ...inputStyle, flex: 1 }}
             />
             <button
               type="button"
               onClick={handleAddTask}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              style={{
+                padding: '10px 20px',
+                background: theme.accent,
+                border: 'none',
+                borderRadius: 8,
+                color: '#fff',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: theme.fontBody,
+                whiteSpace: 'nowrap',
+              }}
             >
               Add
             </button>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {formData.tasks.map((task, idx) => (
-              <div key={idx} className="flex items-center gap-2 bg-gray-800 px-3 py-1 rounded-full">
-                <span className="text-sm text-gray-300">{task}</span>
+              <div key={idx} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                background: theme.surface,
+                border: `1px solid ${theme.surfaceBorder}`,
+                padding: '4px 12px',
+                borderRadius: 20,
+              }}>
+                <span style={{ fontSize: 13, color: theme.textSecondary, fontFamily: theme.fontBody }}>{task}</span>
                 <button
                   type="button"
                   onClick={() => handleRemoveTask(idx)}
-                  className="text-gray-500 hover:text-gray-400"
+                  style={{ background: 'none', border: 'none', color: theme.textTertiary, cursor: 'pointer', fontSize: 16, padding: 0, lineHeight: 1 }}
                 >
                   ×
                 </button>
@@ -128,25 +171,25 @@ export function QuizForm() {
 
         {/* Experience */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Years of Experience</label>
+          <label style={labelStyle}>Years of Experience</label>
           <input
             type="number"
             value={formData.experience_years}
             onChange={e => setFormData(prev => ({ ...prev, experience_years: parseInt(e.target.value) }))}
             min="0"
             max="70"
-            className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            style={{ ...inputStyle }}
             required
           />
         </div>
 
         {/* Education */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Education Level</label>
+          <label style={labelStyle}>Education Level</label>
           <select
             value={formData.education_level}
             onChange={e => setFormData(prev => ({ ...prev, education_level: e.target.value as QuizInput['education_level'] }))}
-            className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            style={{ ...inputStyle, appearance: 'auto' }}
             required
           >
             <option value="high_school">High School</option>
@@ -159,11 +202,11 @@ export function QuizForm() {
 
         {/* Age Range */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Age Range</label>
+          <label style={labelStyle}>Age Range</label>
           <select
             value={formData.age_range}
             onChange={e => setFormData(prev => ({ ...prev, age_range: e.target.value as QuizInput['age_range'] }))}
-            className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            style={{ ...inputStyle, appearance: 'auto' }}
             required
           >
             <option value="18-24">18-24</option>
@@ -176,13 +219,13 @@ export function QuizForm() {
 
         {/* Country */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Country</label>
+          <label style={labelStyle}>Country</label>
           <input
             type="text"
             value={formData.country}
             onChange={e => setFormData(prev => ({ ...prev, country: e.target.value }))}
             placeholder="e.g., US, UK, Canada"
-            className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+            style={{ ...inputStyle }}
             required
           />
         </div>
@@ -191,7 +234,20 @@ export function QuizForm() {
         <button
           type="submit"
           disabled={loading || formData.tasks.length === 0}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-colors"
+          style={{
+            width: '100%',
+            padding: '14px 0',
+            background: loading || formData.tasks.length === 0 ? theme.surfaceBorder : theme.accent,
+            border: 'none',
+            borderRadius: 8,
+            color: '#fff',
+            fontSize: 15,
+            fontWeight: 700,
+            cursor: loading || formData.tasks.length === 0 ? 'not-allowed' : 'pointer',
+            fontFamily: theme.fontBody,
+            opacity: loading || formData.tasks.length === 0 ? 0.5 : 1,
+            transition: 'opacity 0.2s, background 0.2s',
+          }}
         >
           {loading ? 'Evaluating...' : 'Get Your Exposure Score'}
         </button>
