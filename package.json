@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.1",
+    "@vercel/analytics": "^2.0.1",
     "framer-motion": "^12.38.0",
     "html2canvas": "^1.4.1",
     "next": "14.2.35",
     "next-sitemap": "^4.2.3",
+    "posthog-js": "^1.364.4",
     "react": "^18",
     "react-dom": "^18",
     "recharts": "^3.8.1"

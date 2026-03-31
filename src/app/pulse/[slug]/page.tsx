@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Commentary } from '@/lib/types'
 import { MOCK_COMMENTARIES } from '@/lib/mockData'
 import { supabase } from '@/lib/supabase'
+import { useTheme } from '@/lib/theme'
 import { formatDate } from '@/lib/utils'
 import { useParams } from 'next/navigation'
 
@@ -13,131 +14,67 @@ export default function PulseDetailPage() {
   const slug = params.slug as string
   const [commentary, setCommentary] = useState<Commentary | null>(null)
   const [loading, setLoading] = useState(true)
+  const { theme } = useTheme()
 
   useEffect(() => {
-    const loadCommentary = async () => {
+    const load = async () => {
       try {
-        const { data, error } = await supabase
-          .from('commentary')
-          .select('*')
-          .eq('slug', slug)
-          .single()
-
+        const { data, error } = await supabase.from('commentary').select('*').eq('slug', slug).single()
         if (error) throw error
-
-        if (data) {
-          setCommentary(data as Commentary)
-        } else {
-          // Fallback to mock
-          const found = MOCK_COMMENTARIES.find(c => c.slug === slug)
-          setCommentary(found || null)
-        }
-      } catch (error) {
-        console.error('Failed to load commentary:', error)
-        // Fallback to mock
-        const found = MOCK_COMMENTARIES.find(c => c.slug === slug)
-        setCommentary(found || null)
+        setCommentary(data as Commentary)
+      } catch {
+        setCommentary(MOCK_COMMENTARIES.find(c => c.slug === slug) || null)
       } finally {
         setLoading(false)
       }
     }
-
-    loadCommentary()
+    load()
   }, [slug])
 
   if (loading) {
-    return (
-      <div className="bg-gray-950 min-h-screen flex items-center justify-center">
-        <div className="text-gray-400">Loading...</div>
-      </div>
-    )
+    return <div style={{ background: theme.bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ color: theme.textTertiary }}>Loading...</div></div>
   }
 
   if (!commentary) {
     return (
-      <div className="bg-gray-950 min-h-screen py-12">
-        <div className="max-w-4xl mx-auto px-4">
-          <h1 className="text-2xl font-bold text-white mb-4">Pulse not found</h1>
-          <Link href="/pulse" className="text-blue-500 hover:text-blue-400">
-            Back to Pulse
-          </Link>
+      <div style={{ background: theme.bg, minHeight: '100vh', padding: 48 }}>
+        <div style={{ maxWidth: 700, margin: '0 auto' }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: theme.isDark ? '#fff' : theme.text, marginBottom: 16 }}>Pulse not found</h1>
+          <Link href="/pulse" style={{ color: theme.accent }}>Back to Pulse</Link>
         </div>
       </div>
     )
   }
 
-  // Render markdown as HTML
   const sections = commentary.body_markdown.split('\n').map((line, idx) => {
-    if (line.startsWith('# ')) {
-      return (
-        <h1 key={idx} className="text-3xl font-bold text-white mt-8 mb-4">
-          {line.replace(/^# /, '')}
-        </h1>
-      )
-    }
-    if (line.startsWith('## ')) {
-      return (
-        <h2 key={idx} className="text-2xl font-bold text-white mt-6 mb-3">
-          {line.replace(/^## /, '')}
-        </h2>
-      )
-    }
-    if (line.startsWith('### ')) {
-      return (
-        <h3 key={idx} className="text-xl font-bold text-white mt-4 mb-2">
-          {line.replace(/^### /, '')}
-        </h3>
-      )
-    }
-    if (line.startsWith('- ')) {
-      return (
-        <li key={idx} className="text-gray-400 ml-6 mb-2">
-          {line.replace(/^- /, '').replace(/\*\*(.*?)\*\*/g, '$1')}
-        </li>
-      )
-    }
-    if (line.trim()) {
-      return (
-        <p key={idx} className="text-gray-400 mb-4">
-          {line.replace(/\*\*(.*?)\*\*/g, '$1')}
-        </p>
-      )
-    }
+    if (line.startsWith('# ')) return <h1 key={idx} style={{ fontSize: 28, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, marginTop: 32, marginBottom: 16, fontFamily: theme.fontHeading }}>{line.replace(/^# /, '')}</h1>
+    if (line.startsWith('## ')) return <h2 key={idx} style={{ fontSize: 22, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, marginTop: 24, marginBottom: 12, fontFamily: theme.fontHeading }}>{line.replace(/^## /, '')}</h2>
+    if (line.startsWith('### ')) return <h3 key={idx} style={{ fontSize: 18, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, marginTop: 16, marginBottom: 8, fontFamily: theme.fontHeading }}>{line.replace(/^### /, '')}</h3>
+    if (line.startsWith('- ')) return <li key={idx} style={{ color: theme.textSecondary, marginLeft: 24, marginBottom: 8, lineHeight: 1.6 }}>{line.replace(/^- /, '').replace(/\*\*(.*?)\*\*/g, '$1')}</li>
+    if (line.trim()) return <p key={idx} style={{ color: theme.textSecondary, marginBottom: 16, lineHeight: 1.8, fontSize: 16 }}>{line.replace(/\*\*(.*?)\*\*/g, '$1')}</p>
     return null
   })
 
   return (
-    <div className="bg-gray-950 min-h-screen py-12">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back Link */}
-        <Link href="/pulse" className="text-blue-500 hover:text-blue-400 mb-8 inline-flex items-center gap-2">
-          ← Back to Pulse
-        </Link>
+    <div style={{ background: theme.bg, minHeight: '100vh', padding: '48px 0', fontFamily: theme.fontBody }}>
+      <div style={{ maxWidth: 700, margin: '0 auto', padding: '0 24px' }}>
+        <Link href="/pulse" style={{ color: theme.accent, fontSize: 14, textDecoration: 'none', display: 'inline-block', marginBottom: 24 }}>← Back to Pulse</Link>
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">{commentary.title}</h1>
-          <div className="flex items-center gap-4 text-gray-500 text-sm">
+        <div style={{ marginBottom: 32 }}>
+          <h1 style={{ fontSize: 32, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, margin: '0 0 12px', fontFamily: theme.fontHeading }}>{commentary.title}</h1>
+          <div style={{ display: 'flex', gap: 16, fontSize: 13, color: theme.textTertiary }}>
             <time>{formatDate(commentary.published_at)}</time>
             <span>Weekly Pulse Report</span>
           </div>
         </div>
 
-        {/* Content */}
-        <article className="bg-gray-900 border border-gray-800 rounded-lg p-8 prose prose-invert max-w-none">
-          <div className="space-y-4">
-            {sections}
-          </div>
+        <article style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 32 }}>
+          {sections}
         </article>
 
-        {/* Navigation */}
-        <div className="mt-12 pt-8 border-t border-gray-800 flex justify-between">
-          <Link href="/pulse" className="text-gray-400 hover:text-gray-300">
-            ← Previous Pulses
-          </Link>
-          <Link href="/" className="text-gray-400 hover:text-gray-300">
-            Back to Home →
-          </Link>
+        <div style={{ marginTop: 48, paddingTop: 24, borderTop: `1px solid ${theme.surfaceBorder}`, display: 'flex', justifyContent: 'space-between' }}>
+          <Link href="/pulse" style={{ color: theme.textSecondary, textDecoration: 'none', fontSize: 14 }}>← Previous Pulses</Link>
+          <Link href="/" style={{ color: theme.textSecondary, textDecoration: 'none', fontSize: 14 }}>Back to Home →</Link>
         </div>
       </div>
     </div>

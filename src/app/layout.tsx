@@ -4,6 +4,8 @@ import './globals.css'
 import { Navigation } from '@/components/Navigation'
 import { Footer } from '@/components/Footer'
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLd'
+import { Providers } from '@/components/Providers'
+import { Analytics } from '@vercel/analytics/react'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -95,14 +97,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-950 text-white`}
-      >
-        <OrganizationJsonLd />
-        <WebSiteJsonLd />
-        <Navigation />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Providers>
+          <OrganizationJsonLd />
+          <WebSiteJsonLd />
+          <Navigation />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+        </Providers>
+        <Analytics />
       </body>
     </html>
   )

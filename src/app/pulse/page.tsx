@@ -5,83 +5,63 @@ import Link from 'next/link'
 import { Commentary } from '@/lib/types'
 import { MOCK_COMMENTARIES } from '@/lib/mockData'
 import { supabase } from '@/lib/supabase'
+import { useTheme } from '@/lib/theme'
 import { timeAgo } from '@/lib/utils'
 
 export default function PulsePage() {
   const [commentaries, setCommentaries] = useState<Commentary[]>([])
   const [loading, setLoading] = useState(true)
+  const { theme } = useTheme()
 
   useEffect(() => {
-    const loadCommentaries = async () => {
+    const load = async () => {
       try {
         const { data, error } = await supabase
           .from('commentary')
           .select('*')
           .eq('type', 'weekly_pulse')
           .order('published_at', { ascending: false })
-
         if (error) throw error
-
-        if (data && data.length > 0) {
-          setCommentaries(data as Commentary[])
-        } else {
-          setCommentaries(MOCK_COMMENTARIES)
-        }
-      } catch (error) {
-        console.error('Failed to load commentaries:', error)
+        setCommentaries(data && data.length > 0 ? data as Commentary[] : MOCK_COMMENTARIES)
+      } catch {
         setCommentaries(MOCK_COMMENTARIES)
       } finally {
         setLoading(false)
       }
     }
-
-    loadCommentaries()
+    load()
   }, [])
 
   if (loading) {
     return (
-      <div className="bg-gray-950 min-h-screen flex items-center justify-center">
-        <div className="text-gray-400">Loading...</div>
+      <div style={{ background: theme.bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: theme.textTertiary }}>Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="bg-gray-950 min-h-screen py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Weekly Pulse</h1>
-          <p className="text-gray-400">
-            AI-generated analysis and insights on civilization&apos;s structural stability
-          </p>
+    <div style={{ background: theme.bg, minHeight: '100vh', padding: '48px 0', fontFamily: theme.fontBody }}>
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px' }}>
+        <div style={{ marginBottom: 32 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: theme.isDark ? '#fff' : theme.text, margin: '0 0 8px', fontFamily: theme.fontHeading }}>Weekly Pulse</h1>
+          <p style={{ fontSize: 15, color: theme.textSecondary, margin: 0 }}>AI-generated analysis on civilizational stress</p>
         </div>
 
-        {/* Commentaries List */}
-        <div className="space-y-6">
-          {commentaries.map(commentary => {
-            const excerpt = commentary.body_markdown
-              .split('\n')
-              .find(line => !line.startsWith('#') && line.trim())
-              ?.substring(0, 150)
-
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {commentaries.map(c => {
+            const excerpt = c.body_markdown.split('\n').find(l => !l.startsWith('#') && l.trim())?.substring(0, 180)
             return (
-              <Link key={commentary.id} href={`/pulse/${commentary.slug}`}>
-                <div className="group bg-gray-900 border border-gray-800 rounded-lg p-8 hover:border-blue-700 transition-colors cursor-pointer">
-                  <div className="flex items-start justify-between mb-3">
-                    <h2 className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
-                      {commentary.title}
-                    </h2>
-                    <span className="text-sm text-gray-500 whitespace-nowrap ml-4">
-                      {timeAgo(commentary.published_at)}
-                    </span>
+              <Link key={c.id} href={`/pulse/${c.slug}`} style={{ textDecoration: 'none' }}>
+                <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24, cursor: 'pointer', transition: 'border-color 0.2s' }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = theme.accent + '66')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = theme.surfaceBorder)}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ fontSize: 11, color: theme.accent, fontFamily: theme.fontMono, letterSpacing: 1 }}>WEEKLY PULSE</span>
+                    <span style={{ fontSize: 11, color: theme.textTertiary }}>{timeAgo(c.published_at)}</span>
                   </div>
-                  <p className="text-gray-400 mb-4 line-clamp-2">
-                    {excerpt}...
-                  </p>
-                  <div className="text-blue-500 group-hover:text-blue-400 font-medium transition-colors">
-                    Read Full Analysis →
-                  </div>
+                  <h2 style={{ fontSize: 20, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, margin: '0 0 8px', fontFamily: theme.fontHeading }}>{c.title}</h2>
+                  <p style={{ fontSize: 14, color: theme.textSecondary, lineHeight: 1.6, margin: 0 }}>{excerpt}...</p>
                 </div>
               </Link>
             )
@@ -89,9 +69,7 @@ export default function PulsePage() {
         </div>
 
         {commentaries.length === 0 && (
-          <div className="text-center text-gray-400">
-            <p>No pulse reports yet. Check back soon.</p>
-          </div>
+          <div style={{ textAlign: 'center', color: theme.textTertiary, padding: 48 }}>No pulse reports yet.</div>
         )}
       </div>
     </div>
