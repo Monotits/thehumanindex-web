@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import './globals.css'
 import { Navigation } from '@/components/Navigation'
 import { Footer } from '@/components/Footer'
+import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLd'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -17,9 +18,28 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'The Human Index — Civilizational Stress Tracker',
+  metadataBase: new URL('https://thehumanindex.org'),
+  title: {
+    default: 'The Human Index — Civilizational Stress Tracker',
+    template: '%s | The Human Index',
+  },
   description:
     'Track AI displacement exposure and civilizational stress across seven key domains. Understand your job risk, economic inequality, social unrest, institutional decay, and more.',
+  keywords: [
+    'AI displacement',
+    'civilizational stress',
+    'job automation risk',
+    'AI exposure index',
+    'human index',
+    'AI job impact',
+    'economic inequality',
+    'social unrest tracker',
+    'institutional decay',
+    'AI workforce disruption',
+  ],
+  authors: [{ name: 'The Human Index' }],
+  creator: 'The Human Index',
+  publisher: 'The Human Index',
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '48x48' },
@@ -28,22 +48,43 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'The Human Index',
-    description: 'Tracking civilization\'s proximity to irreversible AI-driven structural transformation',
+    title: 'The Human Index — Civilizational Stress Tracker',
+    description: 'Real-time tracking of civilization\'s proximity to irreversible AI-driven structural transformation across seven key domains.',
     type: 'website',
+    siteName: 'The Human Index',
+    locale: 'en_US',
+    url: 'https://thehumanindex.org',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
+        alt: 'The Human Index — Civilizational Stress Tracker',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'The Human Index',
-    description: 'Civilizational Stress Tracker',
+    title: 'The Human Index — Civilizational Stress Tracker',
+    description: 'Real-time tracking of AI displacement exposure across seven key domains.',
     images: ['/og-image.png'],
+  },
+  alternates: {
+    canonical: 'https://thehumanindex.org',
+    types: {
+      'application/rss+xml': 'https://thehumanindex.org/feed.xml',
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 }
 
@@ -57,6 +98,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-950 text-white`}
       >
+        <OrganizationJsonLd />
+        <WebSiteJsonLd />
         <Navigation />
         <main className="min-h-screen">{children}</main>
         <Footer />

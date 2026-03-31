@@ -1,8 +1,13 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CompositeGauge } from '@/components/CompositeGauge'
 import { SubIndexBar } from '@/components/SubIndexBar'
 import { MOCK_COMPOSITE_SCORE, MOCK_COMMENTARIES } from '@/lib/mockData'
 import { timeAgo } from '@/lib/utils'
+
+export const metadata: Metadata = {
+  alternates: { canonical: 'https://thehumanindex.org' },
+}
 
 // ISR revalidation every 24 hours
 export const revalidate = 86400

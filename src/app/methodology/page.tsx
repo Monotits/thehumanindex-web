@@ -1,8 +1,51 @@
+import type { Metadata } from 'next'
 import { DOMAIN_LABELS, DOMAIN_ICONS, Domain } from '@/lib/types'
+import { FAQPageJsonLd } from '@/components/JsonLd'
+
+export const metadata: Metadata = {
+  title: 'Methodology — How We Measure Civilizational Stress',
+  description:
+    'Learn how The Human Index measures AI displacement risk across seven domains: work risk, inequality, unrest, institutional decay, wellbeing, policy response, and public sentiment.',
+  openGraph: {
+    title: 'Methodology — The Human Index',
+    description:
+      'Transparent methodology behind the civilizational stress index. Seven domains, weighted composite scoring, updated weekly.',
+  },
+  alternates: { canonical: 'https://thehumanindex.org/methodology' },
+}
+
+const FAQ_QUESTIONS = [
+  {
+    question: 'What is The Human Index?',
+    answer:
+      'The Human Index is a real-time composite indicator that measures civilizational stress caused by AI-driven economic transformation across seven key domains.',
+  },
+  {
+    question: 'How is the composite score calculated?',
+    answer:
+      'The composite score is a weighted average of seven domain indices: AI Work Displacement Risk (25%), Income Inequality (18%), Social Unrest (15%), Institutional Decay (12%), Public Wellbeing (12%), Policy Response (10%), and Public Sentiment (8%).',
+  },
+  {
+    question: 'What are the exposure bands?',
+    answer:
+      'Scores are categorized into five bands: Low (0-25), Moderate (26-45), Elevated (46-65), High (66-80), and Critical (81-100). Each band indicates the severity of structural stress.',
+  },
+  {
+    question: 'How often is the data updated?',
+    answer:
+      'The Human Index is updated weekly with fresh data from public sources including the Bureau of Labor Statistics, O*NET, Federal Reserve, World Bank, CDC, and Pew Research Center.',
+  },
+  {
+    question: 'What data sources does The Human Index use?',
+    answer:
+      'Primary sources include BLS employment data, O*NET task-level analysis, Federal Reserve income distribution data, World Bank institutional metrics, CDC/SAMHSA wellbeing indicators, and Pew Research trust surveys.',
+  },
+]
 
 export default function MethodologyPage() {
   return (
     <div className="bg-gray-950 min-h-screen py-12">
+      <FAQPageJsonLd questions={FAQ_QUESTIONS} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12">
