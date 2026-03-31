@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 34" fill="none">
+  <!-- Hourglass icon — fits between text lines -->
+  <g transform="translate(2, 1)">
+    <path d="M 3 1 L 27 1 L 15 15 Z" stroke="white" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+    <path d="M 3 31 L 27 31 L 15 17 Z" stroke="white" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+    <path d="M 9 31 L 21 31 L 15 24 Z" fill="white" opacity="0.35"/>
+    <line x1="15" y1="14" x2="15" y2="18" stroke="white" stroke-width="1" stroke-linecap="round"/>
+    <line x1="0" y1="1" x2="30" y2="1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="0" y1="31" x2="30" y2="31" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+  </g>
+  <text x="42" y="12" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="rgba(255,255,255,0.6)">THE</text>
+  <text x="42" y="28" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="1" fill="white">HUMAN INDEX</text>
+</svg>

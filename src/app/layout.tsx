@@ -20,6 +20,13 @@ export const metadata: Metadata = {
   title: 'The Human Index — Civilizational Stress Tracker',
   description:
     'Track AI displacement exposure and civilizational stress across seven key domains. Understand your job risk, economic inequality, social unrest, institutional decay, and more.',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/logo-icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'The Human Index',
     description: 'Tracking civilization\'s proximity to irreversible AI-driven structural transformation',
