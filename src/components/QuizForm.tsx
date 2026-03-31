@@ -145,7 +145,7 @@ export function QuizForm() {
           <label className="block text-sm font-medium text-gray-300 mb-2">Education Level</label>
           <select
             value={formData.education_level}
-            onChange={e => setFormData(prev => ({ ...prev, education_level: e.target.value as Record<string, unknown> }))}
+            onChange={e => setFormData(prev => ({ ...prev, education_level: e.target.value as QuizInput['education_level'] }))}
             className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
             required
           >
@@ -162,7 +162,7 @@ export function QuizForm() {
           <label className="block text-sm font-medium text-gray-300 mb-2">Age Range</label>
           <select
             value={formData.age_range}
-            onChange={e => setFormData(prev => ({ ...prev, age_range: e.target.value as Record<string, unknown> }))}
+            onChange={e => setFormData(prev => ({ ...prev, age_range: e.target.value as QuizInput['age_range'] }))}
             className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
             required
           >
