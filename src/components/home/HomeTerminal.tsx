@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { CompositeScore, Commentary, DOMAIN_LABELS } from '@/lib/types'
 import { useTheme } from '@/lib/theme'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts'
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts'
 import { useEffect, useState } from 'react'
 
 interface Props {
