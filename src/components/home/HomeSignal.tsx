@@ -38,18 +38,38 @@ function GaugeVisual({ score, band }: { score: number; band: string }) {
   const circumference = Math.PI * radius
   const progress = (animated / 100) * circumference
 
+  // Center of the arc at (140, 150), radius 120
+  // Points on the circle for 4 equal zones (each 45°):
+  // 180° → (20, 150)   | 135° → (55.15, 65.15)
+  // 90°  → (140, 30)   | 45°  → (224.85, 65.15) | 0° → (260, 150)
+  const cx = 140, cy = 150, r = 120
+  const p = (deg: number) => {
+    const rad = (deg * Math.PI) / 180
+    return `${(cx + r * Math.cos(rad)).toFixed(2)} ${(cy - r * Math.sin(rad)).toFixed(2)}`
+  }
+
   return (
-    <div style={{ position: 'relative', width: 280, height: 180, margin: '0 auto' }}>
-      <svg viewBox="0 0 280 160" style={{ width: '100%', height: '100%' }}>
-        <path d="M 20 150 A 120 120 0 0 1 260 150" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round" />
-        <path d="M 20 150 A 120 120 0 0 1 80 32" fill="none" stroke="#22c55e" strokeWidth="12" strokeLinecap="round" opacity="0.12" />
-        <path d="M 80 32 A 120 120 0 0 1 140 8" fill="none" stroke="#3b82f6" strokeWidth="12" strokeLinecap="round" opacity="0.12" />
-        <path d="M 140 8 A 120 120 0 0 1 200 32" fill="none" stroke="#f59e0b" strokeWidth="12" strokeLinecap="round" opacity="0.12" />
-        <path d="M 200 32 A 120 120 0 0 1 260 150" fill="none" stroke="#ef4444" strokeWidth="12" strokeLinecap="round" opacity="0.12" />
-        <path d="M 20 150 A 120 120 0 0 1 260 150" fill="none" stroke={bandColor} strokeWidth="12" strokeLinecap="round"
+    <div style={{ position: 'relative', width: 300, height: 200, margin: '0 auto' }}>
+      <svg viewBox="0 0 280 170" style={{ width: '100%', height: '100%' }}>
+        {/* Background track */}
+        <path d={`M ${p(180)} A ${r} ${r} 0 0 1 ${p(0)}`} fill="none" stroke="#1a1a1a" strokeWidth="14" strokeLinecap="round" />
+        {/* Zone indicators */}
+        <path d={`M ${p(180)} A ${r} ${r} 0 0 1 ${p(135)}`} fill="none" stroke="#22c55e" strokeWidth="14" strokeLinecap="round" opacity="0.15" />
+        <path d={`M ${p(135)} A ${r} ${r} 0 0 1 ${p(90)}`} fill="none" stroke="#3b82f6" strokeWidth="14" strokeLinecap="round" opacity="0.15" />
+        <path d={`M ${p(90)} A ${r} ${r} 0 0 1 ${p(45)}`} fill="none" stroke="#f59e0b" strokeWidth="14" strokeLinecap="round" opacity="0.15" />
+        <path d={`M ${p(45)} A ${r} ${r} 0 0 1 ${p(0)}`} fill="none" stroke="#ef4444" strokeWidth="14" strokeLinecap="round" opacity="0.15" />
+        {/* Animated progress arc */}
+        <path d={`M ${p(180)} A ${r} ${r} 0 0 1 ${p(0)}`} fill="none" stroke={bandColor} strokeWidth="14" strokeLinecap="round"
           strokeDasharray={`${progress} ${circumference}`} style={{ transition: 'stroke-dasharray 0.5s ease-out' }} />
+        {/* Tick marks at zone boundaries */}
+        {[135, 90, 45].map(deg => {
+          const rad = (deg * Math.PI) / 180
+          const x = cx + r * Math.cos(rad)
+          const y = cy - r * Math.sin(rad)
+          return <circle key={deg} cx={x} cy={y} r="3" fill="#333" />
+        })}
       </svg>
-      <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', textAlign: 'center' }}>
+      <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', textAlign: 'center' }}>
         <div style={{ fontSize: 56, fontWeight: 200, color: '#fff', lineHeight: 1 }}>{animated.toFixed(animated === score ? 1 : 0)}</div>
       </div>
     </div>
