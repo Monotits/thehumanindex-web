@@ -303,7 +303,7 @@ export default function HomeSignal({ score, pulse }: Props) {
             <h3 style={{ fontSize: 18, fontWeight: 300, color: '#fff', margin: '0 0 4px' }}>How the Index Works</h3>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }}>
-            {METHODOLOGY_STEPS.map((step, i) => (
+            {METHODOLOGY_STEPS.map((step) => (
               <div key={step.num} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 28, fontWeight: 200, color: theme.accent, opacity: 0.5, marginBottom: 8 }}>{step.num}</div>
                 <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 6 }}>{step.title}</div>

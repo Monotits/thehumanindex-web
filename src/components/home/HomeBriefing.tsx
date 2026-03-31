@@ -239,7 +239,7 @@ export default function HomeBriefing({ score, pulse }: Props) {
         <div style={{ padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 24px' }}>How the Index Works</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 32 }}>
-            {METHODOLOGY_STEPS.map((step, i) => (
+            {METHODOLOGY_STEPS.map((step) => (
               <div key={step.num} style={{ position: 'relative' }}>
                 <div style={{ fontSize: 11, color: theme.accent, fontWeight: 600, letterSpacing: 2, marginBottom: 8, fontFamily: theme.fontBody }}>{`STEP ${step.num}`}</div>
                 <div style={{ fontSize: 20, fontWeight: 400, marginBottom: 8, fontFamily: theme.fontHeading }}>{step.title}</div>

@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { CompositeScore, Commentary, DOMAIN_LABELS, DOMAIN_ICONS } from '@/lib/types'
+import { CompositeScore, Commentary, DOMAIN_LABELS } from '@/lib/types'
 import { useTheme } from '@/lib/theme'
-import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar, AreaChart, Area, XAxis, YAxis } from 'recharts'
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts'
 import { useEffect, useState } from 'react'
 
 interface Props {
