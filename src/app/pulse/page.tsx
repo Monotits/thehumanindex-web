@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Commentary } from '@/lib/types'
 import { MOCK_COMMENTARIES } from '@/lib/mockData'
+import { supabase } from '@/lib/supabase'
 import { timeAgo } from '@/lib/utils'
 
 export default function PulsePage() {
@@ -11,17 +12,21 @@ export default function PulsePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Try to fetch from Supabase, fall back to mock
     const loadCommentaries = async () => {
       try {
-        // In production:
-        // const { data } = await supabase
-        //   .from('commentaries')
-        //   .select('*')
-        //   .eq('type', 'weekly_pulse')
-        //   .order('published_at', { ascending: false })
+        const { data, error } = await supabase
+          .from('commentary')
+          .select('*')
+          .eq('type', 'weekly_pulse')
+          .order('published_at', { ascending: false })
 
-        setCommentaries(MOCK_COMMENTARIES)
+        if (error) throw error
+
+        if (data && data.length > 0) {
+          setCommentaries(data as Commentary[])
+        } else {
+          setCommentaries(MOCK_COMMENTARIES)
+        }
       } catch (error) {
         console.error('Failed to load commentaries:', error)
         setCommentaries(MOCK_COMMENTARIES)
@@ -48,7 +53,7 @@ export default function PulsePage() {
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">Weekly Pulse</h1>
           <p className="text-gray-400">
-            Latest analysis and insights on civilization&apos;s structural stability
+            AI-generated analysis and insights on civilization&apos;s structural stability
           </p>
         </div>
 

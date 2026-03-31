@@ -6,35 +6,77 @@ import { CompositeGauge } from '@/components/CompositeGauge'
 import { SubIndexBar } from '@/components/SubIndexBar'
 import { MOCK_COMPOSITE_SCORE } from '@/lib/mockData'
 import { formatDate } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function DashboardPage() {
   const [score, setScore] = useState<CompositeScore | null>(null)
+  const [historicalData, setHistoricalData] = useState<{ date: string; score: number }[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Try to fetch from Supabase, fall back to mock data
-    const loadScore = async () => {
+    const loadData = async () => {
       try {
-        // In production, would fetch from Supabase
-        // const { data } = await supabase
-        //   .from('composite_scores')
-        //   .select('*, sub_indexes(*)')
-        //   .eq('score_type', 'composite')
-        //   .order('computed_at', { ascending: false })
-        //   .limit(1)
+        // Fetch latest composite score with sub_indexes
+        const { data: scores, error } = await supabase
+          .from('composite_scores')
+          .select('*, sub_indexes(*)')
+          .eq('score_type', 'composite')
+          .order('computed_at', { ascending: false })
+          .limit(1)
 
-        // For now use mock
-        setScore(MOCK_COMPOSITE_SCORE)
+        if (error) throw error
+
+        if (scores && scores.length > 0) {
+          setScore(scores[0] as CompositeScore)
+        } else {
+          // Fallback to mock if no data in DB yet
+          setScore(MOCK_COMPOSITE_SCORE)
+        }
+
+        // Fetch historical scores for trend chart
+        const { data: history, error: histError } = await supabase
+          .from('composite_scores')
+          .select('score_value, computed_at')
+          .eq('score_type', 'composite')
+          .order('computed_at', { ascending: true })
+          .limit(20)
+
+        if (!histError && history && history.length > 0) {
+          setHistoricalData(
+            history.map((h: { computed_at: string; score_value: number }) => ({
+              date: new Date(h.computed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              score: h.score_value,
+            }))
+          )
+        } else {
+          // Fallback mock historical
+          setHistoricalData([
+            { date: 'Week 1', score: 54 },
+            { date: 'Week 2', score: 55 },
+            { date: 'Week 3', score: 56 },
+            { date: 'Week 4', score: 57 },
+            { date: 'Week 5', score: 57.5 },
+            { date: 'Week 6', score: 58 },
+          ])
+        }
       } catch (error) {
         console.error('Failed to load score:', error)
         setScore(MOCK_COMPOSITE_SCORE)
+        setHistoricalData([
+          { date: 'Week 1', score: 54 },
+          { date: 'Week 2', score: 55 },
+          { date: 'Week 3', score: 56 },
+          { date: 'Week 4', score: 57 },
+          { date: 'Week 5', score: 57.5 },
+          { date: 'Week 6', score: 58 },
+        ])
       } finally {
         setLoading(false)
       }
     }
 
-    loadScore()
+    loadData()
   }, [])
 
   if (loading || !score) {
@@ -45,15 +87,11 @@ export default function DashboardPage() {
     )
   }
 
-  // Mock historical data
-  const historicalData = [
-    { date: 'Week 1', score: 54 },
-    { date: 'Week 2', score: 55 },
-    { date: 'Week 3', score: 56 },
-    { date: 'Week 4', score: 57 },
-    { date: 'Week 5', score: 57.5 },
-    { date: 'Week 6', score: 58 },
-  ]
+  // Compute domain changes for "What Changed" section
+  const domainChanges = score.sub_indexes?.map(sub => ({
+    domain: sub.domain,
+    value: sub.value,
+  })) || []
 
   return (
     <div className="bg-gray-950 min-h-screen py-12">
@@ -115,38 +153,29 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* What Changed This Week */}
+        {/* Domain Summary */}
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
-          <h2 className="text-lg font-semibold text-gray-400 mb-8">WHAT CHANGED THIS WEEK</h2>
+          <h2 className="text-lg font-semibold text-gray-400 mb-8">DOMAIN SCORES</h2>
           <div className="space-y-6">
-            <div className="flex gap-4">
-              <div className="w-2 h-12 bg-orange-500 rounded-full" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-white mb-1">AI Work Displacement +2.1</h3>
-                <p className="text-sm text-gray-400">Enterprise adoption accelerating across tech sector</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-2 h-12 bg-blue-500 rounded-full" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-white mb-1">Income Inequality +1.8</h3>
-                <p className="text-sm text-gray-400">Wage pressure on routine cognitive work</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-2 h-12 bg-red-500 rounded-full" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-white mb-1">Social Unrest +0.9</h3>
-                <p className="text-sm text-gray-400">Increased labor union activity and demonstrations</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-2 h-12 bg-green-500 rounded-full" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-white mb-1">Policy Response -0.5</h3>
-                <p className="text-sm text-gray-400">Regulatory framework development lagging</p>
-              </div>
-            </div>
+            {domainChanges.map(dc => {
+              const color = dc.value >= 65 ? 'bg-red-500' : dc.value >= 45 ? 'bg-orange-500' : dc.value >= 25 ? 'bg-blue-500' : 'bg-green-500'
+              return (
+                <div key={dc.domain} className="flex gap-4">
+                  <div className={`w-2 h-12 ${color} rounded-full`} />
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-white mb-1">
+                      {dc.domain.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())} — {dc.value.toFixed(1)}
+                    </h3>
+                    <div className="w-full bg-gray-800 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full ${color}`}
+                        style={{ width: `${Math.min(dc.value, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       </div>

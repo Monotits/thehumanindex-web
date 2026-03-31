@@ -3,7 +3,9 @@ import Link from 'next/link'
 import { CompositeGauge } from '@/components/CompositeGauge'
 import { SubIndexBar } from '@/components/SubIndexBar'
 import { MOCK_COMPOSITE_SCORE, MOCK_COMMENTARIES } from '@/lib/mockData'
+import { supabase } from '@/lib/supabase'
 import { timeAgo } from '@/lib/utils'
+import { CompositeScore, Commentary } from '@/lib/types'
 
 export const metadata: Metadata = {
   alternates: { canonical: 'https://thehumanindex.org' },
@@ -12,9 +14,45 @@ export const metadata: Metadata = {
 // ISR revalidation every 24 hours
 export const revalidate = 86400
 
-export default function Home() {
-  const score = MOCK_COMPOSITE_SCORE
-  const latestPulse = MOCK_COMMENTARIES[0]
+async function getLatestScore(): Promise<CompositeScore> {
+  try {
+    const { data, error } = await supabase
+      .from('composite_scores')
+      .select('*, sub_indexes(*)')
+      .eq('score_type', 'composite')
+      .order('computed_at', { ascending: false })
+      .limit(1)
+
+    if (error) throw error
+    if (data && data.length > 0) return data[0] as CompositeScore
+  } catch (e) {
+    console.error('Failed to fetch score:', e)
+  }
+  return MOCK_COMPOSITE_SCORE
+}
+
+async function getLatestPulse(): Promise<Commentary> {
+  try {
+    const { data, error } = await supabase
+      .from('commentary')
+      .select('*')
+      .eq('type', 'weekly_pulse')
+      .order('published_at', { ascending: false })
+      .limit(1)
+
+    if (error) throw error
+    if (data && data.length > 0) return data[0] as Commentary
+  } catch (e) {
+    console.error('Failed to fetch pulse:', e)
+  }
+  return MOCK_COMMENTARIES[0]
+}
+
+export default async function Home() {
+  const [score, latestPulse] = await Promise.all([
+    getLatestScore(),
+    getLatestPulse(),
+  ])
 
   return (
     <div className="bg-gray-950 min-h-screen">
@@ -62,7 +100,7 @@ export default function Home() {
             <span className="text-sm text-gray-500">{timeAgo(latestPulse.published_at)}</span>
           </div>
           <p className="text-gray-400 mb-6 line-clamp-3">
-            {latestPulse.body_markdown.split('\n').find(line => !line.startsWith('#'))}
+            {latestPulse.body_markdown.split('\n').find(line => !line.startsWith('#') && line.trim())}
           </p>
           <Link
             href={`/pulse/${latestPulse.slug}`}
@@ -99,8 +137,8 @@ export default function Home() {
               <p className="text-sm text-gray-400">Fresh data and analysis every Monday</p>
             </div>
             <div>
-              <h4 className="font-bold text-white mb-2">Personal Assessment</h4>
-              <p className="text-sm text-gray-400">See how your job and location stack up</p>
+              <h4 className="font-bold text-white mb-2">AI-Powered Analysis</h4>
+              <p className="text-sm text-gray-400">Claude interprets cross-domain patterns</p>
             </div>
             <div>
               <h4 className="font-bold text-white mb-2">Evidence-Based</h4>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Commentary } from '@/lib/types'
 import { MOCK_COMMENTARIES } from '@/lib/mockData'
+import { supabase } from '@/lib/supabase'
 import { formatDate } from '@/lib/utils'
 import { useParams } from 'next/navigation'
 
@@ -14,21 +15,28 @@ export default function PulseDetailPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Try to fetch from Supabase, fall back to mock
     const loadCommentary = async () => {
       try {
-        // In production:
-        // const { data } = await supabase
-        //   .from('commentaries')
-        //   .select('*')
-        //   .eq('slug', slug)
-        //   .single()
+        const { data, error } = await supabase
+          .from('commentary')
+          .select('*')
+          .eq('slug', slug)
+          .single()
 
-        const found = MOCK_COMMENTARIES.find(c => c.slug === slug)
-        setCommentary(found || null)
+        if (error) throw error
+
+        if (data) {
+          setCommentary(data as Commentary)
+        } else {
+          // Fallback to mock
+          const found = MOCK_COMMENTARIES.find(c => c.slug === slug)
+          setCommentary(found || null)
+        }
       } catch (error) {
         console.error('Failed to load commentary:', error)
-        setCommentary(null)
+        // Fallback to mock
+        const found = MOCK_COMMENTARIES.find(c => c.slug === slug)
+        setCommentary(found || null)
       } finally {
         setLoading(false)
       }
@@ -58,7 +66,7 @@ export default function PulseDetailPage() {
     )
   }
 
-  // Render markdown as simple HTML (for production, use a markdown library)
+  // Render markdown as HTML
   const sections = commentary.body_markdown.split('\n').map((line, idx) => {
     if (line.startsWith('# ')) {
       return (
@@ -74,17 +82,24 @@ export default function PulseDetailPage() {
         </h2>
       )
     }
+    if (line.startsWith('### ')) {
+      return (
+        <h3 key={idx} className="text-xl font-bold text-white mt-4 mb-2">
+          {line.replace(/^### /, '')}
+        </h3>
+      )
+    }
     if (line.startsWith('- ')) {
       return (
         <li key={idx} className="text-gray-400 ml-6 mb-2">
-          {line.replace(/^- /, '')}
+          {line.replace(/^- /, '').replace(/\*\*(.*?)\*\*/g, '$1')}
         </li>
       )
     }
     if (line.trim()) {
       return (
         <p key={idx} className="text-gray-400 mb-4">
-          {line}
+          {line.replace(/\*\*(.*?)\*\*/g, '$1')}
         </p>
       )
     }
