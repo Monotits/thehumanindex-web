@@ -1,20 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 46" fill="none">
-  <!-- Hourglass icon — rounded corners, clean geometry -->
-  <g transform="translate(0, 3)">
-    <!-- Top bar (rounded) -->
-    <rect x="2" y="0" width="30" height="3" rx="1.5" fill="white"/>
-    <!-- Bottom bar (rounded) -->
-    <rect x="2" y="37" width="30" height="3" rx="1.5" fill="white"/>
-    <!-- Top triangle (glass) -->
-    <path d="M 5 4 C 5 4, 17 17, 17 19 C 17 17, 29 4, 29 4" stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <!-- Bottom triangle (glass) -->
-    <path d="M 5 36 C 5 36, 17 23, 17 21 C 17 23, 29 36, 29 36" stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 46" fill="none">
+  <!-- Hourglass — fits within text block height (y:4 to y:42) -->
+  <g transform="translate(4, 8)">
+    <!-- Top bar -->
+    <rect x="0" y="0" width="22" height="2.2" rx="1.1" fill="white"/>
+    <!-- Bottom bar -->
+    <rect x="0" y="27.8" width="22" height="2.2" rx="1.1" fill="white"/>
+    <!-- Top glass curve -->
+    <path d="M 2 3 C 2 3, 11 13, 11 14.5 C 11 13, 20 3, 20 3" stroke="white" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Bottom glass curve -->
+    <path d="M 2 27 C 2 27, 11 17, 11 15.5 C 11 17, 20 27, 20 27" stroke="white" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     <!-- Sand in bottom -->
-    <path d="M 10 36 L 24 36 L 17 28 Z" fill="white" opacity="0.3"/>
-    <!-- Narrow stream -->
-    <line x1="17" y1="18" x2="17" y2="22" stroke="white" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+    <path d="M 7 27 L 15 27 L 11 21 Z" fill="white" opacity="0.3"/>
+    <!-- Stream -->
+    <line x1="11" y1="14" x2="11" y2="16" stroke="white" stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>
   </g>
-  <!-- Text -->
-  <text x="44" y="13" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="rgba(255,255,255,0.6)">THE</text>
-  <text x="44" y="40" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="27" font-weight="700" letter-spacing="1" fill="white">HUMAN INDEX</text>
+  <!-- THE -->
+  <text x="36" y="13" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="rgba(255,255,255,0.6)">THE</text>
+  <!-- HUMAN INDEX -->
+  <text x="36" y="40" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="27" font-weight="700" letter-spacing="1" fill="white">HUMAN INDEX</text>
 </svg>
