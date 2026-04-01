@@ -1,7 +1,8 @@
 'use client'
 
 import { useTheme } from '@/lib/theme'
-import { DOMAIN_LABELS, DOMAIN_ICONS, Domain } from '@/lib/types'
+import { DOMAIN_LABELS, Domain } from '@/lib/types'
+import { DomainIcon } from '@/components/DomainIcon'
 import { seededRandom } from '@/lib/seededRandom'
 import ChartInsight from './ChartInsight'
 
@@ -78,7 +79,7 @@ export default function DomainComparisonBar({ domains }: Props) {
               border: `1px solid ${theme.surfaceBorder}`,
             }}>
               {/* Icon */}
-              <span style={{ fontSize: 16 }}>{DOMAIN_ICONS[d.domain] || '📈'}</span>
+              <DomainIcon domain={d.domain} size={18} color={color} />
 
               {/* Name */}
               <div>

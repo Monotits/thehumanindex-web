@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { CompositeScore, Commentary, Domain, DOMAIN_LABELS, DOMAIN_ICONS, BAND_LABELS } from '@/lib/types'
+import { CompositeScore, Commentary, Domain, DOMAIN_LABELS, BAND_LABELS } from '@/lib/types'
+import { DomainIcon } from '@/components/DomainIcon'
 import { getDomainContext } from '@/lib/domainDescriptions'
 import { KeyStat } from '@/lib/realData'
 import { useTheme } from '@/lib/theme'
@@ -180,7 +181,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
               return (
                 <div key={m.domain} style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 20 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <span style={{ fontSize: 24 }}>{DOMAIN_ICONS[m.domain] || '📈'}</span>
+                    <DomainIcon domain={m.domain as Domain} size={24} color={theme.textSecondary} />
                     <span style={{ fontSize: 13, color, fontWeight: 600, fontFamily: theme.fontBody }}>{isUp ? '↑' : '↓'} {Math.abs(m.delta).toFixed(2)}</span>
                   </div>
                   <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>{DOMAIN_LABELS[m.domain]}</div>

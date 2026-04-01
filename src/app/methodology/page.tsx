@@ -1,6 +1,7 @@
 'use client'
 
-import { DOMAIN_LABELS, DOMAIN_ICONS, Domain } from '@/lib/types'
+import { DOMAIN_LABELS, Domain } from '@/lib/types'
+import { DomainIcon } from '@/components/DomainIcon'
 import { FAQPageJsonLd } from '@/components/JsonLd'
 import { useTheme } from '@/lib/theme'
 
@@ -107,7 +108,7 @@ export default function MethodologyPage() {
               return (
                 <div key={key} style={sectionStyle}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                    <span style={{ fontSize: 32, lineHeight: 1 }}>{DOMAIN_ICONS[domainKey]}</span>
+                    <DomainIcon domain={domainKey} size={28} color={theme.accent} />
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
                         <h3 style={{ fontSize: 17, fontWeight: 700, color: theme.text, margin: 0, fontFamily: theme.fontHeading }}>{label}</h3>

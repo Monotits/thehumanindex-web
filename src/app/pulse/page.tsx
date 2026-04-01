@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Commentary } from '@/lib/types'
+import { DomainIcon } from '@/components/DomainIcon'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/theme'
 import { timeAgo } from '@/lib/utils'
@@ -69,7 +70,7 @@ export default function PulsePage() {
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '64px 24px', background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12 }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>📡</div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}><DomainIcon domain="sentiment" size={40} color={theme.textTertiary} /></div>
             <h2 style={{ fontSize: 20, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, margin: '0 0 8px', fontFamily: theme.fontHeading }}>Pulse reports coming soon</h2>
             <p style={{ fontSize: 14, color: theme.textSecondary, lineHeight: 1.6, maxWidth: 400, margin: '0 auto' }}>
               Weekly AI-generated analysis based on live data from BLS, FRED, World Bank, and OECD will appear here. Check the dashboard for real-time data.

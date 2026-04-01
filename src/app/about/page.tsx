@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { useTheme } from '@/lib/theme'
+import { Domain } from '@/lib/types'
+import { DomainIcon } from '@/components/DomainIcon'
 
 export default function AboutPage() {
   const { theme, themeId } = useTheme()
@@ -87,17 +89,17 @@ export default function AboutPage() {
 
         {/* Domains grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12, margin: '24px 0 16px' }}>
-          {[
-            { icon: '⚙️', name: 'AI Work Displacement', weight: '25%' },
-            { icon: '📊', name: 'Income Inequality', weight: '18%' },
-            { icon: '🔥', name: 'Social Unrest', weight: '15%' },
-            { icon: '🏛️', name: 'Institutional Decay', weight: '12%' },
-            { icon: '💊', name: 'Social Wellbeing', weight: '12%' },
-            { icon: '📜', name: 'Policy Response', weight: '10%' },
-            { icon: '📡', name: 'Public Sentiment', weight: '8%' },
-          ].map(d => (
+          {([
+            { domain: 'work_risk' as Domain, name: 'AI Work Displacement', weight: '25%' },
+            { domain: 'inequality' as Domain, name: 'Income Inequality', weight: '18%' },
+            { domain: 'unrest' as Domain, name: 'Social Unrest', weight: '15%' },
+            { domain: 'decay' as Domain, name: 'Institutional Decay', weight: '12%' },
+            { domain: 'wellbeing' as Domain, name: 'Social Wellbeing', weight: '12%' },
+            { domain: 'policy' as Domain, name: 'Policy Response', weight: '10%' },
+            { domain: 'sentiment' as Domain, name: 'Public Sentiment', weight: '8%' },
+          ]).map(d => (
             <div key={d.name} style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 18 }}>{d.icon}</span>
+              <DomainIcon domain={d.domain} size={20} color={theme.textSecondary} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: theme.text, fontFamily: theme.fontBody }}>{d.name}</div>
                 <div style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontMono }}>{d.weight}</div>

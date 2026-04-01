@@ -1,7 +1,8 @@
 'use client'
 
 import { SubIndex } from '@/lib/types'
-import { DOMAIN_LABELS, DOMAIN_ICONS, BAND_COLORS } from '@/lib/types'
+import { DOMAIN_LABELS, BAND_COLORS } from '@/lib/types'
+import { DomainIcon } from '@/components/DomainIcon'
 import { scoreToBand } from '@/lib/utils'
 
 interface SubIndexBarProps {
@@ -12,13 +13,12 @@ export function SubIndexBar({ subIndex }: SubIndexBarProps) {
   const band = scoreToBand(subIndex.value)
   const color = BAND_COLORS[band]
   const label = DOMAIN_LABELS[subIndex.domain]
-  const icon = DOMAIN_ICONS[subIndex.domain]
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg">{icon}</span>
+          <DomainIcon domain={subIndex.domain} size={20} color={color} />
           <span className="text-sm font-medium text-gray-300">{label}</span>
         </div>
         <span className="text-sm font-bold text-white">{Math.round(subIndex.value)}</span>

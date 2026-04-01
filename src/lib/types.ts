@@ -92,6 +92,7 @@ export const DOMAIN_LABELS: Record<Domain, string> = {
   sentiment: 'Public Sentiment',
 }
 
+/** @deprecated Use <DomainIcon domain={d} /> component instead */
 export const DOMAIN_ICONS: Record<Domain, string> = {
   work_risk: '⚙️',
   inequality: '📊',
