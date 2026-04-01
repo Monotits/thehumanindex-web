@@ -7,6 +7,7 @@ import { seededRandom } from '@/lib/seededRandom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import SubscribeForm from '@/components/SubscribeForm'
 import SocialFeedSection from '@/components/SocialFeedSection'
+import LayoffTracker from '@/components/LayoffTracker'
 import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
 import WaterfallChart from '@/components/charts/WaterfallChart'
 import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
@@ -234,6 +235,11 @@ export default function HomeBriefing({ score, pulse }: Props) {
         {/* ═══ What the World is Saying — Live Feed ═══ */}
         <div style={{ padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <SocialFeedSection />
+        </div>
+
+        {/* ═══ Layoff Tracker ═══ */}
+        <div style={{ padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+          <LayoffTracker />
         </div>
 
         {/* ═══ Methodology at a Glance ═══ */}

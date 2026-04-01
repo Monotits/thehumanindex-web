@@ -25,8 +25,10 @@ export async function POST(request: Request) {
       const resend = new Resend(process.env.RESEND_API_KEY)
       const NOTIFY_EMAIL = process.env.CONTACT_NOTIFY_EMAIL || 'experlercom@gmail.com'
 
+      // Custom domain verified → use branded sender; falls back to Resend default
+      const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'The Human Index <onboarding@resend.dev>'
       await resend.emails.send({
-        from: 'The Human Index <onboarding@resend.dev>',
+        from: FROM_ADDRESS,
         to: NOTIFY_EMAIL,
         replyTo: email,
         subject: `[THI Contact] ${subjectLabel} — from ${name}`,

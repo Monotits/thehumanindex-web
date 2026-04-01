@@ -8,6 +8,7 @@ import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } fro
 import { useEffect, useState } from 'react'
 import SubscribeForm from '@/components/SubscribeForm'
 import SocialFeedSection from '@/components/SocialFeedSection'
+import LayoffTracker from '@/components/LayoffTracker'
 import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
 import WaterfallChart from '@/components/charts/WaterfallChart'
 import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
@@ -245,6 +246,11 @@ export default function HomeTerminal({ score, pulse }: Props) {
         {/* ═══ What the World is Saying — Live Feed ═══ */}
         <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20, marginBottom: 24 }}>
           <SocialFeedSection />
+        </div>
+
+        {/* ═══ Layoff Tracker ═══ */}
+        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20, marginBottom: 24 }}>
+          <LayoffTracker />
         </div>
 
         {/* ═══ Methodology at a Glance ═══ */}

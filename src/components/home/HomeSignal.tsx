@@ -8,6 +8,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { useEffect, useState } from 'react'
 import SubscribeForm from '@/components/SubscribeForm'
 import SocialFeedSection from '@/components/SocialFeedSection'
+import LayoffTracker from '@/components/LayoffTracker'
 import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
 import WaterfallChart from '@/components/charts/WaterfallChart'
 import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
@@ -270,6 +271,13 @@ export default function HomeSignal({ score, pulse }: Props) {
       {/* ═══ What the World is Saying — Live Feed ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
         <SocialFeedSection />
+      </section>
+
+      {/* ═══ Layoff Tracker ═══ */}
+      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
+        <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
+          <LayoffTracker />
+        </div>
       </section>
 
       {/* ═══ Pulse ═══ */}
