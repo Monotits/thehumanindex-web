@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { CompositeScore, Commentary, DOMAIN_LABELS, BAND_LABELS } from '@/lib/types'
+import { KeyStat } from '@/lib/realData'
 import { useTheme } from '@/lib/theme'
 import { seededRandom } from '@/lib/seededRandom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
@@ -20,6 +21,7 @@ import DomainComparisonBar from '@/components/charts/DomainComparisonBar'
 interface Props {
   score: CompositeScore
   pulse: Commentary
+  keyStat?: KeyStat
 }
 
 
@@ -98,7 +100,7 @@ function Sparkline({ data, color, width = 60, height = 24 }: { data: number[]; c
   )
 }
 
-export default function HomeSignal({ score, pulse }: Props) {
+export default function HomeSignal({ score, pulse, keyStat }: Props) {
   const { theme } = useTheme()
   // email state removed — using SubscribeForm component
 
@@ -126,7 +128,7 @@ export default function HomeSignal({ score, pulse }: Props) {
     return { ...d, delta: +(rng() * 4 - 1.5).toFixed(2) }
   }).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
 
-  const keyStat = { value: '3.2M', label: 'jobs reclassified as AI-exposed this quarter', source: 'BLS / O*NET Q1 2026' }
+  const stat = keyStat || { value: '—', label: 'connecting to data sources...', source: '' }
 
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', color: theme.text, fontFamily: theme.fontBody }}>
@@ -165,9 +167,9 @@ export default function HomeSignal({ score, pulse }: Props) {
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
         <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: '32px 40px', textAlign: 'center' }}>
           <div style={{ fontSize: 11, letterSpacing: 2, color: theme.accent, textTransform: 'uppercase', marginBottom: 12 }}>Key Stat This Week</div>
-          <div style={{ fontSize: 48, fontWeight: 200, color: '#fff', lineHeight: 1, marginBottom: 8 }}>{keyStat.value}</div>
-          <div style={{ fontSize: 15, color: theme.textSecondary }}>{keyStat.label}</div>
-          <div style={{ fontSize: 11, color: theme.textTertiary, marginTop: 4 }}>{keyStat.source}</div>
+          <div style={{ fontSize: 48, fontWeight: 200, color: '#fff', lineHeight: 1, marginBottom: 8 }}>{stat.value}</div>
+          <div style={{ fontSize: 15, color: theme.textSecondary }}>{stat.label}</div>
+          <div style={{ fontSize: 11, color: theme.textTertiary, marginTop: 4 }}>{stat.source}</div>
         </div>
       </section>
 

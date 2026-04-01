@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTheme } from '@/lib/theme'
-import { SocialFeedItem, FALLBACK_SOCIAL_FEED } from '@/lib/socialFeed'
+import { SocialFeedItem } from '@/lib/socialFeed'
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -23,9 +23,10 @@ function formatScore(score: number): string {
 
 export default function SocialFeedSection() {
   const { theme, themeId } = useTheme()
-  const [items, setItems] = useState<SocialFeedItem[]>(FALLBACK_SOCIAL_FEED.slice(0, 6))
+  const [items, setItems] = useState<SocialFeedItem[]>([])
   const [isLive, setIsLive] = useState(false)
   const [expanded, setExpanded] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetch('/api/social-feed')
@@ -36,7 +37,8 @@ export default function SocialFeedSection() {
           setIsLive(data.source === 'live')
         }
       })
-      .catch(() => {/* fallback already loaded */})
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
   const visibleItems = expanded ? items : items.slice(0, 6)
@@ -83,6 +85,19 @@ export default function SocialFeedSection() {
           Reddit · RSS · News
         </span>
       </div>
+
+      {/* Loading / Empty state */}
+      {loading && (
+        <div style={{ textAlign: 'center', padding: 24, color: theme.textTertiary, fontSize: 13 }}>
+          Fetching live feed from Reddit and news sources...
+        </div>
+      )}
+
+      {!loading && items.length === 0 && (
+        <div style={{ textAlign: 'center', padding: 24, color: theme.textTertiary, fontSize: 13 }}>
+          No live feed items available right now. Check back soon.
+        </div>
+      )}
 
       {/* Feed items */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: themeId === 'terminal' ? 2 : 10 }}>

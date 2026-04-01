@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { CompositeScore, Commentary, DOMAIN_LABELS, DOMAIN_ICONS, BAND_LABELS } from '@/lib/types'
+import { KeyStat } from '@/lib/realData'
 import { useTheme } from '@/lib/theme'
 import { seededRandom } from '@/lib/seededRandom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
@@ -19,6 +20,7 @@ import DomainComparisonBar from '@/components/charts/DomainComparisonBar'
 interface Props {
   score: CompositeScore
   pulse: Commentary
+  keyStat?: KeyStat
 }
 
 /* ─── Data Sources ─── */
@@ -49,7 +51,7 @@ function BandBadge({ band }: { band: string }) {
   )
 }
 
-export default function HomeBriefing({ score, pulse }: Props) {
+export default function HomeBriefing({ score, pulse, keyStat }: Props) {
   const { theme } = useTheme()
 
 
@@ -70,11 +72,7 @@ export default function HomeBriefing({ score, pulse }: Props) {
     return { ...d, delta: +(rng() * 4 - 1.5).toFixed(2) }
   }).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
 
-  const keyStat = {
-    value: '3.2M',
-    label: 'jobs reclassified as AI-exposed this quarter',
-    source: 'BLS / O*NET Q1 2026',
-  }
+  const stat = keyStat || { value: '—', label: 'connecting to data sources...', source: '' }
 
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', fontFamily: theme.fontHeading, color: theme.text }}>
@@ -140,9 +138,9 @@ export default function HomeBriefing({ score, pulse }: Props) {
         {/* ═══ Key Stat of the Week ═══ */}
         <div style={{ padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}`, textAlign: 'center' }}>
           <div style={{ fontSize: 11, color: theme.accent, textTransform: 'uppercase', letterSpacing: 2, fontFamily: theme.fontBody, marginBottom: 8 }}>Key Figure This Week</div>
-          <div style={{ fontSize: 48, fontWeight: 400, lineHeight: 1, marginBottom: 8, fontFamily: theme.fontHeading }}>{keyStat.value}</div>
-          <div style={{ fontSize: 16, color: theme.textSecondary, fontFamily: theme.fontBody }}>{keyStat.label}</div>
-          <div style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontBody, marginTop: 4 }}>{keyStat.source}</div>
+          <div style={{ fontSize: 48, fontWeight: 400, lineHeight: 1, marginBottom: 8, fontFamily: theme.fontHeading }}>{stat.value}</div>
+          <div style={{ fontSize: 16, color: theme.textSecondary, fontFamily: theme.fontBody }}>{stat.label}</div>
+          <div style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontBody, marginTop: 4 }}>{stat.source}</div>
         </div>
 
         {/* ═══ This Week's Movers ═══ */}
@@ -222,12 +220,21 @@ export default function HomeBriefing({ score, pulse }: Props) {
           </div>
 
           <div>
-            <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 20px' }}>Featured Insight</h2>
+            <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 20px' }}>Live Data Sources</h2>
             <div style={{ background: theme.surface, border: `1px solid ${theme.accent}22`, borderRadius: 8, padding: 28, borderLeft: `3px solid ${theme.accent}` }}>
-              <p style={{ fontSize: 19, fontStyle: 'italic', lineHeight: 1.6, margin: '0 0 12px', fontFamily: theme.fontHeading }}>
-                &ldquo;The convergence of displacement acceleration and policy lag creates a window of systemic vulnerability.&rdquo;
+              <p style={{ fontSize: 15, lineHeight: 1.7, margin: '0 0 12px', fontFamily: theme.fontBody }}>
+                This index is computed from live data sourced from the Bureau of Labor Statistics, Federal Reserve (FRED), World Bank, and OECD. Updated every 24 hours.
               </p>
-              <p style={{ fontSize: 13, color: theme.textTertiary, margin: 0, fontFamily: theme.fontBody }}>THI Analysis Team</p>
+              {score.metadata && (score.metadata as Record<string, string[]>).sources_connected && (
+                <p style={{ fontSize: 13, color: theme.accent, margin: '0 0 8px', fontFamily: theme.fontBody, fontWeight: 600 }}>
+                  Active: {((score.metadata as Record<string, string[]>).sources_connected).join(' · ')}
+                </p>
+              )}
+              {score.metadata && (score.metadata as Record<string, string[]>).sources_missing?.length > 0 && (
+                <p style={{ fontSize: 12, color: theme.textTertiary, margin: 0, fontFamily: theme.fontBody }}>
+                  Pending: {((score.metadata as Record<string, string[]>).sources_missing).join(', ')}
+                </p>
+              )}
             </div>
           </div>
         </div>

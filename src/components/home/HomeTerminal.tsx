@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { CompositeScore, Commentary, DOMAIN_LABELS } from '@/lib/types'
+import { KeyStat } from '@/lib/realData'
 import { useTheme } from '@/lib/theme'
 import { seededRandom } from '@/lib/seededRandom'
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts'
@@ -20,6 +21,7 @@ import DomainComparisonBar from '@/components/charts/DomainComparisonBar'
 interface Props {
   score: CompositeScore
   pulse: Commentary
+  keyStat?: KeyStat
 }
 
 /* ─── Ticker Bar ─── */
@@ -64,7 +66,7 @@ const METHODOLOGY_STEPS = [
   { num: '03', title: 'Index', desc: 'Single composite score updated weekly, with AI-generated analysis' },
 ]
 
-export default function HomeTerminal({ score, pulse }: Props) {
+export default function HomeTerminal({ score, pulse, keyStat }: Props) {
   const { theme } = useTheme()
   const [pulseAnim, setPulseAnim] = useState(1)
   // email state removed — using SubscribeForm component
@@ -93,12 +95,8 @@ export default function HomeTerminal({ score, pulse }: Props) {
   const topRisers = movers.filter(m => m.delta > 0).slice(0, 2)
   const topFallers = movers.filter(m => m.delta < 0).slice(0, 1)
 
-  // Key stat
-  const keyStat = {
-    value: '3.2M',
-    label: 'jobs reclassified as AI-exposed this quarter',
-    source: 'BLS / O*NET Q1 2026',
-  }
+  // Key stat — from real data pipeline
+  const stat = keyStat || { value: '—', label: 'connecting to data sources...', source: '' }
 
   const sectionHeader = (text: string) => (
     <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16, fontFamily: theme.fontMono }}>{text}</div>
@@ -150,9 +148,9 @@ export default function HomeTerminal({ score, pulse }: Props) {
         {/* ═══ Key Stat of the Week ═══ */}
         <div style={{ background: `linear-gradient(135deg, ${theme.surface}, #0a0a0a)`, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: '32px 40px', marginBottom: 24, textAlign: 'center' }}>
           <div style={{ fontSize: 11, letterSpacing: 2, color: theme.accent, textTransform: 'uppercase', fontFamily: theme.fontMono, marginBottom: 12 }}>Key Stat This Week</div>
-          <div style={{ fontSize: 56, fontWeight: 200, color: '#fff', lineHeight: 1, marginBottom: 12 }}>{keyStat.value}</div>
-          <div style={{ fontSize: 16, color: theme.textSecondary, marginBottom: 8 }}>{keyStat.label}</div>
-          <div style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontMono }}>{keyStat.source}</div>
+          <div style={{ fontSize: 56, fontWeight: 200, color: '#fff', lineHeight: 1, marginBottom: 12 }}>{stat.value}</div>
+          <div style={{ fontSize: 16, color: theme.textSecondary, marginBottom: 8 }}>{stat.label}</div>
+          <div style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontMono }}>{stat.source}</div>
         </div>
 
         {/* ═══ Enhanced Domain Analysis (Score + Trend + Delta + Weight) ═══ */}
@@ -218,15 +216,22 @@ export default function HomeTerminal({ score, pulse }: Props) {
             </div>
           </Link>
 
-          {/* Featured Insight */}
+          {/* Live Data Sources */}
           <div style={{ background: theme.surface, border: `1px solid ${theme.accent}33`, borderRadius: 6, padding: 24 }}>
-            <div style={{ fontSize: 11, color: theme.accent, fontFamily: theme.fontMono, letterSpacing: 1, marginBottom: 12 }}>FEATURED INSIGHT</div>
-            <div style={{ fontSize: 28, fontWeight: 200, color: '#fff', lineHeight: 1.3, marginBottom: 16 }}>
-              &ldquo;The convergence of displacement acceleration and policy lag creates a window of systemic vulnerability.&rdquo;
+            <div style={{ fontSize: 11, color: theme.accent, fontFamily: theme.fontMono, letterSpacing: 1, marginBottom: 12 }}>DATA SOURCES ACTIVE</div>
+            <div style={{ fontSize: 16, fontWeight: 400, color: '#fff', lineHeight: 1.5, marginBottom: 16 }}>
+              {score.metadata && (score.metadata as Record<string, string[]>).sources_connected
+                ? `Connected: ${((score.metadata as Record<string, string[]>).sources_connected).join(', ')}`
+                : 'Composite score computed from live economic and social data.'}
             </div>
             <div style={{ fontSize: 13, color: theme.textSecondary, lineHeight: 1.6 }}>
-              Our models indicate that the gap between AI capability deployment and institutional response has widened to its largest margin since tracking began.
+              The index aggregates data from BLS, FRED, World Bank, and OECD to measure civilizational stress across 7 domains. Scores update every 24 hours.
             </div>
+            {score.metadata && (score.metadata as Record<string, string[]>).sources_missing?.length > 0 && (
+              <div style={{ fontSize: 11, color: theme.textTertiary, marginTop: 8, fontFamily: theme.fontMono }}>
+                Pending: {((score.metadata as Record<string, string[]>).sources_missing).join(', ')}
+              </div>
+            )}
           </div>
         </div>
 

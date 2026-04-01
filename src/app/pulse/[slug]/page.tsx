@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Commentary } from '@/lib/types'
-import { MOCK_COMMENTARIES } from '@/lib/mockData'
+// No mock fallback — show not found if Supabase has no data
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/theme'
 import { formatDate } from '@/lib/utils'
@@ -23,7 +23,7 @@ export default function PulseDetailPage() {
         if (error) throw error
         setCommentary(data as Commentary)
       } catch {
-        setCommentary(MOCK_COMMENTARIES.find(c => c.slug === slug) || null)
+        setCommentary(null)
       } finally {
         setLoading(false)
       }

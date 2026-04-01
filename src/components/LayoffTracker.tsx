@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTheme, ThemeConfig } from '@/lib/theme'
-import { LayoffSummary, LayoffEvent, FALLBACK_LAYOFFS } from '@/lib/layoffData'
+import { LayoffSummary, LayoffEvent } from '@/lib/layoffData'
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -46,10 +46,11 @@ const TREND_LABELS = {
 
 export default function LayoffTracker() {
   const { theme, themeId } = useTheme()
-  const [data, setData] = useState<LayoffSummary>(FALLBACK_LAYOFFS)
+  const [data, setData] = useState<LayoffSummary | null>(null)
   const [isLive, setIsLive] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetch('/api/layoffs')
@@ -60,8 +61,25 @@ export default function LayoffTracker() {
           setIsLive(d.source === 'live')
         }
       })
-      .catch(() => {/* fallback already loaded */})
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
+
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: 24, color: theme.textTertiary, fontSize: 13 }}>
+        Fetching layoff data from Reddit and news sources...
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div style={{ textAlign: 'center', padding: 24, color: theme.textTertiary, fontSize: 13 }}>
+        No layoff data available right now. Check back soon.
+      </div>
+    )
+  }
 
   const trend = TREND_LABELS[data.stats.trend]
 
