@@ -22,7 +22,51 @@ const DOMAIN_WEIGHTS: Record<string, number> = {
 }
 
 async function getLatestScore(): Promise<CompositeScore> {
-  // 1. Try Supabase first
+  // 1. ALWAYS compute from real data APIs first (BLS, FRED, World Bank, OECD, WHO, etc.)
+  //    This ensures the v3 algorithm with proper normalization is always used.
+  //    Supabase is only a fallback if ALL real sources fail.
+  try {
+    const { points } = await fetchAllRealData()
+    const computed = computeScores(points)
+
+    // Only use real data if we got at least 1 domain's data
+    if (computed.activeDomains > 0) {
+      const realScore: CompositeScore = {
+        id: `real-${Date.now()}`,
+        score_type: 'composite',
+        score_value: computed.composite,
+        band: computed.band as CompositeScore['band'],
+        delta: null,
+        computed_at: new Date().toISOString(),
+        metadata: {
+          sources_connected: computed.sources_connected,
+          sources_missing: computed.sources_missing,
+          activeDomains: computed.activeDomains,
+          totalDomains: computed.totalDomains,
+        },
+        sub_indexes: Object.entries(computed.domains).map(([domain, info]) => ({
+          id: `real-sub-${domain}`,
+          composite_score_id: `real-${Date.now()}`,
+          domain: domain as Domain,
+          value: info.score ?? 0,
+          weight: DOMAIN_WEIGHTS[domain] || 0.1,
+          source_updated_at: new Date().toISOString(),
+          raw_data: {
+            sources: info.sources,
+            hasData: info.hasData,
+            dataPoints: info.dataPoints,
+          },
+        })),
+      }
+
+      console.log(`[THI] Score: ${computed.composite} (${computed.band}) | Active: ${computed.activeDomains}/${computed.totalDomains} | Sources: ${computed.sources_connected.join(', ')}`)
+      return realScore
+    }
+  } catch (e) {
+    console.error('Real data pipeline failed:', e)
+  }
+
+  // 2. Fallback to Supabase ONLY if real data produced nothing
   try {
     const { data, error } = await supabase
       .from('composite_scores')
@@ -31,48 +75,12 @@ async function getLatestScore(): Promise<CompositeScore> {
       .order('computed_at', { ascending: false })
       .limit(1)
 
-    if (!error && data && data.length > 0) return data[0] as CompositeScore
+    if (!error && data && data.length > 0) {
+      console.log('[THI] Using Supabase fallback (real data unavailable)')
+      return data[0] as CompositeScore
+    }
   } catch (e) {
     console.error('Supabase score fetch failed:', e)
-  }
-
-  // 2. Try real data APIs (BLS, FRED, World Bank, OECD, ACLED)
-  try {
-    const { points } = await fetchAllRealData()
-    const computed = computeScores(points)
-
-    const realScore: CompositeScore = {
-      id: `real-${Date.now()}`,
-      score_type: 'composite',
-      score_value: computed.composite,
-      band: computed.band as CompositeScore['band'],
-      delta: null,
-      computed_at: new Date().toISOString(),
-      metadata: {
-        sources_connected: computed.sources_connected,
-        sources_missing: computed.sources_missing,
-        activeDomains: computed.activeDomains,
-        totalDomains: computed.totalDomains,
-      },
-      sub_indexes: Object.entries(computed.domains).map(([domain, info]) => ({
-        id: `real-sub-${domain}`,
-        composite_score_id: `real-${Date.now()}`,
-        domain: domain as Domain,
-        value: info.score ?? 0,  // null domains show as 0
-        weight: DOMAIN_WEIGHTS[domain] || 0.1,
-        source_updated_at: new Date().toISOString(),
-        raw_data: {
-          sources: info.sources,
-          hasData: info.hasData,
-          dataPoints: info.dataPoints,
-        },
-      })),
-    }
-
-    console.log(`[THI] Score: ${computed.composite} (${computed.band}) | Active: ${computed.activeDomains}/${computed.totalDomains} | Sources: ${computed.sources_connected.join(', ')}`)
-    return realScore
-  } catch (e) {
-    console.error('Real data pipeline failed:', e)
   }
 
   // 3. No data available — return zero score with clear indication
