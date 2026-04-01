@@ -28,7 +28,7 @@
  * │ Pew (via FRED)  │ env     │ sentiment                         │
  * │ CDC (via WB)    │ none    │ wellbeing                          │
  * │ ACLED           │ env     │ unrest (pending access)            │
- * │ O*NET           │ env     │ work_risk (pending registration)   │
+ * │ O*NET           │ env     │ work_risk (3 indicators)           │
  * │ AI Index        │ static  │ work_risk (annual reference)       │
  * └─────────────────┴─────────┴────────────────────────────────────┘
  */
@@ -491,7 +491,7 @@ export async function fetchACLEDData(): Promise<DomainDataPoint[]> {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 7. O*NET — Occupational Automation Exposure (requires key)
+// 7. O*NET — Occupational Automation & Workforce Signals
 // ═══════════════════════════════════════════════════════════
 
 export async function fetchONETData(): Promise<DomainDataPoint[]> {
@@ -499,33 +499,78 @@ export async function fetchONETData(): Promise<DomainDataPoint[]> {
   if (!apiKey) return []
 
   const points: DomainDataPoint[] = []
+  const authHeader = 'Basic ' + Buffer.from(`${apiKey}:`).toString('base64')
+  const headers = { Authorization: authHeader, Accept: 'application/json' }
+  const fetchOpts = { headers, next: { revalidate: 604800 } } // 1 week cache
 
-  try {
-    // O*NET API uses basic auth with username=apikey, password=empty
-    const authHeader = 'Basic ' + Buffer.from(`${apiKey}:`).toString('base64')
+  // Helper to safely fetch O*NET endpoints
+  async function onetFetch(path: string) {
+    const res = await fetch(`https://services.onetcenter.org/ws/${path}`, fetchOpts)
+    if (!res.ok) throw new Error(`O*NET ${path}: ${res.status}`)
+    return res.json()
+  }
 
-    // Fetch "Bright Outlook" occupations (growing jobs) as inverse work risk
-    const url = 'https://services.onetcenter.org/ws/online/hot_technology?start=1&end=10'
-    const res = await fetch(url, {
-      headers: { Authorization: authHeader, Accept: 'application/json' },
-      next: { revalidate: 604800 },
-    })
+  // Run all O*NET queries in parallel
+  const results = await Promise.allSettled([
+    // 1. Hot Technologies — emerging tech skills disrupting the labor market
+    onetFetch('online/hot_technology?start=1&end=20'),
+    // 2. Bright Outlook occupations — growing jobs (inverse risk signal)
+    onetFetch('online/bright_outlook?start=1&end=20'),
+    // 3. Search for AI/automation-related occupations gaining prominence
+    onetFetch('online/search?keyword=artificial+intelligence&start=1&end=10'),
+  ])
 
-    if (res.ok) {
-      const json = await res.json()
-      const techCount = json.technology?.length || json.total || 0
-
-      // More hot technologies = more automation pressure
-      // Range: 20 (normal churn) to 100 (massive displacement wave)
+  // ── Indicator 1: Hot Technology Count ──
+  // More hot technologies = faster skill obsolescence = higher work risk
+  if (results[0].status === 'fulfilled') {
+    try {
+      const json = results[0].value
+      const totalHotTechs = json.total || 0
+      // Range: 30 (normal tech evolution) → 120 (unprecedented disruption)
       points.push(makePoint(
-        'work_risk', 'Hot Technology Demand (O*NET)', techCount,
-        normalize(techCount, 20, 100),
+        'work_risk', 'Hot Technology Count (O*NET)', totalHotTechs,
+        normalize(totalHotTechs, 30, 120),
         'O*NET', 'hot_technology', 'latest',
-        '0 = 20 hot techs (normal), 100 = 100+ (massive skill disruption)',
+        '0 = ≤30 hot techs (normal evolution), 100 = 120+ (massive skill disruption)',
       ))
-    }
-  } catch (err) {
-    console.error('O*NET fetch error:', err)
+    } catch (e) { console.error('O*NET hot_tech parse:', e) }
+  }
+
+  // ── Indicator 2: Bright Outlook Ratio ──
+  // More bright outlook occupations = healthier job market = lower risk
+  if (results[1].status === 'fulfilled') {
+    try {
+      const json = results[1].value
+      const totalBright = json.total || 0
+      // Range: inverted — more bright outlook = LESS risk
+      // 300+ bright outlook occupations = healthy, 100 = concerning decline
+      points.push(makePoint(
+        'work_risk', 'Bright Outlook Occupations (O*NET)', totalBright,
+        normalize(totalBright, 100, 350, true),
+        'O*NET', 'bright_outlook', 'latest',
+        '0 = 350+ bright occupations (strong growth), 100 = <100 (severe contraction)',
+      ))
+    } catch (e) { console.error('O*NET bright parse:', e) }
+  }
+
+  // ── Indicator 3: AI Occupation Penetration ──
+  // How many occupations are now AI-related — higher = more displacement pressure
+  if (results[2].status === 'fulfilled') {
+    try {
+      const json = results[2].value
+      const aiOccupations = json.total || 0
+      // Range: 20 (AI is niche) → 200 (AI pervades most occupations)
+      points.push(makePoint(
+        'work_risk', 'AI-Related Occupations (O*NET)', aiOccupations,
+        normalize(aiOccupations, 20, 200),
+        'O*NET', 'ai_occupations', 'latest',
+        '0 = ≤20 AI occupations (niche), 100 = 200+ (AI pervades workforce)',
+      ))
+    } catch (e) { console.error('O*NET AI search parse:', e) }
+  }
+
+  if (results.every(r => r.status === 'rejected')) {
+    console.error('O*NET: all requests failed', results.map(r => r.status === 'rejected' ? r.reason : null))
   }
 
   return points
