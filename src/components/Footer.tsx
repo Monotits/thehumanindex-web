@@ -42,7 +42,8 @@ export function Footer() {
               <span>BLS / FRED</span>
               <span>World Bank / OECD</span>
               <span>WHO / V-Dem</span>
-              <span>AI Index / Reddit</span>
+              <span>O*NET / AI Index</span>
+              <span>WARN Act / Reddit</span>
             </div>
           </div>
         </div>

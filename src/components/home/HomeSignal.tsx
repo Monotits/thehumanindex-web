@@ -28,13 +28,13 @@ interface Props {
 
 
 const METHODOLOGY_STEPS = [
-  { num: '01', title: 'Collect', desc: '8+ live sources: BLS, FRED, World Bank, OECD, WHO, V-Dem, AI Index' },
+  { num: '01', title: 'Collect', desc: '10+ live sources: BLS, FRED, World Bank, OECD, WHO, V-Dem, O*NET, AI Index, WARN Act' },
   { num: '02', title: 'Analyze', desc: 'Weighted scoring with anomaly detection' },
   { num: '03', title: 'Index', desc: 'Weekly composite + AI-generated analysis' },
 ]
 
 const DATA_SOURCES = [
-  'BLS', 'FRED', 'World Bank', 'OECD', 'WHO', 'V-Dem/WGI', 'AI Index', 'Reddit / RSS',
+  'BLS', 'FRED', 'World Bank', 'OECD', 'WHO', 'V-Dem/WGI', 'O*NET', 'AI Index', 'WARN Act', 'Reddit / RSS',
 ]
 
 /* ─── Gauge ─── */

@@ -58,13 +58,15 @@ const DATA_SOURCES = [
   { name: 'OECD', desc: 'Wellbeing' },
   { name: 'WHO', desc: 'Health' },
   { name: 'V-Dem/WGI', desc: 'Democracy' },
+  { name: 'O*NET', desc: 'Occupations' },
   { name: 'AI Index', desc: 'Tech adoption' },
+  { name: 'WARN Act', desc: 'Layoff filings' },
   { name: 'Reddit / RSS', desc: 'Sentiment' },
 ]
 
 
 const METHODOLOGY_STEPS = [
-  { num: '01', title: 'Collect', desc: 'Live feeds from BLS, FRED, World Bank, OECD, WHO, V-Dem, AI Index, Reddit/RSS' },
+  { num: '01', title: 'Collect', desc: 'Live feeds from 10+ sources: BLS, FRED, World Bank, OECD, WHO, V-Dem, O*NET, AI Index, WARN Act, Reddit/RSS' },
   { num: '02', title: 'Analyze', desc: 'Weighted scoring with statistical normalization and anomaly detection' },
   { num: '03', title: 'Index', desc: 'Single composite score updated weekly, with AI-generated analysis' },
 ]

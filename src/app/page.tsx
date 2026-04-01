@@ -92,7 +92,7 @@ async function getLatestScore(): Promise<CompositeScore> {
     band: 'low',
     delta: null,
     computed_at: new Date().toISOString(),
-    metadata: { sources_connected: [], sources_missing: ['BLS', 'FRED', 'World Bank', 'OECD', 'ACLED'], activeDomains: 0, totalDomains: 7 },
+    metadata: { sources_connected: [], sources_missing: ['BLS', 'FRED', 'World Bank', 'OECD', 'O*NET', 'ACLED'], activeDomains: 0, totalDomains: 7 },
     sub_indexes: Object.keys(DOMAIN_WEIGHTS).map(domain => ({
       id: `empty-${domain}`,
       composite_score_id: 'no-data',

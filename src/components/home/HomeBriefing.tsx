@@ -34,12 +34,14 @@ const DATA_SOURCES = [
   { name: 'OECD', desc: 'Wellbeing' },
   { name: 'WHO', desc: 'Health' },
   { name: 'V-Dem/WGI', desc: 'Democracy' },
+  { name: 'O*NET', desc: 'Occupations' },
   { name: 'AI Index', desc: 'Tech adoption' },
+  { name: 'WARN Act', desc: 'Layoff filings' },
   { name: 'Reddit / RSS', desc: 'Sentiment' },
 ]
 
 const METHODOLOGY_STEPS = [
-  { num: '01', title: 'Collect', desc: 'Live feeds from 8+ sources: BLS, FRED, World Bank, OECD, WHO, V-Dem, AI Index, Reddit/RSS.' },
+  { num: '01', title: 'Collect', desc: 'Live feeds from 10+ sources: BLS, FRED, World Bank, OECD, WHO, V-Dem, O*NET, AI Index, WARN Act, Reddit/RSS.' },
   { num: '02', title: 'Analyze', desc: 'Weighted scoring model with statistical normalization, anomaly detection, and cross-domain correlation.' },
   { num: '03', title: 'Index', desc: 'A single composite score updated weekly, with AI-generated analysis providing context and narrative.' },
 ]
@@ -259,7 +261,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
             <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 20px' }}>Live Data Sources</h2>
             <div style={{ background: theme.surface, border: `1px solid ${theme.accent}22`, borderRadius: 8, padding: 28, borderLeft: `3px solid ${theme.accent}` }}>
               <p style={{ fontSize: 15, lineHeight: 1.7, margin: '0 0 12px', fontFamily: theme.fontBody }}>
-                This index is computed from live data sourced from the Bureau of Labor Statistics, Federal Reserve (FRED), World Bank, and OECD. Updated every 24 hours.
+                This index is computed from live data sourced from 10+ institutions including BLS, FRED, World Bank, OECD, WHO, O*NET, and Stanford AI Index. Updated every 24 hours.
               </p>
               {score.metadata && (score.metadata as Record<string, string[]>).sources_connected && (
                 <p style={{ fontSize: 13, color: theme.accent, margin: '0 0 8px', fontFamily: theme.fontBody, fontWeight: 600 }}>
