@@ -32,6 +32,7 @@ export function Footer() {
             <div style={{ fontWeight: 600, color: theme.textSecondary, marginBottom: 10, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>Project</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <Link href="/about" style={linkStyle}>About</Link>
+              <Link href="/contact" style={linkStyle}>Contact</Link>
               <Link href="/feed.xml" style={linkStyle}>RSS Feed</Link>
             </div>
           </div>
