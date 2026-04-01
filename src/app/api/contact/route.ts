@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       const NOTIFY_EMAIL = process.env.CONTACT_NOTIFY_EMAIL || 'experlercom@gmail.com'
 
       await resend.emails.send({
-        from: 'The Human Index <noreply@thehumanindex.org>',
+        from: 'The Human Index <onboarding@resend.dev>',
         to: NOTIFY_EMAIL,
         replyTo: email,
         subject: `[THI Contact] ${subjectLabel} — from ${name}`,
