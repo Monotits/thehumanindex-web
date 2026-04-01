@@ -1,6 +1,7 @@
 'use client'
 
 import { useTheme } from '@/lib/theme'
+import ChartInsight from './ChartInsight'
 
 interface Props {
   currentScore: number
@@ -91,6 +92,27 @@ export default function WeeklyHeatmap({ currentScore }: Props) {
           </div>
         ))}
       </div>
+
+      {/* Dynamic Analysis */}
+      {(() => {
+        const scores = weeks.map(w => w.score)
+        const avg = scores.reduce((s, v) => s + v, 0) / scores.length
+        const max = Math.max(...scores)
+        const min = Math.min(...scores)
+        const maxWeek = weeks.find(w => w.score === max)
+        const trend = scores[scores.length - 1] - scores[0]
+        const elevatedCount = scores.filter(s => s >= 55).length
+        return (
+          <ChartInsight title="12-week pattern">
+            Over the past 12 weeks, the composite has averaged {avg.toFixed(1)}, ranging from {min.toFixed(0)} to {max.toFixed(0)} (peak: {maxWeek?.week}). {elevatedCount >= 8
+              ? `The index has spent ${elevatedCount} of 12 weeks in elevated territory or above — a sustained pattern rather than isolated spikes, indicating structural rather than episodic stress.`
+              : elevatedCount >= 4
+                ? `With ${elevatedCount} weeks above the elevated threshold, the pattern shows intermittent but recurring pressure.`
+                : 'Most weeks have remained below the elevated threshold, suggesting the current reading may represent a temporary spike rather than a structural shift.'
+            } The overall trajectory is {trend > 2 ? 'upward, with a net increase of +' + trend.toFixed(1) + ' pts' : trend < -2 ? 'downward, with a net decrease of ' + trend.toFixed(1) + ' pts' : 'roughly flat over the period'}.
+          </ChartInsight>
+        )
+      })()}
     </div>
   )
 }

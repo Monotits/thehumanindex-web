@@ -2,6 +2,7 @@
 
 import { useTheme } from '@/lib/theme'
 import { DOMAIN_LABELS, Domain } from '@/lib/types'
+import ChartInsight from './ChartInsight'
 
 interface Props {
   domains: { domain: Domain; value: number; weight: number }[]
@@ -153,6 +154,20 @@ export default function WaterfallChart({ domains, compositeScore }: Props) {
           <line x1={38} y1={chartHeight} x2={chartWidth - 10} y2={chartHeight} stroke={theme.surfaceBorder} strokeWidth={1} />
         </svg>
       </div>
+
+      {/* Dynamic Analysis */}
+      {(() => {
+        const top = sorted[0]
+        const topContrib = (top.value * top.weight)
+        const topPct = ((topContrib / compositeScore) * 100).toFixed(0)
+        const top3 = sorted.slice(0, 3)
+        const top3Pct = ((top3.reduce((s, d) => s + d.value * d.weight, 0) / compositeScore) * 100).toFixed(0)
+        return (
+          <ChartInsight title="Score decomposition">
+            <strong>{DOMAIN_LABELS[top.domain]}</strong> is the single largest contributor to the composite, accounting for {topPct}% of the total score (weighted contribution: {topContrib.toFixed(1)} pts). The top three domains together drive {top3Pct}% of the index — a concentration that makes the composite highly sensitive to shifts in these areas. Domains with lower weights, even if scored high, have limited ability to move the overall needle.
+          </ChartInsight>
+        )
+      })()}
     </div>
   )
 }

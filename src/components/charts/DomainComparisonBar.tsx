@@ -2,6 +2,7 @@
 
 import { useTheme } from '@/lib/theme'
 import { DOMAIN_LABELS, DOMAIN_ICONS, Domain } from '@/lib/types'
+import ChartInsight from './ChartInsight'
 
 interface DomainData {
   domain: Domain
@@ -123,6 +124,23 @@ export default function DomainComparisonBar({ domains }: Props) {
         <span style={{ textAlign: 'right' }}>WoW Δ</span>
         <span style={{ textAlign: 'right' }}>Wt</span>
       </div>
+
+      {/* Dynamic Analysis */}
+      {(() => {
+        const above50 = sorted.filter(d => d.value >= 50)
+        const below30 = sorted.filter(d => d.value < 30)
+        const highest = sorted[0]
+        const lowest = sorted[sorted.length - 1]
+        const spread = highest.value - lowest.value
+        return (
+          <ChartInsight title="Domain overview">
+            {above50.length} of 7 domains currently score above the 50-point midline, indicating {above50.length >= 5 ? 'broad-based stress across most dimensions' : above50.length >= 3 ? 'moderate stress concentrated in key areas' : 'stress that remains limited to a few domains'}.
+            {' '}<strong>{DOMAIN_LABELS[highest.domain]}</strong> leads at {highest.value.toFixed(1)}, while <strong>{DOMAIN_LABELS[lowest.domain]}</strong> sits lowest at {lowest.value.toFixed(1)} — a spread of {spread.toFixed(0)} points.
+            {spread > 30 && ' This wide disparity suggests highly uneven stress distribution, where certain systems face acute pressure while others remain relatively stable.'}
+            {below30.length > 0 && ` ${below30.map(d => DOMAIN_LABELS[d.domain]).join(' and ')} ${below30.length === 1 ? 'remains' : 'remain'} in the low-stress zone, representing areas of relative resilience.`}
+          </ChartInsight>
+        )
+      })()}
     </div>
   )
 }

@@ -1,7 +1,8 @@
 'use client'
 
 import { useTheme } from '@/lib/theme'
-import { Domain } from '@/lib/types'
+import { Domain, DOMAIN_LABELS } from '@/lib/types'
+import ChartInsight from './ChartInsight'
 
 interface Props {
   domains: { domain: Domain; value: number }[]
@@ -137,6 +138,26 @@ export default function CorrelationHeatmap({ domains }: Props) {
           <span>Correlated stress</span>
         </div>
       </div>
+
+      {/* Dynamic Analysis */}
+      {(() => {
+        // Find strongest positive and negative correlations
+        const pairs: { d1: string; d2: string; corr: number }[] = []
+        for (let i = 0; i < domainKeys.length; i++) {
+          for (let j = i + 1; j < domainKeys.length; j++) {
+            pairs.push({ d1: domainKeys[i], d2: domainKeys[j], corr: getCorrelation(domainKeys[i], domainKeys[j]) })
+          }
+        }
+        const strongest = [...pairs].sort((a, b) => b.corr - a.corr)[0]
+        const mostInverse = [...pairs].sort((a, b) => a.corr - b.corr)[0]
+        const n1 = (d: string) => DOMAIN_LABELS[d as Domain] || d
+        return (
+          <ChartInsight title="What the correlations tell us">
+            The strongest co-movement is between <strong>{n1(strongest.d1)}</strong> and <strong>{n1(strongest.d2)}</strong> (r={strongest.corr.toFixed(2)}) — when one rises, the other follows closely, suggesting a shared structural driver.
+            Conversely, <strong>{n1(mostInverse.d1)}</strong> and <strong>{n1(mostInverse.d2)}</strong> (r={mostInverse.corr.toFixed(2)}) move in opposite directions, indicating that gains in one domain may come at the expense of the other. Policy interventions should account for these interdependencies rather than treating domains in isolation.
+          </ChartInsight>
+        )
+      })()}
     </div>
   )
 }

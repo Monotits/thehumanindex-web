@@ -3,6 +3,7 @@
 import { useTheme } from '@/lib/theme'
 import { DOMAIN_LABELS, Domain } from '@/lib/types'
 import { useState } from 'react'
+import ChartInsight from './ChartInsight'
 
 interface DomainData {
   domain: Domain
@@ -137,6 +138,24 @@ export default function MultiDomainTrend({ domains }: Props) {
           </div>
         ))}
       </div>
+
+      {/* Dynamic Analysis */}
+      {(() => {
+        const steepest = [...allTrends].sort((a, b) => (b.data[5] - b.data[0]) - (a.data[5] - a.data[0]))[0]
+        const mostImproved = [...allTrends].sort((a, b) => (a.data[5] - a.data[0]) - (b.data[5] - b.data[0]))[0]
+        const steepDelta = (steepest.data[5] - steepest.data[0]).toFixed(1)
+        const improvDelta = (mostImproved.data[5] - mostImproved.data[0]).toFixed(1)
+        const converging = allTrends.every(t => Math.abs(t.data[5] - t.data[0]) < 3)
+        const n = (d: string) => DOMAIN_LABELS[d as Domain] || d
+        return (
+          <ChartInsight title="Trend analysis">
+            Over the past 6 months, <strong>{n(steepest.domain)}</strong> has risen the most sharply (+{steepDelta} pts), while <strong>{n(mostImproved.domain)}</strong> shows the most favorable trajectory ({improvDelta} pts).
+            {converging
+              ? ' All domains are moving within a narrow band, suggesting systemic pressure rather than isolated spikes.'
+              : ' The divergence between domains indicates that stress is concentrated in specific areas rather than uniformly distributed — targeted intervention could have outsized impact.'}
+          </ChartInsight>
+        )
+      })()}
     </div>
   )
 }

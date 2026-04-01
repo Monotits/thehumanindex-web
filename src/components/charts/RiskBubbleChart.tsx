@@ -1,7 +1,8 @@
 'use client'
 
 import { useTheme } from '@/lib/theme'
-import { Domain } from '@/lib/types'
+import { Domain, DOMAIN_LABELS } from '@/lib/types'
+import ChartInsight from './ChartInsight'
 
 interface DomainData {
   domain: Domain
@@ -113,6 +114,24 @@ export default function RiskBubbleChart({ domains }: Props) {
         <span>|</span>
         <span>Above zero line = accelerating stress</span>
       </div>
+
+      {/* Dynamic Analysis */}
+      {(() => {
+        const highAndRising = dataWithVelocity.filter(d => d.value >= 50 && d.velocity > 0).sort((a, b) => (b.value + b.velocity * 5) - (a.value + a.velocity * 5))
+        const lowAndFalling = dataWithVelocity.filter(d => d.value < 50 && d.velocity < 0)
+        const critical = highAndRising[0]
+        const n = (d: string) => DOMAIN_LABELS[d as Domain] || d
+        return (
+          <ChartInsight title="Risk assessment">
+            {critical ? (
+              <>The most concerning signal is <strong>{n(critical.domain)}</strong> — already at {critical.value.toFixed(0)} and accelerating at +{critical.velocity.toFixed(1)} pts/week. Domains in the upper-right quadrant (high score, positive velocity) represent compounding risk where stress is both elevated and worsening.</>
+            ) : (
+              <>No domain currently sits in the critical upper-right quadrant (high &amp; rising), which suggests the current stress levels, while elevated, are not actively accelerating.</>
+            )}
+            {lowAndFalling.length > 0 && <> On the positive side, {lowAndFalling.map(d => n(d.domain)).join(' and ')} {lowAndFalling.length === 1 ? 'is' : 'are'} both lower-scored and decelerating — a pocket of resilience.</>}
+          </ChartInsight>
+        )
+      })()}
     </div>
   )
 }

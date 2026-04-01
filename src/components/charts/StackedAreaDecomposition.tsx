@@ -3,6 +3,7 @@
 import { useTheme } from '@/lib/theme'
 import { DOMAIN_LABELS, Domain } from '@/lib/types'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import ChartInsight from './ChartInsight'
 
 interface DomainData {
   domain: Domain
@@ -94,6 +95,20 @@ export default function StackedAreaDecomposition({ domains }: Props) {
           ))}
         </AreaChart>
       </ResponsiveContainer>
+
+      {/* Dynamic Analysis */}
+      {(() => {
+        const latestContribs = sorted.map(d => ({ domain: d.domain, contrib: +(d.value * d.weight).toFixed(1) }))
+        const top = latestContribs[0]
+        const bottom = latestContribs[latestContribs.length - 1]
+        const topHalf = latestContribs.slice(0, Math.ceil(latestContribs.length / 2))
+        const topHalfPct = ((topHalf.reduce((s, d) => s + d.contrib, 0) / latestContribs.reduce((s, d) => s + d.contrib, 0)) * 100).toFixed(0)
+        return (
+          <ChartInsight title="Composition over time">
+            The stacked view reveals how the composite score is built up over time. <strong>{DOMAIN_LABELS[top.domain as Domain]}</strong> consistently occupies the largest band ({top.contrib} weighted pts), while <strong>{DOMAIN_LABELS[bottom.domain as Domain]}</strong> contributes the least ({bottom.contrib} pts). The top half of domains account for {topHalfPct}% of the total — a structural imbalance suggesting the index is disproportionately driven by a handful of stress vectors. Watch for bands that widen month-over-month: that signals accelerating contribution from that domain.
+          </ChartInsight>
+        )
+      })()}
     </div>
   )
 }
