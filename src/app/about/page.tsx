@@ -78,8 +78,9 @@ export default function AboutPage() {
           social unrest, declining wellbeing, policy failure, and public sentiment collapse.
         </p>
         <p style={pStyle}>
-          Each domain draws from authoritative public data sources — BLS, World Bank, ACLED,
-          V-Dem, WHO, OECD, and social media sentiment analysis. Every score is weighted,
+          Each domain draws from authoritative public data sources — BLS, FRED, World Bank,
+          OECD, WHO, V-Dem governance indicators, Stanford AI Index, and Reddit/RSS
+          sentiment analysis. Every score is weighted,
           documented, and open to scrutiny. We publish our full methodology because
           transparency isn&apos;t optional when the stakes are this high.
         </p>

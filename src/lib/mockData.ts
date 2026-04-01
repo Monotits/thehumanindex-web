@@ -332,7 +332,7 @@ GDP tells you the economy is growing. It doesn't tell you that growth is concent
 
 The Human Index synthesizes seven domains of civilizational stress into a single composite score. Think of it like a vital signs monitor for the economy — not a prediction of the future, but a real-time reading of the present.
 
-Each domain is tracked weekly using public data from authoritative sources: the Bureau of Labor Statistics, World Bank, ACLED, V-Dem, WHO, OECD, and social media sentiment analysis. Every score is weighted according to a documented methodology that we publish in full.
+Each domain is tracked daily using live data from the Bureau of Labor Statistics, Federal Reserve (FRED), World Bank, OECD, and Reddit/RSS sentiment analysis. Every score is weighted according to a documented methodology that we publish in full.
 
 ## How to Read the Score
 

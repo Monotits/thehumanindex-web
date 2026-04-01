@@ -10,12 +10,14 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 interface RealDataResponse {
   scores: {
     composite: number
-    domains: Record<string, { score: number; sources: string[]; dataPoints: unknown[] }>
+    domains: Record<string, { score: number | null; sources: string[]; dataPoints: unknown[]; hasData: boolean }>
     band: string
+    activeDomains: number
+    totalDomains: number
     sources_connected: string[]
     sources_missing: string[]
   }
-  raw_points: { domain: string; value: number; normalized: number; source: string; series: string; period: string }[]
+  raw_points: { domain: string; indicator: string; value: number; normalized: number; source: string; series: string; period: string; context: string }[]
   errors: string[]
   fetched_at: string
 }
@@ -95,7 +97,7 @@ export default function DashboardPage() {
                     id: `real-sub-${domain}`,
                     composite_score_id: `real-${Date.now()}`,
                     domain: domain as Domain,
-                    value: info.score,
+                    value: info.score ?? 0,
                     weight: DOMAIN_WEIGHTS[domain] || 0.1,
                     source_updated_at: data.fetched_at,
                     raw_data: { sources: info.sources },
@@ -174,21 +176,33 @@ export default function DashboardPage() {
         <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
           <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16 }}>Domain Breakdown</div>
           {sortedDomains.map(d => {
-            const color = d.value >= 65 ? '#ef4444' : d.value >= 45 ? '#f59e0b' : d.value >= 25 ? '#3b82f6' : '#22c55e'
+            const hasData = d.raw_data && (d.raw_data as Record<string, unknown>).hasData !== false
+            const color = !hasData ? theme.textTertiary : d.value >= 65 ? '#ef4444' : d.value >= 45 ? '#f59e0b' : d.value >= 25 ? '#3b82f6' : '#22c55e'
             const sources = d.raw_data && (d.raw_data as Record<string, string[]>).sources
               ? (d.raw_data as Record<string, string[]>).sources
               : null
             return (
-              <div key={d.domain} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+              <div key={d.domain} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: `1px solid ${theme.surfaceBorder}`, opacity: hasData ? 1 : 0.5 }}>
                 <div style={{ flex: '0 0 180px', fontSize: 14, fontWeight: 500, color: theme.isDark ? '#fff' : theme.text }}>
                   {DOMAIN_LABELS[d.domain] || d.domain}
                 </div>
-                <div style={{ flex: 1, height: 8, background: theme.isDark ? '#1a1a1a' : '#eee', borderRadius: 4, marginRight: 16 }}>
-                  <div style={{ width: `${d.value}%`, height: '100%', background: color, borderRadius: 4 }} />
-                </div>
-                <div style={{ flex: '0 0 50px', fontFamily: theme.fontMono, fontSize: 15, fontWeight: 600, color, textAlign: 'right' }}>{d.value.toFixed(1)}</div>
+                {hasData ? (
+                  <>
+                    <div style={{ flex: 1, height: 8, background: theme.isDark ? '#1a1a1a' : '#eee', borderRadius: 4, marginRight: 16 }}>
+                      <div style={{ width: `${d.value}%`, height: '100%', background: color, borderRadius: 4, transition: 'width 0.5s ease' }} />
+                    </div>
+                    <div style={{ flex: '0 0 50px', fontFamily: theme.fontMono, fontSize: 15, fontWeight: 600, color, textAlign: 'right' }}>{d.value.toFixed(1)}</div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ flex: 1, fontSize: 12, color: theme.textTertiary, fontStyle: 'italic', marginRight: 16 }}>
+                      Awaiting data source
+                    </div>
+                    <div style={{ flex: '0 0 50px', fontFamily: theme.fontMono, fontSize: 15, color: theme.textTertiary, textAlign: 'right' }}>—</div>
+                  </>
+                )}
                 <div style={{ flex: '0 0 50px', fontSize: 12, color: theme.textTertiary, textAlign: 'right' }}>{(d.weight * 100).toFixed(0)}%</div>
-                {sources && (
+                {sources && sources.length > 0 && (
                   <div style={{ flex: '0 0 100px', fontSize: 10, color: theme.textTertiary, textAlign: 'right', fontFamily: theme.fontMono }}>
                     {sources.join(', ')}
                   </div>
@@ -203,18 +217,26 @@ export default function DashboardPage() {
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
             <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16 }}>Raw Data Points</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
-              {rawPoints.map((p, i) => (
-                <div key={i} style={{ padding: 12, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, marginBottom: 4 }}>{p.series}</div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <span style={{ fontSize: 20, fontWeight: 300, color: theme.accent, fontFamily: theme.fontMono }}>{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}</span>
-                    <span style={{ fontSize: 10, color: theme.textTertiary, fontFamily: theme.fontMono }}>→ {p.normalized}/100</span>
+              {rawPoints.map((p, i) => {
+                const stressColor = p.normalized >= 65 ? '#ef4444' : p.normalized >= 45 ? '#f59e0b' : p.normalized >= 25 ? '#3b82f6' : '#22c55e'
+                return (
+                  <div key={i} style={{ padding: 12, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, marginBottom: 4 }}>{p.indicator || p.series}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span style={{ fontSize: 20, fontWeight: 300, color: theme.accent, fontFamily: theme.fontMono }}>{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}</span>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: stressColor, fontFamily: theme.fontMono }}>{p.normalized}/100</span>
+                    </div>
+                    <div style={{ fontSize: 10, color: theme.textTertiary, marginTop: 4, fontFamily: theme.fontMono }}>
+                      {p.source} · {p.period}
+                    </div>
+                    {p.context && (
+                      <div style={{ fontSize: 9, color: theme.textTertiary, marginTop: 4, opacity: 0.7 }}>
+                        {p.context}
+                      </div>
+                    )}
                   </div>
-                  <div style={{ fontSize: 10, color: theme.textTertiary, marginTop: 4, fontFamily: theme.fontMono }}>
-                    {p.source} · {p.period}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}

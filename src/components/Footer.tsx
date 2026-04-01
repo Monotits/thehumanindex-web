@@ -39,10 +39,10 @@ export function Footer() {
           <div>
             <div style={{ fontWeight: 600, color: theme.textSecondary, marginBottom: 10, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>Data Sources</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, color: theme.textTertiary }}>
-              <span>BLS / O*NET</span>
-              <span>World Bank</span>
-              <span>ACLED / V-Dem</span>
-              <span>WHO / OECD</span>
+              <span>BLS / FRED</span>
+              <span>World Bank / OECD</span>
+              <span>WHO / V-Dem</span>
+              <span>AI Index / Reddit</span>
             </div>
           </div>
         </div>

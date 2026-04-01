@@ -8,18 +8,18 @@ const FAQ_QUESTIONS = [
   { question: 'What is The Human Index?', answer: 'The Human Index is a real-time composite indicator that measures civilizational stress caused by AI-driven economic transformation across seven key domains.' },
   { question: 'How is the composite score calculated?', answer: 'The composite score is a weighted average of seven domain indices: AI Work Displacement Risk (25%), Income Inequality (18%), Social Unrest (15%), Institutional Decay (12%), Public Wellbeing (12%), Policy Response (10%), and Public Sentiment (8%).' },
   { question: 'What are the exposure bands?', answer: 'Scores are categorized into five bands: Low (0-25), Moderate (26-45), Elevated (46-65), High (66-80), and Critical (81-100). Each band indicates the severity of structural stress.' },
-  { question: 'How often is the data updated?', answer: 'The Human Index is updated weekly with fresh data from public sources including the Bureau of Labor Statistics, O*NET, Federal Reserve, World Bank, CDC, and Pew Research Center.' },
-  { question: 'What data sources does The Human Index use?', answer: 'Primary sources include BLS employment data, O*NET task-level analysis, Federal Reserve income distribution data, World Bank institutional metrics, CDC/SAMHSA wellbeing indicators, and Pew Research trust surveys.' },
+  { question: 'How often is the data updated?', answer: 'The Human Index is updated daily with live data from 8+ sources including BLS, FRED, World Bank, OECD, WHO, and V-Dem governance indicators. Sentiment data is refreshed hourly from Reddit and RSS feeds. AI Index data is updated annually.' },
+  { question: 'What data sources does The Human Index use?', answer: 'Connected sources: BLS (unemployment), FRED (jobless claims, savings rate, consumer sentiment, Gini, treasury spread, debt/GDP), World Bank/V-Dem (governance, corruption, rule of law, political stability, inequality), OECD (life satisfaction, trust in government, voter turnout), WHO (suicide rate, life expectancy, alcohol consumption), Stanford AI Index (AI investment, enterprise adoption), Reddit/RSS (public discourse). O*NET and ACLED integration pending.' },
 ]
 
 const DOMAIN_DESCRIPTIONS: Record<string, string> = {
-  work_risk: 'Tracks automation exposure of current jobs based on task decomposition, wage levels, and skill substitutability. Data sources: O*NET, Bureau of Labor Statistics, Glassdoor.',
-  inequality: 'Measures income and wealth concentration, wage stagnation, and asset appreciation gaps. Data sources: World Inequality Database, IRS, Federal Reserve.',
-  unrest: 'Monitors labor strikes, protests, and civic participation indicators. Data sources: IPSOS surveys, labor department filings, protest tracking.',
-  decay: 'Tracks institutional trust, government effectiveness, and functional capacity. Data sources: Pew Research, World Bank, Congressional effectiveness metrics.',
-  wellbeing: 'Measures mental health indicators, substance use, suicide rates, and life satisfaction. Data sources: CDC, SAMHSA, OECD.',
-  policy: 'Assesses policy responsiveness to emerging displacement challenges. Data sources: Legislative tracking, regulation analysis, expert assessment.',
-  sentiment: 'Analyzes public discourse and sentiment toward AI, technology, and economic systems. Data sources: Social media analysis, news sentiment, surveys.',
+  work_risk: 'Tracks AI-driven work displacement through unemployment rates, jobless claims, corporate AI investment, and enterprise adoption rates. Sources: BLS, FRED (ICSA), Stanford AI Index.',
+  inequality: 'Measures income and wealth concentration via Gini coefficients and income distribution. Sources: FRED (Census Gini), World Bank (Gini, Income Share Top 10%).',
+  unrest: 'Monitors social tension through political stability indices and civic engagement metrics. Sources: World Bank/V-Dem (Political Stability), OECD (Voter Turnout), ACLED (pending).',
+  decay: 'Tracks institutional effectiveness, democratic quality, corruption, and rule of law. Sources: World Bank/V-Dem WGI (Government Effectiveness, Voice & Accountability, Rule of Law, Control of Corruption), FRED (Treasury Spread), OECD (Trust in Government).',
+  wellbeing: 'Measures life satisfaction, health outcomes, financial security, and substance use. Sources: OECD (Life Satisfaction), FRED (Personal Saving Rate), WHO (Suicide Rate, Life Expectancy, Alcohol Consumption), World Bank (Suicide Rate, Life Expectancy).',
+  policy: 'Assesses fiscal sustainability and government spending responsiveness. Sources: FRED (Federal Debt as % GDP, Government Social Benefits).',
+  sentiment: 'Analyzes consumer confidence and public economic outlook. Sources: FRED (U. Michigan Consumer Sentiment, OECD Consumer Confidence), Reddit/RSS (layoff tracking, public discourse).',
 }
 
 const WEIGHTS: Record<string, number> = {
@@ -35,13 +35,13 @@ const BANDS = [
 ]
 
 const DATA_SOURCES = [
-  'Bureau of Labor Statistics (BLS) — Employment data',
-  'O*NET Database — Task-level job exposure analysis',
-  'Federal Reserve — Income and wealth distribution',
-  'World Bank — Institutional quality metrics',
-  'CDC / SAMHSA — Mental health and wellbeing indicators',
-  'Pew Research Center — Public sentiment and trust',
-  'Labor Department — Strike and protest filings',
+  'Bureau of Labor Statistics (BLS) — Unemployment rate, labor market data',
+  'Federal Reserve Economic Data (FRED) — Jobless claims, Gini, savings rate, consumer sentiment, treasury spread, debt/GDP',
+  'World Bank / V-Dem (WGI) — Gini index, governance effectiveness, rule of law, corruption, political stability',
+  'OECD — Life satisfaction, trust in government, voter turnout',
+  'WHO Global Health Observatory — Suicide rate, life expectancy, alcohol consumption',
+  'Stanford AI Index — Corporate AI investment, enterprise adoption rate (annual)',
+  'Reddit / RSS — Layoff tracking, public sentiment from 7 subreddits + 5 news feeds',
 ]
 
 export default function MethodologyPage() {

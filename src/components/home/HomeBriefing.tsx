@@ -9,6 +9,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import SubscribeForm from '@/components/SubscribeForm'
 import SocialFeedSection from '@/components/SocialFeedSection'
 import LayoffTracker from '@/components/LayoffTracker'
+import CorporateLayoffTable from '@/components/CorporateLayoffTable'
 import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
 import WaterfallChart from '@/components/charts/WaterfallChart'
 import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
@@ -25,17 +26,18 @@ interface Props {
 
 /* ─── Data Sources ─── */
 const DATA_SOURCES = [
-  { name: 'BLS / JOLTS', desc: 'Employment' },
-  { name: 'World Bank', desc: 'Inequality' },
-  { name: 'ACLED', desc: 'Conflict' },
-  { name: 'V-Dem', desc: 'Democracy' },
-  { name: 'WHO / OECD', desc: 'Wellbeing' },
+  { name: 'BLS', desc: 'Employment' },
+  { name: 'FRED', desc: 'Economic' },
+  { name: 'World Bank', desc: 'Governance' },
+  { name: 'OECD', desc: 'Wellbeing' },
+  { name: 'WHO', desc: 'Health' },
+  { name: 'V-Dem/WGI', desc: 'Democracy' },
   { name: 'AI Index', desc: 'Tech adoption' },
-  { name: 'Reddit / X', desc: 'Sentiment' },
+  { name: 'Reddit / RSS', desc: 'Sentiment' },
 ]
 
 const METHODOLOGY_STEPS = [
-  { num: '01', title: 'Collect', desc: 'Real-time feeds from 12+ authoritative data sources spanning 7 critical domains of civilizational stress.' },
+  { num: '01', title: 'Collect', desc: 'Live feeds from 8+ sources: BLS, FRED, World Bank, OECD, WHO, V-Dem, AI Index, Reddit/RSS.' },
   { num: '02', title: 'Analyze', desc: 'Weighted scoring model with statistical normalization, anomaly detection, and cross-domain correlation.' },
   { num: '03', title: 'Index', desc: 'A single composite score updated weekly, with AI-generated analysis providing context and narrative.' },
 ]
@@ -162,6 +164,11 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
               )
             })}
           </div>
+        </div>
+
+        {/* ═══ Corporate Layoff Tracker — Primary content ═══ */}
+        <div style={{ padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+          <CorporateLayoffTable />
         </div>
 
         {/* ═══ Enhanced Domain Analysis ═══ */}

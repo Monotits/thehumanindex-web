@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import SubscribeForm from '@/components/SubscribeForm'
 import SocialFeedSection from '@/components/SocialFeedSection'
 import LayoffTracker from '@/components/LayoffTracker'
+import CorporateLayoffTable from '@/components/CorporateLayoffTable'
 import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
 import WaterfallChart from '@/components/charts/WaterfallChart'
 import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
@@ -26,13 +27,13 @@ interface Props {
 
 
 const METHODOLOGY_STEPS = [
-  { num: '01', title: 'Collect', desc: '12+ authoritative sources across 7 domains' },
+  { num: '01', title: 'Collect', desc: '8+ live sources: BLS, FRED, World Bank, OECD, WHO, V-Dem, AI Index' },
   { num: '02', title: 'Analyze', desc: 'Weighted scoring with anomaly detection' },
   { num: '03', title: 'Index', desc: 'Weekly composite + AI-generated analysis' },
 ]
 
 const DATA_SOURCES = [
-  'BLS / JOLTS', 'World Bank', 'ACLED', 'V-Dem', 'WHO / OECD', 'AI Index', 'Reddit / X',
+  'BLS', 'FRED', 'World Bank', 'OECD', 'WHO', 'V-Dem/WGI', 'AI Index', 'Reddit / RSS',
 ]
 
 /* ─── Gauge ─── */
@@ -193,6 +194,13 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
               </div>
             )
           })}
+        </div>
+      </section>
+
+      {/* ═══ Corporate Layoff Tracker — Primary content ═══ */}
+      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
+        <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
+          <CorporateLayoffTable />
         </div>
       </section>
 

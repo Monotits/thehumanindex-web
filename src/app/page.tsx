@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { MOCK_COMPOSITE_SCORE } from '@/lib/mockData'
 import { supabase } from '@/lib/supabase'
 import { CompositeScore, Commentary, Domain } from '@/lib/types'
 import { fetchAllRealData, computeScores, fetchKeyStat } from '@/lib/realData'
@@ -11,17 +10,6 @@ export const metadata: Metadata = {
 
 // ISR revalidation every 24 hours
 export const revalidate = 86400
-
-// Mock fallback values per domain
-const MOCK_DOMAIN_SCORES: Record<string, number> = {
-  work_risk: 72,
-  inequality: 64,
-  unrest: 51,
-  decay: 43,
-  wellbeing: 38,
-  policy: 55,
-  sentiment: 62,
-}
 
 const DOMAIN_WEIGHTS: Record<string, number> = {
   work_risk: 0.25,
@@ -51,42 +39,62 @@ async function getLatestScore(): Promise<CompositeScore> {
   // 2. Try real data APIs (BLS, FRED, World Bank, OECD, ACLED)
   try {
     const { points } = await fetchAllRealData()
-    if (points.length > 0) {
-      const computed = computeScores(points, MOCK_DOMAIN_SCORES)
+    const computed = computeScores(points)
 
-      // Build CompositeScore from real data
-      const realScore: CompositeScore = {
-        id: `real-${Date.now()}`,
-        score_type: 'composite',
-        score_value: computed.composite,
-        band: computed.band as CompositeScore['band'],
-        delta: null, // no delta without historical data
-        computed_at: new Date().toISOString(),
-        metadata: {
-          sources_connected: computed.sources_connected,
-          sources_missing: computed.sources_missing,
+    const realScore: CompositeScore = {
+      id: `real-${Date.now()}`,
+      score_type: 'composite',
+      score_value: computed.composite,
+      band: computed.band as CompositeScore['band'],
+      delta: null,
+      computed_at: new Date().toISOString(),
+      metadata: {
+        sources_connected: computed.sources_connected,
+        sources_missing: computed.sources_missing,
+        activeDomains: computed.activeDomains,
+        totalDomains: computed.totalDomains,
+      },
+      sub_indexes: Object.entries(computed.domains).map(([domain, info]) => ({
+        id: `real-sub-${domain}`,
+        composite_score_id: `real-${Date.now()}`,
+        domain: domain as Domain,
+        value: info.score ?? 0,  // null domains show as 0
+        weight: DOMAIN_WEIGHTS[domain] || 0.1,
+        source_updated_at: new Date().toISOString(),
+        raw_data: {
+          sources: info.sources,
+          hasData: info.hasData,
+          dataPoints: info.dataPoints,
         },
-        sub_indexes: Object.entries(computed.domains).map(([domain, info]) => ({
-          id: `real-sub-${domain}`,
-          composite_score_id: `real-${Date.now()}`,
-          domain: domain as Domain,
-          value: info.score,
-          weight: DOMAIN_WEIGHTS[domain] || 0.1,
-          source_updated_at: new Date().toISOString(),
-          raw_data: { sources: info.sources },
-        })),
-      }
-
-      console.log(`[THI] Real data score: ${computed.composite} | Sources: ${computed.sources_connected.join(', ')} | Missing: ${computed.sources_missing.join(', ')}`)
-      return realScore
+      })),
     }
+
+    console.log(`[THI] Score: ${computed.composite} (${computed.band}) | Active: ${computed.activeDomains}/${computed.totalDomains} | Sources: ${computed.sources_connected.join(', ')}`)
+    return realScore
   } catch (e) {
     console.error('Real data pipeline failed:', e)
   }
 
-  // 3. Fall back to mock
-  console.warn('[THI] Using mock data — no real sources available')
-  return MOCK_COMPOSITE_SCORE
+  // 3. No data available — return zero score with clear indication
+  console.warn('[THI] No data sources available')
+  return {
+    id: 'no-data',
+    score_type: 'composite',
+    score_value: 0,
+    band: 'low',
+    delta: null,
+    computed_at: new Date().toISOString(),
+    metadata: { sources_connected: [], sources_missing: ['BLS', 'FRED', 'World Bank', 'OECD', 'ACLED'], activeDomains: 0, totalDomains: 7 },
+    sub_indexes: Object.keys(DOMAIN_WEIGHTS).map(domain => ({
+      id: `empty-${domain}`,
+      composite_score_id: 'no-data',
+      domain: domain as Domain,
+      value: 0,
+      weight: DOMAIN_WEIGHTS[domain],
+      source_updated_at: null,
+      raw_data: { hasData: false, sources: [], dataPoints: [] },
+    })),
+  }
 }
 
 const PLACEHOLDER_PULSE: Commentary = {

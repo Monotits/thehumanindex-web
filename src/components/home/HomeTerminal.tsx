@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import SubscribeForm from '@/components/SubscribeForm'
 import SocialFeedSection from '@/components/SocialFeedSection'
 import LayoffTracker from '@/components/LayoffTracker'
+import CorporateLayoffTable from '@/components/CorporateLayoffTable'
 import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
 import WaterfallChart from '@/components/charts/WaterfallChart'
 import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
@@ -50,18 +51,19 @@ function TickerBar({ score }: { score: CompositeScore }) {
 
 /* ─── Data Sources ─── */
 const DATA_SOURCES = [
-  { name: 'BLS / JOLTS', desc: 'Employment' },
-  { name: 'World Bank', desc: 'Inequality' },
-  { name: 'ACLED', desc: 'Conflict' },
-  { name: 'V-Dem', desc: 'Democracy' },
-  { name: 'WHO / OECD', desc: 'Wellbeing' },
+  { name: 'BLS', desc: 'Employment' },
+  { name: 'FRED', desc: 'Economic' },
+  { name: 'World Bank', desc: 'Governance' },
+  { name: 'OECD', desc: 'Wellbeing' },
+  { name: 'WHO', desc: 'Health' },
+  { name: 'V-Dem/WGI', desc: 'Democracy' },
   { name: 'AI Index', desc: 'Tech adoption' },
-  { name: 'Reddit / X', desc: 'Sentiment' },
+  { name: 'Reddit / RSS', desc: 'Sentiment' },
 ]
 
 
 const METHODOLOGY_STEPS = [
-  { num: '01', title: 'Collect', desc: 'Real-time feeds from 12+ authoritative sources across 7 domains' },
+  { num: '01', title: 'Collect', desc: 'Live feeds from BLS, FRED, World Bank, OECD, WHO, V-Dem, AI Index, Reddit/RSS' },
   { num: '02', title: 'Analyze', desc: 'Weighted scoring with statistical normalization and anomaly detection' },
   { num: '03', title: 'Index', desc: 'Single composite score updated weekly, with AI-generated analysis' },
 ]
@@ -151,6 +153,11 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
           <div style={{ fontSize: 56, fontWeight: 200, color: '#fff', lineHeight: 1, marginBottom: 12 }}>{stat.value}</div>
           <div style={{ fontSize: 16, color: theme.textSecondary, marginBottom: 8 }}>{stat.label}</div>
           <div style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontMono }}>{stat.source}</div>
+        </div>
+
+        {/* ═══ Corporate Layoff Tracker — Primary content ═══ */}
+        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20, marginBottom: 24 }}>
+          <CorporateLayoffTable />
         </div>
 
         {/* ═══ Enhanced Domain Analysis (Score + Trend + Delta + Weight) ═══ */}
