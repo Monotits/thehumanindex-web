@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { CompositeScore, Commentary, DOMAIN_LABELS, DOMAIN_ICONS, BAND_LABELS } from '@/lib/types'
+import { CompositeScore, Commentary, Domain, DOMAIN_LABELS, DOMAIN_ICONS, BAND_LABELS } from '@/lib/types'
+import { getDomainContext } from '@/lib/domainDescriptions'
 import { KeyStat } from '@/lib/realData'
 import { useTheme } from '@/lib/theme'
 import { seededRandom } from '@/lib/seededRandom'
@@ -175,6 +176,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
             {movers.slice(0, 3).map(m => {
               const isUp = m.delta > 0
               const color = isUp ? '#dc2626' : '#2d7d46'
+              const ctx = getDomainContext(m.domain as Domain, m.value, m.delta)
               return (
                 <div key={m.domain} style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 20 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -182,7 +184,10 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
                     <span style={{ fontSize: 13, color, fontWeight: 600, fontFamily: theme.fontBody }}>{isUp ? '↑' : '↓'} {Math.abs(m.delta).toFixed(2)}</span>
                   </div>
                   <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>{DOMAIN_LABELS[m.domain]}</div>
-                  <div style={{ fontSize: 28, fontWeight: 400, color, fontFamily: theme.fontHeading }}>{m.value.toFixed(1)}</div>
+                  <div style={{ fontSize: 28, fontWeight: 400, color, fontFamily: theme.fontHeading, marginBottom: 10 }}>{m.value.toFixed(1)}</div>
+                  <div style={{ fontSize: 13, color: theme.textSecondary, lineHeight: 1.5, fontFamily: theme.fontBody }}>
+                    {ctx.insight}
+                  </div>
                 </div>
               )
             })}

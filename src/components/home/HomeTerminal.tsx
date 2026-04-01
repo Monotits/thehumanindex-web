@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { CompositeScore, Commentary, DOMAIN_LABELS } from '@/lib/types'
+import { CompositeScore, Commentary, Domain, DOMAIN_LABELS } from '@/lib/types'
+import { getDomainContext } from '@/lib/domainDescriptions'
 import { KeyStat } from '@/lib/realData'
 import { useTheme } from '@/lib/theme'
 import { seededRandom } from '@/lib/seededRandom'
@@ -134,6 +135,7 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
           {[...topRisers, ...topFallers].map(m => {
             const isUp = m.delta > 0
             const color = isUp ? '#ff3333' : '#00ff88'
+            const ctx = getDomainContext(m.domain as Domain, m.value, m.delta)
             return (
               <div key={m.domain} style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -141,7 +143,10 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
                   <span style={{ fontSize: 13, color, fontFamily: theme.fontMono, fontWeight: 600 }}>{isUp ? '+' : ''}{m.delta.toFixed(2)}</span>
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 4 }}>{DOMAIN_LABELS[m.domain]}</div>
-                <div style={{ fontSize: 24, fontWeight: 300, color, fontFamily: theme.fontMono }}>{m.value.toFixed(1)}</div>
+                <div style={{ fontSize: 24, fontWeight: 300, color, fontFamily: theme.fontMono, marginBottom: 8 }}>{m.value.toFixed(1)}</div>
+                <div style={{ fontSize: 11, color: theme.textTertiary, lineHeight: 1.5, fontFamily: theme.fontMono }}>
+                  {ctx.insight}
+                </div>
               </div>
             )
           })}
