@@ -140,7 +140,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Score + Chart */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, marginBottom: 32 }}>
+        <div className="grid-hero" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, marginBottom: 32 }}>
           {/* Big Number */}
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 32, textAlign: 'center' }}>
             <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16 }}>Composite</div>
@@ -216,7 +216,7 @@ export default function DashboardPage() {
         {rawPoints.length > 0 && (
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
             <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16 }}>Raw Data Points</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
               {rawPoints.map((p, i) => {
                 const stressColor = p.normalized >= 65 ? '#ef4444' : p.normalized >= 45 ? '#f59e0b' : p.normalized >= 25 ? '#3b82f6' : '#22c55e'
                 return (

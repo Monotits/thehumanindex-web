@@ -44,3 +44,82 @@ body {
     text-wrap: balance;
   }
 }
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE LAYOUT SYSTEM
+   Mobile-first breakpoint: 768px
+   ═══════════════════════════════════════════════════ */
+
+/* ── Navigation ── */
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: block !important;
+  }
+  .desktop-nav {
+    display: none !important;
+  }
+}
+
+/* ── Grid helpers: collapse to 1 column on mobile ── */
+@media (max-width: 768px) {
+  .grid-hero { grid-template-columns: 1fr !important; gap: 24px !important; }
+  .grid-2col { grid-template-columns: 1fr !important; gap: 16px !important; }
+  .grid-3col { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .grid-stats { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .grid-movers { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .grid-methodology { grid-template-columns: 1fr !important; gap: 16px !important; }
+}
+
+/* ── Stat bar: stack on very small screens ── */
+@media (max-width: 480px) {
+  .grid-stats { grid-template-columns: 1fr 1fr !important; }
+  .stat-bar { flex-direction: column !important; }
+  .stat-bar > * { border-right: none !important; border-bottom: 1px solid rgba(128,128,128,0.15); padding: 8px 0 !important; }
+  .stat-bar > *:last-child { border-bottom: none; }
+}
+
+/* ── Table: horizontal scroll wrapper ── */
+.table-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 768px) {
+  .table-scroll-wrapper > * { min-width: 600px; }
+}
+
+/* ── Domain Comparison Bar: simplify on mobile ── */
+@media (max-width: 768px) {
+  .domain-bar-row {
+    grid-template-columns: 24px 1fr 52px !important;
+    gap: 6px !important;
+  }
+  .domain-bar-row .hide-mobile { display: none !important; }
+  .domain-bar-header { display: none !important; }
+}
+
+/* ── General spacing/typography mobile ── */
+@media (max-width: 768px) {
+  .mobile-padding { padding-left: 16px !important; padding-right: 16px !important; }
+  .mobile-text-sm { font-size: 13px !important; }
+  .mobile-heading-sm { font-size: 28px !important; }
+  .mobile-stack { flex-direction: column !important; }
+  .mobile-full { width: 100% !important; }
+  .mobile-hide { display: none !important; }
+}
+
+/* ── Data sources strip: wrap on mobile ── */
+@media (max-width: 768px) {
+  .sources-strip {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    justify-content: center !important;
+  }
+}
+
+/* ── Footer: single column on mobile ── */
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+  }
+}

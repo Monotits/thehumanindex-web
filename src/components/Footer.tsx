@@ -12,7 +12,7 @@ export function Footer() {
     <footer style={{ borderTop: `1px solid ${theme.surfaceBorder}`, background: theme.bg, padding: '32px 0 24px' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
         {/* Top row — nav columns */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 24, marginBottom: 24, fontSize: 13 }}>
+        <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 24, marginBottom: 24, fontSize: 13 }}>
           <div>
             <div style={{ fontWeight: 600, color: theme.textSecondary, marginBottom: 10, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>Index</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

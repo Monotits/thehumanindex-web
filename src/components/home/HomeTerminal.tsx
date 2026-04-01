@@ -133,7 +133,7 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ This Week's Movers ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 }}>
+        <div className="grid-movers" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 }}>
           {[...topRisers, ...topFallers].map(m => {
             const isUp = m.delta > 0
             const color = isUp ? '#ff3333' : '#00ff88'
@@ -155,7 +155,7 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Compact Stat Bar ═══ */}
-        <div style={{
+        <div className="stat-bar" style={{
           display: 'flex', gap: 0, marginBottom: 24,
           background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6,
           overflow: 'hidden',
@@ -196,7 +196,7 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Analytics Row: Radar + Weekly Heatmap ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20 }}>
             {sectionHeader('Distribution')}
             <ResponsiveContainer width="100%" height={260}>
@@ -218,7 +218,7 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Waterfall + Multi-Domain Trend ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20 }}>
             <WaterfallChart domains={domains} compositeScore={score.score_value} />
           </div>
@@ -228,7 +228,7 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Risk Matrix + Correlation ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20 }}>
             <RiskBubbleChart domains={domains} />
           </div>
@@ -238,7 +238,7 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Featured Insight ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
           {/* Pulse Card */}
           <Link href={`/pulse/${pulse.slug}`} style={{ textDecoration: 'none' }}>
             <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 24, cursor: 'pointer', height: '100%' }}>
@@ -274,7 +274,7 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
 
         {/* ═══ Data Sources Strip ═══ */}
         <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: '16px 24px', marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <div className="sources-strip" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <span style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontMono, letterSpacing: 1 }}>DATA SOURCES:</span>
             {DATA_SOURCES.map(s => (
               <div key={s.name} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -298,7 +298,7 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
         {/* ═══ Methodology at a Glance ═══ */}
         <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 32, marginBottom: 24 }}>
           {sectionHeader('Methodology at a Glance')}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }}>
+          <div className="grid-methodology" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }}>
             {METHODOLOGY_STEPS.map((step, i) => (
               <div key={step.num} style={{ position: 'relative' }}>
                 <div style={{ fontSize: 32, fontWeight: 200, color: theme.accent, opacity: 0.4, fontFamily: theme.fontMono, marginBottom: 8 }}>{step.num}</div>

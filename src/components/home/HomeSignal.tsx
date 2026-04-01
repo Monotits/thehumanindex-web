@@ -167,7 +167,7 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
 
       {/* ═══ Compact Stat Bar ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 20px' }}>
-        <div style={{
+        <div className="stat-bar" style={{
           display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 0,
           background: theme.surface, borderRadius: 10, border: `1px solid ${theme.surfaceBorder}`,
           overflow: 'hidden',
@@ -198,7 +198,7 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
 
       {/* ═══ This Week's Movers ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }} className="grid-movers">
           {movers.slice(0, 3).map(m => {
             const isUp = m.delta > 0
             const color = isUp ? '#ef4444' : '#22c55e'
@@ -277,7 +277,7 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
 
       {/* ═══ Waterfall + Multi-Domain Trend ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="grid-2col">
           <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
             <WaterfallChart domains={sortedDomains} compositeScore={score.score_value} />
           </div>
@@ -289,7 +289,7 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
 
       {/* ═══ Risk Matrix + Correlation + Heatmap ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="grid-2col">
           <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
             <RiskBubbleChart domains={sortedDomains} />
           </div>
@@ -336,7 +336,7 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <h3 style={{ fontSize: 18, fontWeight: 300, color: '#fff', margin: '0 0 4px' }}>How the Index Works</h3>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }} className="grid-methodology">
             {METHODOLOGY_STEPS.map((step) => (
               <div key={step.num} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 28, fontWeight: 200, color: theme.accent, opacity: 0.5, marginBottom: 8 }}>{step.num}</div>
@@ -353,7 +353,7 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
 
       {/* ═══ Data Sources ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, flexWrap: 'wrap', padding: '16px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, flexWrap: 'wrap', padding: '16px 0' }} className="sources-strip">
           <span style={{ fontSize: 11, color: theme.textTertiary, letterSpacing: 1 }}>SOURCES:</span>
           {DATA_SOURCES.map(s => (
             <span key={s} style={{ fontSize: 12, color: theme.textSecondary }}>{s}</span>
@@ -363,7 +363,7 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
 
       {/* ═══ Subscribe + Quiz ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '16px 24px 32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="grid-2col">
           {/* Subscribe */}
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 32, textAlign: 'center' }}>
             <div style={{ fontSize: 18, fontWeight: 300, color: '#fff', marginBottom: 8 }}>Stay informed. Every week.</div>

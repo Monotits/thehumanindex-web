@@ -44,7 +44,7 @@ export function Navigation() {
           </Link>
 
           {/* Desktop links */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             {links.map(({ href, label }) => {
               const isActive = pathname.startsWith(href)
               const isSettings = href === '/settings'

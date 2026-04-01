@@ -214,7 +214,7 @@ export default function CorporateLayoffTable() {
       </div>
 
       {/* Table */}
-      <div style={{
+      <div className="table-scroll-wrapper" style={{
         border: `1px solid ${theme.surfaceBorder}`,
         borderRadius: isTerminal ? 2 : 10,
         overflow: 'hidden',

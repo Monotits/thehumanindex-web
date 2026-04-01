@@ -88,7 +88,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
         {/* ═══ Hero Banner ═══ */}
         <div style={{ padding: '48px 0 40px', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' }}>
+          <div className="grid-hero" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' }}>
             <div>
               <div style={{ fontSize: 12, color: theme.textTertiary, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12, fontFamily: theme.fontBody }}>
                 Global Stress Assessment — {new Date(score.computed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
@@ -142,7 +142,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Compact Stat Bar ═══ */}
-        <div style={{
+        <div className="stat-bar" style={{
           display: 'flex', gap: 0, margin: '0 0', padding: 0,
           borderBottom: `1px solid ${theme.surfaceBorder}`,
           overflow: 'hidden',
@@ -175,7 +175,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
         {/* ═══ This Week's Movers ═══ */}
         <div style={{ padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <h2 style={{ fontSize: 22, fontWeight: 400, margin: '0 0 20px' }}>This Week&apos;s Movers</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+          <div className="grid-movers" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
             {movers.slice(0, 3).map(m => {
               const isUp = m.delta > 0
               const color = isUp ? '#dc2626' : '#2d7d46'
@@ -212,7 +212,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Composite Decomposition + Weekly Heatmap ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 24, padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 24, padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
             <StackedAreaDecomposition domains={sortedDomains} />
           </div>
@@ -222,7 +222,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Waterfall + Multi-Domain Trend ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
             <WaterfallChart domains={sortedDomains} compositeScore={score.score_value} />
           </div>
@@ -232,7 +232,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Risk Matrix + Correlation ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
             <RiskBubbleChart domains={sortedDomains} />
           </div>
@@ -242,7 +242,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Weekly Pulse + Featured Insight ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <div>
             <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 20px' }}>Weekly Pulse</h2>
             <article style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 28, marginBottom: 16 }}>
@@ -290,7 +290,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
         {/* ═══ Methodology at a Glance ═══ */}
         <div style={{ padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 24px' }}>How the Index Works</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 32 }}>
+          <div className="grid-methodology" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 32 }}>
             {METHODOLOGY_STEPS.map((step) => (
               <div key={step.num} style={{ position: 'relative' }}>
                 <div style={{ fontSize: 11, color: theme.accent, fontWeight: 600, letterSpacing: 2, marginBottom: 8, fontFamily: theme.fontBody }}>{`STEP ${step.num}`}</div>
@@ -306,7 +306,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
 
         {/* ═══ Data Sources Strip ═══ */}
         <div style={{ padding: '24px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
+          <div className="sources-strip" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 11, color: theme.textTertiary, letterSpacing: 1, textTransform: 'uppercase', fontFamily: theme.fontBody }}>Data Sources:</span>
             {DATA_SOURCES.map(s => (
               <span key={s.name} style={{ fontSize: 13, color: theme.textSecondary, fontWeight: 500 }}>{s.name}</span>
@@ -315,7 +315,7 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Subscribe + Quiz CTA Row ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '40px 0' }}>
+        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '40px 0' }}>
           {/* Subscribe */}
           <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 32 }}>
             <h3 style={{ fontSize: 20, fontWeight: 400, margin: '0 0 8px' }}>Weekly Briefing</h3>

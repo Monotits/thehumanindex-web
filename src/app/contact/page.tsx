@@ -102,7 +102,7 @@ export default function ContactPage() {
       </div>
 
       <div style={{ maxWidth: 880, margin: '0 auto', padding: '40px 24px 64px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
+        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
 
           {/* Left: Contact Form */}
           <div>
@@ -134,7 +134,7 @@ export default function ContactPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
                     <label style={{ fontSize: 12, fontWeight: 600, color: theme.textTertiary, display: 'block', marginBottom: 6, fontFamily: theme.fontBody }}>Name</label>
                     <input

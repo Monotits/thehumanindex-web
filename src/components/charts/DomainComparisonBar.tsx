@@ -68,7 +68,7 @@ export default function DomainComparisonBar({ domains }: Props) {
           const trend = generateTrend(d.value, d.domain)
 
           return (
-            <div key={d.domain} style={{
+            <div key={d.domain} className="domain-bar-row" style={{
               display: 'grid',
               gridTemplateColumns: '28px 130px 1fr 52px 48px 44px 32px',
               alignItems: 'center',
@@ -87,7 +87,7 @@ export default function DomainComparisonBar({ domains }: Props) {
               </div>
 
               {/* Bar */}
-              <div style={{ position: 'relative', height: 8, background: theme.isDark ? '#1a1a1a' : '#eee', borderRadius: 4, overflow: 'hidden' }}>
+              <div className="hide-mobile" style={{ position: 'relative', height: 8, background: theme.isDark ? '#1a1a1a' : '#eee', borderRadius: 4, overflow: 'hidden' }}>
                 <div style={{
                   position: 'absolute', left: 0, top: 0, height: '100%',
                   width: `${d.value}%`, background: color, borderRadius: 4,
@@ -103,10 +103,10 @@ export default function DomainComparisonBar({ domains }: Props) {
               </div>
 
               {/* Sparkline */}
-              <MiniSparkline data={trend} color={color} />
+              <div className="hide-mobile"><MiniSparkline data={trend} color={color} /></div>
 
               {/* Delta */}
-              <div style={{
+              <div className="hide-mobile" style={{
                 fontSize: 11, fontFamily: theme.fontMono, textAlign: 'right',
                 color: delta > 0 ? '#ef4444' : '#22c55e',
               }}>
@@ -114,7 +114,7 @@ export default function DomainComparisonBar({ domains }: Props) {
               </div>
 
               {/* Weight */}
-              <div style={{ fontSize: 10, color: theme.textTertiary, textAlign: 'right', fontFamily: theme.fontMono }}>
+              <div className="hide-mobile" style={{ fontSize: 10, color: theme.textTertiary, textAlign: 'right', fontFamily: theme.fontMono }}>
                 {(d.weight * 100).toFixed(0)}%
               </div>
             </div>
@@ -123,7 +123,7 @@ export default function DomainComparisonBar({ domains }: Props) {
       </div>
 
       {/* Column headers hint */}
-      <div style={{ display: 'grid', gridTemplateColumns: '28px 130px 1fr 52px 48px 44px 32px', gap: 8, padding: '6px 16px', fontSize: 8, color: theme.textTertiary }}>
+      <div className="domain-bar-header" style={{ display: 'grid', gridTemplateColumns: '28px 130px 1fr 52px 48px 44px 32px', gap: 8, padding: '6px 16px', fontSize: 8, color: theme.textTertiary }}>
         <span />
         <span />
         <span>Score bar (midline = 50)</span>
