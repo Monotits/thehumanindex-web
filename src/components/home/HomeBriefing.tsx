@@ -338,8 +338,8 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Institutional CTA ═══ */}
-        <div style={{ background: '#1a2332', borderRadius: 8, padding: '40px 48px', margin: '0 0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
-          <div style={{ flex: 1, minWidth: 280 }}>
+        <div className="mobile-padding" style={{ background: '#1a2332', borderRadius: 8, padding: '40px 48px', margin: '0 0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <h2 style={{ fontSize: 24, fontWeight: 400, color: '#fff', margin: '0 0 12px', fontFamily: theme.fontHeading }}>For Researchers & Journalists</h2>
             <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, margin: 0, fontFamily: theme.fontBody }}>
               All our data is open. Read the methodology, explore the index, and cite freely. API access coming Q3 2026.

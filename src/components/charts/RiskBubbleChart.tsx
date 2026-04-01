@@ -56,7 +56,7 @@ export default function RiskBubbleChart({ domains }: Props) {
       <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 12 }}>
         Risk Matrix — Score vs. Velocity
       </div>
-      <svg width={width} height={height} style={{ display: 'block' }}>
+      <svg viewBox={`0 0 ${width} ${height}`} width="100%" style={{ display: 'block', maxWidth: width }}>
         {/* Grid */}
         <line x1={padX} y1={padY} x2={padX} y2={height - padY} stroke={theme.surfaceBorder} strokeWidth={1} />
         <line x1={padX} y1={height - padY} x2={width - padX} y2={height - padY} stroke={theme.surfaceBorder} strokeWidth={1} />

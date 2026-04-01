@@ -74,7 +74,7 @@ export default function CorrelationHeatmap({ domains }: Props) {
         Domain Correlation Matrix
       </div>
       <div style={{ overflowX: 'auto' }}>
-        <svg width={size} height={size} style={{ display: 'block' }}>
+        <svg viewBox={`0 0 ${size} ${size}`} width="100%" style={{ display: 'block', maxWidth: size }}>
           {/* Column headers */}
           {domainKeys.map((d, i) => (
             <text key={`ch-${d}`} x={labelWidth + i * cellSize + cellSize / 2} y={labelWidth - 8}

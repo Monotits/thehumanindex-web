@@ -183,7 +183,7 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
             <div key={i} style={{
               flex: '1 1 0', padding: '14px 20px', textAlign: 'center',
               borderRight: i < arr.length - 1 ? `1px solid ${theme.surfaceBorder}` : 'none',
-              minWidth: 140,
+              minWidth: 0,
             }}>
               <div style={{ fontSize: 22, fontWeight: 600, color: '#fff', fontFamily: theme.fontMono, lineHeight: 1 }}>
                 {item.value}

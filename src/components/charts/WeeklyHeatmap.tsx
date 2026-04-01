@@ -50,7 +50,7 @@ export default function WeeklyHeatmap({ currentScore }: Props) {
       <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 12 }}>
         12-Week Stress Heatmap
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, ${cellW}px)`, gap, width: 'fit-content' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap, maxWidth: (cellW + gap) * cols }}>
         {weeks.map((w, i) => {
           const color = scoreColor(w.score)
           const isLast = i === weeks.length - 1

@@ -62,7 +62,7 @@ export default function MultiDomainTrend({ domains }: Props) {
         6-Month Trend — All Domains
       </div>
 
-      <svg width={width} height={height} style={{ display: 'block' }}>
+      <svg viewBox={`0 0 ${width} ${height}`} width="100%" style={{ display: 'block', maxWidth: width }}>
         {/* Grid lines */}
         {[minVal, (minVal + maxVal) / 2, maxVal].map(v => (
           <g key={v}>

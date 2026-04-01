@@ -27,7 +27,7 @@ export default function WaterfallChart({ domains, compositeScore }: Props) {
         Composite Score Breakdown — Weighted Contribution
       </div>
       <div style={{ overflowX: 'auto' }}>
-        <svg width={chartWidth} height={chartHeight + 50} style={{ display: 'block' }}>
+        <svg viewBox={`0 0 ${chartWidth} ${chartHeight + 50}`} width="100%" style={{ display: 'block', maxWidth: chartWidth }}>
           {/* Bars */}
           {sorted.map((d, i) => {
             const contribution = d.value * d.weight

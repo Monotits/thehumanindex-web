@@ -7,6 +7,11 @@
   --foreground: #f9fafb;
 }
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
