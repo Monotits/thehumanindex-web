@@ -14,7 +14,7 @@ export function Navigation() {
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/quiz', label: 'Quiz' },
     { href: '/pulse', label: 'Pulse' },
-    { href: '/methodology', label: 'Methodology' },
+    { href: '/about', label: 'About' },
     { href: '/settings', label: '⚙' },
   ]
 

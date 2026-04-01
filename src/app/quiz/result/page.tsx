@@ -5,6 +5,7 @@ import { QuizResult } from '@/lib/types'
 import { ShareCard } from '@/components/ShareCard'
 import { BandLabel } from '@/components/BandLabel'
 import { useTheme } from '@/lib/theme'
+import SubscribeForm from '@/components/SubscribeForm'
 
 export default function ResultPage() {
   const { theme } = useTheme()
@@ -30,9 +31,9 @@ export default function ResultPage() {
           { task: 'Report writing and documentation', exposure: 0.68 },
         ],
         skill_recommendations: [
-          { skill: 'Prompt Engineering', reason: 'Critical for working effectively with AI systems', course_url: 'https://example.com' },
-          { skill: 'Systems Thinking', reason: 'Higher-order skills AI struggles with', course_url: 'https://example.com' },
-          { skill: 'Strategic Communication', reason: 'Leadership and influence remain distinctly human', course_url: 'https://example.com' },
+          { skill: 'AI Collaboration & Prompt Engineering', reason: 'Workers who can direct AI tools effectively command 23% salary premiums over peers who cannot.', course_url: '' },
+          { skill: 'Systems Thinking & Complex Problem Solving', reason: 'AI excels at narrow tasks but struggles with interconnected systems. This skill makes you irreplaceable.', course_url: '' },
+          { skill: 'Strategic Communication', reason: 'Persuading humans, building consensus, and navigating politics remain distinctly human capabilities.', course_url: '' },
         ],
         region_context: { unemployment_rate: 3.8, tech_industry_concentration: 'High', ai_adoption_speed: 'Accelerating' },
         share_card_data: { band: 'ELEVATED', percentile_text: '65th percentile', job_title: 'Data Analyst', region: 'San Francisco, CA' },
@@ -150,11 +151,7 @@ export default function ResultPage() {
                   <div key={idx} style={{ borderBottom: idx < result.skill_recommendations.length - 1 ? `1px solid ${theme.surfaceBorder}` : 'none', paddingBottom: idx < result.skill_recommendations.length - 1 ? 20 : 0 }}>
                     <h3 style={{ fontSize: 15, fontWeight: 600, color: theme.text, margin: '0 0 8px', fontFamily: theme.fontHeading }}>{rec.skill}</h3>
                     <p style={{ fontSize: 13, color: theme.textSecondary, margin: '0 0 10px', lineHeight: 1.5, fontFamily: theme.fontBody }}>{rec.reason}</p>
-                    {rec.course_url && (
-                      <a href={rec.course_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: theme.accent, fontWeight: 600, textDecoration: 'none', fontFamily: theme.fontBody }}>
-                        Find Courses →
-                      </a>
-                    )}
+                    {/* Course links will be added when learning partner integrations are live */}
                   </div>
                 ))}
               </div>
@@ -162,13 +159,13 @@ export default function ResultPage() {
 
             {/* CTA */}
             <div style={{ ...cardStyle, background: `${theme.accent}10`, borderColor: `${theme.accent}30`, textAlign: 'center' }}>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: theme.text, margin: '0 0 8px', fontFamily: theme.fontHeading }}>Download the App</h3>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: theme.text, margin: '0 0 8px', fontFamily: theme.fontHeading }}>Stay Ahead of the Curve</h3>
               <p style={{ fontSize: 14, color: theme.textSecondary, margin: '0 0 20px', fontFamily: theme.fontBody }}>
-                Get your full personalized report with detailed career roadmap and continuous exposure monitoring.
+                Get weekly updates on how AI displacement is evolving — and what it means for your career.
               </p>
-              <button style={{ padding: '10px 28px', background: theme.accent, border: 'none', borderRadius: 8, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.fontBody }}>
-                Download Now
-              </button>
+              <div style={{ maxWidth: 380, margin: '0 auto' }}>
+                <SubscribeForm />
+              </div>
             </div>
           </div>
 

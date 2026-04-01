@@ -2,6 +2,7 @@
 
 import { useTheme } from '@/lib/theme'
 import { Domain, DOMAIN_LABELS } from '@/lib/types'
+import { seededRandom } from '@/lib/seededRandom'
 import ChartInsight from './ChartInsight'
 
 interface DomainData {
@@ -30,10 +31,10 @@ export default function RiskBubbleChart({ domains }: Props) {
   const plotH = height - padY * 2
 
   // X axis: score (0-100), Y axis: velocity (simulated change rate), size: weight
-  const dataWithVelocity = domains.map(d => ({
-    ...d,
-    velocity: +(Math.random() * 8 - 2).toFixed(2), // simulated weekly change rate
-  }))
+  const dataWithVelocity = domains.map(d => {
+    const rng = seededRandom(`bubble-${d.domain}`)
+    return { ...d, velocity: +(rng() * 8 - 2).toFixed(2) }
+  })
 
   const maxVel = Math.max(...dataWithVelocity.map(d => Math.abs(d.velocity))) + 1
   const minVel = -maxVel

@@ -2,6 +2,7 @@
 
 import { useTheme } from '@/lib/theme'
 import { DOMAIN_LABELS, DOMAIN_ICONS, Domain } from '@/lib/types'
+import { seededRandom } from '@/lib/seededRandom'
 import ChartInsight from './ChartInsight'
 
 interface DomainData {
@@ -17,6 +18,19 @@ interface Props {
 const DOMAIN_COLORS: Record<string, string> = {
   work_risk: '#ef4444', inequality: '#f97316', sentiment: '#f59e0b',
   policy: '#eab308', unrest: '#3b82f6', decay: '#6366f1', wellbeing: '#22c55e',
+}
+
+function generateTrend(base: number, seed: string): number[] {
+  const rng = seededRandom(`dombar-trend-${seed}`)
+  const d: number[] = []
+  for (let i = 0; i < 5; i++) d.push(Math.max(5, base - (5 - i) * 0.8 + (rng() - 0.3) * 3))
+  d.push(base)
+  return d
+}
+
+function generateDelta(seed: string): number {
+  const rng = seededRandom(`dombar-delta-${seed}`)
+  return +(rng() * 4 - 1.5).toFixed(2)
 }
 
 function MiniSparkline({ data, color }: { data: number[]; color: string }) {
@@ -37,13 +51,6 @@ function MiniSparkline({ data, color }: { data: number[]; color: string }) {
   )
 }
 
-function generateTrend(base: number): number[] {
-  const d: number[] = []
-  for (let i = 0; i < 5; i++) d.push(Math.max(5, base - (5 - i) * 0.8 + (Math.random() - 0.3) * 3))
-  d.push(base)
-  return d
-}
-
 export default function DomainComparisonBar({ domains }: Props) {
   const { theme } = useTheme()
   const sorted = [...domains].sort((a, b) => b.value - a.value)
@@ -56,8 +63,8 @@ export default function DomainComparisonBar({ domains }: Props) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {sorted.map(d => {
           const color = DOMAIN_COLORS[d.domain] || '#888'
-          const delta = +(Math.random() * 4 - 1.5).toFixed(2)
-          const trend = generateTrend(d.value)
+          const delta = generateDelta(d.domain)
+          const trend = generateTrend(d.value, d.domain)
 
           return (
             <div key={d.domain} style={{

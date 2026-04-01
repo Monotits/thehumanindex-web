@@ -1,6 +1,7 @@
 'use client'
 
 import { useTheme } from '@/lib/theme'
+import { seededRandom } from '@/lib/seededRandom'
 import ChartInsight from './ChartInsight'
 
 interface Props {
@@ -9,9 +10,10 @@ interface Props {
 
 // Generate 12 weeks of plausible composite scores
 function generateWeeklyScores(current: number): { week: string; score: number }[] {
+  const rng = seededRandom(`heatmap-${current.toFixed(1)}`)
   const weeks: { week: string; score: number }[] = []
   for (let i = 11; i >= 0; i--) {
-    const noise = (Math.random() - 0.4) * 3
+    const noise = (rng() - 0.4) * 3
     const trend = (11 - i) * 0.35
     const score = Math.max(20, Math.min(85, current - (11 - i) * 0.5 + noise + trend * 0.2 - 4))
     const date = new Date()

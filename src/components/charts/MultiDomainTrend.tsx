@@ -2,6 +2,7 @@
 
 import { useTheme } from '@/lib/theme'
 import { DOMAIN_LABELS, Domain } from '@/lib/types'
+import { seededRandom } from '@/lib/seededRandom'
 import { useState } from 'react'
 import ChartInsight from './ChartInsight'
 
@@ -21,10 +22,11 @@ const DOMAIN_COLORS: Record<string, string> = {
 
 const MONTHS = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']
 
-function generateTrend(base: number): number[] {
+function generateTrend(base: number, seed: string): number[] {
+  const rng = seededRandom(`multitrend-${seed}`)
   const data: number[] = []
   for (let i = 0; i < 5; i++) {
-    data.push(Math.max(5, Math.min(95, base - (5 - i) * (0.8 + Math.random() * 1.2) + (Math.random() - 0.3) * 3)))
+    data.push(Math.max(5, Math.min(95, base - (5 - i) * (0.8 + rng() * 1.2) + (rng() - 0.3) * 3)))
   }
   data.push(base)
   return data
@@ -44,7 +46,7 @@ export default function MultiDomainTrend({ domains }: Props) {
   const allTrends = domains.map(d => ({
     domain: d.domain,
     color: DOMAIN_COLORS[d.domain] || '#888',
-    data: generateTrend(d.value),
+    data: generateTrend(d.value, d.domain),
   }))
 
   const allValues = allTrends.flatMap(t => t.data)

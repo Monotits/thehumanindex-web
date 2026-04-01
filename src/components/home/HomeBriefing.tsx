@@ -3,8 +3,10 @@
 import Link from 'next/link'
 import { CompositeScore, Commentary, DOMAIN_LABELS, DOMAIN_ICONS, BAND_LABELS } from '@/lib/types'
 import { useTheme } from '@/lib/theme'
+import { seededRandom } from '@/lib/seededRandom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { useState } from 'react'
+import SubscribeForm from '@/components/SubscribeForm'
+import SocialFeedSection from '@/components/SocialFeedSection'
 import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
 import WaterfallChart from '@/components/charts/WaterfallChart'
 import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
@@ -35,11 +37,6 @@ const METHODOLOGY_STEPS = [
   { num: '03', title: 'Index', desc: 'A single composite score updated weekly, with AI-generated analysis providing context and narrative.' },
 ]
 
-const SOCIAL_MENTIONS = [
-  { platform: 'Reddit', handle: 'r/economics', text: 'The pace of AI-driven job reclassification is outstripping policy response. JOLTS data this week confirms the structural shift.', time: '6h ago', icon: '💬' },
-  { platform: 'X / Twitter', handle: '@econpolicy', text: 'New Human Index reading at 58.4 — highest since tracking began. The displacement-to-retraining pipeline is fundamentally broken.', time: '12h ago', icon: '🐦' },
-  { platform: 'Financial Times', handle: 'Analysis', text: 'AI workforce displacement reaches "elevated" threshold as Fortune 100 companies accelerate restructuring plans.', time: '2d ago', icon: '📰' },
-]
 
 function BandBadge({ band }: { band: string }) {
   const colors: Record<string, string> = { low: '#2d7d46', moderate: '#2563eb', elevated: '#d97706', high: '#ea580c', critical: '#dc2626' }
@@ -53,7 +50,7 @@ function BandBadge({ band }: { band: string }) {
 
 export default function HomeBriefing({ score, pulse }: Props) {
   const { theme } = useTheme()
-  const [email, setEmail] = useState('')
+
 
   const trendData = [
     { m: 'Oct', s: Math.max(30, score.score_value - 5.5) },
@@ -67,10 +64,10 @@ export default function HomeBriefing({ score, pulse }: Props) {
   const sortedDomains = [...(score.sub_indexes || [])].sort((a, b) => b.value - a.value)
 
   // Movers
-  const movers = sortedDomains.map(d => ({
-    ...d,
-    delta: +(Math.random() * 4 - 1.5).toFixed(2),
-  })).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+  const movers = sortedDomains.map(d => {
+    const rng = seededRandom(`mover-briefing-${d.domain}`)
+    return { ...d, delta: +(rng() * 4 - 1.5).toFixed(2) }
+  }).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
 
   const keyStat = {
     value: '3.2M',
@@ -234,27 +231,9 @@ export default function HomeBriefing({ score, pulse }: Props) {
           </div>
         </div>
 
-        {/* ═══ What the World is Saying ═══ */}
+        {/* ═══ What the World is Saying — Live Feed ═══ */}
         <div style={{ padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
-          <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 8px' }}>What the World is Saying</h2>
-          <p style={{ fontSize: 14, color: theme.textTertiary, margin: '0 0 24px', fontFamily: theme.fontBody }}>Voices from across the media landscape this week</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-            {SOCIAL_MENTIONS.map((m, i) => (
-              <div key={i} style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 18 }}>{m.icon}</span>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: theme.text }}>{m.platform}</div>
-                      <div style={{ fontSize: 11, color: theme.textTertiary }}>{m.handle}</div>
-                    </div>
-                  </div>
-                  <span style={{ fontSize: 11, color: theme.textTertiary }}>{m.time}</span>
-                </div>
-                <p style={{ fontSize: 14, color: theme.textSecondary, lineHeight: 1.6, margin: 0, fontFamily: theme.fontBody }}>{m.text}</p>
-              </div>
-            ))}
-          </div>
+          <SocialFeedSection />
         </div>
 
         {/* ═══ Methodology at a Glance ═══ */}
@@ -292,16 +271,7 @@ export default function HomeBriefing({ score, pulse }: Props) {
             <p style={{ fontSize: 14, color: theme.textSecondary, margin: '0 0 20px', fontFamily: theme.fontBody, lineHeight: 1.6 }}>
               The composite score, top movers, and AI-generated analysis — delivered every Monday.
             </p>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                style={{ flex: 1, padding: '10px 14px', background: theme.bg, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 4, color: theme.text, fontSize: 13, fontFamily: theme.fontBody, outline: 'none' }}
-              />
-              <button style={{ padding: '10px 20px', background: theme.accent, border: 'none', borderRadius: 4, color: '#fff', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: theme.fontBody }}>Subscribe</button>
-            </div>
+            <SubscribeForm />
           </div>
 
           {/* Quiz CTA */}
@@ -317,16 +287,16 @@ export default function HomeBriefing({ score, pulse }: Props) {
         </div>
 
         {/* ═══ Institutional CTA ═══ */}
-        <div style={{ background: '#1a2332', borderRadius: 8, padding: '40px 48px', margin: '0 0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h2 style={{ fontSize: 24, fontWeight: 400, color: '#fff', margin: '0 0 12px', fontFamily: theme.fontHeading }}>Institutional Access</h2>
+        <div style={{ background: '#1a2332', borderRadius: 8, padding: '40px 48px', margin: '0 0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
+          <div style={{ flex: 1, minWidth: 280 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 400, color: '#fff', margin: '0 0 12px', fontFamily: theme.fontHeading }}>For Researchers & Journalists</h2>
             <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, margin: 0, fontFamily: theme.fontBody }}>
-              Citation-ready data, custom country reports, and API access for your research team.
+              All our data is open. Read the methodology, explore the index, and cite freely. API access coming Q3 2026.
             </p>
           </div>
-          <button style={{ padding: '12px 32px', fontSize: 14, background: theme.accent, border: 'none', borderRadius: 4, color: '#fff', fontWeight: 600, cursor: 'pointer', fontFamily: theme.fontBody, whiteSpace: 'nowrap' }}>
-            Request Access
-          </button>
+          <Link href="/methodology" style={{ padding: '12px 32px', fontSize: 14, background: theme.accent, border: 'none', borderRadius: 4, color: '#fff', fontWeight: 600, cursor: 'pointer', fontFamily: theme.fontBody, whiteSpace: 'nowrap', textDecoration: 'none', display: 'inline-block' }}>
+            Read Methodology
+          </Link>
         </div>
 
         {/* ═══ Audience Positioning ═══ */}

@@ -3,8 +3,11 @@
 import Link from 'next/link'
 import { CompositeScore, Commentary, DOMAIN_LABELS, BAND_LABELS } from '@/lib/types'
 import { useTheme } from '@/lib/theme'
+import { seededRandom } from '@/lib/seededRandom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useEffect, useState } from 'react'
+import SubscribeForm from '@/components/SubscribeForm'
+import SocialFeedSection from '@/components/SocialFeedSection'
 import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
 import WaterfallChart from '@/components/charts/WaterfallChart'
 import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
@@ -18,11 +21,6 @@ interface Props {
   pulse: Commentary
 }
 
-const SOCIAL_MENTIONS = [
-  { platform: 'Reddit', handle: 'r/economics', text: 'The pace of AI-driven job reclassification is outstripping policy response. JOLTS data this week confirms the structural shift.', time: '6h ago', icon: '💬' },
-  { platform: 'X', handle: '@econpolicy', text: 'New Human Index reading at 58.4 — highest since tracking began. The displacement-to-retraining pipeline is fundamentally broken.', time: '12h ago', icon: '🐦' },
-  { platform: 'FT', handle: 'Analysis', text: 'AI workforce displacement reaches "elevated" threshold as Fortune 100 companies accelerate restructuring plans.', time: '2d ago', icon: '📰' },
-]
 
 const METHODOLOGY_STEPS = [
   { num: '01', title: 'Collect', desc: '12+ authoritative sources across 7 domains' },
@@ -101,7 +99,7 @@ function Sparkline({ data, color, width = 60, height = 24 }: { data: number[]; c
 
 export default function HomeSignal({ score, pulse }: Props) {
   const { theme } = useTheme()
-  const [email, setEmail] = useState('')
+  // email state removed — using SubscribeForm component
 
   const trendData = [
     { m: 'Oct', s: Math.max(30, score.score_value - 5.5) },
@@ -114,17 +112,18 @@ export default function HomeSignal({ score, pulse }: Props) {
 
   const sortedDomains = [...(score.sub_indexes || [])].sort((a, b) => b.value - a.value)
 
-  const sparklineData = (base: number) => {
+  const sparklineData = (base: number, seed: string) => {
+    const rng = seededRandom(`signal-spark-${seed}`)
     const d = []
-    for (let i = 0; i < 6; i++) d.push(Math.max(5, base - (6 - i) * (0.5 + Math.random() * 1.5) + Math.random() * 3))
+    for (let i = 0; i < 6; i++) d.push(Math.max(5, base - (6 - i) * (0.5 + rng() * 1.5) + rng() * 3))
     d.push(base)
     return d
   }
 
-  const movers = sortedDomains.map(d => ({
-    ...d,
-    delta: +(Math.random() * 4 - 1.5).toFixed(2),
-  })).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+  const movers = sortedDomains.map(d => {
+    const rng = seededRandom(`mover-signal-${d.domain}`)
+    return { ...d, delta: +(rng() * 4 - 1.5).toFixed(2) }
+  }).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
 
   const keyStat = { value: '3.2M', label: 'jobs reclassified as AI-exposed this quarter', source: 'BLS / O*NET Q1 2026' }
 
@@ -186,7 +185,7 @@ export default function HomeSignal({ score, pulse }: Props) {
                 <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 4 }}>{DOMAIN_LABELS[m.domain]}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ fontSize: 24, fontWeight: 300, color }}>{m.value.toFixed(1)}</span>
-                  <Sparkline data={sparklineData(m.value)} color={color} />
+                  <Sparkline data={sparklineData(m.value, m.domain)} color={color} />
                 </div>
               </div>
             )
@@ -268,29 +267,9 @@ export default function HomeSignal({ score, pulse }: Props) {
         </div>
       </section>
 
-      {/* ═══ What the World is Saying ═══ */}
+      {/* ═══ What the World is Saying — Live Feed ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 300, color: '#fff', margin: '0 0 8px' }}>What the World is Saying</h2>
-          <p style={{ fontSize: 14, color: theme.textTertiary, margin: 0 }}>From Reddit threads to headline news — the conversation this week</p>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-          {SOCIAL_MENTIONS.map((m, i) => (
-            <div key={i} style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 16 }}>{m.icon}</span>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{m.platform}</div>
-                    <div style={{ fontSize: 11, color: theme.textTertiary }}>{m.handle}</div>
-                  </div>
-                </div>
-                <span style={{ fontSize: 11, color: theme.textTertiary }}>{m.time}</span>
-              </div>
-              <p style={{ fontSize: 13, color: theme.textSecondary, lineHeight: 1.6, margin: 0 }}>{m.text}</p>
-            </div>
-          ))}
-        </div>
+        <SocialFeedSection />
       </section>
 
       {/* ═══ Pulse ═══ */}
@@ -347,15 +326,8 @@ export default function HomeSignal({ score, pulse }: Props) {
             <p style={{ fontSize: 13, color: theme.textSecondary, margin: '0 0 20px' }}>
               Composite score, top movers, and analysis — delivered every Monday.
             </p>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', maxWidth: 340, margin: '0 auto' }}>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                style={{ flex: 1, padding: '10px 14px', background: '#0a0a0a', border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, color: '#fff', fontSize: 13, outline: 'none' }}
-              />
-              <button style={{ padding: '10px 20px', background: theme.accent, border: 'none', borderRadius: 8, color: '#000', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Subscribe</button>
+            <div style={{ maxWidth: 340, margin: '0 auto' }}>
+              <SubscribeForm />
             </div>
           </div>
 

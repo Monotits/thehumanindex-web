@@ -2,6 +2,7 @@
 
 import { useTheme } from '@/lib/theme'
 import { DOMAIN_LABELS, Domain } from '@/lib/types'
+import { seededRandom } from '@/lib/seededRandom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import ChartInsight from './ChartInsight'
 
@@ -22,10 +23,11 @@ const DOMAIN_COLORS: Record<string, string> = {
 
 const MONTHS = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']
 
-function generateWeightedTrend(base: number, weight: number): number[] {
+function generateWeightedTrend(base: number, weight: number, seed: string): number[] {
+  const rng = seededRandom(`stacked-${seed}`)
   const data: number[] = []
   for (let i = 0; i < 5; i++) {
-    const v = Math.max(1, (base - (5 - i) * (0.6 + Math.random() * 1.0) + (Math.random() - 0.3) * 2) * weight)
+    const v = Math.max(1, (base - (5 - i) * (0.6 + rng() * 1.0) + (rng() - 0.3) * 2) * weight)
     data.push(+v.toFixed(2))
   }
   data.push(+(base * weight).toFixed(2))
@@ -39,7 +41,7 @@ export default function StackedAreaDecomposition({ domains }: Props) {
   // Build data array for recharts
   const trendsByDomain = sorted.map(d => ({
     domain: d.domain,
-    trend: generateWeightedTrend(d.value, d.weight),
+    trend: generateWeightedTrend(d.value, d.weight, d.domain),
   }))
 
   const chartData = MONTHS.map((m, i) => {

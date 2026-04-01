@@ -3,8 +3,11 @@
 import Link from 'next/link'
 import { CompositeScore, Commentary, DOMAIN_LABELS } from '@/lib/types'
 import { useTheme } from '@/lib/theme'
+import { seededRandom } from '@/lib/seededRandom'
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts'
 import { useEffect, useState } from 'react'
+import SubscribeForm from '@/components/SubscribeForm'
+import SocialFeedSection from '@/components/SocialFeedSection'
 import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
 import WaterfallChart from '@/components/charts/WaterfallChart'
 import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
@@ -53,11 +56,6 @@ const DATA_SOURCES = [
   { name: 'Reddit / X', desc: 'Sentiment' },
 ]
 
-const SOCIAL_MENTIONS = [
-  { platform: 'Reddit', handle: 'r/economics', text: 'The pace of AI-driven job reclassification is outstripping policy response. JOLTS data this week confirms the structural shift.', time: '6h ago', tag: 'SOCIAL' },
-  { platform: 'X / Twitter', handle: '@econpolicy', text: 'New Human Index reading at 58.4 — highest since tracking began. The displacement-to-retraining pipeline is fundamentally broken.', time: '12h ago', tag: 'SOCIAL' },
-  { platform: 'Financial Times', handle: 'Analysis', text: 'AI workforce displacement reaches "elevated" threshold as Fortune 100 companies accelerate restructuring plans.', time: '2d ago', tag: 'PRESS' },
-]
 
 const METHODOLOGY_STEPS = [
   { num: '01', title: 'Collect', desc: 'Real-time feeds from 12+ authoritative sources across 7 domains' },
@@ -68,7 +66,7 @@ const METHODOLOGY_STEPS = [
 export default function HomeTerminal({ score, pulse }: Props) {
   const { theme } = useTheme()
   const [pulseAnim, setPulseAnim] = useState(1)
-  const [email, setEmail] = useState('')
+  // email state removed — using SubscribeForm component
 
   useEffect(() => {
     const t = setInterval(() => setPulseAnim(p => p === 1 ? 0.5 : 1), 2000)
@@ -86,10 +84,10 @@ export default function HomeTerminal({ score, pulse }: Props) {
   const domains = [...(score.sub_indexes || [])].sort((a, b) => b.value - a.value)
 
   // Movers — top 2 risers and top 1 faller (simulated deltas)
-  const movers = domains.map(d => ({
-    ...d,
-    delta: +(Math.random() * 4 - 1.5).toFixed(2),
-  })).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+  const movers = domains.map(d => {
+    const rng = seededRandom(`mover-terminal-${d.domain}`)
+    return { ...d, delta: +(rng() * 4 - 1.5).toFixed(2) }
+  }).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
 
   const topRisers = movers.filter(m => m.delta > 0).slice(0, 2)
   const topFallers = movers.filter(m => m.delta < 0).slice(0, 1)
@@ -244,23 +242,9 @@ export default function HomeTerminal({ score, pulse }: Props) {
           </div>
         </div>
 
-        {/* ═══ What the World is Saying ═══ */}
+        {/* ═══ What the World is Saying — Live Feed ═══ */}
         <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20, marginBottom: 24 }}>
-          {sectionHeader('What the World is Saying')}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-            {SOCIAL_MENTIONS.map((m, i) => (
-              <div key={i} style={{ background: '#0a0a0a', border: `1px solid ${theme.surfaceBorder}`, borderRadius: 4, padding: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <div>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: theme.accent, fontFamily: theme.fontMono }}>{m.tag}</span>
-                    <span style={{ fontSize: 11, color: theme.textTertiary, marginLeft: 8 }}>{m.platform} · {m.handle}</span>
-                  </div>
-                  <span style={{ fontSize: 10, color: theme.textTertiary }}>{m.time}</span>
-                </div>
-                <p style={{ fontSize: 12, color: theme.textSecondary, lineHeight: 1.5, margin: 0 }}>{m.text}</p>
-              </div>
-            ))}
-          </div>
+          <SocialFeedSection />
         </div>
 
         {/* ═══ Methodology at a Glance ═══ */}
@@ -299,15 +283,8 @@ export default function HomeTerminal({ score, pulse }: Props) {
           <div style={{ fontSize: 13, color: theme.textSecondary, marginBottom: 20, maxWidth: 420, margin: '0 auto 20px' }}>
             Get the composite score, top movers, and AI-generated analysis delivered to your inbox every Monday.
           </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', maxWidth: 400, margin: '0 auto' }}>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              style={{ flex: 1, padding: '10px 16px', background: '#0a0a0a', border: `1px solid ${theme.surfaceBorder}`, borderRadius: 4, color: '#fff', fontSize: 13, fontFamily: theme.fontBody, outline: 'none' }}
-            />
-            <button style={{ padding: '10px 20px', background: theme.accent, border: 'none', borderRadius: 4, color: '#000', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Subscribe</button>
+          <div style={{ maxWidth: 400, margin: '0 auto' }}>
+            <SubscribeForm />
           </div>
         </div>
 
