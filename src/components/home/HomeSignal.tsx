@@ -164,13 +164,34 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
         </div>
       </section>
 
-      {/* ═══ Key Stat ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: '32px 40px', textAlign: 'center' }}>
-          <div style={{ fontSize: 11, letterSpacing: 2, color: theme.accent, textTransform: 'uppercase', marginBottom: 12 }}>Key Stat This Week</div>
-          <div style={{ fontSize: 48, fontWeight: 200, color: '#fff', lineHeight: 1, marginBottom: 8 }}>{stat.value}</div>
-          <div style={{ fontSize: 15, color: theme.textSecondary }}>{stat.label}</div>
-          <div style={{ fontSize: 11, color: theme.textTertiary, marginTop: 4 }}>{stat.source}</div>
+      {/* ═══ Compact Stat Bar ═══ */}
+      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 20px' }}>
+        <div style={{
+          display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 0,
+          background: theme.surface, borderRadius: 10, border: `1px solid ${theme.surfaceBorder}`,
+          overflow: 'hidden',
+        }}>
+          {[
+            { value: stat.value, label: stat.label.replace('initial ', '').replace(' this week', ''), src: 'FRED' },
+            ...(score.sub_indexes?.slice(0, 2).map(s => ({
+              value: s.value.toFixed(1),
+              label: (DOMAIN_LABELS[s.domain] || s.domain).replace(/_/g, ' '),
+              src: '',
+            })) || []),
+          ].map((item, i, arr) => (
+            <div key={i} style={{
+              flex: '1 1 0', padding: '14px 20px', textAlign: 'center',
+              borderRight: i < arr.length - 1 ? `1px solid ${theme.surfaceBorder}` : 'none',
+              minWidth: 140,
+            }}>
+              <div style={{ fontSize: 22, fontWeight: 600, color: '#fff', fontFamily: theme.fontMono, lineHeight: 1 }}>
+                {item.value}
+              </div>
+              <div style={{ fontSize: 11, color: theme.textTertiary, marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                {item.label}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

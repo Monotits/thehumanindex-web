@@ -137,12 +137,35 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
           </div>
         </div>
 
-        {/* ═══ Key Stat of the Week ═══ */}
-        <div style={{ padding: '32px 0', borderBottom: `1px solid ${theme.surfaceBorder}`, textAlign: 'center' }}>
-          <div style={{ fontSize: 11, color: theme.accent, textTransform: 'uppercase', letterSpacing: 2, fontFamily: theme.fontBody, marginBottom: 8 }}>Key Figure This Week</div>
-          <div style={{ fontSize: 48, fontWeight: 400, lineHeight: 1, marginBottom: 8, fontFamily: theme.fontHeading }}>{stat.value}</div>
-          <div style={{ fontSize: 16, color: theme.textSecondary, fontFamily: theme.fontBody }}>{stat.label}</div>
-          <div style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontBody, marginTop: 4 }}>{stat.source}</div>
+        {/* ═══ Compact Stat Bar ═══ */}
+        <div style={{
+          display: 'flex', gap: 0, margin: '0 0', padding: 0,
+          borderBottom: `1px solid ${theme.surfaceBorder}`,
+          overflow: 'hidden',
+        }}>
+          {[
+            { value: stat.value, label: stat.label.replace('initial ', '').replace(' this week', ''), accent: true },
+            ...(score.sub_indexes?.sort((a, b) => b.value - a.value).slice(0, 3).map(s => ({
+              value: s.value.toFixed(1),
+              label: (DOMAIN_LABELS[s.domain] || s.domain).replace(/_/g, ' '),
+              accent: false,
+            })) || []),
+          ].map((item, i, arr) => (
+            <div key={i} style={{
+              flex: '1 1 0', padding: '20px 16px', textAlign: 'center',
+              borderRight: i < arr.length - 1 ? `1px solid ${theme.surfaceBorder}` : 'none',
+            }}>
+              <div style={{
+                fontSize: 24, fontWeight: 400, fontFamily: theme.fontHeading, lineHeight: 1,
+                color: item.accent ? theme.accent : theme.text,
+              }}>
+                {item.value}
+              </div>
+              <div style={{ fontSize: 11, color: theme.textTertiary, marginTop: 6, fontFamily: theme.fontBody, letterSpacing: 0.3 }}>
+                {item.label}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* ═══ This Week's Movers ═══ */}

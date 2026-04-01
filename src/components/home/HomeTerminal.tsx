@@ -147,12 +147,35 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
           })}
         </div>
 
-        {/* ═══ Key Stat of the Week ═══ */}
-        <div style={{ background: `linear-gradient(135deg, ${theme.surface}, #0a0a0a)`, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: '32px 40px', marginBottom: 24, textAlign: 'center' }}>
-          <div style={{ fontSize: 11, letterSpacing: 2, color: theme.accent, textTransform: 'uppercase', fontFamily: theme.fontMono, marginBottom: 12 }}>Key Stat This Week</div>
-          <div style={{ fontSize: 56, fontWeight: 200, color: '#fff', lineHeight: 1, marginBottom: 12 }}>{stat.value}</div>
-          <div style={{ fontSize: 16, color: theme.textSecondary, marginBottom: 8 }}>{stat.label}</div>
-          <div style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontMono }}>{stat.source}</div>
+        {/* ═══ Compact Stat Bar ═══ */}
+        <div style={{
+          display: 'flex', gap: 0, marginBottom: 24,
+          background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6,
+          overflow: 'hidden',
+        }}>
+          {[
+            { value: stat.value, label: stat.label.replace('initial ', '').replace(' this week', ''), accent: true },
+            ...(score.sub_indexes?.sort((a, b) => b.value - a.value).slice(0, 3).map(s => ({
+              value: s.value.toFixed(1),
+              label: (DOMAIN_LABELS[s.domain] || s.domain).replace(/_/g, ' '),
+              accent: false,
+            })) || []),
+          ].map((item, i, arr) => (
+            <div key={i} style={{
+              flex: '1 1 0', padding: '12px 16px', textAlign: 'center',
+              borderRight: i < arr.length - 1 ? `1px solid ${theme.surfaceBorder}` : 'none',
+            }}>
+              <div style={{
+                fontSize: 20, fontWeight: 600, fontFamily: theme.fontMono, lineHeight: 1,
+                color: item.accent ? theme.accent : '#fff',
+              }}>
+                {item.value}
+              </div>
+              <div style={{ fontSize: 9, color: theme.textTertiary, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1, fontFamily: theme.fontMono }}>
+                {item.label}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* ═══ Corporate Layoff Tracker — Primary content ═══ */}
