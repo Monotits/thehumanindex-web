@@ -19,33 +19,29 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
   const [exporting, setExporting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [downloaded, setDownloaded] = useState(false)
-  const cardRef = useRef<HTMLDivElement>(null)
+  // Separate refs: one for the visible preview, one for the hidden full-size capture target
+  const captureRef = useRef<HTMLDivElement>(null)
 
-  // Reset states when modal opens
   useEffect(() => {
-    if (open) {
-      setCopied(false)
-      setDownloaded(false)
-    }
+    if (open) { setCopied(false); setDownloaded(false) }
   }, [open])
 
-  // Close on Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     if (open) window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [open, onClose])
 
+  const dims = orientation === 'horizontal'
+    ? { width: 1200, height: 630 }
+    : { width: 1080, height: 1920 }
+
   const captureCard = useCallback(async (): Promise<HTMLCanvasElement | null> => {
-    if (!cardRef.current) return null
+    if (!captureRef.current) return null
     setExporting(true)
     try {
-      const dims = orientation === 'horizontal'
-        ? { width: 1200, height: 630 }
-        : { width: 1080, height: 1920 }
-      const canvas = await html2canvas(cardRef.current, {
+      // html2canvas captures the hidden full-size element (no CSS transform)
+      const canvas = await html2canvas(captureRef.current, {
         scale: 2,
         useCORS: true,
         backgroundColor: null,
@@ -60,18 +56,18 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
     } finally {
       setExporting(false)
     }
-  }, [orientation])
+  }, [dims.width, dims.height])
 
   const handleDownload = useCallback(async () => {
     const canvas = await captureCard()
     if (!canvas) return
     const link = document.createElement('a')
-    link.download = `human-index-${data.type}-${Date.now()}.png`
+    link.download = `human-index-${data.type}-${orientation}-${Date.now()}.png`
     link.href = canvas.toDataURL('image/png')
     link.click()
     setDownloaded(true)
     setTimeout(() => setDownloaded(false), 2000)
-  }, [captureCard, data.type])
+  }, [captureCard, data.type, orientation])
 
   const handleCopy = useCallback(async () => {
     const canvas = await captureCard()
@@ -87,7 +83,6 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
       }, 'image/png')
     } catch (err) {
       console.error('Failed to copy:', err)
-      // Fallback: download instead
       handleDownload()
     }
   }, [captureCard, handleDownload])
@@ -95,6 +90,7 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
   if (!open) return null
 
   const cardTheme = CARD_THEMES[style]
+  const previewMaxWidth = orientation === 'horizontal' ? 640 : 320
 
   return (
     <div
@@ -107,6 +103,25 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
+      {/*
+        HIDDEN full-size card for html2canvas capture.
+        Positioned off-screen so it doesn't affect layout,
+        but NOT display:none (html2canvas needs it rendered).
+      */}
+      <div style={{
+        position: 'fixed',
+        left: -9999,
+        top: 0,
+        width: dims.width,
+        height: dims.height,
+        overflow: 'hidden',
+        pointerEvents: 'none',
+      }}>
+        <div ref={captureRef} style={{ width: dims.width, height: dims.height }}>
+          <ShareCardRenderer data={data} theme={cardTheme} orientation={orientation} />
+        </div>
+      </div>
+
       <div style={{
         background: theme.surface,
         border: `1px solid ${theme.surfaceBorder}`,
@@ -167,7 +182,6 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
                     transition: 'all 0.2s',
                   }}
                 >
-                  {/* Style preview swatch */}
                   <div style={{
                     width: '100%', height: 24, borderRadius: 4, marginBottom: 8,
                     background: t.bgGradient,
@@ -215,7 +229,7 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
                   Horizontal
                 </div>
                 <div style={{ fontSize: 10, color: theme.textTertiary, marginTop: 2 }}>
-                  1200×630
+                  1200x630
                 </div>
               </div>
             </button>
@@ -239,47 +253,45 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
                   Vertical
                 </div>
                 <div style={{ fontSize: 10, color: theme.textTertiary, marginTop: 2 }}>
-                  1080×1920
+                  1080x1920
                 </div>
               </div>
             </button>
           </div>
         </div>
 
-        {/* Card preview */}
+        {/* Card preview — uses CSS scale for display only, NOT used for capture */}
         <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'center' }}>
           <div style={{
             width: '100%',
-            maxWidth: orientation === 'horizontal' ? 640 : 360,
-            aspectRatio: orientation === 'horizontal' ? '1200 / 630' : '1080 / 1920',
+            maxWidth: previewMaxWidth,
+            aspectRatio: `${dims.width} / ${dims.height}`,
             borderRadius: 8,
             overflow: 'hidden',
             border: `1px solid ${theme.surfaceBorder}`,
             position: 'relative',
+            background: '#000',
           }}>
-            {/* Scaled preview */}
-            <div style={{
-              width: orientation === 'horizontal' ? 1200 : 1080,
-              height: orientation === 'horizontal' ? 630 : 1920,
-              transform: 'scale(var(--card-scale))',
-              transformOrigin: 'top left',
-              position: 'absolute', top: 0, left: 0,
-            }}
-            ref={(el) => {
-              if (el) {
-                const parent = el.parentElement
-                if (parent) {
-                  const baseWidth = orientation === 'horizontal' ? 1200 : 1080
-                  const scale = parent.clientWidth / baseWidth
-                  el.style.setProperty('--card-scale', String(scale))
-                  el.style.transform = `scale(${scale})`
+            <div
+              style={{
+                width: dims.width,
+                height: dims.height,
+                transformOrigin: 'top left',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+              }}
+              ref={(el) => {
+                if (el) {
+                  const parent = el.parentElement
+                  if (parent) {
+                    const scale = parent.clientWidth / dims.width
+                    el.style.transform = `scale(${scale})`
+                  }
                 }
-              }
-            }}
+              }}
             >
-              <div ref={cardRef}>
-                <ShareCardRenderer data={data} theme={cardTheme} orientation={orientation} />
-              </div>
+              <ShareCardRenderer data={data} theme={cardTheme} orientation={orientation} />
             </div>
           </div>
         </div>
