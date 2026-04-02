@@ -338,6 +338,21 @@ export default function PulseDetailPage() {
           padding: '36px 32px',
         }}>
           {renderMarkdown(commentary.body_markdown, theme)}
+
+          {/* AI-generated content disclaimer */}
+          <div style={{
+            marginTop: 32, paddingTop: 16,
+            borderTop: `1px solid ${theme.surfaceBorder}`,
+            display: 'flex', alignItems: 'flex-start', gap: 10,
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.textTertiary} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 1 }}>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>
+            <p style={{ fontSize: 11, color: theme.textTertiary, lineHeight: 1.6, margin: 0 }}>
+              This report is AI-generated based on live data from our pipeline. Domain scores reflect real data from BLS, FRED, World Bank, OECD, and other sources. Contextual analysis is produced by AI and may contain interpretive commentary. We do not fabricate statistics or attribute data to institutions without verification.
+            </p>
+          </div>
         </article>
 
         {/* Reading time & share */}

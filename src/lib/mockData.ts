@@ -86,7 +86,7 @@ This data pushed our Work Risk sub-index to 72 and is the primary driver behind 
     title: 'Institutional Decay and the Trust Deficit',
     body_markdown: `# Institutional Decay and the Trust Deficit
 
-Institutional trust metrics hit a new low this quarter. Pew Research's latest survey finds that only 22% of Americans trust the federal government to "do the right thing" — and when asked specifically about the government's ability to manage AI-driven economic transformation, that number drops to 14%.
+Institutional trust metrics continue their multi-decade decline. Pew Research's tracking data shows trust in the federal government hovering near historic lows — and when the question turns specifically to the government's ability to manage AI-driven economic transformation, the numbers drop even further.
 
 ## The Policy Paralysis
 
@@ -258,7 +258,7 @@ Public Sentiment at 62 represents something new in our index: a domain where the
 
 ## The Tipping Point
 
-Three months ago, most public polling showed a roughly 50/50 split between AI optimists and pessimists. Today, Gallup data shows roughly 75% of Americans expect AI to reduce total jobs over the next decade — a significant hardening of public opinion in a short period.
+Three months ago, most public polling showed a roughly even split between AI optimists and pessimists. Today, a clear majority of Americans expect AI to reduce total jobs over the next decade — a significant hardening of public opinion in a short period.
 
 What changed? Not any single event, but a critical mass of personal experience. As AI tools went from demos to deployments, people moved from imagining AI's impact to experiencing it. An increasing share of knowledge workers report personally witnessing a colleague's role being eliminated or significantly reduced due to AI integration.
 

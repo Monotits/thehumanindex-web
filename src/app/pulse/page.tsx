@@ -299,9 +299,9 @@ export default function PulsePage() {
         {/* Footer note */}
         <div style={{ marginTop: 48, padding: '20px 0', borderTop: `1px solid ${theme.surfaceBorder}`, textAlign: 'center' }}>
           <p style={{ fontSize: 12, color: theme.textTertiary, lineHeight: 1.6, margin: 0 }}>
-            Pulse reports are generated weekly using live data from BLS, FRED, World Bank, OECD, O*NET, and sentiment analysis.
+            Pulse reports are AI-generated weekly using live data from BLS, FRED, World Bank, OECD, O*NET, and sentiment analysis.
             <br />
-            Each report is AI-generated and reviewed for accuracy.
+            Domain scores are real. Contextual analysis is AI-generated and fact-checked before publication.
           </p>
         </div>
       </div>
