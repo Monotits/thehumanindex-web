@@ -8,6 +8,8 @@ import { useTheme } from '@/lib/theme'
 import { seededRandom } from '@/lib/seededRandom'
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts'
 import { useEffect, useState } from 'react'
+import { ShareButton } from '@/components/share'
+import type { CompositeCardData, DomainCardData } from '@/components/share'
 import SubscribeForm from '@/components/SubscribeForm'
 import SocialFeedSection from '@/components/SocialFeedSection'
 import LayoffTracker from '@/components/LayoffTracker'
@@ -103,6 +105,14 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
   // Key stat — from real data pipeline
   const stat = keyStat || { value: '—', label: 'connecting to data sources...', source: '' }
 
+  const compositeShareData: CompositeCardData = {
+    type: 'composite',
+    score: score.score_value,
+    delta: score.delta,
+    domains: domains.map(d => ({ domain: d.domain as Domain, score: Math.round(d.value) })),
+    date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+  }
+
   const sectionHeader = (text: string) => (
     <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16, fontFamily: theme.fontMono }}>{text}</div>
   )
@@ -124,12 +134,15 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
             {Math.floor(score.score_value)}<span style={{ fontSize: 48, color: theme.textTertiary }}>.{(score.score_value % 1).toFixed(2).slice(2)}</span>
           </div>
           <div style={{ fontSize: 14, color: theme.textSecondary, marginBottom: 8 }}>Composite Stress Index</div>
-          {score.delta !== null && (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 4, background: `${bandColor}15`, border: `1px solid ${bandColor}30` }}>
-              <span style={{ fontFamily: 'monospace', fontSize: 13, color: bandColor }}>{score.delta > 0 ? '▲' : '▼'} {Math.abs(score.delta).toFixed(2)}</span>
-              <span style={{ fontSize: 12, color: theme.textTertiary }}>WoW</span>
-            </div>
-          )}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            {score.delta !== null && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 4, background: `${bandColor}15`, border: `1px solid ${bandColor}30` }}>
+                <span style={{ fontFamily: 'monospace', fontSize: 13, color: bandColor }}>{score.delta > 0 ? '▲' : '▼'} {Math.abs(score.delta).toFixed(2)}</span>
+                <span style={{ fontSize: 12, color: theme.textTertiary }}>WoW</span>
+              </div>
+            )}
+            <ShareButton data={compositeShareData} variant="compact" label="Share" />
+          </div>
         </div>
 
         {/* ═══ This Week's Movers ═══ */}
@@ -142,7 +155,10 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
               <div key={m.domain} style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                   <span style={{ fontSize: 12, color: theme.textTertiary, fontFamily: theme.fontMono }}>{isUp ? '▲ RISING' : '▼ FALLING'}</span>
-                  <span style={{ fontSize: 13, color, fontFamily: theme.fontMono, fontWeight: 600 }}>{isUp ? '+' : ''}{m.delta.toFixed(2)}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 13, color, fontFamily: theme.fontMono, fontWeight: 600 }}>{isUp ? '+' : ''}{m.delta.toFixed(2)}</span>
+                    <ShareButton data={{ type: 'domain', domain: m.domain as Domain, score: Math.round(m.value), delta: m.delta, headline: ctx.insight, date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) } as DomainCardData} variant="icon" />
+                  </div>
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 4 }}>{DOMAIN_LABELS[m.domain]}</div>
                 <div style={{ fontSize: 24, fontWeight: 300, color, fontFamily: theme.fontMono, marginBottom: 8 }}>{m.value.toFixed(1)}</div>

@@ -8,6 +8,8 @@ import { KeyStat } from '@/lib/realData'
 import { useTheme } from '@/lib/theme'
 import { seededRandom } from '@/lib/seededRandom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { ShareButton } from '@/components/share'
+import type { CompositeCardData, DomainCardData } from '@/components/share'
 import SubscribeForm from '@/components/SubscribeForm'
 import SocialFeedSection from '@/components/SocialFeedSection'
 import LayoffTracker from '@/components/LayoffTracker'
@@ -80,6 +82,15 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
 
   const stat = keyStat || { value: '—', label: 'connecting to data sources...', source: '' }
 
+  // Share card data
+  const compositeShareData: CompositeCardData = {
+    type: 'composite',
+    score: score.score_value,
+    delta: score.delta,
+    domains: sortedDomains.map(d => ({ domain: d.domain as Domain, score: Math.round(d.value) })),
+    date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+  }
+
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', fontFamily: theme.fontHeading, color: theme.text }}>
       {/* Red accent line */}
@@ -103,13 +114,14 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
               <p style={{ fontSize: 17, color: theme.textSecondary, lineHeight: 1.7, margin: '0 0 24px', fontFamily: theme.fontBody }}>
                 The composite index stands at {score.score_value.toFixed(2)}, reflecting mounting pressure across multiple domains of civilizational stability. Policy response continues to lag behind technological deployment.
               </p>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <BandBadge band={score.band} />
                 {score.delta !== null && (
                   <span style={{ fontSize: 13, color: theme.textTertiary, fontFamily: theme.fontBody }}>
                     {score.delta > 0 ? '↑' : '↓'} {Math.abs(score.delta).toFixed(2)} from previous week
                   </span>
                 )}
+                <ShareButton data={compositeShareData} variant="compact" label="Share" />
               </div>
             </div>
 
@@ -181,10 +193,23 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
               const color = isUp ? '#dc2626' : '#2d7d46'
               const ctx = getDomainContext(m.domain as Domain, m.value, m.delta)
               return (
-                <div key={m.domain} style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 20 }}>
+                <div key={m.domain} style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 20, position: 'relative' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                     <DomainIcon domain={m.domain as Domain} size={24} color={theme.textSecondary} />
-                    <span style={{ fontSize: 13, color, fontWeight: 600, fontFamily: theme.fontBody }}>{isUp ? '↑' : '↓'} {Math.abs(m.delta).toFixed(2)}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 13, color, fontWeight: 600, fontFamily: theme.fontBody }}>{isUp ? '↑' : '↓'} {Math.abs(m.delta).toFixed(2)}</span>
+                      <ShareButton
+                        data={{
+                          type: 'domain',
+                          domain: m.domain as Domain,
+                          score: Math.round(m.value),
+                          delta: m.delta,
+                          headline: ctx.insight,
+                          date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                        } as DomainCardData}
+                        variant="icon"
+                      />
+                    </div>
                   </div>
                   <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>{DOMAIN_LABELS[m.domain]}</div>
                   <div style={{ fontSize: 28, fontWeight: 400, color, fontFamily: theme.fontHeading, marginBottom: 10 }}>{m.value.toFixed(1)}</div>

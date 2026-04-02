@@ -8,6 +8,8 @@ import { useTheme } from '@/lib/theme'
 import { seededRandom } from '@/lib/seededRandom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useEffect, useState } from 'react'
+import { ShareButton } from '@/components/share'
+import type { CompositeCardData, DomainCardData } from '@/components/share'
 import SubscribeForm from '@/components/SubscribeForm'
 import SocialFeedSection from '@/components/SocialFeedSection'
 import LayoffTracker from '@/components/LayoffTracker'
@@ -132,6 +134,14 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
 
   const stat = keyStat || { value: '—', label: 'connecting to data sources...', source: '' }
 
+  const compositeShareData: CompositeCardData = {
+    type: 'composite',
+    score: score.score_value,
+    delta: score.delta,
+    domains: sortedDomains.map(d => ({ domain: d.domain as Domain, score: Math.round(d.value) })),
+    date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+  }
+
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', color: theme.text, fontFamily: theme.fontBody }}>
       {/* ═══ Hero ═══ */}
@@ -142,10 +152,13 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
 
         <GaugeVisual score={score.score_value} band={score.band} />
 
-        <div style={{ display: 'inline-block', marginTop: 16, padding: '6px 20px', borderRadius: 20, background: `${theme.accent}15`, border: `1px solid ${theme.accent}30` }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: theme.accent, letterSpacing: 1 }}>
-            {BAND_LABELS[score.band] || score.band.toUpperCase()}
-          </span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginTop: 16 }}>
+          <div style={{ padding: '6px 20px', borderRadius: 20, background: `${theme.accent}15`, border: `1px solid ${theme.accent}30` }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: theme.accent, letterSpacing: 1 }}>
+              {BAND_LABELS[score.band] || score.band.toUpperCase()}
+            </span>
+          </div>
+          <ShareButton data={compositeShareData} variant="compact" label="Share" />
         </div>
 
         <h1 style={{ fontSize: 32, fontWeight: 300, color: '#fff', lineHeight: 1.4, margin: '32px auto 16px', maxWidth: 600 }}>
@@ -207,7 +220,10 @@ export default function HomeSignal({ score, pulse, keyStat }: Props) {
               <div key={m.domain} style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                   <span style={{ fontSize: 11, color: theme.textTertiary, letterSpacing: 1 }}>{isUp ? '↑ RISING' : '↓ FALLING'}</span>
-                  <span style={{ fontSize: 13, color, fontWeight: 600 }}>{isUp ? '+' : ''}{m.delta.toFixed(2)}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 13, color, fontWeight: 600 }}>{isUp ? '+' : ''}{m.delta.toFixed(2)}</span>
+                    <ShareButton data={{ type: 'domain', domain: m.domain as Domain, score: Math.round(m.value), delta: m.delta, headline: ctx.insight, date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) } as DomainCardData} variant="icon" />
+                  </div>
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 4 }}>{DOMAIN_LABELS[m.domain]}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>

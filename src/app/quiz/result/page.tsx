@@ -5,6 +5,8 @@ import { QuizResult } from '@/lib/types'
 import { ShareCard } from '@/components/ShareCard'
 import { BandLabel } from '@/components/BandLabel'
 import { useTheme } from '@/lib/theme'
+import { ShareButton } from '@/components/share'
+import type { QuizCardData } from '@/components/share'
 import SubscribeForm from '@/components/SubscribeForm'
 
 export default function ResultPage() {
@@ -173,6 +175,19 @@ export default function ResultPage() {
           <div>
             <div style={{ position: 'sticky', top: 96 }}>
               <ShareCard result={result} />
+              <div style={{ marginTop: 16, textAlign: 'center' }}>
+                <ShareButton
+                  data={{
+                    type: 'quiz',
+                    jobTitle: result.share_card_data.job_title,
+                    band: result.exposure_band,
+                    percentile: result.percentile,
+                    topRisks: result.top_tasks_at_risk?.slice(0, 3).map(t => t.task) || [],
+                  } as QuizCardData}
+                  variant="button"
+                  label="Share as Card"
+                />
+              </div>
             </div>
           </div>
         </div>

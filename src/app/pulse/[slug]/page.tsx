@@ -8,6 +8,8 @@ import { MOCK_COMMENTARIES } from '@/lib/mockData'
 import { supabase } from '@/lib/supabase'
 import { useTheme, ThemeConfig } from '@/lib/theme'
 import { formatDate } from '@/lib/utils'
+import { ShareButton } from '@/components/share'
+import type { PulseCardData } from '@/components/share'
 import { useParams } from 'next/navigation'
 
 // ── Score extraction helpers ──────────────────────────────
@@ -345,7 +347,18 @@ export default function PulseDetailPage() {
           fontSize: 12, color: theme.textTertiary,
         }}>
           <span>{Math.max(2, Math.ceil(commentary.body_markdown.split(' ').length / 200))} min read</span>
-          <div style={{ display: 'flex', gap: 16 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <ShareButton
+              data={{
+                type: 'pulse',
+                title: commentary.title,
+                excerpt: commentary.body_markdown.split('\n').filter(l => !l.startsWith('#') && l.trim()).join(' ').replace(/\*\*(.*?)\*\*/g, '$1').substring(0, 180),
+                compositeScore,
+                date: formatDate(commentary.published_at),
+              } as PulseCardData}
+              variant="compact"
+              label="Share"
+            />
             <Link href="/" style={{ color: theme.textTertiary, textDecoration: 'none', fontSize: 12 }}>Dashboard</Link>
             <Link href="/methodology" style={{ color: theme.textTertiary, textDecoration: 'none', fontSize: 12 }}>Methodology</Link>
           </div>
