@@ -3,7 +3,7 @@ import localFont from 'next/font/local'
 import './globals.css'
 import { Navigation } from '@/components/Navigation'
 import { Footer } from '@/components/Footer'
-import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLd'
+import { OrganizationJsonLd, WebSiteJsonLd, DatasetJsonLd } from '@/components/JsonLd'
 import { Providers } from '@/components/Providers'
 import { Analytics } from '@vercel/analytics/react'
 import { GoogleAnalytics } from '@/components/GoogleAnalytics'
@@ -102,6 +102,7 @@ export default function RootLayout({
         <Providers>
           <OrganizationJsonLd />
           <WebSiteJsonLd />
+          <DatasetJsonLd />
           <Navigation />
           <main className="min-h-screen">{children}</main>
           <Footer />

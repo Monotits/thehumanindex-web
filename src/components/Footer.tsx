@@ -19,6 +19,7 @@ export function Footer() {
               <Link href="/dashboard" style={linkStyle}>Dashboard</Link>
               <Link href="/pulse" style={linkStyle}>Weekly Pulse</Link>
               <Link href="/methodology" style={linkStyle}>Methodology</Link>
+              <Link href="/glossary" style={linkStyle}>Domain Glossary</Link>
             </div>
           </div>
           <div>

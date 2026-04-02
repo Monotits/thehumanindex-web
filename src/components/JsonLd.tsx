@@ -130,3 +130,73 @@ export function WebApplicationJsonLd() {
     />
   )
 }
+
+// Dataset schema — makes the index discoverable by AI models and Google Dataset Search
+export function DatasetJsonLd() {
+  return (
+    <JsonLd
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'Dataset',
+        name: 'The Human Index — Civilizational Stress Dataset',
+        description:
+          'Weekly composite index tracking civilizational stress across seven domains: AI Work Displacement, Income Inequality, Social Unrest, Institutional Decay, Social Wellbeing, Policy Response, and Public Sentiment. Data sourced from FRED, World Bank, ACLED, GDELT, and OECD.',
+        url: 'https://thehumanindex.org',
+        license: 'https://creativecommons.org/licenses/by/4.0/',
+        creator: {
+          '@type': 'Organization',
+          name: 'The Human Index',
+          url: 'https://thehumanindex.org',
+        },
+        temporalCoverage: '2024/..',
+        spatialCoverage: {
+          '@type': 'Place',
+          name: 'Global (focus: United States)',
+        },
+        variableMeasured: [
+          { '@type': 'PropertyValue', name: 'Composite Stress Index', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'AI Work Displacement', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'Income Inequality', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'Social Unrest', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'Institutional Decay', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'Social Wellbeing', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'Policy Response', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'Public Sentiment', unitText: 'score 0-100' },
+        ],
+        distribution: {
+          '@type': 'DataDownload',
+          encodingFormat: 'application/json',
+          contentUrl: 'https://thehumanindex.org/api/data',
+        },
+        keywords: [
+          'civilizational stress',
+          'AI displacement',
+          'economic inequality',
+          'social unrest',
+          'institutional decay',
+          'public sentiment',
+          'composite index',
+          'weekly tracker',
+        ],
+      }}
+    />
+  )
+}
+
+// BreadcrumbList schema
+export function BreadcrumbJsonLd({ items }: { items: { name: string; url: string }[] }) {
+  return (
+    <JsonLd
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: items.map((item, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: item.name,
+          item: item.url,
+        })),
+      }}
+    />
+  )
+}
