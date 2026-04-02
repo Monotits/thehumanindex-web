@@ -206,6 +206,7 @@ function CompositeCard({ data, theme, orientation: o }: { data: CompositeCardDat
             width: badgeSize, height: badgeSize, borderRadius: badgeSize,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             background: `${sc}15`, border: `3px solid ${sc}40`,
+            paddingBottom: isV ? 16 : 8,
           }}>
             <div style={{ fontSize: badgeSize * 0.36, fontWeight: 800, color: sc, fontFamily: FM, lineHeight: 1 }}>
               {data.score.toFixed(1)}
@@ -534,6 +535,7 @@ function OverviewCard({ data, theme, orientation: o }: { data: OverviewCardData;
           width: badgeSize, height: badgeSize, borderRadius: badgeSize,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           background: `${sc}15`, border: `3px solid ${sc}40`,
+          paddingBottom: isV ? 16 : 8,
         }}>
           <div style={{ fontSize: badgeSize * 0.35, fontWeight: 800, color: sc, fontFamily: FM, lineHeight: 1 }}>
             {data.compositeScore.toFixed(1)}
