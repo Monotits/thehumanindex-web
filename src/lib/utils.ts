@@ -37,6 +37,8 @@ export function timeAgo(dateStr: string): string {
   if (days === 0) return 'Today'
   if (days === 1) return 'Yesterday'
   if (days < 7) return `${days} days ago`
-  if (days < 30) return `${Math.floor(days / 7)} weeks ago`
-  return `${Math.floor(days / 30)} months ago`
+  const weeks = Math.floor(days / 7)
+  if (days < 30) return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`
+  const months = Math.floor(days / 30)
+  return months === 1 ? '1 month ago' : `${months} months ago`
 }

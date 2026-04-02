@@ -128,3 +128,10 @@ body {
     gap: 20px !important;
   }
 }
+
+/* ── Pulse page: responsive cards ── */
+@media (max-width: 768px) {
+  .pulse-card .hide-mobile { display: none !important; }
+  .pulse-card .show-mobile-inline { display: inline-flex !important; }
+  .pulse-nav { flex-direction: column !important; }
+}
