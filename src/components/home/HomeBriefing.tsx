@@ -8,8 +8,8 @@ import { KeyStat } from '@/lib/realData'
 import { useTheme } from '@/lib/theme'
 import { seededRandom } from '@/lib/seededRandom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { ShareButton } from '@/components/share'
-import type { CompositeCardData, DomainCardData } from '@/components/share'
+import { ShareButton, SharePrompt } from '@/components/share'
+import type { CompositeCardData, DomainCardData, TrendCardData } from '@/components/share'
 import SubscribeForm from '@/components/SubscribeForm'
 import SocialFeedSection from '@/components/SocialFeedSection'
 import LayoffTracker from '@/components/LayoffTracker'
@@ -88,6 +88,17 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
     score: score.score_value,
     delta: score.delta,
     domains: sortedDomains.map(d => ({ domain: d.domain as Domain, score: Math.round(d.value) })),
+    date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+  }
+
+  const trendShareData: TrendCardData = {
+    type: 'trend',
+    title: 'Domain Trend Analysis',
+    domains: sortedDomains.map(d => {
+      const rng = seededRandom(`mover-briefing-${d.domain}`)
+      return { domain: d.domain as Domain, score: Math.round(d.value), delta: +(rng() * 4 - 1.5).toFixed(2) }
+    }),
+    compositeScore: score.score_value,
     date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
   }
 
@@ -231,7 +242,10 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
         <div style={{ padding: '40px 0 24px', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 8px' }}>Seven Domains of Stress</h2>
           <p style={{ fontSize: 14, color: theme.textTertiary, margin: '0 0 24px', fontFamily: theme.fontBody }}>Each domain scored 0–100 using public economic, social, and governance data</p>
-          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24, position: 'relative' }}>
+            <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}>
+              <ShareButton data={trendShareData} variant="icon" />
+            </div>
             <DomainComparisonBar domains={sortedDomains} />
           </div>
         </div>
@@ -338,6 +352,18 @@ export default function HomeBriefing({ score, pulse, keyStat }: Props) {
             ))}
           </div>
         </div>
+
+        <SharePrompt
+          compositeScore={score.score_value}
+          band={score.band}
+          delta={score.delta}
+          topDomains={sortedDomains.slice(0, 5).map(d => {
+            const rng = seededRandom(`mover-briefing-${d.domain}`)
+            return { domain: d.domain as Domain, score: Math.round(d.value), delta: +(rng() * 4 - 1.5).toFixed(2) }
+          })}
+          date={new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          weekNumber={Math.ceil((new Date().getTime() - new Date('2025-01-01').getTime()) / (7 * 24 * 60 * 60 * 1000))}
+        />
 
         {/* ═══ Subscribe + Quiz CTA Row ═══ */}
         <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '40px 0' }}>

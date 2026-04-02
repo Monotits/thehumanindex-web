@@ -8,6 +8,7 @@
  */
 
 export type CardStyle = 'terminal' | 'gradient' | 'minimal'
+export type CardOrientation = 'horizontal' | 'vertical'
 
 export interface CardTheme {
   id: CardStyle

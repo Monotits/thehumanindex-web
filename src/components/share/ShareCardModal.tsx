@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import html2canvas from 'html2canvas'
 import { useTheme } from '@/lib/theme'
-import { CardStyle, CARD_THEMES } from './cardStyles'
+import { CardStyle, CardOrientation, CARD_THEMES } from './cardStyles'
 import { ShareCardData, ShareCardRenderer } from './ShareCardRenderer'
 
 interface ShareCardModalProps {
@@ -15,6 +15,7 @@ interface ShareCardModalProps {
 export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
   const { theme } = useTheme()
   const [style, setStyle] = useState<CardStyle>('terminal')
+  const [orientation, setOrientation] = useState<CardOrientation>('horizontal')
   const [exporting, setExporting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [downloaded, setDownloaded] = useState(false)
@@ -41,13 +42,16 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
     if (!cardRef.current) return null
     setExporting(true)
     try {
+      const dims = orientation === 'horizontal'
+        ? { width: 1200, height: 630 }
+        : { width: 1080, height: 1920 }
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         useCORS: true,
         backgroundColor: null,
         logging: false,
-        width: 1200,
-        height: 630,
+        width: dims.width,
+        height: dims.height,
       })
       return canvas
     } catch (err) {
@@ -56,7 +60,7 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
     } finally {
       setExporting(false)
     }
-  }, [])
+  }, [orientation])
 
   const handleDownload = useCallback(async () => {
     const canvas = await captureCard()
@@ -186,12 +190,68 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
           </div>
         </div>
 
+        {/* Orientation picker */}
+        <div style={{ padding: '16px 24px', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+          <div style={{ fontSize: 10, color: theme.textTertiary, fontFamily: theme.fontMono, letterSpacing: 2, marginBottom: 10, textTransform: 'uppercase' }}>
+            Choose Orientation
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => setOrientation('horizontal')}
+              style={{
+                flex: 1, padding: '12px 16px',
+                background: orientation === 'horizontal' ? `${theme.accent}15` : 'transparent',
+                border: `1px solid ${orientation === 'horizontal' ? theme.accent + '60' : theme.surfaceBorder}`,
+                borderRadius: 10, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                transition: 'all 0.2s',
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: theme.text }}>
+                <rect x="3" y="7" width="18" height="10" rx="1" />
+              </svg>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: orientation === 'horizontal' ? (theme.isDark ? '#fff' : theme.text) : theme.textSecondary }}>
+                  Horizontal
+                </div>
+                <div style={{ fontSize: 10, color: theme.textTertiary, marginTop: 2 }}>
+                  1200×630
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setOrientation('vertical')}
+              style={{
+                flex: 1, padding: '12px 16px',
+                background: orientation === 'vertical' ? `${theme.accent}15` : 'transparent',
+                border: `1px solid ${orientation === 'vertical' ? theme.accent + '60' : theme.surfaceBorder}`,
+                borderRadius: 10, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                transition: 'all 0.2s',
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: theme.text }}>
+                <rect x="7" y="3" width="10" height="18" rx="1" />
+              </svg>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: orientation === 'vertical' ? (theme.isDark ? '#fff' : theme.text) : theme.textSecondary }}>
+                  Vertical
+                </div>
+                <div style={{ fontSize: 10, color: theme.textTertiary, marginTop: 2 }}>
+                  1080×1920
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
         {/* Card preview */}
         <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'center' }}>
           <div style={{
             width: '100%',
-            maxWidth: 640,
-            aspectRatio: '1200 / 630',
+            maxWidth: orientation === 'horizontal' ? 640 : 360,
+            aspectRatio: orientation === 'horizontal' ? '1200 / 630' : '1080 / 1920',
             borderRadius: 8,
             overflow: 'hidden',
             border: `1px solid ${theme.surfaceBorder}`,
@@ -199,7 +259,8 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
           }}>
             {/* Scaled preview */}
             <div style={{
-              width: 1200, height: 630,
+              width: orientation === 'horizontal' ? 1200 : 1080,
+              height: orientation === 'horizontal' ? 630 : 1920,
               transform: 'scale(var(--card-scale))',
               transformOrigin: 'top left',
               position: 'absolute', top: 0, left: 0,
@@ -208,7 +269,8 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
               if (el) {
                 const parent = el.parentElement
                 if (parent) {
-                  const scale = parent.clientWidth / 1200
+                  const baseWidth = orientation === 'horizontal' ? 1200 : 1080
+                  const scale = parent.clientWidth / baseWidth
                   el.style.setProperty('--card-scale', String(scale))
                   el.style.transform = `scale(${scale})`
                 }
@@ -216,7 +278,7 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
             }}
             >
               <div ref={cardRef}>
-                <ShareCardRenderer data={data} theme={cardTheme} />
+                <ShareCardRenderer data={data} theme={cardTheme} orientation={orientation} />
               </div>
             </div>
           </div>

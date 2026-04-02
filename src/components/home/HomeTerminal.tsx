@@ -8,8 +8,8 @@ import { useTheme } from '@/lib/theme'
 import { seededRandom } from '@/lib/seededRandom'
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts'
 import { useEffect, useState } from 'react'
-import { ShareButton } from '@/components/share'
-import type { CompositeCardData, DomainCardData } from '@/components/share'
+import { ShareButton, SharePrompt } from '@/components/share'
+import type { CompositeCardData, DomainCardData, TrendCardData } from '@/components/share'
 import SubscribeForm from '@/components/SubscribeForm'
 import SocialFeedSection from '@/components/SocialFeedSection'
 import LayoffTracker from '@/components/LayoffTracker'
@@ -113,6 +113,17 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
     date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
   }
 
+  const trendShareData: TrendCardData = {
+    type: 'trend',
+    title: 'Domain Trend Analysis',
+    domains: domains.map(d => {
+      const rng = seededRandom(`mover-terminal-${d.domain}`)
+      return { domain: d.domain as Domain, score: Math.round(d.value), delta: +(rng() * 4 - 1.5).toFixed(2) }
+    }),
+    compositeScore: score.score_value,
+    date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+  }
+
   const sectionHeader = (text: string) => (
     <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16, fontFamily: theme.fontMono }}>{text}</div>
   )
@@ -207,7 +218,10 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Enhanced Domain Analysis (Score + Trend + Delta + Weight) ═══ */}
-        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20, marginBottom: 24 }}>
+        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20, marginBottom: 24, position: 'relative' }}>
+          <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}>
+            <ShareButton data={trendShareData} variant="icon" />
+          </div>
           <DomainComparisonBar domains={domains} />
         </div>
 
@@ -229,7 +243,10 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
         </div>
 
         {/* ═══ Composite Decomposition (Stacked Area) ═══ */}
-        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20, marginBottom: 24 }}>
+        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 6, padding: 20, marginBottom: 24, position: 'relative' }}>
+          <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}>
+            <ShareButton data={compositeShareData} variant="icon" />
+          </div>
           <StackedAreaDecomposition domains={domains} />
         </div>
 
@@ -351,6 +368,19 @@ export default function HomeTerminal({ score, pulse, keyStat }: Props) {
             <SubscribeForm />
           </div>
         </div>
+
+        {/* ═══ Share Prompt ═══ */}
+        <SharePrompt
+          compositeScore={score.score_value}
+          band={score.band}
+          delta={score.delta}
+          topDomains={domains.slice(0, 5).map(d => {
+            const rng = seededRandom(`mover-terminal-${d.domain}`)
+            return { domain: d.domain as Domain, score: Math.round(d.value), delta: +(rng() * 4 - 1.5).toFixed(2) }
+          })}
+          date={new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          weekNumber={Math.ceil((new Date().getTime() - new Date('2025-01-01').getTime()) / (7 * 24 * 60 * 60 * 1000))}
+        />
 
         {/* ═══ Audience Positioning ═══ */}
         <div style={{ textAlign: 'center', padding: '32px 0 48px', borderTop: `1px solid ${theme.surfaceBorder}` }}>

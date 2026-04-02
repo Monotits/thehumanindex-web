@@ -1,7 +1,7 @@
 'use client'
 
 import { Domain, DOMAIN_LABELS } from '@/lib/types'
-import { CardTheme, getScoreColor, getScoreBand } from './cardStyles'
+import { CardTheme, CardOrientation, getScoreColor, getScoreBand } from './cardStyles'
 
 // ── Card data types ───────────────────────────────
 
@@ -38,7 +38,32 @@ export interface QuizCardData {
   topRisks: string[]
 }
 
-export type ShareCardData = CompositeCardData | DomainCardData | PulseCardData | QuizCardData
+export interface TrendCardData {
+  type: 'trend'
+  title: string
+  domains: { domain: Domain; score: number; delta: number }[]
+  compositeScore: number
+  date: string
+}
+
+export interface OverviewCardData {
+  type: 'overview'
+  compositeScore: number
+  compositeChange: number | null
+  band: string
+  topDomains: { domain: Domain; score: number; delta: number }[]
+  date: string
+  weekNumber: number
+}
+
+export interface LayoffCardData {
+  type: 'layoff'
+  totalAffected: string
+  topCompanies: { name: string; count: string; reason: string }[]
+  date: string
+}
+
+export type ShareCardData = CompositeCardData | DomainCardData | PulseCardData | QuizCardData | TrendCardData | OverviewCardData | LayoffCardData
 
 // ── Shared sub-components ───────────────────────────────
 
@@ -114,11 +139,14 @@ function DomainBar({ domain, score, theme }: { domain: Domain; score: number; th
 
 // ── Card Templates ───────────────────────────────
 
-/** 1200×630 — standard OG / social media card size */
-const CARD_W = 1200
-const CARD_H = 630
+function getCardDimensions(orientation: CardOrientation) {
+  return orientation === 'horizontal'
+    ? { width: 1200, height: 630 }
+    : { width: 1080, height: 1920 }
+}
 
-function CompositeCard({ data, theme }: { data: CompositeCardData; theme: CardTheme }) {
+function CompositeCard({ data, theme, orientation = 'horizontal' }: { data: CompositeCardData; theme: CardTheme; orientation?: CardOrientation }) {
+  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
   const sortedDomains = [...data.domains].sort((a, b) => b.score - a.score)
 
   return (
@@ -187,7 +215,8 @@ function CompositeCard({ data, theme }: { data: CompositeCardData; theme: CardTh
   )
 }
 
-function DomainCard({ data, theme }: { data: DomainCardData; theme: CardTheme }) {
+function DomainCard({ data, theme, orientation = 'horizontal' }: { data: DomainCardData; theme: CardTheme; orientation?: CardOrientation }) {
+  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
   const color = getScoreColor(data.score, theme)
   const band = getScoreBand(data.score)
 
@@ -277,7 +306,8 @@ function DomainCard({ data, theme }: { data: DomainCardData; theme: CardTheme })
   )
 }
 
-function PulseCard({ data, theme }: { data: PulseCardData; theme: CardTheme }) {
+function PulseCard({ data, theme, orientation = 'horizontal' }: { data: PulseCardData; theme: CardTheme; orientation?: CardOrientation }) {
+  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
   return (
     <div style={{
       width: CARD_W, height: CARD_H,
@@ -341,7 +371,8 @@ function PulseCard({ data, theme }: { data: PulseCardData; theme: CardTheme }) {
   )
 }
 
-function QuizCard({ data, theme }: { data: QuizCardData; theme: CardTheme }) {
+function QuizCard({ data, theme, orientation = 'horizontal' }: { data: QuizCardData; theme: CardTheme; orientation?: CardOrientation }) {
+  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
   const bandColor = data.band === 'critical' ? theme.scoreColors.critical
     : data.band === 'high' ? theme.scoreColors.high
     : data.band === 'elevated' ? theme.scoreColors.elevated
@@ -445,17 +476,266 @@ function QuizCard({ data, theme }: { data: QuizCardData; theme: CardTheme }) {
   )
 }
 
+function TrendCard({ data, theme, orientation = 'horizontal' }: { data: TrendCardData; theme: CardTheme; orientation?: CardOrientation }) {
+  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
+  const sortedDomains = [...data.domains].sort((a, b) => b.score - a.score)
+
+  return (
+    <div style={{
+      width: CARD_W, height: CARD_H,
+      background: theme.bgGradient,
+      display: 'flex', flexDirection: 'column',
+      padding: orientation === 'horizontal' ? 48 : 56,
+      fontFamily: theme.fontBody,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Background grid pattern */}
+      <div style={{
+        position: 'absolute', inset: 0, opacity: 0.03,
+        backgroundImage: `linear-gradient(${theme.text} 1px, transparent 1px), linear-gradient(90deg, ${theme.text} 1px, transparent 1px)`,
+        backgroundSize: '40px 40px',
+      }} />
+
+      {/* Top: branding + date */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
+        <Branding theme={theme} size={orientation === 'horizontal' ? 'normal' : 'normal'} />
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: 10, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2 }}>DOMAIN TRENDS</div>
+          <div style={{ fontSize: 13, color: theme.textSecondary, fontFamily: theme.fontMono, marginTop: 4 }}>{data.date}</div>
+        </div>
+      </div>
+
+      {/* Middle: title + domain bars */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 20, position: 'relative', marginTop: orientation === 'horizontal' ? 0 : 20 }}>
+        <h2 style={{
+          fontSize: orientation === 'horizontal' ? 32 : 42,
+          fontWeight: 700, color: theme.text,
+          fontFamily: theme.fontHeading, lineHeight: 1.2, margin: 0,
+        }}>
+          {data.title}
+        </h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
+          {sortedDomains.map(d => {
+            const color = getScoreColor(d.score, theme)
+            return (
+              <div key={d.domain} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 100, fontSize: 11, color: theme.textSecondary, fontFamily: theme.fontMono, fontWeight: 600, flexShrink: 0 }}>
+                  {DOMAIN_LABELS[d.domain].split(' ').slice(0, 2).join(' ')}
+                </div>
+                <div style={{ flex: 1, height: 12, background: `${theme.textMuted}30`, borderRadius: 6, overflow: 'hidden' }}>
+                  <div style={{ width: `${d.score}%`, height: '100%', background: color, borderRadius: 6 }} />
+                </div>
+                <div style={{ width: 50, textAlign: 'right' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color, fontFamily: theme.fontMono }}>
+                    {d.score}
+                  </div>
+                  <div style={{ fontSize: 10, color: d.delta > 0 ? theme.scoreColors.high : theme.scoreColors.low, fontFamily: theme.fontMono }}>
+                    {d.delta > 0 ? '▲' : '▼'} {Math.abs(d.delta).toFixed(1)}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Bottom: composite score + tagline */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative', marginTop: orientation === 'horizontal' ? 0 : 24 }}>
+        <div style={{ fontSize: 13, color: theme.textMuted, fontStyle: 'italic' }}>
+          Measuring civilizational stress in the age of AI
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono }}>COMPOSITE:</span>
+          <span style={{ fontSize: 20, fontWeight: 800, color: getScoreColor(data.compositeScore, theme), fontFamily: theme.fontMono }}>
+            {data.compositeScore.toFixed(1)}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function OverviewCard({ data, theme, orientation = 'horizontal' }: { data: OverviewCardData; theme: CardTheme; orientation?: CardOrientation }) {
+  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
+  const sortedDomains = [...data.topDomains].sort((a, b) => b.score - a.score)
+
+  return (
+    <div style={{
+      width: CARD_W, height: CARD_H,
+      background: theme.bgGradient,
+      display: 'flex', flexDirection: 'column',
+      padding: orientation === 'horizontal' ? 48 : 56,
+      fontFamily: theme.fontBody,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Background glow */}
+      <div style={{
+        position: 'absolute', top: -150, right: -150,
+        width: 500, height: 500, borderRadius: '50%',
+        background: `radial-gradient(circle, ${getScoreColor(data.compositeScore, theme)}12, transparent 70%)`,
+      }} />
+
+      {/* Top: branding */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
+        <Branding theme={theme} size={orientation === 'horizontal' ? 'normal' : 'normal'} />
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: 10, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2 }}>WEEKLY OVERVIEW</div>
+          <div style={{ fontSize: 13, color: theme.textSecondary, fontFamily: theme.fontMono, marginTop: 4 }}>{data.date}</div>
+        </div>
+      </div>
+
+      {/* Middle: hero score + domains + band */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 32, position: 'relative' }}>
+        {/* Hero score */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+          <ScoreBadge score={data.compositeScore} theme={theme} size={orientation === 'horizontal' ? 'large' : 'large'} />
+          {data.compositeChange !== null && (
+            <div style={{
+              fontSize: 18, fontWeight: 600,
+              fontFamily: theme.fontMono,
+              color: data.compositeChange > 0 ? theme.scoreColors.high : theme.scoreColors.low,
+            }}>
+              {data.compositeChange > 0 ? '▲' : '▼'} {Math.abs(data.compositeChange).toFixed(1)} pts from last week
+            </div>
+          )}
+        </div>
+
+        {/* Domain bars */}
+        <div>
+          <div style={{ fontSize: 10, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2, marginBottom: 16 }}>
+            TOP DOMAIN READINGS
+          </div>
+          {sortedDomains.slice(0, 3).map(d => (
+            <DomainBar key={d.domain} domain={d.domain} score={d.score} theme={theme} />
+          ))}
+        </div>
+
+        {/* Band badge */}
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div style={{
+            display: 'inline-block',
+            padding: '8px 20px', borderRadius: 8,
+            background: `${getScoreColor(data.compositeScore, theme)}20`,
+            border: `1px solid ${getScoreColor(data.compositeScore, theme)}40`,
+            fontSize: 14, fontWeight: 700, color: getScoreColor(data.compositeScore, theme), fontFamily: theme.fontMono, letterSpacing: 2,
+          }}>
+            {data.band.toUpperCase()}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom: tagline */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
+        <div style={{ fontSize: 13, color: theme.textMuted, fontStyle: 'italic' }}>
+          Week {data.weekNumber} • Measuring civilizational stress in the age of AI
+        </div>
+        <div style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono }}>thehumanindex.org</div>
+      </div>
+    </div>
+  )
+}
+
+function LayoffCard({ data, theme, orientation = 'horizontal' }: { data: LayoffCardData; theme: CardTheme; orientation?: CardOrientation }) {
+  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
+
+  return (
+    <div style={{
+      width: CARD_W, height: CARD_H,
+      background: theme.bgGradient,
+      display: 'flex', flexDirection: 'column',
+      padding: orientation === 'horizontal' ? 48 : 56,
+      fontFamily: theme.fontBody,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Accent glow - red tint */}
+      <div style={{
+        position: 'absolute', top: -100, right: -100,
+        width: 400, height: 400, borderRadius: '50%',
+        background: `radial-gradient(circle, ${theme.scoreColors.critical}15, transparent 70%)`,
+      }} />
+
+      {/* Top: branding */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
+        <Branding theme={theme} size={orientation === 'horizontal' ? 'normal' : 'normal'} />
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: 10, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2 }}>LAYOFF TRACKER</div>
+          <div style={{ fontSize: 13, color: theme.textSecondary, fontFamily: theme.fontMono, marginTop: 4 }}>{data.date}</div>
+        </div>
+      </div>
+
+      {/* Middle */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 24, position: 'relative' }}>
+        {/* Big number */}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 14, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2, marginBottom: 8 }}>AFFECTED WORKERS</div>
+          <div style={{
+            fontSize: orientation === 'horizontal' ? 64 : 72,
+            fontWeight: 800, color: theme.scoreColors.critical,
+            fontFamily: theme.fontMono, lineHeight: 1,
+          }}>
+            {data.totalAffected}
+          </div>
+        </div>
+
+        {/* Top companies */}
+        <div>
+          <div style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2, marginBottom: 16 }}>
+            TOP COMPANIES
+          </div>
+          {data.topCompanies.slice(0, orientation === 'horizontal' ? 3 : 4).map((company, i) => (
+            <div key={i} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+              padding: '12px 0',
+              borderBottom: i < (orientation === 'horizontal' ? Math.min(3, data.topCompanies.length) : Math.min(4, data.topCompanies.length)) - 1 ? `1px solid ${theme.textMuted}20` : 'none',
+            }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: theme.text }}>
+                  {company.name}
+                </div>
+                <div style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>
+                  {company.reason}
+                </div>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: theme.scoreColors.critical, fontFamily: theme.fontMono, flexShrink: 0 }}>
+                {company.count}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
+        <div style={{ fontSize: 13, color: theme.textMuted, fontStyle: 'italic' }}>
+          Tracking workforce changes in tech
+        </div>
+        <div style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono }}>thehumanindex.org</div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main Renderer ───────────────────────────────
 
-export function ShareCardRenderer({ data, theme }: { data: ShareCardData; theme: CardTheme }) {
+export function ShareCardRenderer({ data, theme, orientation = 'horizontal' }: { data: ShareCardData; theme: CardTheme; orientation?: CardOrientation }) {
   switch (data.type) {
     case 'composite':
-      return <CompositeCard data={data} theme={theme} />
+      return <CompositeCard data={data} theme={theme} orientation={orientation} />
     case 'domain':
-      return <DomainCard data={data} theme={theme} />
+      return <DomainCard data={data} theme={theme} orientation={orientation} />
     case 'pulse':
-      return <PulseCard data={data} theme={theme} />
+      return <PulseCard data={data} theme={theme} orientation={orientation} />
     case 'quiz':
-      return <QuizCard data={data} theme={theme} />
+      return <QuizCard data={data} theme={theme} orientation={orientation} />
+    case 'trend':
+      return <TrendCard data={data} theme={theme} orientation={orientation} />
+    case 'overview':
+      return <OverviewCard data={data} theme={theme} orientation={orientation} />
+    case 'layoff':
+      return <LayoffCard data={data} theme={theme} orientation={orientation} />
   }
 }
