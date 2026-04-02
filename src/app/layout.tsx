@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer'
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLd'
 import { Providers } from '@/components/Providers'
 import { Analytics } from '@vercel/analytics/react'
+import { GoogleAnalytics } from '@/components/GoogleAnalytics'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -106,6 +107,7 @@ export default function RootLayout({
           <Footer />
         </Providers>
         <Analytics />
+        <GoogleAnalytics />
       </body>
     </html>
   )
