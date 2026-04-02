@@ -149,9 +149,10 @@ const FRED_SERIES = [
     context: '0 = 180K/week (boom), 100 = 800K+ (deep recession)' },
 
   // inequality — FRED Gini (more current than World Bank)
+  // NOTE: FRED reports Gini as whole numbers (e.g. 49.0), not decimals (0.49)
   { id: 'SIPOVGINIRUS', domain: 'inequality', name: 'Gini Index (US, Census)',
-    low: 0.35, high: 0.55, invert: false,
-    context: '0 = Gini 0.35 (egalitarian), 100 = 0.55+ (extreme inequality)' },
+    low: 35, high: 55, invert: false,
+    context: '0 = Gini 35 (egalitarian), 100 = 55+ (extreme inequality)' },
 
   // decay — yield curve as recession probability proxy
   { id: 'T10Y2Y', domain: 'decay', name: '10Y-2Y Treasury Spread',
