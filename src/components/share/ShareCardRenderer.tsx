@@ -65,11 +65,18 @@ export interface LayoffCardData {
 
 export type ShareCardData = CompositeCardData | DomainCardData | PulseCardData | QuizCardData | TrendCardData | OverviewCardData | LayoffCardData
 
+// ── SAFE FONTS for html2canvas ───────────────────────────────
+// html2canvas cannot render custom web fonts reliably.
+// We use only system-safe fonts that exist on every OS.
+const FONT_BODY = 'Helvetica, Arial, sans-serif'
+const FONT_MONO = '"Courier New", Courier, monospace'
+const FONT_HEADING = 'Georgia, "Times New Roman", serif'
+
 // ── Shared sub-components ───────────────────────────────
 
 function HourglassLogo({ color, size = 28 }: { color: string; size?: number }) {
   return (
-    <svg width={size} height={size * 1.5} viewBox="0 0 25 40" fill="none" style={{ flexShrink: 0 }}>
+    <svg width={size} height={size * 1.4} viewBox="0 0 25 40" fill="none" style={{ flexShrink: 0, display: 'block' }}>
       <rect x="2" y="1" width="21" height="4" rx="1.5" fill={color} />
       <rect x="2" y="35" width="21" height="4" rx="1.5" fill={color} />
       <path d="M4 5 C4 5, 4 16, 12.5 20 C21 16, 21 5, 21 5" stroke={color} strokeWidth="2" fill="none" />
@@ -79,17 +86,15 @@ function HourglassLogo({ color, size = 28 }: { color: string; size?: number }) {
   )
 }
 
-function Branding({ theme, size = 'normal' }: { theme: CardTheme; size?: 'normal' | 'small' }) {
-  const fontSize = size === 'small' ? 13 : 16
-  const logoSize = size === 'small' ? 12 : 16
+function Branding({ theme, big = false }: { theme: CardTheme; big?: boolean }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: size === 'small' ? 6 : 8 }}>
-      <HourglassLogo color={theme.accent} size={logoSize} />
+    <div style={{ display: 'flex', alignItems: 'center', gap: big ? 12 : 8 }}>
+      <HourglassLogo color={theme.accent} size={big ? 22 : 16} />
       <div>
-        <div style={{ fontSize, fontWeight: 700, color: theme.text, fontFamily: theme.fontHeading, letterSpacing: 1, lineHeight: 1 }}>
+        <div style={{ fontSize: big ? 20 : 15, fontWeight: 700, color: theme.text, fontFamily: FONT_BODY, letterSpacing: 2, lineHeight: 1.1 }}>
           THE HUMAN INDEX
         </div>
-        <div style={{ fontSize: size === 'small' ? 8 : 9, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2, marginTop: 2 }}>
+        <div style={{ fontSize: big ? 11 : 9, color: theme.textMuted, fontFamily: FONT_MONO, letterSpacing: 2, marginTop: 3 }}>
           thehumanindex.org
         </div>
       </div>
@@ -97,443 +102,459 @@ function Branding({ theme, size = 'normal' }: { theme: CardTheme; size?: 'normal
   )
 }
 
-function ScoreBadge({ score, theme, size = 'large' }: { score: number; theme: CardTheme; size?: 'large' | 'medium' | 'small' }) {
+function ScoreBadge({ score, theme, size = 120 }: { score: number; theme: CardTheme; size?: number }) {
   const color = getScoreColor(score, theme)
   const band = getScoreBand(score)
-  const dims = size === 'large' ? { w: 120, h: 120, fs: 48, bs: 12 } : size === 'medium' ? { w: 80, h: 80, fs: 32, bs: 10 } : { w: 56, h: 56, fs: 22, bs: 8 }
+  const fs = Math.round(size * 0.38)
+  const bs = Math.round(size * 0.1)
 
   return (
     <div style={{
-      width: dims.w, height: dims.h, borderRadius: dims.w / 2,
+      width: size, height: size, borderRadius: size,
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       background: `${color}18`,
-      border: `2px solid ${color}50`,
-      boxShadow: `0 0 40px ${color}20`,
+      border: `3px solid ${color}50`,
     }}>
-      <div style={{ fontSize: dims.fs, fontWeight: 800, color, fontFamily: theme.fontMono, lineHeight: 1 }}>
+      <div style={{ fontSize: fs, fontWeight: 800, color, fontFamily: FONT_MONO, lineHeight: 1, marginBottom: 4 }}>
         {score.toFixed(1)}
       </div>
-      <div style={{ fontSize: dims.bs, fontWeight: 600, color, fontFamily: theme.fontMono, letterSpacing: 2, marginTop: 4 }}>
+      <div style={{ fontSize: bs, fontWeight: 700, color, fontFamily: FONT_MONO, letterSpacing: 2 }}>
         {band}
       </div>
     </div>
   )
 }
 
-function DomainBar({ domain, score, theme }: { domain: Domain; score: number; theme: CardTheme }) {
+function DomainBarRow({ label, score, theme, barHeight = 10, fontSize = 12 }: {
+  label: string; score: number; theme: CardTheme; barHeight?: number; fontSize?: number
+}) {
   const color = getScoreColor(score, theme)
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-      <div style={{ width: 90, fontSize: 10, color: theme.textSecondary, fontFamily: theme.fontMono, textAlign: 'right', flexShrink: 0 }}>
-        {DOMAIN_LABELS[domain].split(' ').slice(0, 2).join(' ')}
+    <div style={{ display: 'flex', alignItems: 'center', marginBottom: barHeight + 4 }}>
+      <div style={{
+        width: 140, fontSize: fontSize - 1, color: theme.textSecondary,
+        fontFamily: FONT_MONO, textAlign: 'right', paddingRight: 16, flexShrink: 0,
+        overflow: 'hidden', whiteSpace: 'nowrap',
+      }}>
+        {label}
       </div>
-      <div style={{ flex: 1, height: 8, background: `${theme.textMuted}30`, borderRadius: 4, overflow: 'hidden' }}>
-        <div style={{ width: `${score}%`, height: '100%', background: color, borderRadius: 4, transition: 'width 0.3s' }} />
+      <div style={{ flex: 1, height: barHeight, background: `${theme.textMuted}30`, borderRadius: barHeight / 2, overflow: 'hidden', marginRight: 16 }}>
+        <div style={{ width: `${score}%`, height: '100%', background: color, borderRadius: barHeight / 2 }} />
       </div>
-      <div style={{ width: 30, fontSize: 11, fontWeight: 700, color, fontFamily: theme.fontMono, textAlign: 'right' }}>
+      <div style={{ width: 40, fontSize, fontWeight: 700, color, fontFamily: FONT_MONO, textAlign: 'right', flexShrink: 0 }}>
         {score}
       </div>
     </div>
   )
 }
 
-// ── Card Templates ───────────────────────────────
+// ── Helpers ───────────────────────────────
 
 function getCardDimensions(orientation: CardOrientation) {
   return orientation === 'horizontal'
-    ? { width: 1200, height: 630 }
-    : { width: 1080, height: 1920 }
+    ? { w: 1200, h: 630 }
+    : { w: 1080, h: 1920 }
 }
 
-function CompositeCard({ data, theme, orientation = 'horizontal' }: { data: CompositeCardData; theme: CardTheme; orientation?: CardOrientation }) {
-  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
-  const sortedDomains = [...data.domains].sort((a, b) => b.score - a.score)
+function truncate(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text
+  return text.substring(0, maxLen - 3).trim() + '...'
+}
 
+// Standard card wrapper
+function CardWrap({ theme, orientation, children }: {
+  theme: CardTheme; orientation: CardOrientation; children: React.ReactNode
+}) {
+  const { w, h } = getCardDimensions(orientation)
+  const pad = orientation === 'horizontal' ? 48 : 64
   return (
     <div style={{
-      width: CARD_W, height: CARD_H,
+      width: w, height: h,
       background: theme.bgGradient,
-      display: 'flex', flexDirection: 'column',
-      padding: 48,
-      fontFamily: theme.fontBody,
+      padding: pad,
+      fontFamily: FONT_BODY,
       position: 'relative',
       overflow: 'hidden',
+      boxSizing: 'border-box',
+      display: 'flex',
+      flexDirection: 'column',
     }}>
-      {/* Background grid pattern */}
+      {/* Grid pattern */}
       <div style={{
-        position: 'absolute', inset: 0, opacity: 0.03,
+        position: 'absolute', inset: 0, opacity: 0.04,
         backgroundImage: `linear-gradient(${theme.text} 1px, transparent 1px), linear-gradient(90deg, ${theme.text} 1px, transparent 1px)`,
         backgroundSize: '40px 40px',
+        pointerEvents: 'none',
       }} />
+      {children}
+    </div>
+  )
+}
 
-      {/* Top: branding + date */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
-        <Branding theme={theme} />
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 10, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2 }}>COMPOSITE INDEX</div>
-          <div style={{ fontSize: 13, color: theme.textSecondary, fontFamily: theme.fontMono, marginTop: 4 }}>{data.date}</div>
-        </div>
-      </div>
-
-      {/* Middle: score + domains */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 64, position: 'relative' }}>
-        {/* Left: big score */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-          <ScoreBadge score={data.score} theme={theme} size="large" />
-          {data.delta !== null && (
-            <div style={{
-              fontSize: 16, fontWeight: 600,
-              fontFamily: theme.fontMono,
-              color: data.delta > 0 ? theme.scoreColors.high : theme.scoreColors.low,
-            }}>
-              {data.delta > 0 ? '▲' : '▼'} {Math.abs(data.delta).toFixed(1)} pts
-            </div>
-          )}
-        </div>
-
-        {/* Right: domain bars */}
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 10, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2, marginBottom: 16 }}>
-            DOMAIN READINGS
-          </div>
-          {sortedDomains.map(d => (
-            <DomainBar key={d.domain} domain={d.domain} score={d.score} theme={theme} />
-          ))}
-        </div>
-      </div>
-
-      {/* Bottom: tagline */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
-        <div style={{ fontSize: 13, color: theme.textMuted, fontStyle: 'italic' }}>
-          Measuring civilizational stress in the age of AI
-        </div>
-        <div style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono }}>
-          thehumanindex.org
-        </div>
+function CardHeader({ theme, label, date, big }: { theme: CardTheme; label: string; date: string; big?: boolean }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', flexShrink: 0 }}>
+      <Branding theme={theme} big={big} />
+      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+        <div style={{ fontSize: big ? 13 : 11, color: theme.textMuted, fontFamily: FONT_MONO, letterSpacing: 2 }}>{label}</div>
+        <div style={{ fontSize: big ? 15 : 13, color: theme.textSecondary, fontFamily: FONT_MONO, marginTop: 4 }}>{date}</div>
       </div>
     </div>
   )
 }
 
+function CardFooter({ theme, text, big }: { theme: CardTheme; text: string; big?: boolean }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative', flexShrink: 0 }}>
+      <div style={{ fontSize: big ? 15 : 13, color: theme.textMuted, fontStyle: 'italic', fontFamily: FONT_BODY }}>
+        {text}
+      </div>
+      <div style={{ fontSize: big ? 13 : 11, color: theme.textMuted, fontFamily: FONT_MONO }}>thehumanindex.org</div>
+    </div>
+  )
+}
+
+// ── Card Templates ───────────────────────────────
+
+function CompositeCard({ data, theme, orientation = 'horizontal' }: { data: CompositeCardData; theme: CardTheme; orientation?: CardOrientation }) {
+  const isV = orientation === 'vertical'
+  const sortedDomains = [...data.domains].sort((a, b) => b.score - a.score)
+
+  if (isV) {
+    return (
+      <CardWrap theme={theme} orientation={orientation}>
+        <CardHeader theme={theme} label="COMPOSITE INDEX" date={data.date} big />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 48, position: 'relative' }}>
+          <ScoreBadge score={data.score} theme={theme} size={200} />
+          {data.delta !== null && (
+            <div style={{
+              fontSize: 24, fontWeight: 700, fontFamily: FONT_MONO,
+              color: data.delta > 0 ? theme.scoreColors.high : theme.scoreColors.low,
+            }}>
+              {data.delta > 0 ? '+' : ''}{data.delta.toFixed(1)} pts from last week
+            </div>
+          )}
+          <div style={{ width: '100%', maxWidth: 800, marginTop: 16 }}>
+            <div style={{ fontSize: 14, color: theme.textMuted, fontFamily: FONT_MONO, letterSpacing: 2, marginBottom: 24, textAlign: 'center' }}>
+              DOMAIN READINGS
+            </div>
+            {sortedDomains.map(d => (
+              <DomainBarRow key={d.domain} label={DOMAIN_LABELS[d.domain]} score={d.score} theme={theme} barHeight={14} fontSize={15} />
+            ))}
+          </div>
+        </div>
+        <CardFooter theme={theme} text="Measuring civilizational stress in the age of AI" big />
+      </CardWrap>
+    )
+  }
+
+  return (
+    <CardWrap theme={theme} orientation={orientation}>
+      <CardHeader theme={theme} label="COMPOSITE INDEX" date={data.date} />
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 56, position: 'relative' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          <ScoreBadge score={data.score} theme={theme} size={130} />
+          {data.delta !== null && (
+            <div style={{
+              fontSize: 15, fontWeight: 700, fontFamily: FONT_MONO,
+              color: data.delta > 0 ? theme.scoreColors.high : theme.scoreColors.low,
+            }}>
+              {data.delta > 0 ? '+' : ''}{data.delta.toFixed(1)} pts
+            </div>
+          )}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 11, color: theme.textMuted, fontFamily: FONT_MONO, letterSpacing: 2, marginBottom: 16 }}>DOMAIN READINGS</div>
+          {sortedDomains.map(d => (
+            <DomainBarRow key={d.domain} label={DOMAIN_LABELS[d.domain].split(' ').slice(0, 2).join(' ')} score={d.score} theme={theme} />
+          ))}
+        </div>
+      </div>
+      <CardFooter theme={theme} text="Measuring civilizational stress in the age of AI" />
+    </CardWrap>
+  )
+}
+
 function DomainCard({ data, theme, orientation = 'horizontal' }: { data: DomainCardData; theme: CardTheme; orientation?: CardOrientation }) {
-  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
+  const isV = orientation === 'vertical'
   const color = getScoreColor(data.score, theme)
   const band = getScoreBand(data.score)
 
   return (
-    <div style={{
-      width: CARD_W, height: CARD_H,
-      background: theme.bgGradient,
-      display: 'flex', flexDirection: 'column',
-      padding: 48,
-      fontFamily: theme.fontBody,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Accent glow */}
+    <CardWrap theme={theme} orientation={orientation}>
+      {/* Glow */}
       <div style={{
-        position: 'absolute', top: -100, right: -100,
-        width: 400, height: 400, borderRadius: '50%',
+        position: 'absolute', top: -120, right: -120,
+        width: 500, height: 500, borderRadius: '50%',
         background: `radial-gradient(circle, ${color}15, transparent 70%)`,
+        pointerEvents: 'none',
       }} />
-
-      {/* Top */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
-        <Branding theme={theme} />
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 10, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2 }}>DOMAIN REPORT</div>
-          <div style={{ fontSize: 13, color: theme.textSecondary, fontFamily: theme.fontMono, marginTop: 4 }}>{data.date}</div>
-        </div>
-      </div>
-
-      {/* Middle */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 20, position: 'relative' }}>
-        <div style={{ fontSize: 11, color, fontFamily: theme.fontMono, letterSpacing: 3, textTransform: 'uppercase', fontWeight: 600 }}>
+      <CardHeader theme={theme} label="DOMAIN REPORT" date={data.date} big={isV} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: isV ? 32 : 20, position: 'relative' }}>
+        <div style={{ fontSize: isV ? 16 : 12, color, fontFamily: FONT_MONO, letterSpacing: 3, textTransform: 'uppercase', fontWeight: 700 }}>
           {DOMAIN_LABELS[data.domain]}
         </div>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <div style={{ fontSize: 80, fontWeight: 800, color, fontFamily: theme.fontMono, lineHeight: 1 }}>
+          <div style={{ fontSize: isV ? 100 : 80, fontWeight: 800, color, fontFamily: FONT_MONO, lineHeight: 1 }}>
             {data.score}
           </div>
           <div>
             <div style={{
-              display: 'inline-block',
-              padding: '6px 14px', borderRadius: 8,
-              background: `${color}20`,
-              border: `1px solid ${color}40`,
-              fontSize: 14, fontWeight: 700, color, fontFamily: theme.fontMono, letterSpacing: 2,
+              display: 'inline-block', padding: '8px 16px', borderRadius: 8,
+              background: `${color}20`, border: `1px solid ${color}40`,
+              fontSize: isV ? 18 : 14, fontWeight: 700, color, fontFamily: FONT_MONO, letterSpacing: 2,
             }}>
               {band}
             </div>
             {data.delta !== null && (
               <div style={{
-                fontSize: 16, fontWeight: 600,
-                fontFamily: theme.fontMono,
+                fontSize: isV ? 20 : 16, fontWeight: 700, fontFamily: FONT_MONO,
                 color: data.delta > 0 ? theme.scoreColors.high : theme.scoreColors.low,
-                marginTop: 8,
+                marginTop: 10,
               }}>
-                {data.delta > 0 ? '▲' : '▼'} {Math.abs(data.delta).toFixed(1)} from last week
+                {data.delta > 0 ? '+' : ''}{data.delta.toFixed(1)} from last week
               </div>
             )}
           </div>
         </div>
-
-        <div style={{ fontSize: 18, color: theme.textSecondary, lineHeight: 1.6, maxWidth: 700 }}>
-          {data.headline}
+        <div style={{ fontSize: isV ? 22 : 18, color: theme.textSecondary, lineHeight: 1.6, maxWidth: isV ? 900 : 700, fontFamily: FONT_BODY }}>
+          {truncate(data.headline, isV ? 200 : 140)}
         </div>
-
         {/* Score bar */}
-        <div style={{ maxWidth: 600 }}>
-          <div style={{ height: 10, background: `${theme.textMuted}25`, borderRadius: 5, overflow: 'hidden' }}>
-            <div style={{ width: `${data.score}%`, height: '100%', background: `linear-gradient(90deg, ${color}80, ${color})`, borderRadius: 5 }} />
+        <div style={{ maxWidth: isV ? 900 : 600 }}>
+          <div style={{ height: isV ? 14 : 10, background: `${theme.textMuted}25`, borderRadius: 7, overflow: 'hidden' }}>
+            <div style={{ width: `${data.score}%`, height: '100%', background: `linear-gradient(90deg, ${color}80, ${color})`, borderRadius: 7 }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 9, color: theme.textMuted, fontFamily: theme.fontMono }}>
-            <span>0 — LOW</span>
-            <span>100 — CRITICAL</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: isV ? 11 : 9, color: theme.textMuted, fontFamily: FONT_MONO }}>
+            <span>0 - LOW</span>
+            <span>100 - CRITICAL</span>
           </div>
         </div>
       </div>
-
-      {/* Bottom */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
-        <div style={{ fontSize: 13, color: theme.textMuted, fontStyle: 'italic' }}>
-          Measuring civilizational stress in the age of AI
-        </div>
-        <div style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono }}>thehumanindex.org</div>
-      </div>
-    </div>
+      <CardFooter theme={theme} text="Measuring civilizational stress in the age of AI" big={isV} />
+    </CardWrap>
   )
 }
 
 function PulseCard({ data, theme, orientation = 'horizontal' }: { data: PulseCardData; theme: CardTheme; orientation?: CardOrientation }) {
-  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
-  return (
-    <div style={{
-      width: CARD_W, height: CARD_H,
-      background: theme.bgGradient,
-      display: 'flex', flexDirection: 'column',
-      padding: 48,
-      fontFamily: theme.fontBody,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Subtle line decoration */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: theme.accent }} />
+  const isV = orientation === 'vertical'
+  // Truncate excerpt to fit card without overflow
+  const maxExcerpt = isV ? 400 : 180
 
-      {/* Top */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
-        <Branding theme={theme} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+  return (
+    <CardWrap theme={theme} orientation={orientation}>
+      {/* Top accent line */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 5, background: theme.accent, pointerEvents: 'none' }} />
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', flexShrink: 0 }}>
+        <Branding theme={theme} big={isV} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
           <div style={{
             padding: '6px 14px', borderRadius: 6,
             background: `${theme.accent}20`,
-            fontSize: 11, fontWeight: 700, color: theme.accent, fontFamily: theme.fontMono, letterSpacing: 2,
+            fontSize: isV ? 14 : 11, fontWeight: 700, color: theme.accent, fontFamily: FONT_MONO, letterSpacing: 2,
           }}>
             WEEKLY PULSE
           </div>
-          <div style={{ fontSize: 13, color: theme.textSecondary, fontFamily: theme.fontMono }}>{data.date}</div>
+          <div style={{ fontSize: isV ? 15 : 13, color: theme.textSecondary, fontFamily: FONT_MONO }}>{data.date}</div>
         </div>
       </div>
 
-      {/* Middle */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 24, position: 'relative' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: isV ? 40 : 24, position: 'relative' }}>
         <h2 style={{
-          fontSize: 38, fontWeight: 700, color: theme.text,
-          fontFamily: theme.fontHeading, lineHeight: 1.2, margin: 0,
-          maxWidth: data.compositeScore ? 800 : 1000,
+          fontSize: isV ? 52 : 36, fontWeight: 700, color: theme.text,
+          fontFamily: FONT_HEADING, lineHeight: 1.25, margin: 0,
+          maxWidth: isV ? 900 : 1000,
         }}>
-          {data.title}
+          {truncate(data.title, isV ? 100 : 70)}
         </h2>
-
-        <p style={{ fontSize: 17, color: theme.textSecondary, lineHeight: 1.7, margin: 0, maxWidth: 800 }}>
-          {data.excerpt}
+        <p style={{
+          fontSize: isV ? 22 : 17, color: theme.textSecondary, lineHeight: 1.7, margin: 0,
+          maxWidth: isV ? 900 : 900, fontFamily: FONT_BODY,
+        }}>
+          {truncate(data.excerpt, maxExcerpt)}
         </p>
-      </div>
-
-      {/* Score + bottom */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
-        <div style={{ fontSize: 13, color: theme.textMuted, fontStyle: 'italic' }}>Read the full analysis at thehumanindex.org/pulse</div>
-        {data.compositeScore !== null && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono }}>INDEX:</span>
+        {isV && data.compositeScore !== null && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginTop: 24 }}>
+            <span style={{ fontSize: 16, color: theme.textMuted, fontFamily: FONT_MONO }}>INDEX SCORE:</span>
             <span style={{
-              fontSize: 22, fontWeight: 800,
+              fontSize: 40, fontWeight: 800,
               color: getScoreColor(data.compositeScore, theme),
-              fontFamily: theme.fontMono,
+              fontFamily: FONT_MONO,
             }}>
               {data.compositeScore.toFixed(1)}
             </span>
           </div>
         )}
       </div>
-    </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative', flexShrink: 0 }}>
+        <div style={{ fontSize: isV ? 15 : 13, color: theme.textMuted, fontStyle: 'italic', fontFamily: FONT_BODY }}>
+          Read the full analysis at thehumanindex.org/pulse
+        </div>
+        {!isV && data.compositeScore !== null && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 11, color: theme.textMuted, fontFamily: FONT_MONO }}>INDEX:</span>
+            <span style={{
+              fontSize: 22, fontWeight: 800,
+              color: getScoreColor(data.compositeScore, theme),
+              fontFamily: FONT_MONO,
+            }}>
+              {data.compositeScore.toFixed(1)}
+            </span>
+          </div>
+        )}
+      </div>
+    </CardWrap>
   )
 }
 
 function QuizCard({ data, theme, orientation = 'horizontal' }: { data: QuizCardData; theme: CardTheme; orientation?: CardOrientation }) {
-  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
+  const isV = orientation === 'vertical'
   const bandColor = data.band === 'critical' ? theme.scoreColors.critical
     : data.band === 'high' ? theme.scoreColors.high
     : data.band === 'elevated' ? theme.scoreColors.elevated
     : data.band === 'moderate' ? theme.scoreColors.moderate
     : theme.scoreColors.low
 
+  const circleSize = isV ? 220 : 160
+
   return (
-    <div style={{
-      width: CARD_W, height: CARD_H,
-      background: theme.bgGradient,
-      display: 'flex', flexDirection: 'column',
-      padding: 48,
-      fontFamily: theme.fontBody,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Background glow */}
+    <CardWrap theme={theme} orientation={orientation}>
+      {/* Glow */}
       <div style={{
-        position: 'absolute', bottom: -100, left: '50%', transform: 'translateX(-50%)',
-        width: 500, height: 300, borderRadius: '50%',
+        position: 'absolute', bottom: -120, left: '50%', transform: 'translateX(-50%)',
+        width: 600, height: 400, borderRadius: '50%',
         background: `radial-gradient(circle, ${bandColor}12, transparent 70%)`,
+        pointerEvents: 'none',
       }} />
 
-      {/* Top */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
-        <Branding theme={theme} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', flexShrink: 0 }}>
+        <Branding theme={theme} big={isV} />
         <div style={{
           padding: '6px 14px', borderRadius: 6,
           background: `${theme.accent}20`,
-          fontSize: 11, fontWeight: 700, color: theme.accent, fontFamily: theme.fontMono, letterSpacing: 2,
+          fontSize: isV ? 14 : 11, fontWeight: 700, color: theme.accent, fontFamily: FONT_MONO, letterSpacing: 2,
         }}>
           AI EXPOSURE QUIZ
         </div>
       </div>
 
-      {/* Middle */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 48, position: 'relative' }}>
-        {/* Left: percentile + band */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: isV ? 'column' : 'row',
+        alignItems: 'center',
+        gap: isV ? 48 : 48,
+        position: 'relative',
+        justifyContent: 'center',
+      }}>
+        {/* Percentile circle + band */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, flexShrink: 0 }}>
           <div style={{
-            width: 160, height: 160, borderRadius: '50%',
+            width: circleSize, height: circleSize, borderRadius: circleSize,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             background: `${bandColor}15`,
             border: `3px solid ${bandColor}40`,
-            boxShadow: `0 0 60px ${bandColor}15`,
           }}>
-            <div style={{ fontSize: 14, color: theme.textMuted, fontFamily: theme.fontMono, marginBottom: 4 }}>PERCENTILE</div>
-            <div style={{ fontSize: 52, fontWeight: 800, color: bandColor, fontFamily: theme.fontMono, lineHeight: 1 }}>
+            <div style={{ fontSize: isV ? 18 : 14, color: theme.textMuted, fontFamily: FONT_MONO, marginBottom: 6 }}>PERCENTILE</div>
+            <div style={{ fontSize: isV ? 72 : 52, fontWeight: 800, color: bandColor, fontFamily: FONT_MONO, lineHeight: 1 }}>
               {data.percentile}
             </div>
           </div>
           <div style={{
-            padding: '6px 18px', borderRadius: 8,
+            padding: '8px 20px', borderRadius: 8,
             background: `${bandColor}20`, border: `1px solid ${bandColor}40`,
-            fontSize: 14, fontWeight: 700, color: bandColor, fontFamily: theme.fontMono, letterSpacing: 2,
+            fontSize: isV ? 18 : 14, fontWeight: 700, color: bandColor, fontFamily: FONT_MONO, letterSpacing: 2,
           }}>
             {data.band.toUpperCase()}
           </div>
         </div>
 
-        {/* Right: job + risks */}
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 14, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2, marginBottom: 8 }}>MY ROLE</div>
-          <div style={{ fontSize: 30, fontWeight: 700, color: theme.text, fontFamily: theme.fontHeading, marginBottom: 24, lineHeight: 1.2 }}>
-            {data.jobTitle}
+        {/* Job + risks */}
+        <div style={{ flex: isV ? undefined : 1, width: isV ? '100%' : undefined, textAlign: isV ? 'center' : 'left' }}>
+          <div style={{ fontSize: isV ? 16 : 14, color: theme.textMuted, fontFamily: FONT_MONO, letterSpacing: 2, marginBottom: 8 }}>MY ROLE</div>
+          <div style={{
+            fontSize: isV ? 38 : 28, fontWeight: 700, color: theme.text, fontFamily: FONT_HEADING,
+            marginBottom: isV ? 32 : 24, lineHeight: 1.2,
+          }}>
+            {truncate(data.jobTitle, 40)}
           </div>
 
           {data.topRisks.length > 0 && (
-            <>
-              <div style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2, marginBottom: 10 }}>TOP TASKS AT RISK</div>
+            <div style={{ textAlign: 'left', maxWidth: isV ? 700 : undefined, margin: isV ? '0 auto' : undefined }}>
+              <div style={{ fontSize: isV ? 13 : 11, color: theme.textMuted, fontFamily: FONT_MONO, letterSpacing: 2, marginBottom: 12 }}>TOP TASKS AT RISK</div>
               {data.topRisks.slice(0, 3).map((risk, i) => (
                 <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '8px 0',
-                  borderBottom: i < data.topRisks.length - 1 ? `1px solid ${theme.textMuted}20` : 'none',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '10px 0',
+                  borderBottom: i < 2 ? `1px solid ${theme.textMuted}20` : 'none',
                 }}>
                   <div style={{
-                    width: 20, height: 20, borderRadius: '50%',
+                    width: 24, height: 24, borderRadius: 24,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: `${bandColor}20`,
-                    fontSize: 10, fontWeight: 700, color: bandColor, fontFamily: theme.fontMono,
+                    fontSize: 12, fontWeight: 700, color: bandColor, fontFamily: FONT_MONO,
+                    flexShrink: 0,
                   }}>
                     {i + 1}
                   </div>
-                  <span style={{ fontSize: 15, color: theme.textSecondary }}>{risk}</span>
+                  <span style={{ fontSize: isV ? 18 : 15, color: theme.textSecondary, fontFamily: FONT_BODY }}>
+                    {truncate(risk, 50)}
+                  </span>
                 </div>
               ))}
-            </>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Bottom */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
-        <div style={{ fontSize: 13, color: theme.textMuted, fontStyle: 'italic' }}>
-          Take the quiz at thehumanindex.org/quiz
-        </div>
-        <div style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono }}>thehumanindex.org</div>
-      </div>
-    </div>
+      <CardFooter theme={theme} text="Take the quiz at thehumanindex.org/quiz" big={isV} />
+    </CardWrap>
   )
 }
 
 function TrendCard({ data, theme, orientation = 'horizontal' }: { data: TrendCardData; theme: CardTheme; orientation?: CardOrientation }) {
-  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
+  const isV = orientation === 'vertical'
   const sortedDomains = [...data.domains].sort((a, b) => b.score - a.score)
 
   return (
-    <div style={{
-      width: CARD_W, height: CARD_H,
-      background: theme.bgGradient,
-      display: 'flex', flexDirection: 'column',
-      padding: orientation === 'horizontal' ? 48 : 56,
-      fontFamily: theme.fontBody,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Background grid pattern */}
-      <div style={{
-        position: 'absolute', inset: 0, opacity: 0.03,
-        backgroundImage: `linear-gradient(${theme.text} 1px, transparent 1px), linear-gradient(90deg, ${theme.text} 1px, transparent 1px)`,
-        backgroundSize: '40px 40px',
-      }} />
+    <CardWrap theme={theme} orientation={orientation}>
+      <CardHeader theme={theme} label="DOMAIN TRENDS" date={data.date} big={isV} />
 
-      {/* Top: branding + date */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
-        <Branding theme={theme} size={orientation === 'horizontal' ? 'normal' : 'normal'} />
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 10, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2 }}>DOMAIN TRENDS</div>
-          <div style={{ fontSize: 13, color: theme.textSecondary, fontFamily: theme.fontMono, marginTop: 4 }}>{data.date}</div>
-        </div>
-      </div>
-
-      {/* Middle: title + domain bars */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 20, position: 'relative', marginTop: orientation === 'horizontal' ? 0 : 20 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: isV ? 32 : 20, position: 'relative' }}>
         <h2 style={{
-          fontSize: orientation === 'horizontal' ? 32 : 42,
-          fontWeight: 700, color: theme.text,
-          fontFamily: theme.fontHeading, lineHeight: 1.2, margin: 0,
+          fontSize: isV ? 48 : 30, fontWeight: 700, color: theme.text,
+          fontFamily: FONT_HEADING, lineHeight: 1.2, margin: 0,
         }}>
           {data.title}
         </h2>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isV ? 24 : 14, marginTop: isV ? 24 : 12, maxWidth: isV ? 900 : undefined }}>
           {sortedDomains.map(d => {
             const color = getScoreColor(d.score, theme)
+            const deltaColor = d.delta > 0 ? theme.scoreColors.high : theme.scoreColors.low
             return (
-              <div key={d.domain} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 100, fontSize: 11, color: theme.textSecondary, fontFamily: theme.fontMono, fontWeight: 600, flexShrink: 0 }}>
+              <div key={d.domain} style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{
+                  width: isV ? 180 : 130, fontSize: isV ? 14 : 12, color: theme.textSecondary,
+                  fontFamily: FONT_MONO, fontWeight: 600, flexShrink: 0, paddingRight: 12,
+                  textAlign: 'right', overflow: 'hidden', whiteSpace: 'nowrap',
+                }}>
                   {DOMAIN_LABELS[d.domain].split(' ').slice(0, 2).join(' ')}
                 </div>
-                <div style={{ flex: 1, height: 12, background: `${theme.textMuted}30`, borderRadius: 6, overflow: 'hidden' }}>
-                  <div style={{ width: `${d.score}%`, height: '100%', background: color, borderRadius: 6 }} />
+                <div style={{ flex: 1, height: isV ? 16 : 12, background: `${theme.textMuted}30`, borderRadius: 8, overflow: 'hidden', marginRight: 16 }}>
+                  <div style={{ width: `${d.score}%`, height: '100%', background: color, borderRadius: 8 }} />
                 </div>
-                <div style={{ width: 50, textAlign: 'right' }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color, fontFamily: theme.fontMono }}>
+                <div style={{ width: isV ? 70 : 50, textAlign: 'right', flexShrink: 0, marginRight: 8 }}>
+                  <span style={{ fontSize: isV ? 16 : 13, fontWeight: 700, color, fontFamily: FONT_MONO }}>
                     {d.score}
-                  </div>
-                  <div style={{ fontSize: 10, color: d.delta > 0 ? theme.scoreColors.high : theme.scoreColors.low, fontFamily: theme.fontMono }}>
-                    {d.delta > 0 ? '▲' : '▼'} {Math.abs(d.delta).toFixed(1)}
-                  </div>
+                  </span>
+                </div>
+                <div style={{ width: isV ? 60 : 45, textAlign: 'right', flexShrink: 0 }}>
+                  <span style={{ fontSize: isV ? 13 : 10, fontWeight: 600, color: deltaColor, fontFamily: FONT_MONO }}>
+                    {d.delta > 0 ? '+' : ''}{d.delta.toFixed(1)}
+                  </span>
                 </div>
               </div>
             )
@@ -541,166 +562,123 @@ function TrendCard({ data, theme, orientation = 'horizontal' }: { data: TrendCar
         </div>
       </div>
 
-      {/* Bottom: composite score + tagline */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative', marginTop: orientation === 'horizontal' ? 0 : 24 }}>
-        <div style={{ fontSize: 13, color: theme.textMuted, fontStyle: 'italic' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative', flexShrink: 0 }}>
+        <div style={{ fontSize: isV ? 15 : 13, color: theme.textMuted, fontStyle: 'italic', fontFamily: FONT_BODY }}>
           Measuring civilizational stress in the age of AI
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono }}>COMPOSITE:</span>
-          <span style={{ fontSize: 20, fontWeight: 800, color: getScoreColor(data.compositeScore, theme), fontFamily: theme.fontMono }}>
+          <span style={{ fontSize: isV ? 13 : 11, color: theme.textMuted, fontFamily: FONT_MONO }}>COMPOSITE:</span>
+          <span style={{ fontSize: isV ? 28 : 20, fontWeight: 800, color: getScoreColor(data.compositeScore, theme), fontFamily: FONT_MONO }}>
             {data.compositeScore.toFixed(1)}
           </span>
         </div>
       </div>
-    </div>
+    </CardWrap>
   )
 }
 
 function OverviewCard({ data, theme, orientation = 'horizontal' }: { data: OverviewCardData; theme: CardTheme; orientation?: CardOrientation }) {
-  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
+  const isV = orientation === 'vertical'
   const sortedDomains = [...data.topDomains].sort((a, b) => b.score - a.score)
+  const scoreColor = getScoreColor(data.compositeScore, theme)
 
   return (
-    <div style={{
-      width: CARD_W, height: CARD_H,
-      background: theme.bgGradient,
-      display: 'flex', flexDirection: 'column',
-      padding: orientation === 'horizontal' ? 48 : 56,
-      fontFamily: theme.fontBody,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Background glow */}
+    <CardWrap theme={theme} orientation={orientation}>
+      {/* Glow */}
       <div style={{
         position: 'absolute', top: -150, right: -150,
         width: 500, height: 500, borderRadius: '50%',
-        background: `radial-gradient(circle, ${getScoreColor(data.compositeScore, theme)}12, transparent 70%)`,
+        background: `radial-gradient(circle, ${scoreColor}12, transparent 70%)`,
+        pointerEvents: 'none',
       }} />
 
-      {/* Top: branding */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
-        <Branding theme={theme} size={orientation === 'horizontal' ? 'normal' : 'normal'} />
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 10, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2 }}>WEEKLY OVERVIEW</div>
-          <div style={{ fontSize: 13, color: theme.textSecondary, fontFamily: theme.fontMono, marginTop: 4 }}>{data.date}</div>
-        </div>
-      </div>
+      <CardHeader theme={theme} label="WEEKLY OVERVIEW" date={data.date} big={isV} />
 
-      {/* Middle: hero score + domains + band */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 32, position: 'relative' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: isV ? 48 : 24, position: 'relative' }}>
         {/* Hero score */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-          <ScoreBadge score={data.compositeScore} theme={theme} size={orientation === 'horizontal' ? 'large' : 'large'} />
-          {data.compositeChange !== null && (
-            <div style={{
-              fontSize: 18, fontWeight: 600,
-              fontFamily: theme.fontMono,
-              color: data.compositeChange > 0 ? theme.scoreColors.high : theme.scoreColors.low,
-            }}>
-              {data.compositeChange > 0 ? '▲' : '▼'} {Math.abs(data.compositeChange).toFixed(1)} pts from last week
-            </div>
-          )}
-        </div>
+        <ScoreBadge score={data.compositeScore} theme={theme} size={isV ? 200 : 130} />
+        {data.compositeChange !== null && (
+          <div style={{
+            fontSize: isV ? 22 : 16, fontWeight: 700, fontFamily: FONT_MONO,
+            color: data.compositeChange > 0 ? theme.scoreColors.high : theme.scoreColors.low,
+          }}>
+            {data.compositeChange > 0 ? '+' : ''}{data.compositeChange.toFixed(1)} pts from last week
+          </div>
+        )}
 
         {/* Domain bars */}
-        <div>
-          <div style={{ fontSize: 10, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2, marginBottom: 16 }}>
+        <div style={{ width: '100%', maxWidth: isV ? 800 : 600 }}>
+          <div style={{ fontSize: isV ? 13 : 11, color: theme.textMuted, fontFamily: FONT_MONO, letterSpacing: 2, marginBottom: 16, textAlign: 'center' }}>
             TOP DOMAIN READINGS
           </div>
-          {sortedDomains.slice(0, 3).map(d => (
-            <DomainBar key={d.domain} domain={d.domain} score={d.score} theme={theme} />
+          {sortedDomains.slice(0, isV ? 5 : 3).map(d => (
+            <DomainBarRow key={d.domain} label={DOMAIN_LABELS[d.domain]} score={d.score} theme={theme}
+              barHeight={isV ? 14 : 10} fontSize={isV ? 14 : 12} />
           ))}
         </div>
 
         {/* Band badge */}
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <div style={{
-            display: 'inline-block',
-            padding: '8px 20px', borderRadius: 8,
-            background: `${getScoreColor(data.compositeScore, theme)}20`,
-            border: `1px solid ${getScoreColor(data.compositeScore, theme)}40`,
-            fontSize: 14, fontWeight: 700, color: getScoreColor(data.compositeScore, theme), fontFamily: theme.fontMono, letterSpacing: 2,
-          }}>
-            {data.band.toUpperCase()}
-          </div>
+        <div style={{
+          display: 'inline-block', padding: isV ? '10px 24px' : '8px 20px', borderRadius: 8,
+          background: `${scoreColor}20`, border: `1px solid ${scoreColor}40`,
+          fontSize: isV ? 18 : 14, fontWeight: 700, color: scoreColor, fontFamily: FONT_MONO, letterSpacing: 2,
+        }}>
+          {data.band.toUpperCase()}
         </div>
       </div>
 
-      {/* Bottom: tagline */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
-        <div style={{ fontSize: 13, color: theme.textMuted, fontStyle: 'italic' }}>
-          Week {data.weekNumber} • Measuring civilizational stress in the age of AI
-        </div>
-        <div style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono }}>thehumanindex.org</div>
-      </div>
-    </div>
+      <CardFooter theme={theme} text={`Week ${data.weekNumber} • Measuring civilizational stress in the age of AI`} big={isV} />
+    </CardWrap>
   )
 }
 
 function LayoffCard({ data, theme, orientation = 'horizontal' }: { data: LayoffCardData; theme: CardTheme; orientation?: CardOrientation }) {
-  const { width: CARD_W, height: CARD_H } = getCardDimensions(orientation)
+  const isV = orientation === 'vertical'
 
   return (
-    <div style={{
-      width: CARD_W, height: CARD_H,
-      background: theme.bgGradient,
-      display: 'flex', flexDirection: 'column',
-      padding: orientation === 'horizontal' ? 48 : 56,
-      fontFamily: theme.fontBody,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Accent glow - red tint */}
+    <CardWrap theme={theme} orientation={orientation}>
+      {/* Red glow */}
       <div style={{
         position: 'absolute', top: -100, right: -100,
-        width: 400, height: 400, borderRadius: '50%',
+        width: 500, height: 500, borderRadius: '50%',
         background: `radial-gradient(circle, ${theme.scoreColors.critical}15, transparent 70%)`,
+        pointerEvents: 'none',
       }} />
 
-      {/* Top: branding */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
-        <Branding theme={theme} size={orientation === 'horizontal' ? 'normal' : 'normal'} />
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 10, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2 }}>LAYOFF TRACKER</div>
-          <div style={{ fontSize: 13, color: theme.textSecondary, fontFamily: theme.fontMono, marginTop: 4 }}>{data.date}</div>
-        </div>
-      </div>
+      <CardHeader theme={theme} label="LAYOFF TRACKER" date={data.date} big={isV} />
 
-      {/* Middle */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 24, position: 'relative' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: isV ? 48 : 24, position: 'relative' }}>
         {/* Big number */}
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 14, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2, marginBottom: 8 }}>AFFECTED WORKERS</div>
+          <div style={{ fontSize: isV ? 18 : 14, color: theme.textMuted, fontFamily: FONT_MONO, letterSpacing: 2, marginBottom: 12 }}>AFFECTED WORKERS</div>
           <div style={{
-            fontSize: orientation === 'horizontal' ? 64 : 72,
-            fontWeight: 800, color: theme.scoreColors.critical,
-            fontFamily: theme.fontMono, lineHeight: 1,
+            fontSize: isV ? 96 : 64, fontWeight: 800, color: theme.scoreColors.critical,
+            fontFamily: FONT_MONO, lineHeight: 1,
           }}>
             {data.totalAffected}
           </div>
         </div>
 
-        {/* Top companies */}
-        <div>
-          <div style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono, letterSpacing: 2, marginBottom: 16 }}>
+        {/* Companies */}
+        <div style={{ maxWidth: isV ? 800 : undefined, margin: isV ? '0 auto' : undefined, width: isV ? '100%' : undefined }}>
+          <div style={{ fontSize: isV ? 13 : 11, color: theme.textMuted, fontFamily: FONT_MONO, letterSpacing: 2, marginBottom: 16 }}>
             TOP COMPANIES
           </div>
-          {data.topCompanies.slice(0, orientation === 'horizontal' ? 3 : 4).map((company, i) => (
+          {data.topCompanies.slice(0, isV ? 5 : 3).map((company, i, arr) => (
             <div key={i} style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-              padding: '12px 0',
-              borderBottom: i < (orientation === 'horizontal' ? Math.min(3, data.topCompanies.length) : Math.min(4, data.topCompanies.length)) - 1 ? `1px solid ${theme.textMuted}20` : 'none',
+              padding: isV ? '16px 0' : '12px 0',
+              borderBottom: i < arr.length - 1 ? `1px solid ${theme.textMuted}20` : 'none',
             }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: theme.text }}>
+                <div style={{ fontSize: isV ? 18 : 14, fontWeight: 700, color: theme.text, fontFamily: FONT_BODY }}>
                   {company.name}
                 </div>
-                <div style={{ fontSize: 12, color: theme.textSecondary, marginTop: 4 }}>
+                <div style={{ fontSize: isV ? 14 : 12, color: theme.textSecondary, marginTop: 4, fontFamily: FONT_BODY }}>
                   {company.reason}
                 </div>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: theme.scoreColors.critical, fontFamily: theme.fontMono, flexShrink: 0 }}>
+              <div style={{ fontSize: isV ? 16 : 13, fontWeight: 700, color: theme.scoreColors.critical, fontFamily: FONT_MONO, flexShrink: 0, paddingLeft: 16 }}>
                 {company.count}
               </div>
             </div>
@@ -708,14 +686,8 @@ function LayoffCard({ data, theme, orientation = 'horizontal' }: { data: LayoffC
         </div>
       </div>
 
-      {/* Bottom */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative' }}>
-        <div style={{ fontSize: 13, color: theme.textMuted, fontStyle: 'italic' }}>
-          Tracking workforce changes in tech
-        </div>
-        <div style={{ fontSize: 11, color: theme.textMuted, fontFamily: theme.fontMono }}>thehumanindex.org</div>
-      </div>
-    </div>
+      <CardFooter theme={theme} text="Tracking workforce changes in tech" big={isV} />
+    </CardWrap>
   )
 }
 
