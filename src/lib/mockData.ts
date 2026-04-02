@@ -40,7 +40,7 @@ What makes this week significant isn't any single indicator — it's the simulta
 
 ## What to Watch
 
-Next week's BLS employment situation report (Friday) will be the first to include the new "AI-exposed occupation" classification codes. This will give us a much cleaner signal on actual displacement versus reallocation. Tech earnings calls (MSFT, GOOG, META) will also reveal enterprise AI adoption velocity.`,
+Next week's BLS employment situation report (Friday) will be closely watched for further signs of white-collar contraction. Researchers have been mapping existing SOC codes to AI-exposure levels, and we expect these frameworks to sharpen our displacement signal. Tech earnings calls (MSFT, GOOG, META) will also reveal enterprise AI adoption velocity.`,
     composite_score_id: 'mock-score-1',
     published_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
     slug: 'ai-acceleration-threshold',
@@ -51,23 +51,23 @@ Next week's BLS employment situation report (Friday) will be the first to includ
     title: 'The White-Collar Reckoning: March Jobs Data Decoded',
     body_markdown: `# The White-Collar Reckoning: March Jobs Data Decoded
 
-March employment data reveals a structural shift that headline unemployment numbers are hiding. While the topline rate holds steady at 4.1%, the composition of employment has changed dramatically.
+March employment data reveals a structural shift that headline unemployment numbers are hiding. While the topline rate holds near 4.4%, the composition of employment has changed dramatically.
 
 ## The Numbers Behind the Numbers
 
-Total nonfarm payrolls added 187,000 jobs — a decent number. But break it down:
+Total nonfarm payrolls continue to grow, but the composition tells a different story:
 
-- **Healthcare and social assistance**: +62,000 (human-touch sectors still growing)
-- **Government**: +38,000 (fiscal stimulus lagging indicator)
-- **Professional and business services**: -24,000 (third consecutive monthly decline)
-- **Information sector**: -18,000 (accelerating losses)
-- **Financial activities**: -11,000 (AI-driven consolidation)
+- **Healthcare and social assistance**: Strong gains (human-touch sectors still growing)
+- **Government**: Steady additions (fiscal stimulus lagging indicator)
+- **Professional and business services**: Declining (consecutive monthly contractions)
+- **Information sector**: Contracting (accelerating losses)
+- **Financial activities**: Declining (AI-driven consolidation)
 
 The economy is adding jobs at the bottom and losing them in the middle. This is exactly the "hollowing out" pattern labor economists warned about.
 
 ## The Freelance Collapse
 
-Less visible but more alarming: the BLS supplemental survey shows self-employed workers in knowledge sectors declined 8.2% year-over-year. Freelance translators, copywriters, graphic designers, and data analysts are being quietly displaced by AI tools their former clients now use directly.
+Less visible but more alarming: surveys of freelance platforms show self-employed workers in knowledge sectors facing accelerating demand declines. Freelance translators, copywriters, graphic designers, and data analysts are being quietly displaced by AI tools their former clients now use directly.
 
 ## Regional Divergence
 
@@ -90,7 +90,7 @@ Institutional trust metrics hit a new low this quarter. Pew Research's latest su
 
 ## The Policy Paralysis
 
-Congress has introduced 47 AI-related bills since January. Zero have reached a floor vote. The legislative process is fundamentally outpaced by the technology it's trying to regulate. By the time a bill is drafted, the capabilities it addresses have already been superseded.
+Congress has introduced dozens of AI-related bills — including the AI PLAN Act, CREATE AI Act, and GAIN AI Act — yet meaningful legislation remains stalled in committee. The legislative process is fundamentally outpaced by the technology it's trying to regulate. By the time a bill is drafted, the capabilities it addresses have already been superseded.
 
 At the state level, the picture is marginally better. California, New York, and Colorado have enacted narrow AI disclosure requirements. But without federal coordination, companies face a patchwork that incentivizes the lowest common denominator.
 
@@ -119,11 +119,11 @@ Q1 earnings season revealed a consistent pattern: record profits, flat headcount
 
 ## The Distribution Problem
 
-McKinsey's latest analysis estimates AI-driven productivity gains of $2.6 trillion annually by 2027. Our analysis of compensation data shows:
+McKinsey's analysis estimates AI-driven productivity gains of $2.6 to $4.4 trillion annually as adoption matures. Our analysis of compensation data shows:
 
-- **Top 10% of earners**: Capturing 68% of AI-related compensation gains
-- **Middle 40%**: Flat to slightly declining in real terms
-- **Bottom 50%**: Experiencing wage pressure from AI-displaced workers competing for remaining roles
+- **Top earners**: Capturing a disproportionate share of AI-related compensation gains, with AI skills commanding 23-25% salary premiums
+- **Middle-income workers**: Flat to slightly declining in real terms
+- **Lower-income workers**: Experiencing wage pressure from AI-displaced workers competing for remaining roles
 
 This isn't new — technology has always concentrated gains initially. What's different is the speed. Previous waves (mechanization, computerization) played out over decades. The current AI wave is compressing the same dynamics into years.
 
@@ -154,9 +154,9 @@ The Social Wellbeing sub-index dropped to 38 this week, driven by new SAMHSA dat
 
 ## The Anxiety Epidemic
 
-The American Psychological Association's 2026 Stress in America survey found that 67% of working adults report "significant anxiety" about AI's impact on their career — up from 41% in 2024. Among workers aged 35-54, the figure rises to 74%.
+The American Psychological Association's Stress in America surveys have tracked a steady rise in AI-related workplace anxiety — from roughly 36% in 2023 to 57% in 2025. Early 2026 indicators suggest the trend is accelerating, particularly among workers aged 35-54.
 
-This isn't abstract worry. It's manifesting in concrete health outcomes: increased prescriptions for anxiety medication (up 18% YoY in the 25-54 demographic), elevated rates of insomnia-related complaints, and a measurable increase in alcohol consumption correlated with industries undergoing rapid AI adoption.
+This isn't abstract worry. It's manifesting in concrete health outcomes: rising prescriptions for anxiety medication in working-age demographics, elevated rates of insomnia-related complaints, and increased stress-related healthcare utilization in industries undergoing rapid AI adoption.
 
 ## The Paradox of Knowledge Workers
 
@@ -164,7 +164,7 @@ Perhaps the most counterintuitive finding: highly educated workers report higher
 
 ## Organizational Impact
 
-Companies are beginning to see the wellbeing cost of AI transformation. Gallup's Q1 engagement survey shows a 12% decline in employee engagement at firms that announced AI-driven restructuring, compared to a 2% decline industry-wide. Presenteeism — showing up but not fully functioning — is reportedly costing AI-transitioning firms an estimated $3,400 per affected employee annually.
+Companies are beginning to see the wellbeing cost of AI transformation. Engagement surveys show notable declines at firms that announced AI-driven restructuring, compared to modest industry-wide declines. Presenteeism — showing up but not fully functioning — is a growing concern at firms undergoing rapid AI transitions.
 
 ## What Helps
 
@@ -197,11 +197,11 @@ Third: screenwriters in South Korea began a strike mirroring the 2023 WGA action
 
 ## The European Dimension
 
-Paris, Berlin, and Rome each saw protests exceeding 10,000 participants against "unregulated AI deployment." The protests are notable for their cross-demographic composition — not just displaced workers, but students, retirees, and small business owners who perceive AI-driven consolidation as a threat to economic diversity.
+Major European cities have seen growing protests against unregulated AI deployment. The protests are notable for their cross-demographic composition — not just displaced workers, but students, retirees, and small business owners who perceive AI-driven consolidation as a threat to economic diversity.
 
 ## Online Sentiment
 
-ACLED's event tracking, combined with our social media analysis, shows a 34% increase in protest-related online discourse over the past 6 weeks. The language is shifting from "concern" to "demand" — indicating a transition from passive anxiety to active mobilization.
+Social media analysis shows a marked increase in protest-related online discourse over the past several weeks. The language is shifting from "concern" to "demand" — indicating a transition from passive anxiety to active mobilization.
 
 ## The Unrest-Policy Connection
 
@@ -220,26 +220,26 @@ The Policy Response sub-index sits at 55, and the story it tells is one of syste
 
 ## The Legislative Timeline Problem
 
-The average time from AI-related bill introduction to committee vote in the US Congress: 14 months. The average time between major AI capability releases: 3 months. By the time legislation is drafted, debated, and amended, the technology it addresses has evolved two or three generations.
+AI-related bills routinely take over a year to move from introduction to committee consideration. Meanwhile, major AI capability releases happen every few months. By the time legislation is drafted, debated, and amended, the technology it addresses has evolved multiple generations.
 
 ## What's Actually Moving
 
 Despite the gridlock at the federal level, some policy action is happening:
 
-- **EEOC**: Issued updated guidance on AI in hiring decisions, with enforcement actions beginning Q3 2026
-- **FTC**: Opened investigations into three companies for AI-driven price discrimination
-- **SEC**: Proposed disclosure requirements for AI's role in material business decisions
-- **State level**: 14 states now have some form of AI-related legislation, up from 6 a year ago
+- **EEOC**: Previous AI hiring guidance was withdrawn in early 2025, but Title VII enforcement still applies to algorithmic discrimination
+- **FTC**: Investigating companies for AI-driven pricing practices and deceptive AI claims
+- **SEC**: Examining disclosure requirements for AI's role in material business decisions
+- **State level**: A growing number of states now have some form of AI-related legislation, with Colorado's AI Act (SB24-205) taking effect in 2026
 
 The pattern: executive agencies and state governments are moving, while Congress remains stalled. This creates a fragmented regulatory landscape that's better than nothing but far from optimal.
 
 ## International Comparison
 
-The EU AI Act, despite implementation challenges, has created a baseline that US policy lacks. Our comparative analysis shows EU-based firms are investing 2.3x more in AI governance infrastructure than US counterparts — not because they want to, but because they have to.
+The EU AI Act, despite implementation challenges, has created a baseline that US policy lacks. With penalties reaching up to 7% of global turnover and the high-risk system deadline approaching in August 2026, EU-based firms are investing significantly more in AI governance infrastructure than US counterparts — not because they want to, but because they have to.
 
 ## The Workforce Transition Gap
 
-Perhaps the most damaging policy failure isn't in AI regulation but in workforce transition. Federal spending on worker retraining programs has increased just 4% nominally since 2023 — a real-terms decline given inflation. Compare this to South Korea's AI Transition Fund ($4.2B over 3 years) or Germany's Qualifizierungschancengesetz expansion.
+Perhaps the most damaging policy failure isn't in AI regulation but in workforce transition. Federal spending on worker retraining programs has barely kept pace with inflation. Compare this to South Korea's multi-billion-dollar AI transformation plan or Germany's Qualifizierungschancengesetz, which funds up to 100% of AI and digital skills retraining costs.
 
 ## Index Interpretation
 
@@ -258,21 +258,21 @@ Public Sentiment at 62 represents something new in our index: a domain where the
 
 ## The Tipping Point
 
-Three months ago, most public polling showed a roughly 50/50 split between AI optimists and pessimists. Today, Gallup's tracking poll shows 61% of Americans believe AI will "mostly harm" working people over the next decade — a 14-point shift in one quarter.
+Three months ago, most public polling showed a roughly 50/50 split between AI optimists and pessimists. Today, Gallup data shows roughly 75% of Americans expect AI to reduce total jobs over the next decade — a significant hardening of public opinion in a short period.
 
-What changed? Not any single event, but a critical mass of personal experience. As AI tools went from demos to deployments, people moved from imagining AI's impact to experiencing it. A Pew study released this week found that 43% of knowledge workers have personally witnessed a colleague's role being eliminated or significantly reduced due to AI.
+What changed? Not any single event, but a critical mass of personal experience. As AI tools went from demos to deployments, people moved from imagining AI's impact to experiencing it. An increasing share of knowledge workers report personally witnessing a colleague's role being eliminated or significantly reduced due to AI integration.
 
 ## The Narrative Fracture
 
-What's particularly interesting is the divergence between elite and public sentiment. In Davos surveys and tech industry polls, optimism about AI remains high (72% positive). Among the general public, it's collapsing. This gap — the widest we've recorded — suggests a fundamental disconnect between those building AI and those being affected by it.
+What's particularly interesting is the divergence between elite and public sentiment. In tech industry circles and executive surveys, optimism about AI remains high. Among the general public, it's collapsing. This gap suggests a fundamental disconnect between those building AI and those being affected by it.
 
 ## Social Media as Amplifier
 
-Reddit, X, and TikTok have become primary venues for sharing displacement stories. The hashtag #AIlaidoff has accumulated 2.1M posts. Our sentiment analysis of these posts shows a shift from individual complaint to collective identity — people are beginning to see themselves as part of a shared experience rather than isolated cases.
+Reddit, X, and TikTok have become primary venues for sharing displacement stories. Hashtags around AI layoffs have surged across platforms, and our sentiment analysis of these posts shows a shift from individual complaint to collective identity — people are beginning to see themselves as part of a shared experience rather than isolated cases.
 
 ## Why Sentiment Matters
 
-Public Sentiment is our lowest-weighted domain at 8%, and that's deliberate — feelings are not facts. But sentiment drives behavior: voting patterns, consumption choices, career decisions, social cohesion. When 62% of a population feels pessimistic about a technology that's being deployed regardless, the political and social consequences are significant.
+Public Sentiment is our lowest-weighted domain at 8%, and that's deliberate — feelings are not facts. But sentiment drives behavior: voting patterns, consumption choices, career decisions, social cohesion. When a majority of the population feels pessimistic about a technology that's being deployed regardless, the political and social consequences are significant.
 
 ## The Trust Interaction
 
@@ -291,17 +291,17 @@ Not everything in the index is headed in one direction. This week we spotlight t
 
 ## Healthcare: The Augmentation Model
 
-Healthcare's AI story is different from most sectors. Rather than displacement, we're seeing augmentation: radiologists using AI to improve diagnostic accuracy by 31%, nurses using predictive models to prioritize patient care, and administrators using AI to reduce paperwork burden.
+Healthcare's AI story is different from most sectors. Rather than displacement, we're seeing augmentation: radiologists using AI to improve diagnostic accuracy, nurses using predictive models to prioritize patient care, and administrators using AI to reduce paperwork burden.
 
 Why? Healthcare has a fundamental constraint other sectors don't: you can't outsource human touch. The jobs that are growing (home health aides, nurse practitioners, physical therapists) require physical presence and emotional intelligence. AI handles the data; humans handle the care.
 
 ## Skilled Trades: The Immunity Effect
 
-Electricians, plumbers, HVAC technicians, and construction workers have seen AI exposure scores below 15 in our model. Their work is physically embodied, spatially complex, and highly variable — exactly the combination AI struggles with. Demand for skilled trades is up 22% year-over-year, and wages are rising at twice the national average.
+Electricians, plumbers, HVAC technicians, and construction workers have seen AI exposure scores below 15 in our model. Their work is physically embodied, spatially complex, and highly variable — exactly the combination AI struggles with. Demand for skilled trades is growing at roughly 3x the rate of professional roles, and wages are rising well above the national average.
 
 ## Education: The Uncomfortable Middle
 
-Education sits in an interesting position. AI tutoring tools are demonstrably effective for content delivery — some studies show 40% improvement in learning outcomes. But the profession's value extends beyond content delivery into mentorship, socialization, and developmental guidance. Schools that are adapting well are redefining the teacher's role from "content deliverer" to "learning facilitator" — and seeing improved outcomes.
+Education sits in an interesting position. AI tutoring tools are demonstrably effective for content delivery — multiple studies show significant improvement in learning outcomes. But the profession's value extends beyond content delivery into mentorship, socialization, and developmental guidance. Schools that are adapting well are redefining the teacher's role from "content deliverer" to "learning facilitator" — and seeing improved outcomes.
 
 ## The Common Thread
 
