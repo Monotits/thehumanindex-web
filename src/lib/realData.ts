@@ -629,6 +629,48 @@ function getAIIndexData(): DomainDataPoint[] {
 }
 
 // ═══════════════════════════════════════════════════════════
+// 9. OECD Reference Data (static until new API stabilizes)
+//    Source: OECD Better Life Index 2024
+//    The old stats.oecd.org API is shut down (500) and the new
+//    sdmx.oecd.org hasn't migrated BLI yet (404).
+//    TODO: Reconnect live API when OECD completes migration.
+// ═══════════════════════════════════════════════════════════
+
+function getOECDReferenceData(): DomainDataPoint[] {
+  const REPORT_YEAR = '2024'
+  const points: DomainDataPoint[] = []
+
+  // Life satisfaction (0-10 scale). US: 6.9/10 (OECD BLI 2024)
+  const lifeSatisfaction = 6.9
+  points.push(makePoint(
+    'wellbeing', 'Life Satisfaction (OECD BLI)', lifeSatisfaction,
+    normalize(lifeSatisfaction, 8.0, 3.0, true),
+    'OECD', 'BLI/SW_LIFS', REPORT_YEAR,
+    '0 = 8.0/10 (very happy), 100 = 3.0/10 (deep despair)',
+  ))
+
+  // Trust in government (% of population). US: ~30% (OECD/Pew 2024)
+  const trustGov = 30
+  points.push(makePoint(
+    'decay', 'Trust in Government (OECD/Pew)', trustGov,
+    normalize(trustGov, 70, 10, true),
+    'OECD', 'BLI/CG_TRSTGOV', REPORT_YEAR,
+    '0 = 70%+ trust (healthy democracy), 100 = 10% trust (institutional collapse)',
+  ))
+
+  // Voter turnout (%). US: ~66% (2024 presidential election)
+  const voterTurnout = 66
+  points.push(makePoint(
+    'unrest', 'Voter Turnout (OECD ref)', voterTurnout,
+    normalize(voterTurnout, 80, 30, true),
+    'OECD', 'BLI/CG_VOTO', REPORT_YEAR,
+    '0 = 80%+ turnout (engaged citizenry), 100 = 30% (civic collapse)',
+  ))
+
+  return points
+}
+
+// ═══════════════════════════════════════════════════════════
 // Combined Pipeline
 // ═══════════════════════════════════════════════════════════
 
@@ -650,14 +692,18 @@ export async function fetchAllRealData(): Promise<RealDataResult> {
     withTimeout(fetchBLSData(), TIMEOUT, 'BLS'),
     withTimeout(fetchFREDData(), TIMEOUT, 'FRED'),
     withTimeout(fetchWorldBankData(), TIMEOUT, 'World Bank'),
-    withTimeout(fetchOECDData(), TIMEOUT, 'OECD'),
-    withTimeout(fetchWHOData(), TIMEOUT, 'WHO'),
+    // OECD live API is in transition (old API shut down, new API hasn't migrated BLI)
+    // Using static reference data instead — see getOECDReferenceData()
+    // withTimeout(fetchOECDData(), TIMEOUT, 'OECD'),
+    // WHO API deprecated end of 2025; USA data returns empty
+    // World Bank already covers suicide rate + life expectancy
+    // withTimeout(fetchWHOData(), TIMEOUT, 'WHO'),
     withTimeout(fetchACLEDData(), TIMEOUT, 'ACLED'),
     withTimeout(fetchONETData(), TIMEOUT, 'O*NET'),
   ])
 
   const allPoints: DomainDataPoint[] = []
-  const sourceNames = ['BLS', 'FRED', 'World Bank', 'OECD', 'WHO', 'ACLED', 'O*NET']
+  const sourceNames = ['BLS', 'FRED', 'World Bank', 'ACLED', 'O*NET']
 
   results.forEach((r, i) => {
     if (r.status === 'fulfilled') {
@@ -669,8 +715,9 @@ export async function fetchAllRealData(): Promise<RealDataResult> {
     }
   })
 
-  // Add AI Index static data (always available)
+  // Add static reference data (always available)
   allPoints.push(...getAIIndexData())
+  allPoints.push(...getOECDReferenceData())
 
   console.log(`[Data Pipeline] Total: ${allPoints.length} data points, ${errors.length} errors`)
   // Log each point's raw → normalized for debugging
@@ -737,7 +784,7 @@ export function computeScores(points: DomainDataPoint[]): ComputedScores {
   else if (composite >= 45) band = 'elevated'
   else if (composite >= 25) band = 'moderate'
 
-  const allSources = ['BLS', 'FRED', 'World Bank', 'OECD', 'WHO', 'ACLED', 'O*NET', 'AI Index']
+  const allSources = ['BLS', 'FRED', 'World Bank', 'OECD', 'ACLED', 'O*NET', 'AI Index']
   const connected = Array.from(connectedSources)
   const missing = allSources.filter(s => !connectedSources.has(s))
 
