@@ -9,7 +9,7 @@ import { seededRandom } from '@/lib/seededRandom'
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts'
 import { useEffect, useState } from 'react'
 import { ShareButton } from '@/components/share'
-import type { CompositeCardData, DomainCardData } from '@/components/share'
+import type { CompositeCardData } from '@/components/share'
 import SubscribeForm from '@/components/SubscribeForm'
 
 interface Props {

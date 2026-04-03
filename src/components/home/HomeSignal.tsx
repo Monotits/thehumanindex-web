@@ -2,10 +2,8 @@
 
 import Link from 'next/link'
 import { CompositeScore, Commentary, Domain, DOMAIN_LABELS, BAND_LABELS } from '@/lib/types'
-import { getDomainContext } from '@/lib/domainDescriptions'
 import { KeyStat } from '@/lib/realData'
 import { useTheme } from '@/lib/theme'
-import { seededRandom } from '@/lib/seededRandom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useEffect, useState } from 'react'
 import { ShareButton } from '@/components/share'

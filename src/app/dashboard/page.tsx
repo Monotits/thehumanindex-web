@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CompositeScore, Domain, DOMAIN_LABELS } from '@/lib/types'
+import { CompositeScore, DOMAIN_LABELS } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/theme'
 import { formatDate } from '@/lib/utils'
