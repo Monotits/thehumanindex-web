@@ -95,7 +95,7 @@ export async function GET(request: Request) {
         env_check: src.name === 'O*NET'
           ? { ONET_API_KEY: process.env.ONET_API_KEY ? `${process.env.ONET_API_KEY.substring(0, 5)}...` : 'MISSING' }
           : src.name === 'ACLED'
-          ? { ACLED_API_KEY: process.env.ACLED_API_KEY ? 'SET' : 'MISSING', ACLED_EMAIL: process.env.ACLED_EMAIL ? 'SET' : 'MISSING' }
+          ? { ACLED_EMAIL: process.env.ACLED_EMAIL ? 'SET' : 'MISSING', ACLED_PASSWORD: process.env.ACLED_PASSWORD ? 'SET' : 'MISSING' }
           : undefined,
       })
     } catch (err) {

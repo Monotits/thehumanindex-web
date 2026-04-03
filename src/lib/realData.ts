@@ -473,17 +473,44 @@ export async function fetchWHOData(): Promise<DomainDataPoint[]> {
 // ═══════════════════════════════════════════════════════════
 
 export async function fetchACLEDData(): Promise<DomainDataPoint[]> {
-  const apiKey = process.env.ACLED_API_KEY
   const email = process.env.ACLED_EMAIL
-  if (!apiKey || !email) return []
+  const password = process.env.ACLED_PASSWORD
+  if (!email || !password) return []
 
   const points: DomainDataPoint[] = []
 
   try {
+    // Step 1: Get OAuth access token
+    const tokenRes = await fetch('https://acleddata.com/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        username: email,
+        password: password,
+        grant_type: 'password',
+        client_id: 'acled',
+      }),
+      cache: 'no-store' as RequestCache,
+    })
+    if (!tokenRes.ok) {
+      const body = await tokenRes.text().catch(() => '')
+      throw new Error(`ACLED OAuth failed: ${tokenRes.status} — ${body.substring(0, 200)}`)
+    }
+    const tokenJson = await tokenRes.json()
+    const accessToken = tokenJson.access_token
+    if (!accessToken) throw new Error('ACLED OAuth: no access_token in response')
+
+    // Step 2: Fetch protest/riot data for US using the new API
     const currentYear = new Date().getFullYear()
-    const url = `https://api.acleddata.com/acled/read?key=${apiKey}&email=${email}&year=${currentYear}&event_type=Protests&event_type=Riots&country=United States&limit=0`
-    const res = await fetch(url, { cache: 'no-store' })
-    if (!res.ok) throw new Error(`ACLED returned ${res.status}`)
+    const apiUrl = `https://acleddata.com/api/acled/read?event_type=Protests&event_type=Riots&country=United States&year=${currentYear}&limit=0`
+    const res = await fetch(apiUrl, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: 'no-store' as RequestCache,
+    })
+    if (!res.ok) {
+      const body = await res.text().catch(() => '')
+      throw new Error(`ACLED API returned ${res.status} — ${body.substring(0, 200)}`)
+    }
     const json = await res.json()
 
     const count = json.count || 0
