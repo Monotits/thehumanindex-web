@@ -78,13 +78,17 @@ export interface KeyStat {
 
 function normalize(value: number, low: number, high: number, invert = false): number {
   if (invert) {
-    // For inverted: low = best (score 0), high = worst (score 100)
-    // Safety: if caller accidentally passes low < high, swap them
-    const [lo, hi] = low > high ? [low, high] : [high, low]
-    const clamped = Math.max(hi, Math.min(lo, value))
-    const score = ((lo - clamped) / (lo - hi)) * 100
+    // For inverted indicators: higher raw value = LESS stress (score closer to 0)
+    // low param = value where stress is highest (score 100)
+    // high param = value where stress is lowest (score 0)
+    // Example: Consumer Sentiment — low=50 (crisis, score 100), high=101 (optimistic, score 0)
+    const minBound = Math.min(low, high)
+    const maxBound = Math.max(low, high)
+    const clamped = Math.max(minBound, Math.min(maxBound, value))
+    const score = ((maxBound - clamped) / (maxBound - minBound)) * 100
     return Math.round(Math.max(0, Math.min(100, score)))
   }
+  // Normal: higher raw value = MORE stress (score closer to 100)
   const clamped = Math.max(low, Math.min(high, value))
   const score = ((clamped - low) / (high - low)) * 100
   return Math.round(Math.max(0, Math.min(100, score)))

@@ -8,19 +8,9 @@ import { useTheme } from '@/lib/theme'
 import { seededRandom } from '@/lib/seededRandom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useEffect, useState } from 'react'
-import { ShareButton, SharePrompt } from '@/components/share'
-import type { CompositeCardData, DomainCardData, TrendCardData } from '@/components/share'
+import { ShareButton } from '@/components/share'
+import type { CompositeCardData } from '@/components/share'
 import SubscribeForm from '@/components/SubscribeForm'
-import SocialFeedSection from '@/components/SocialFeedSection'
-import LayoffTracker from '@/components/LayoffTracker'
-import CorporateLayoffTable from '@/components/CorporateLayoffTable'
-import CorrelationHeatmap from '@/components/charts/CorrelationHeatmap'
-import WaterfallChart from '@/components/charts/WaterfallChart'
-import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
-import MultiDomainTrend from '@/components/charts/MultiDomainTrend'
-import StackedAreaDecomposition from '@/components/charts/StackedAreaDecomposition'
-import WeeklyHeatmap from '@/components/charts/WeeklyHeatmap'
-import DomainComparisonBar from '@/components/charts/DomainComparisonBar'
 import { MonthlyScore } from '@/lib/historicalData'
 
 interface Props {
@@ -54,17 +44,6 @@ function buildTrendData(history: MonthlyScore[] | undefined, currentScore: numbe
   return months
 }
 
-
-const METHODOLOGY_STEPS = [
-  { num: '01', title: 'Collect', desc: '10+ live sources: BLS, FRED, World Bank, OECD, WHO, V-Dem, O*NET, AI Index, WARN Act' },
-  { num: '02', title: 'Analyze', desc: 'Weighted scoring with anomaly detection' },
-  { num: '03', title: 'Index', desc: 'Weekly composite + AI-generated analysis' },
-]
-
-const DATA_SOURCES = [
-  'BLS', 'FRED', 'World Bank', 'OECD', 'WHO', 'V-Dem/WGI', 'O*NET', 'AI Index', 'WARN Act', 'Reddit / RSS',
-]
-
 /* ─── Gauge ─── */
 function GaugeVisual({ score, band }: { score: number; band: string }) {
   const [animated, setAnimated] = useState(0)
@@ -79,8 +58,7 @@ function GaugeVisual({ score, band }: { score: number; band: string }) {
   }, [score])
 
   const bandColor = band === 'critical' ? '#ef4444' : band === 'high' ? '#f97316' : band === 'elevated' ? '#f59e0b' : band === 'moderate' ? '#3b82f6' : '#22c55e'
-  const radius = 120
-  const circumference = Math.PI * radius
+  const circumference = Math.PI * 120
   const progress = (animated / 100) * circumference
 
   const cx = 140, cy = 150, r = 120
@@ -113,43 +91,11 @@ function GaugeVisual({ score, band }: { score: number; band: string }) {
   )
 }
 
-/* ─── Mini Sparkline ─── */
-function Sparkline({ data, color, width = 60, height = 24 }: { data: number[]; color: string; width?: number; height?: number }) {
-  const min = Math.min(...data) - 2
-  const max = Math.max(...data) + 2
-  const points = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * width
-    const y = height - ((v - min) / (max - min)) * height
-    return `${x},${y}`
-  }).join(' ')
-
-  return (
-    <svg width={width} height={height} style={{ display: 'block' }}>
-      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
 export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Props) {
   const { theme } = useTheme()
 
   const trendData = buildTrendData(trendHistory, score.score_value)
-
   const sortedDomains = [...(score.sub_indexes || [])].sort((a, b) => b.value - a.value)
-
-  const sparklineData = (base: number, seed: string) => {
-    const rng = seededRandom(`signal-spark-${seed}`)
-    const d = []
-    for (let i = 0; i < 6; i++) d.push(Math.max(5, base - (6 - i) * (0.5 + rng() * 1.5) + rng() * 3))
-    d.push(base)
-    return d
-  }
-
-  const movers = sortedDomains.map(d => {
-    const rng = seededRandom(`mover-signal-${d.domain}`)
-    return { ...d, delta: +(rng() * 4 - 1.5).toFixed(2) }
-  }).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
-
   const stat = keyStat || { value: '—', label: 'connecting to data sources...', source: '' }
 
   const compositeShareData: CompositeCardData = {
@@ -160,19 +106,9 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
     date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
   }
 
-  const trendShareData: TrendCardData = {
-    type: 'trend',
-    title: 'Domain Trend Analysis',
-    domains: sortedDomains.map(d => {
-      const rng = seededRandom(`mover-signal-${d.domain}`)
-      return { domain: d.domain as Domain, score: Math.round(d.value), delta: +(rng() * 4 - 1.5).toFixed(2) }
-    }),
-    compositeScore: score.score_value,
-    date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-  }
-
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', color: theme.text, fontFamily: theme.fontBody }}>
+
       {/* ═══ Hero ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '60px 24px 40px', textAlign: 'center' }}>
         <div style={{ fontSize: 12, color: theme.textTertiary, textTransform: 'uppercase', letterSpacing: 3, marginBottom: 24 }}>
@@ -197,29 +133,28 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
           The Human Index tracks seven dimensions of civilizational stress caused by AI-driven economic transformation. Updated weekly with real data.
         </p>
 
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-          <Link href="/quiz" style={{ padding: '12px 28px', fontSize: 14, background: '#fff', border: 'none', borderRadius: 8, color: '#000', fontWeight: 600, textDecoration: 'none' }}>
-            How exposed is your job? →
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link href="/dashboard" style={{ padding: '12px 28px', fontSize: 14, background: '#fff', border: 'none', borderRadius: 8, color: '#000', fontWeight: 600, textDecoration: 'none' }}>
+            Explore the Dashboard →
           </Link>
-          <Link href={`/pulse/${pulse.slug}`} style={{ padding: '12px 28px', fontSize: 14, background: 'transparent', border: '1px solid #333', borderRadius: 8, color: '#999', textDecoration: 'none' }}>
-            Read this week&apos;s analysis
+          <Link href="/quiz" style={{ padding: '12px 28px', fontSize: 14, background: 'transparent', border: '1px solid #333', borderRadius: 8, color: '#999', textDecoration: 'none' }}>
+            How exposed is your job?
           </Link>
         </div>
       </section>
 
       {/* ═══ Compact Stat Bar ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 20px' }}>
+      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
         <div className="stat-bar" style={{
           display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 0,
           background: theme.surface, borderRadius: 10, border: `1px solid ${theme.surfaceBorder}`,
           overflow: 'hidden',
         }}>
           {[
-            { value: stat.value, label: stat.label.replace('initial ', '').replace(' this week', ''), src: 'FRED' },
+            { value: stat.value, label: stat.label.replace('initial ', '').replace(' this week', '') },
             ...(score.sub_indexes?.slice(0, 2).map(s => ({
               value: s.value.toFixed(1),
               label: (DOMAIN_LABELS[s.domain] || s.domain).replace(/_/g, ' '),
-              src: '',
             })) || []),
           ].map((item, i, arr) => (
             <div key={i} style={{
@@ -238,52 +173,14 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
         </div>
       </section>
 
-      {/* ═══ This Week's Movers ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }} className="grid-movers">
-          {movers.slice(0, 3).map(m => {
-            const isUp = m.delta > 0
-            const color = isUp ? '#ef4444' : '#22c55e'
-            const ctx = getDomainContext(m.domain as Domain, m.value, m.delta)
-            return (
-              <div key={m.domain} style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ fontSize: 11, color: theme.textTertiary, letterSpacing: 1 }}>{isUp ? '↑ RISING' : '↓ FALLING'}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 13, color, fontWeight: 600 }}>{isUp ? '+' : ''}{m.delta.toFixed(2)}</span>
-                    <ShareButton data={{ type: 'domain', domain: m.domain as Domain, score: Math.round(m.value), delta: m.delta, headline: ctx.insight, date: new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) } as DomainCardData} variant="icon" />
-                  </div>
-                </div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 4 }}>{DOMAIN_LABELS[m.domain]}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-                  <span style={{ fontSize: 24, fontWeight: 300, color }}>{m.value.toFixed(1)}</span>
-                  <Sparkline data={sparklineData(m.value, m.domain)} color={color} />
-                </div>
-                <div style={{ fontSize: 12, color: theme.textSecondary, lineHeight: 1.5 }}>
-                  {ctx.insight}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* ═══ Corporate Layoff Tracker — Primary content ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
-          <CorporateLayoffTable />
-        </div>
-      </section>
-
-      {/* ═══ Trend ═══ */}
+      {/* ═══ Trend Chart ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
         <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <div>
-              <h3 style={{ fontSize: 15, fontWeight: 600, color: '#fff', margin: 0 }}>The trend is rising</h3>
-              <p style={{ fontSize: 12, color: theme.textTertiary, margin: '4px 0 0' }}>Composite index, last 6 months</p>
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: '#fff', margin: 0 }}>6-Month Trend</h3>
+              <p style={{ fontSize: 12, color: theme.textTertiary, margin: '4px 0 0' }}>Composite index over time</p>
             </div>
-            <div style={{ fontSize: 13, color: theme.accent, fontWeight: 600 }}>↑ {((score.score_value / (score.score_value - 5.5) - 1) * 100).toFixed(1)}% since October</div>
           </div>
           <ResponsiveContainer width="100%" height={160}>
             <AreaChart data={trendData}>
@@ -302,90 +199,95 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
         </div>
       </section>
 
-      {/* ═══ Enhanced Domain Analysis ═══ */}
+      {/* ═══ Domain Overview (simple bars) ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <h2 style={{ fontSize: 24, fontWeight: 300, color: '#fff', margin: '0 0 8px' }}>Seven Signals We Track</h2>
           <p style={{ fontSize: 14, color: theme.textTertiary, margin: 0 }}>Each scored 0-100 from public data. Higher = more stress.</p>
         </div>
-        <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24, marginBottom: 16, position: 'relative' }}>
-          <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}>
-            <ShareButton data={trendShareData} variant="icon" />
-          </div>
-          <DomainComparisonBar domains={sortedDomains} />
-        </div>
-      </section>
-
-      {/* ═══ Composite Decomposition ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
         <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
-          <StackedAreaDecomposition domains={sortedDomains} />
-        </div>
-      </section>
-
-      {/* ═══ Waterfall + Multi-Domain Trend ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="grid-2col">
-          <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
-            <WaterfallChart domains={sortedDomains} compositeScore={score.score_value} />
-          </div>
-          <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
-            <MultiDomainTrend domains={sortedDomains} />
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ Risk Matrix + Correlation + Heatmap ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="grid-2col">
-          <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
-            <RiskBubbleChart domains={sortedDomains} />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
-              <WeeklyHeatmap currentScore={score.score_value} />
-            </div>
-            <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
-              <CorrelationHeatmap domains={sortedDomains} />
-            </div>
+          {sortedDomains.map(d => {
+            const color = d.value >= 70 ? '#ef4444' : d.value >= 55 ? '#f97316' : d.value >= 40 ? '#f59e0b' : d.value >= 25 ? '#3b82f6' : '#22c55e'
+            return (
+              <div key={d.domain} style={{ display: 'flex', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
+                <div style={{ flex: '0 0 160px', fontSize: 13, fontWeight: 600, color: '#fff' }}>
+                  {DOMAIN_LABELS[d.domain] || d.domain}
+                </div>
+                <div style={{ flex: 1, height: 6, background: '#1a1a1a', borderRadius: 3, marginRight: 12 }}>
+                  <div style={{ width: `${d.value}%`, height: '100%', background: color, borderRadius: 3, transition: 'width 0.5s ease' }} />
+                </div>
+                <div style={{ flex: '0 0 40px', fontFamily: theme.fontMono, fontSize: 14, fontWeight: 600, color, textAlign: 'right' }}>
+                  {d.value.toFixed(0)}
+                </div>
+              </div>
+            )
+          })}
+          <div style={{ textAlign: 'center', marginTop: 16 }}>
+            <Link href="/dashboard" style={{ fontSize: 13, color: theme.accent, textDecoration: 'none' }}>
+              Full domain analysis on Dashboard →
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ═══ What the World is Saying — Live Feed ═══ */}
+      {/* ═══ Latest Pulse (Prominent) ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <SocialFeedSection />
-      </section>
-
-      {/* ═══ Layoff Tracker ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
-          <LayoffTracker />
-        </div>
-      </section>
-
-      {/* ═══ Pulse ═══ */}
-      <section style={{ maxWidth: 700, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ borderTop: `1px solid ${theme.surfaceBorder}`, paddingTop: 40 }}>
+        <div style={{ background: 'linear-gradient(135deg, #0f1419, #1a1a2a)', borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 32 }}>
           <div style={{ fontSize: 11, color: theme.accent, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12 }}>This Week&apos;s Pulse</div>
-          <h2 style={{ fontSize: 28, fontWeight: 300, color: '#fff', lineHeight: 1.3, margin: '0 0 16px' }}>{pulse.title}</h2>
-          <p style={{ fontSize: 16, color: theme.textSecondary, lineHeight: 1.8, margin: '0 0 24px' }}>
+          <h2 style={{ fontSize: 26, fontWeight: 300, color: '#fff', lineHeight: 1.3, margin: '0 0 16px' }}>{pulse.title}</h2>
+          <p style={{ fontSize: 15, color: theme.textSecondary, lineHeight: 1.8, margin: '0 0 24px' }}>
             {pulse.body_markdown.split('\n').find(l => !l.startsWith('#') && l.trim())?.substring(0, 300)}...
           </p>
-          <Link href={`/pulse/${pulse.slug}`} style={{ fontSize: 14, color: '#fff', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid #333', paddingBottom: 2 }}>
-            Read the full analysis →
-          </Link>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Link href={`/pulse/${pulse.slug}`} style={{ fontSize: 14, color: '#fff', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid #444', paddingBottom: 2 }}>
+              Read the full analysis →
+            </Link>
+            <Link href="/pulse" style={{ fontSize: 13, color: theme.textTertiary, textDecoration: 'none' }}>
+              View all Pulse reports
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ═══ Methodology ═══ */}
+      {/* ═══ Quiz CTA + Subscribe ═══ */}
+      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="grid-2col">
+          {/* Quiz CTA */}
+          <div style={{ background: 'linear-gradient(135deg, #111, #1a1a2a)', border: '1px solid #222', borderRadius: 12, padding: 32, textAlign: 'center' }}>
+            <h3 style={{ fontSize: 20, fontWeight: 300, color: '#fff', margin: '0 0 8px' }}>How exposed is your job?</h3>
+            <p style={{ fontSize: 13, color: theme.textSecondary, margin: '0 0 20px' }}>
+              Take a 2-minute assessment to see where you stand in the AI displacement landscape.
+            </p>
+            <Link href="/quiz" style={{ display: 'inline-block', padding: '12px 28px', fontSize: 14, background: '#fff', border: 'none', borderRadius: 8, color: '#000', fontWeight: 600, textDecoration: 'none' }}>
+              Take the Quiz →
+            </Link>
+          </div>
+
+          {/* Subscribe */}
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 32, textAlign: 'center' }}>
+            <div style={{ fontSize: 18, fontWeight: 300, color: '#fff', marginBottom: 8 }}>Stay informed. Every week.</div>
+            <p style={{ fontSize: 13, color: theme.textSecondary, margin: '0 0 20px' }}>
+              Composite score, top movers, and analysis — delivered every Monday.
+            </p>
+            <div style={{ maxWidth: 340, margin: '0 auto' }}>
+              <SubscribeForm />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ Methodology Brief ═══ */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
         <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 32 }}>
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <h3 style={{ fontSize: 18, fontWeight: 300, color: '#fff', margin: '0 0 4px' }}>How the Index Works</h3>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }} className="grid-methodology">
-            {METHODOLOGY_STEPS.map((step) => (
+            {[
+              { num: '01', title: 'Collect', desc: '10+ live sources: BLS, FRED, World Bank, OECD, WHO, V-Dem, O*NET, AI Index' },
+              { num: '02', title: 'Analyze', desc: 'Weighted scoring with anomaly detection across 7 domains' },
+              { num: '03', title: 'Index', desc: 'Weekly composite score with AI-generated analysis' },
+            ].map((step) => (
               <div key={step.num} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 28, fontWeight: 200, color: theme.accent, opacity: 0.5, marginBottom: 8 }}>{step.num}</div>
                 <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 6 }}>{step.title}</div>
@@ -399,57 +301,8 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
         </div>
       </section>
 
-      {/* ═══ Data Sources ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, flexWrap: 'wrap', padding: '16px 0' }} className="sources-strip">
-          <span style={{ fontSize: 11, color: theme.textTertiary, letterSpacing: 1 }}>SOURCES:</span>
-          {DATA_SOURCES.map(s => (
-            <span key={s} style={{ fontSize: 12, color: theme.textSecondary }}>{s}</span>
-          ))}
-        </div>
-      </section>
-
-      <SharePrompt
-        compositeScore={score.score_value}
-        band={score.band}
-        delta={score.delta}
-        topDomains={sortedDomains.slice(0, 5).map(d => {
-          const rng = seededRandom(`mover-signal-${d.domain}`)
-          return { domain: d.domain as Domain, score: Math.round(d.value), delta: +(rng() * 4 - 1.5).toFixed(2) }
-        })}
-        date={new Date(score.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-        weekNumber={Math.ceil((new Date().getTime() - new Date('2025-01-01').getTime()) / (7 * 24 * 60 * 60 * 1000))}
-      />
-
-      {/* ═══ Subscribe + Quiz ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '16px 24px 32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="grid-2col">
-          {/* Subscribe */}
-          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 32, textAlign: 'center' }}>
-            <div style={{ fontSize: 18, fontWeight: 300, color: '#fff', marginBottom: 8 }}>Stay informed. Every week.</div>
-            <p style={{ fontSize: 13, color: theme.textSecondary, margin: '0 0 20px' }}>
-              Composite score, top movers, and analysis — delivered every Monday.
-            </p>
-            <div style={{ maxWidth: 340, margin: '0 auto' }}>
-              <SubscribeForm />
-            </div>
-          </div>
-
-          {/* Quiz CTA */}
-          <div style={{ background: 'linear-gradient(135deg, #111, #1a1a2a)', border: '1px solid #222', borderRadius: 12, padding: 32, textAlign: 'center' }}>
-            <h3 style={{ fontSize: 20, fontWeight: 300, color: '#fff', margin: '0 0 8px' }}>How exposed is your job?</h3>
-            <p style={{ fontSize: 13, color: theme.textSecondary, margin: '0 0 20px' }}>
-              Take a 2-minute assessment to see where you stand.
-            </p>
-            <Link href="/quiz" style={{ display: 'inline-block', padding: '12px 28px', fontSize: 14, background: '#fff', border: 'none', borderRadius: 8, color: '#000', fontWeight: 600, textDecoration: 'none' }}>
-              Take the Quiz →
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* ═══ Audience Positioning ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '16px 24px 48px', textAlign: 'center' }}>
+      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 48px', textAlign: 'center' }}>
         <div style={{ fontSize: 11, color: theme.textTertiary, letterSpacing: 1, marginBottom: 16 }}>BUILT FOR</div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
           {['Researchers', 'Policy Analysts', 'Journalists', 'Macro Strategists', 'Everyone'].map(a => (
