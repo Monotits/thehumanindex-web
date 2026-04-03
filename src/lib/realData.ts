@@ -269,30 +269,36 @@ const WORLDBANK_INDICATORS = [
 ]
 
 export async function fetchWorldBankData(): Promise<DomainDataPoint[]> {
-  const points: DomainDataPoint[] = []
-
-  for (const ind of WORLDBANK_INDICATORS) {
-    try {
+  // Fetch all indicators in PARALLEL (not sequential) to stay within timeout
+  const results = await Promise.allSettled(
+    WORLDBANK_INDICATORS.map(async (ind) => {
       const url = `https://api.worldbank.org/v2/country/USA/indicator/${ind.code}?format=json&per_page=5&date=2012:2025&mrv=1`
       const res = await fetch(url, { next: { revalidate: 604800 } })
-      if (!res.ok) continue
+      if (!res.ok) return null
 
       const json = await res.json()
       const data = json?.[1]
-      if (!data || data.length === 0) continue
+      if (!data || data.length === 0) return null
 
       const latest = data.find((d: { value: number | null }) => d.value !== null)
-      if (!latest) continue
+      if (!latest) return null
 
-      points.push(makePoint(
+      return makePoint(
         ind.domain, ind.name, latest.value,
         normalize(latest.value, ind.low, ind.high, ind.invert),
         'World Bank', ind.code, latest.date, ind.context,
-      ))
-    } catch (err) {
-      console.error(`World Bank fetch error for ${ind.code}:`, err)
+      )
+    })
+  )
+
+  const points: DomainDataPoint[] = []
+  results.forEach((r, i) => {
+    if (r.status === 'fulfilled' && r.value) {
+      points.push(r.value)
+    } else if (r.status === 'rejected') {
+      console.error(`World Bank fetch error for ${WORLDBANK_INDICATORS[i].code}:`, r.reason)
     }
-  }
+  })
 
   return points
 }
@@ -304,89 +310,92 @@ export async function fetchWorldBankData(): Promise<DomainDataPoint[]> {
 export async function fetchOECDData(): Promise<DomainDataPoint[]> {
   const points: DomainDataPoint[] = []
 
-  try {
-    const url = 'https://stats.oecd.org/sdmx-json/data/BLI/USA.SW_LIFS.L.TOT/all?dimensionAtObservation=allDimensions'
-    const res = await fetch(url, { next: { revalidate: 604800 } })
-    if (!res.ok) throw new Error(`OECD returned ${res.status}`)
-    const json = await res.json()
+  // OECD moved from stats.oecd.org to sdmx.oecd.org in 2024
+  // Try new API first, fall back to old API
+  const OECD_INDICATORS = [
+    {
+      newUrl: 'https://sdmx.oecd.org/public/rest/data/OECD.WISE.WDP,DSD_BLI@DF_BLI,/A.USA.SW_LIFS..?format=jsondata',
+      oldUrl: 'https://stats.oecd.org/sdmx-json/data/BLI/USA.SW_LIFS.L.TOT/all?dimensionAtObservation=allDimensions',
+      domain: 'wellbeing', name: 'Life Satisfaction (OECD)', series: 'BLI/SW_LIFS',
+      low: 8.0, high: 3.0, invert: true,
+      context: '0 = 8.0/10 (very happy), 100 = 3.0/10 (deep despair)',
+      isFraction: false,
+    },
+    {
+      newUrl: 'https://sdmx.oecd.org/public/rest/data/OECD.WISE.WDP,DSD_BLI@DF_BLI,/A.USA.CG_TRSTGOV..?format=jsondata',
+      oldUrl: 'https://stats.oecd.org/sdmx-json/data/BLI/USA.CG_TRSTGOV.L.TOT/all?dimensionAtObservation=allDimensions',
+      domain: 'decay', name: 'Trust in Government (OECD)', series: 'BLI/CG_TRSTGOV',
+      low: 70, high: 10, invert: true,
+      context: '0 = 70%+ trust (healthy democracy), 100 = 10% trust (institutional collapse)',
+      isFraction: true,
+    },
+    {
+      newUrl: 'https://sdmx.oecd.org/public/rest/data/OECD.WISE.WDP,DSD_BLI@DF_BLI,/A.USA.CG_VOTO..?format=jsondata',
+      oldUrl: 'https://stats.oecd.org/sdmx-json/data/BLI/USA.CG_VOTO.L.TOT/all?dimensionAtObservation=allDimensions',
+      domain: 'unrest', name: 'Voter Turnout (OECD)', series: 'BLI/CG_VOTO',
+      low: 80, high: 30, invert: true,
+      context: '0 = 80%+ turnout (engaged citizenry), 100 = 30% (civic collapse)',
+      isFraction: true,
+    },
+  ]
 
-    const observations = json?.dataSets?.[0]?.observations
-    if (observations) {
-      const keys = Object.keys(observations)
-      if (keys.length > 0) {
-        const val = observations[keys[keys.length - 1]]?.[0]
-        if (typeof val === 'number') {
-          points.push(makePoint(
-            'wellbeing', 'Life Satisfaction (OECD)', val,
-            normalize(val, 8.0, 3.0, true),
-            'OECD', 'BLI/SW_LIFS', 'latest',
-            '0 = 8.0/10 (very happy), 100 = 3.0/10 (deep despair)',
-          ))
+  // Helper to extract value from OECD SDMX JSON (works for both old and new API formats)
+  function extractOECDValue(json: Record<string, unknown>): number | null {
+    // New API format (jsondata)
+    const dataSets = json?.dataSets as Array<Record<string, unknown>> | undefined
+    if (dataSets?.[0]) {
+      const series = (dataSets[0].series || dataSets[0].observations) as Record<string, Record<string, unknown>> | undefined
+      if (series) {
+        for (const key of Object.keys(series)) {
+          const obs = series[key]?.observations as Record<string, number[]> | undefined
+          if (obs) {
+            const obsKeys = Object.keys(obs).sort()
+            const lastKey = obsKeys[obsKeys.length - 1]
+            if (lastKey && obs[lastKey]?.[0] != null) return obs[lastKey][0]
+          }
         }
       }
-    }
-  } catch (err) {
-    console.error('OECD life satisfaction error:', err)
-  }
-
-  // OECD Trust in Government
-  try {
-    const url = 'https://stats.oecd.org/sdmx-json/data/BLI/USA.CG_TRSTGOV.L.TOT/all?dimensionAtObservation=allDimensions'
-    const res = await fetch(url, { next: { revalidate: 604800 } })
-    if (res.ok) {
-      const json = await res.json()
-      const observations = json?.dataSets?.[0]?.observations
+      // Old API format: dataSets[0].observations directly
+      const observations = dataSets[0].observations as Record<string, number[]> | undefined
       if (observations) {
         const keys = Object.keys(observations)
         if (keys.length > 0) {
           const val = observations[keys[keys.length - 1]]?.[0]
-          if (typeof val === 'number') {
-            // OECD may return as fraction (0.30) or percentage (30) — normalize
-            const pct = val <= 1 ? val * 100 : val
-            // Trust in government: % of population. Higher = less stress.
-            // US: ~30%. Range: 70% (high trust) → 0, 10% (no trust) → 100
-            points.push(makePoint(
-              'decay', 'Trust in Government (OECD/Pew proxy)', pct,
-              normalize(pct, 70, 10, true),
-              'OECD', 'BLI/CG_TRSTGOV', 'latest',
-              '0 = 70%+ trust (healthy democracy), 100 = 10% trust (institutional collapse)',
-            ))
-          }
+          if (typeof val === 'number') return val
         }
       }
     }
-  } catch (err) {
-    console.error('OECD trust error:', err)
+    return null
   }
 
-  // OECD Voter Turnout — proxy for civic engagement / unrest
-  try {
-    const url = 'https://stats.oecd.org/sdmx-json/data/BLI/USA.CG_VOTO.L.TOT/all?dimensionAtObservation=allDimensions'
-    const res = await fetch(url, { next: { revalidate: 604800 } })
-    if (res.ok) {
-      const json = await res.json()
-      const observations = json?.dataSets?.[0]?.observations
-      if (observations) {
-        const keys = Object.keys(observations)
-        if (keys.length > 0) {
-          const val = observations[keys[keys.length - 1]]?.[0]
-          if (typeof val === 'number') {
-            // OECD may return as fraction (0.55) or percentage (55) — normalize
-            const pct = val <= 1 ? val * 100 : val
-            // Low voter turnout = civic disengagement = unrest signal
-            // Range: 80% (engaged) → 0, 30% (apathetic) → 100
-            points.push(makePoint(
-              'unrest', 'Voter Turnout (OECD)', pct,
-              normalize(pct, 80, 30, true),
-              'OECD', 'BLI/CG_VOTO', 'latest',
-              '0 = 80%+ turnout (engaged citizenry), 100 = 30% (civic collapse)',
-            ))
+  // Fetch all indicators in parallel
+  const results = await Promise.allSettled(
+    OECD_INDICATORS.map(async (ind) => {
+      // Try new API first
+      for (const url of [ind.newUrl, ind.oldUrl]) {
+        try {
+          const res = await fetch(url, { next: { revalidate: 604800 } })
+          if (!res.ok) continue
+          const json = await res.json()
+          const val = extractOECDValue(json)
+          if (val != null) {
+            const finalVal = ind.isFraction && val <= 1 ? val * 100 : val
+            return makePoint(
+              ind.domain, ind.name, finalVal,
+              normalize(finalVal, ind.low, ind.high, ind.invert),
+              'OECD', ind.series, 'latest', ind.context,
+            )
           }
+        } catch {
+          continue // Try next URL
         }
       }
-    }
-  } catch (err) {
-    console.error('OECD voter turnout error:', err)
+      return null
+    })
+  )
+
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value) points.push(r.value)
   }
 
   return points
@@ -398,74 +407,50 @@ export async function fetchOECDData(): Promise<DomainDataPoint[]> {
 // ═══════════════════════════════════════════════════════════
 
 export async function fetchWHOData(): Promise<DomainDataPoint[]> {
+  const WHO_INDICATORS = [
+    {
+      url: "https://ghoapi.azureedge.net/api/SDGSUICIDE?$filter=SpatialDim eq 'USA' and Dim1 eq 'BTSX'&$orderby=TimeDim desc&$top=1",
+      domain: 'wellbeing', name: 'Suicide Rate per 100K (WHO)', series: 'SDGSUICIDE',
+      low: 5, high: 30, invert: false,
+      context: '0 = 5/100K (low suicide rate), 100 = 30+/100K (mental health catastrophe)',
+    },
+    {
+      url: "https://ghoapi.azureedge.net/api/WHOSIS_000001?$filter=SpatialDim eq 'USA' and Dim1 eq 'BTSX'&$orderby=TimeDim desc&$top=1",
+      domain: 'wellbeing', name: 'Life Expectancy at Birth (WHO)', series: 'WHOSIS_000001',
+      low: 82, high: 60, invert: true,
+      context: '0 = 82+ years (Japan-level health), 100 = 60 years (health system collapse)',
+    },
+    {
+      url: "https://ghoapi.azureedge.net/api/SA_0000001688?$filter=SpatialDim eq 'USA' and Dim1 eq 'BTSX'&$orderby=TimeDim desc&$top=1",
+      domain: 'wellbeing', name: 'Alcohol Consumption per Capita (WHO)', series: 'SA_0000001688',
+      low: 5, high: 15, invert: false,
+      context: '0 = 5L/year (moderate), 100 = 15L+ (severe substance abuse crisis)',
+    },
+  ]
+
+  // Fetch all WHO indicators in parallel
+  const results = await Promise.allSettled(
+    WHO_INDICATORS.map(async (ind) => {
+      const res = await fetch(ind.url, { next: { revalidate: 604800 } })
+      if (!res.ok) return null
+      const json = await res.json()
+      const item = json?.value?.[0]
+      if (!item || item.NumericValue == null) return null
+
+      const val = item.NumericValue
+      return makePoint(
+        ind.domain, ind.name, val,
+        normalize(val, ind.low, ind.high, ind.invert),
+        'WHO', ind.series, String(item.TimeDim || 'latest'), ind.context,
+      )
+    })
+  )
+
   const points: DomainDataPoint[] = []
-
-  // Age-standardized suicide rate per 100,000
-  try {
-    const url = 'https://ghoapi.azureedge.net/api/SDGSUICIDE?$filter=SpatialDim eq \'USA\' and Dim1 eq \'BTSX\'&$orderby=TimeDim desc&$top=1'
-    const res = await fetch(url, { next: { revalidate: 604800 } })
-    if (res.ok) {
-      const json = await res.json()
-      const item = json?.value?.[0]
-      if (item && item.NumericValue != null) {
-        const val = item.NumericValue
-        // US suicide rate: ~14.5/100K. Range: 5 (low) to 30 (extreme crisis)
-        points.push(makePoint(
-          'wellbeing', 'Suicide Rate per 100K (WHO)', val,
-          normalize(val, 5, 30),
-          'WHO', 'SDGSUICIDE', String(item.TimeDim || 'latest'),
-          '0 = 5/100K (low suicide rate), 100 = 30+/100K (mental health catastrophe)',
-        ))
-      }
-    }
-  } catch (err) {
-    console.error('WHO suicide rate error:', err)
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value) points.push(r.value)
+    else if (r.status === 'rejected') console.error('WHO fetch error:', r.reason)
   }
-
-  // Life expectancy at birth (both sexes)
-  try {
-    const url = 'https://ghoapi.azureedge.net/api/WHOSIS_000001?$filter=SpatialDim eq \'USA\' and Dim1 eq \'BTSX\'&$orderby=TimeDim desc&$top=1'
-    const res = await fetch(url, { next: { revalidate: 604800 } })
-    if (res.ok) {
-      const json = await res.json()
-      const item = json?.value?.[0]
-      if (item && item.NumericValue != null) {
-        const val = item.NumericValue
-        // US life expectancy: ~77 years. Range: 82 (Japan-level) to 60 (crisis)
-        points.push(makePoint(
-          'wellbeing', 'Life Expectancy at Birth (WHO)', val,
-          normalize(val, 82, 60, true),
-          'WHO', 'WHOSIS_000001', String(item.TimeDim || 'latest'),
-          '0 = 82+ years (Japan-level health), 100 = 60 years (health system collapse)',
-        ))
-      }
-    }
-  } catch (err) {
-    console.error('WHO life expectancy error:', err)
-  }
-
-  // Alcohol consumption (litres pure alcohol per capita)
-  try {
-    const url = 'https://ghoapi.azureedge.net/api/SA_0000001688?$filter=SpatialDim eq \'USA\' and Dim1 eq \'BTSX\'&$orderby=TimeDim desc&$top=1'
-    const res = await fetch(url, { next: { revalidate: 604800 } })
-    if (res.ok) {
-      const json = await res.json()
-      const item = json?.value?.[0]
-      if (item && item.NumericValue != null) {
-        const val = item.NumericValue
-        // US: ~8.9 litres. Range: 5 (moderate) to 15 (severe substance abuse)
-        points.push(makePoint(
-          'wellbeing', 'Alcohol Consumption per Capita (WHO)', val,
-          normalize(val, 5, 15),
-          'WHO', 'SA_0000001688', String(item.TimeDim || 'latest'),
-          '0 = 5L/year (moderate), 100 = 15L+ (severe substance abuse crisis)',
-        ))
-      }
-    }
-  } catch (err) {
-    console.error('WHO alcohol error:', err)
-  }
-
   return points
 }
 
@@ -640,7 +625,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 
 export async function fetchAllRealData(): Promise<RealDataResult> {
   const errors: string[] = []
-  const TIMEOUT = 15000 // 15s per source
+  const TIMEOUT = 25000 // 25s per source (cron has 60s total, sources run in parallel)
 
   const results = await Promise.allSettled([
     withTimeout(fetchBLSData(), TIMEOUT, 'BLS'),
