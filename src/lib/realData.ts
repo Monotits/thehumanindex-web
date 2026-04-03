@@ -116,7 +116,7 @@ export async function fetchBLSData(): Promise<DomainDataPoint[]> {
         endyear: String(currentYear),
         ...(process.env.BLS_API_KEY ? { registrationkey: process.env.BLS_API_KEY } : {}),
       }),
-      next: { revalidate: 86400 },
+      cache: 'no-store',
     })
 
     if (!res.ok) throw new Error(`BLS API returned ${res.status}`)
@@ -203,7 +203,7 @@ export async function fetchFREDData(): Promise<DomainDataPoint[]> {
   for (const s of FRED_SERIES) {
     try {
       const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${s.id}&api_key=${apiKey}&file_type=json&sort_order=desc&limit=1`
-      const res = await fetch(url, { next: { revalidate: 86400 } })
+      const res = await fetch(url, { cache: 'no-store' })
 
       if (!res.ok) continue
       const json = await res.json()
@@ -273,7 +273,7 @@ export async function fetchWorldBankData(): Promise<DomainDataPoint[]> {
   const results = await Promise.allSettled(
     WORLDBANK_INDICATORS.map(async (ind) => {
       const url = `https://api.worldbank.org/v2/country/USA/indicator/${ind.code}?format=json&per_page=5&date=2012:2025&mrv=1`
-      const res = await fetch(url, { next: { revalidate: 604800 } })
+      const res = await fetch(url, { cache: 'no-store' })
       if (!res.ok) return null
 
       const json = await res.json()
@@ -371,11 +371,15 @@ export async function fetchOECDData(): Promise<DomainDataPoint[]> {
   // Fetch all indicators in parallel
   const results = await Promise.allSettled(
     OECD_INDICATORS.map(async (ind) => {
-      // Try new API first
+      // Try new API first, then old
+      const errors: string[] = []
       for (const url of [ind.newUrl, ind.oldUrl]) {
         try {
-          const res = await fetch(url, { next: { revalidate: 604800 } })
-          if (!res.ok) continue
+          const res = await fetch(url, { cache: 'no-store' as RequestCache })
+          if (!res.ok) {
+            errors.push(`${url.substring(0, 60)}... → HTTP ${res.status}`)
+            continue
+          }
           const json = await res.json()
           const val = extractOECDValue(json)
           if (val != null) {
@@ -386,10 +390,13 @@ export async function fetchOECDData(): Promise<DomainDataPoint[]> {
               'OECD', ind.series, 'latest', ind.context,
             )
           }
-        } catch {
-          continue // Try next URL
+          errors.push(`${url.substring(0, 60)}... → no value in response`)
+        } catch (err) {
+          errors.push(`${url.substring(0, 60)}... → ${String(err).substring(0, 100)}`)
+          continue
         }
       }
+      console.warn(`OECD ${ind.series}: all URLs failed:`, errors)
       return null
     })
   )
@@ -431,11 +438,17 @@ export async function fetchWHOData(): Promise<DomainDataPoint[]> {
   // Fetch all WHO indicators in parallel
   const results = await Promise.allSettled(
     WHO_INDICATORS.map(async (ind) => {
-      const res = await fetch(ind.url, { next: { revalidate: 604800 } })
-      if (!res.ok) return null
+      const res = await fetch(ind.url, { cache: 'no-store' as RequestCache })
+      if (!res.ok) {
+        console.error(`WHO ${ind.series}: HTTP ${res.status}`)
+        return null
+      }
       const json = await res.json()
       const item = json?.value?.[0]
-      if (!item || item.NumericValue == null) return null
+      if (!item || item.NumericValue == null) {
+        console.warn(`WHO ${ind.series}: no data in response`)
+        return null
+      }
 
       const val = item.NumericValue
       return makePoint(
@@ -468,7 +481,7 @@ export async function fetchACLEDData(): Promise<DomainDataPoint[]> {
   try {
     const currentYear = new Date().getFullYear()
     const url = `https://api.acleddata.com/acled/read?key=${apiKey}&email=${email}&year=${currentYear}&event_type=Protests&event_type=Riots&country=United States&limit=0`
-    const res = await fetch(url, { next: { revalidate: 86400 } })
+    const res = await fetch(url, { cache: 'no-store' })
     if (!res.ok) throw new Error(`ACLED returned ${res.status}`)
     const json = await res.json()
 
@@ -496,13 +509,17 @@ export async function fetchONETData(): Promise<DomainDataPoint[]> {
 
   const points: DomainDataPoint[] = []
   const authHeader = 'Basic ' + Buffer.from(`${apiKey}:`).toString('base64')
-  const headers = { Authorization: authHeader, Accept: 'application/json' }
-  const fetchOpts = { headers, next: { revalidate: 604800 } } // 1 week cache
 
   // Helper to safely fetch O*NET endpoints
   async function onetFetch(path: string) {
-    const res = await fetch(`https://services.onetcenter.org/ws/${path}`, fetchOpts)
-    if (!res.ok) throw new Error(`O*NET ${path}: ${res.status}`)
+    const res = await fetch(`https://services.onetcenter.org/ws/${path}`, {
+      headers: { Authorization: authHeader, Accept: 'application/json' },
+      cache: 'no-store' as RequestCache,
+    })
+    if (!res.ok) {
+      const body = await res.text().catch(() => '')
+      throw new Error(`O*NET ${path}: HTTP ${res.status} — ${body.substring(0, 200)}`)
+    }
     return res.json()
   }
 
@@ -569,7 +586,9 @@ export async function fetchONETData(): Promise<DomainDataPoint[]> {
   }
 
   if (results.every(r => r.status === 'rejected')) {
-    console.error('O*NET: all requests failed', results.map(r => r.status === 'rejected' ? r.reason : null))
+    const errors = results.map(r => r.status === 'rejected' ? String(r.reason) : '').filter(Boolean)
+    console.error('O*NET: all requests failed:', errors)
+    throw new Error(`O*NET: all failed — ${errors[0]}`)
   }
 
   return points
@@ -740,7 +759,7 @@ export async function fetchKeyStat(): Promise<KeyStat> {
   if (apiKey) {
     try {
       const url = `https://api.stlouisfed.org/fred/series/observations?series_id=ICSA&api_key=${apiKey}&file_type=json&sort_order=desc&limit=1`
-      const res = await withTimeout(fetch(url, { next: { revalidate: 86400 } }), FETCH_TIMEOUT, 'FRED-ICSA')
+      const res = await withTimeout(fetch(url, { cache: 'no-store' }), FETCH_TIMEOUT, 'FRED-ICSA')
       if (res.ok) {
         const json = await res.json()
         const obs = json.observations?.[0]
@@ -754,7 +773,7 @@ export async function fetchKeyStat(): Promise<KeyStat> {
 
     try {
       const url = `https://api.stlouisfed.org/fred/series/observations?series_id=UNRATE&api_key=${apiKey}&file_type=json&sort_order=desc&limit=1`
-      const res = await withTimeout(fetch(url, { next: { revalidate: 86400 } }), FETCH_TIMEOUT, 'FRED-UNRATE')
+      const res = await withTimeout(fetch(url, { cache: 'no-store' }), FETCH_TIMEOUT, 'FRED-UNRATE')
       if (res.ok) {
         const json = await res.json()
         const obs = json.observations?.[0]
@@ -778,7 +797,7 @@ export async function fetchKeyStat(): Promise<KeyStat> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-      next: { revalidate: 86400 },
+      cache: 'no-store',
     }), FETCH_TIMEOUT, 'BLS-keyStat')
     if (res.ok) {
       const json = await res.json()
