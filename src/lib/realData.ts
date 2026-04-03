@@ -78,8 +78,11 @@ export interface KeyStat {
 
 function normalize(value: number, low: number, high: number, invert = false): number {
   if (invert) {
-    const clamped = Math.max(high, Math.min(low, value))
-    const score = ((low - clamped) / (low - high)) * 100
+    // For inverted: low = best (score 0), high = worst (score 100)
+    // Safety: if caller accidentally passes low < high, swap them
+    const [lo, hi] = low > high ? [low, high] : [high, low]
+    const clamped = Math.max(hi, Math.min(lo, value))
+    const score = ((lo - clamped) / (lo - hi)) * 100
     return Math.round(Math.max(0, Math.min(100, score)))
   }
   const clamped = Math.max(low, Math.min(high, value))
@@ -335,11 +338,13 @@ export async function fetchOECDData(): Promise<DomainDataPoint[]> {
         if (keys.length > 0) {
           const val = observations[keys[keys.length - 1]]?.[0]
           if (typeof val === 'number') {
+            // OECD may return as fraction (0.30) or percentage (30) — normalize
+            const pct = val <= 1 ? val * 100 : val
             // Trust in government: % of population. Higher = less stress.
             // US: ~30%. Range: 70% (high trust) → 0, 10% (no trust) → 100
             points.push(makePoint(
-              'decay', 'Trust in Government (OECD/Pew proxy)', val,
-              normalize(val, 70, 10, true),
+              'decay', 'Trust in Government (OECD/Pew proxy)', pct,
+              normalize(pct, 70, 10, true),
               'OECD', 'BLI/CG_TRSTGOV', 'latest',
               '0 = 70%+ trust (healthy democracy), 100 = 10% trust (institutional collapse)',
             ))
@@ -363,11 +368,13 @@ export async function fetchOECDData(): Promise<DomainDataPoint[]> {
         if (keys.length > 0) {
           const val = observations[keys[keys.length - 1]]?.[0]
           if (typeof val === 'number') {
+            // OECD may return as fraction (0.55) or percentage (55) — normalize
+            const pct = val <= 1 ? val * 100 : val
             // Low voter turnout = civic disengagement = unrest signal
             // Range: 80% (engaged) → 0, 30% (apathetic) → 100
             points.push(makePoint(
-              'unrest', 'Voter Turnout (OECD)', val,
-              normalize(val, 80, 30, true),
+              'unrest', 'Voter Turnout (OECD)', pct,
+              normalize(pct, 80, 30, true),
               'OECD', 'BLI/CG_VOTO', 'latest',
               '0 = 80%+ turnout (engaged citizenry), 100 = 30% (civic collapse)',
             ))
@@ -527,12 +534,13 @@ export async function fetchONETData(): Promise<DomainDataPoint[]> {
     try {
       const json = results[0].value
       const totalHotTechs = json.total || 0
-      // Range: 30 (normal tech evolution) → 120 (unprecedented disruption)
+      // Range: 100 (stable tech landscape) → 600 (massive disruption)
+      // O*NET typically lists 200-400+ hot technologies; wider range avoids ceiling
       points.push(makePoint(
         'work_risk', 'Hot Technology Count (O*NET)', totalHotTechs,
-        normalize(totalHotTechs, 30, 120),
+        normalize(totalHotTechs, 100, 600),
         'O*NET', 'hot_technology', 'latest',
-        '0 = ≤30 hot techs (normal evolution), 100 = 120+ (massive skill disruption)',
+        '0 = ≤100 hot techs (stable), 100 = 600+ (massive skill disruption)',
       ))
     } catch (e) { console.error('O*NET hot_tech parse:', e) }
   }
@@ -544,12 +552,13 @@ export async function fetchONETData(): Promise<DomainDataPoint[]> {
       const json = results[1].value
       const totalBright = json.total || 0
       // Range: inverted — more bright outlook = LESS risk
-      // 300+ bright outlook occupations = healthy, 100 = concerning decline
+      // 500+ bright outlook occupations = healthy, <150 = severe contraction
+      // NOTE: for invert=true, first param (low) must be > second param (high)
       points.push(makePoint(
         'work_risk', 'Bright Outlook Occupations (O*NET)', totalBright,
-        normalize(totalBright, 100, 350, true),
+        normalize(totalBright, 500, 150, true),
         'O*NET', 'bright_outlook', 'latest',
-        '0 = 350+ bright occupations (strong growth), 100 = <100 (severe contraction)',
+        '0 = 500+ bright occupations (strong growth), 100 = <150 (severe contraction)',
       ))
     } catch (e) { console.error('O*NET bright parse:', e) }
   }
@@ -560,12 +569,13 @@ export async function fetchONETData(): Promise<DomainDataPoint[]> {
     try {
       const json = results[2].value
       const aiOccupations = json.total || 0
-      // Range: 20 (AI is niche) → 200 (AI pervades most occupations)
+      // Range: 10 (AI is niche) → 300 (AI pervades most occupations)
+      // O*NET keyword search can return many results; wider range for accuracy
       points.push(makePoint(
         'work_risk', 'AI-Related Occupations (O*NET)', aiOccupations,
-        normalize(aiOccupations, 20, 200),
+        normalize(aiOccupations, 10, 300),
         'O*NET', 'ai_occupations', 'latest',
-        '0 = ≤20 AI occupations (niche), 100 = 200+ (AI pervades workforce)',
+        '0 = ≤10 AI occupations (niche), 100 = 300+ (AI pervades workforce)',
       ))
     } catch (e) { console.error('O*NET AI search parse:', e) }
   }
@@ -645,13 +655,21 @@ export async function fetchAllRealData(): Promise<RealDataResult> {
   results.forEach((r, i) => {
     if (r.status === 'fulfilled') {
       allPoints.push(...r.value)
+      console.log(`[Data Pipeline] ${sourceNames[i]}: ${r.value.length} data points`)
     } else {
       errors.push(`${sourceNames[i]}: ${r.reason}`)
+      console.warn(`[Data Pipeline] ${sourceNames[i]}: FAILED —`, r.reason)
     }
   })
 
   // Add AI Index static data (always available)
   allPoints.push(...getAIIndexData())
+
+  console.log(`[Data Pipeline] Total: ${allPoints.length} data points, ${errors.length} errors`)
+  // Log each point's raw → normalized for debugging
+  for (const p of allPoints) {
+    console.log(`  [${p.domain}] ${p.indicator}: raw=${p.value} → normalized=${p.normalized}`)
+  }
 
   return { points: allPoints, errors }
 }

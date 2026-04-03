@@ -21,11 +21,37 @@ import MultiDomainTrend from '@/components/charts/MultiDomainTrend'
 import StackedAreaDecomposition from '@/components/charts/StackedAreaDecomposition'
 import WeeklyHeatmap from '@/components/charts/WeeklyHeatmap'
 import DomainComparisonBar from '@/components/charts/DomainComparisonBar'
+import { MonthlyScore } from '@/lib/historicalData'
 
 interface Props {
   score: CompositeScore
   pulse: Commentary
   keyStat?: KeyStat
+  trendHistory?: MonthlyScore[]
+}
+
+const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function buildTrendData(history: MonthlyScore[] | undefined, currentScore: number) {
+  if (history && history.length > 0) {
+    const data = history.map(h => {
+      const [, monthStr] = h.year_month.split('-')
+      return { m: MONTH_SHORT[parseInt(monthStr, 10) - 1], s: h.composite }
+    })
+    const now = new Date()
+    const currentYM = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    if (history[history.length - 1]?.year_month !== currentYM) {
+      data.push({ m: MONTH_SHORT[now.getMonth()], s: currentScore })
+    }
+    return data
+  }
+  const now = new Date()
+  const months: { m: string; s: number }[] = []
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    months.push({ m: MONTH_SHORT[d.getMonth()], s: currentScore })
+  }
+  return months
 }
 
 
@@ -104,18 +130,10 @@ function Sparkline({ data, color, width = 60, height = 24 }: { data: number[]; c
   )
 }
 
-export default function HomeSignal({ score, pulse, keyStat }: Props) {
+export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Props) {
   const { theme } = useTheme()
-  // email state removed — using SubscribeForm component
 
-  const trendData = [
-    { m: 'Oct', s: Math.max(30, score.score_value - 5.5) },
-    { m: 'Nov', s: Math.max(30, score.score_value - 3.9) },
-    { m: 'Dec', s: Math.max(30, score.score_value - 3.4) },
-    { m: 'Jan', s: Math.max(30, score.score_value - 1.8) },
-    { m: 'Feb', s: Math.max(30, score.score_value - 1.1) },
-    { m: 'Mar', s: score.score_value },
-  ]
+  const trendData = buildTrendData(trendHistory, score.score_value)
 
   const sortedDomains = [...(score.sub_indexes || [])].sort((a, b) => b.value - a.value)
 

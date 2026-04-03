@@ -26,6 +26,7 @@ interface Props {
   score: CompositeScore
   pulse: Commentary
   keyStat?: KeyStat
+  trendHistory?: unknown[] // accepted but unused in terminal theme
 }
 
 /* ─── Ticker Bar ─── */

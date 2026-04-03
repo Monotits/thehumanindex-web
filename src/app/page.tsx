@@ -1,15 +1,17 @@
 import type { Metadata } from 'next'
+import { createClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { CompositeScore, Commentary, Domain } from '@/lib/types'
-import { fetchAllRealData, computeScores, fetchKeyStat } from '@/lib/realData'
+import { fetchAllRealData, computeScores, fetchKeyStat, ComputedScores } from '@/lib/realData'
+import { MonthlyScore } from '@/lib/historicalData'
 import HomeRouter from '@/components/home/HomeRouter'
 
 export const metadata: Metadata = {
   alternates: { canonical: 'https://thehumanindex.org' },
 }
 
-// ISR revalidation every 24 hours
-export const revalidate = 86400
+// ISR revalidation every 6 hours (ensures data stays reasonably fresh)
+export const revalidate = 21600
 
 const DOMAIN_WEIGHTS: Record<string, number> = {
   work_risk: 0.25,
@@ -19,6 +21,40 @@ const DOMAIN_WEIGHTS: Record<string, number> = {
   wellbeing: 0.12,
   policy: 0.10,
   sentiment: 0.08,
+}
+
+/** Save current month's score to monthly_scores table (fire-and-forget) */
+async function storeMonthlyScore(computed: ComputedScores) {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!serviceRoleKey || !supabaseUrl) return
+
+  try {
+    const sb = createClient(supabaseUrl, serviceRoleKey)
+    const now = new Date()
+    const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+
+    await sb.from('monthly_scores').upsert({
+      year_month: yearMonth,
+      composite: computed.composite,
+      band: computed.band,
+      work_risk: computed.domains.work_risk?.score ?? null,
+      inequality: computed.domains.inequality?.score ?? null,
+      unrest: computed.domains.unrest?.score ?? null,
+      decay: computed.domains.decay?.score ?? null,
+      wellbeing: computed.domains.wellbeing?.score ?? null,
+      policy: computed.domains.policy?.score ?? null,
+      sentiment: computed.domains.sentiment?.score ?? null,
+      active_domains: computed.activeDomains,
+      sources_connected: computed.sources_connected,
+      computed_at: now.toISOString(),
+      metadata: { auto_stored: true },
+    }, { onConflict: 'year_month' })
+
+    console.log(`[THI] Stored monthly score for ${yearMonth}: ${computed.composite}`)
+  } catch (e) {
+    console.error('[THI] Failed to store monthly score:', e)
+  }
 }
 
 async function getLatestScore(): Promise<CompositeScore> {
@@ -60,6 +96,10 @@ async function getLatestScore(): Promise<CompositeScore> {
       }
 
       console.log(`[THI] Score: ${computed.composite} (${computed.band}) | Active: ${computed.activeDomains}/${computed.totalDomains} | Sources: ${computed.sources_connected.join(', ')}`)
+
+      // Auto-store this month's score (fire-and-forget, don't block rendering)
+      storeMonthlyScore(computed).catch(() => {})
+
       return realScore
     }
   } catch (e) {
@@ -132,12 +172,43 @@ async function getLatestPulse(): Promise<Commentary> {
   return PLACEHOLDER_PULSE
 }
 
+async function getTrendHistory(): Promise<MonthlyScore[]> {
+  try {
+    const { data, error } = await supabase
+      .from('monthly_scores')
+      .select('*')
+      .order('year_month', { ascending: true })
+      .limit(6)
+
+    if (!error && data && data.length > 0) {
+      return data.map(row => ({
+        year_month: row.year_month,
+        composite: Number(row.composite),
+        band: row.band,
+        work_risk: row.work_risk != null ? Number(row.work_risk) : null,
+        inequality: row.inequality != null ? Number(row.inequality) : null,
+        unrest: row.unrest != null ? Number(row.unrest) : null,
+        decay: row.decay != null ? Number(row.decay) : null,
+        wellbeing: row.wellbeing != null ? Number(row.wellbeing) : null,
+        policy: row.policy != null ? Number(row.policy) : null,
+        sentiment: row.sentiment != null ? Number(row.sentiment) : null,
+        active_domains: row.active_domains,
+        sources_connected: row.sources_connected || [],
+      }))
+    }
+  } catch (e) {
+    console.error('Failed to fetch trend history:', e)
+  }
+  return []
+}
+
 export default async function Home() {
-  const [score, pulse, keyStat] = await Promise.all([
+  const [score, pulse, keyStat, trendHistory] = await Promise.all([
     getLatestScore(),
     getLatestPulse(),
     fetchKeyStat(),
+    getTrendHistory(),
   ])
 
-  return <HomeRouter score={score} pulse={pulse} keyStat={keyStat} />
+  return <HomeRouter score={score} pulse={pulse} keyStat={keyStat} trendHistory={trendHistory} />
 }

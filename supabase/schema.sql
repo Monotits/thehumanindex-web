@@ -82,6 +82,26 @@ CREATE TABLE job_mapping_cache (
   hit_count int DEFAULT 1
 );
 
+-- 7. monthly_scores — Permanent historical record of monthly composite + domain scores
+--    Used for the trend chart on the homepage. One row per month.
+CREATE TABLE monthly_scores (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  year_month text NOT NULL UNIQUE,             -- e.g. '2026-03'
+  composite numeric(5,2) NOT NULL,
+  band text NOT NULL CHECK (band IN ('low', 'moderate', 'elevated', 'high', 'critical')),
+  work_risk numeric(5,2),
+  inequality numeric(5,2),
+  unrest numeric(5,2),
+  decay numeric(5,2),
+  wellbeing numeric(5,2),
+  policy numeric(5,2),
+  sentiment numeric(5,2),
+  active_domains int NOT NULL DEFAULT 0,
+  sources_connected text[] DEFAULT '{}',
+  computed_at timestamptz NOT NULL DEFAULT now(),
+  metadata jsonb
+);
+
 -- Indexes for performance
 CREATE INDEX idx_composite_scores_type_date ON composite_scores(score_type, computed_at DESC);
 CREATE INDEX idx_sub_indexes_composite ON sub_indexes(composite_score_id);
@@ -91,6 +111,7 @@ CREATE INDEX idx_commentary_slug ON commentary(slug);
 CREATE INDEX idx_commentary_type_date ON commentary(type, published_at DESC);
 CREATE INDEX idx_job_mapping_cache_title ON job_mapping_cache(job_title_normalized);
 CREATE INDEX idx_raw_data_points_source ON raw_data_points(source, reference_date DESC);
+CREATE INDEX idx_monthly_scores_month ON monthly_scores(year_month DESC);
 
 -- Row Level Security
 ALTER TABLE composite_scores ENABLE ROW LEVEL SECURITY;
@@ -99,6 +120,7 @@ ALTER TABLE raw_data_points ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quiz_results ENABLE ROW LEVEL SECURITY;
 ALTER TABLE commentary ENABLE ROW LEVEL SECURITY;
 ALTER TABLE job_mapping_cache ENABLE ROW LEVEL SECURITY;
+ALTER TABLE monthly_scores ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 -- composite_scores: public read
@@ -115,6 +137,9 @@ CREATE POLICY "Users read own quiz_results" ON quiz_results FOR SELECT USING (au
 
 -- commentary: public read
 CREATE POLICY "Public read commentary" ON commentary FOR SELECT USING (true);
+
+-- monthly_scores: public read
+CREATE POLICY "Public read monthly_scores" ON monthly_scores FOR SELECT USING (true);
 
 -- job_mapping_cache: no public access (Edge Function uses service role)
 -- No SELECT policy = no public access
