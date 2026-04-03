@@ -19,3 +19,13 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Failed to revalidate' }, { status: 500 })
   }
 }
+
+// GET version — no secret needed, revalidates homepage only
+export async function GET() {
+  try {
+    revalidatePath('/')
+    return Response.json({ revalidated: true, path: '/', now: Date.now() })
+  } catch {
+    return Response.json({ error: 'Failed to revalidate' }, { status: 500 })
+  }
+}

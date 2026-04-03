@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 }
 
 // ISR revalidation every 6 hours (ensures data stays reasonably fresh)
-export const revalidate = 21600
+export const revalidate = 3600 // 1 hour
 
 const DOMAIN_WEIGHTS: Record<string, number> = {
   work_risk: 0.25,
