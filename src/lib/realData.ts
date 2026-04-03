@@ -501,8 +501,17 @@ export async function fetchACLEDData(): Promise<DomainDataPoint[]> {
     if (!accessToken) throw new Error('ACLED OAuth: no access_token in response')
 
     // Step 2: Fetch protest/riot data for US using the new API
+    // New API format: /api/acled/read?_format=json&filters...
+    // Use event_type with pipe separator and event_date for current year
     const currentYear = new Date().getFullYear()
-    const apiUrl = `https://acleddata.com/api/acled/read?event_type=Protests&event_type=Riots&country=United States&year=${currentYear}&limit=0`
+    const params = new URLSearchParams({
+      _format: 'json',
+      event_type: 'Protests|Riots',
+      country: 'United States',
+      year: String(currentYear),
+      limit: '5000',
+    })
+    const apiUrl = `https://acleddata.com/api/acled/read?${params.toString()}`
     const res = await fetch(apiUrl, {
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: 'no-store' as RequestCache,
@@ -513,7 +522,9 @@ export async function fetchACLEDData(): Promise<DomainDataPoint[]> {
     }
     const json = await res.json()
 
-    const count = json.count || 0
+    // New API returns array of events directly, or { data: [...] }
+    const events = Array.isArray(json) ? json : (json.data || [])
+    const count = events.length || 0
     points.push(makePoint(
       'unrest', 'US Protests & Riots YTD (ACLED)', count,
       normalize(count, 500, 3000),

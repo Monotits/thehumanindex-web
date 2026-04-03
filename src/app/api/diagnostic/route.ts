@@ -88,24 +88,33 @@ async function testACLED() {
     return { step: 'oauth_token', error: String(err) }
   }
 
-  // Step 2: Test API call
-  try {
-    const currentYear = new Date().getFullYear()
-    const apiUrl = `https://acleddata.com/api/acled/read?event_type=Protests&event_type=Riots&country=United States&year=${currentYear}&limit=0`
-    const res = await fetch(apiUrl, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      cache: 'no-store' as RequestCache,
-    })
-    const text = await res.text()
-    return {
-      step: 'api_call',
-      status: res.status,
-      token: `${accessToken.substring(0, 10)}...`,
-      url: apiUrl,
-      bodyPreview: text.substring(0, 500),
+  // Step 2: Test API call with multiple URL variants
+  const currentYear = new Date().getFullYear()
+  const testUrls = [
+    `https://acleddata.com/api/acled/read?_format=json&country=United States&year=${currentYear}&limit=10`,
+    `https://acleddata.com/api/acled/read?_format=json&limit=10`,
+  ]
+  const apiResults = []
+  for (const apiUrl of testUrls) {
+    try {
+      const res = await fetch(apiUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        cache: 'no-store' as RequestCache,
+      })
+      const text = await res.text()
+      apiResults.push({
+        url: apiUrl.substring(0, 120),
+        status: res.status,
+        bodyPreview: text.substring(0, 500),
+      })
+    } catch (err) {
+      apiResults.push({ url: apiUrl.substring(0, 120), error: String(err) })
     }
-  } catch (err) {
-    return { step: 'api_call', token: `${accessToken.substring(0, 10)}...`, error: String(err) }
+  }
+  return {
+    step: 'api_calls',
+    token: `${accessToken.substring(0, 10)}...`,
+    results: apiResults,
   }
 }
 
