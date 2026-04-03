@@ -510,9 +510,9 @@ export async function fetchONETData(): Promise<DomainDataPoint[]> {
 
   const points: DomainDataPoint[] = []
 
-  // O*NET API v2.0 uses X-API-Key header (not Basic Auth)
+  // O*NET API v2.0: new base URL + X-API-Key header
   async function onetFetch(path: string) {
-    const res = await fetch(`https://services.onetcenter.org/ws/${path}`, {
+    const res = await fetch(`https://api-v2.onetcenter.org/${path}`, {
       headers: { 'X-API-Key': apiKey!, Accept: 'application/json' },
       cache: 'no-store' as RequestCache,
     })

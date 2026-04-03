@@ -17,7 +17,54 @@ import {
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
-export async function GET() {
+// Direct test helpers for debugging specific sources
+async function testWHO() {
+  const url = 'https://ghoapi.azureedge.net/api/SDGSUICIDE?$filter=SpatialDim%20eq%20%27USA%27%20and%20Dim1%20eq%20%27BTSX%27&$orderby=TimeDim%20desc&$top=1'
+  const res = await fetch(url, { cache: 'no-store' as RequestCache })
+  const text = await res.text()
+  return { status: res.status, bodyPreview: text.substring(0, 500), url }
+}
+
+async function testOECD() {
+  const urls = [
+    'https://sdmx.oecd.org/public/rest/data/OECD.WISE.WDP,DSD_BLI@DF_BLI,/A.USA.SW_LIFS..?format=jsondata',
+    'https://stats.oecd.org/sdmx-json/data/BLI/USA.SW_LIFS.L.TOT/all?dimensionAtObservation=allDimensions',
+  ]
+  const results = []
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { cache: 'no-store' as RequestCache })
+      const text = await res.text()
+      results.push({ url: url.substring(0, 80), status: res.status, bodyPreview: text.substring(0, 300) })
+    } catch (err) {
+      results.push({ url: url.substring(0, 80), error: String(err) })
+    }
+  }
+  return results
+}
+
+async function testONET() {
+  const apiKey = process.env.ONET_API_KEY
+  if (!apiKey) return { error: 'ONET_API_KEY missing' }
+
+  const url = 'https://api-v2.onetcenter.org/online/hot_technology?start=1&end=5'
+  const res = await fetch(url, {
+    headers: { 'X-API-Key': apiKey, Accept: 'application/json' },
+    cache: 'no-store' as RequestCache,
+  })
+  const text = await res.text()
+  return { status: res.status, key: `${apiKey.substring(0, 8)}...`, bodyPreview: text.substring(0, 500), url }
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const debug = searchParams.get('debug')
+
+  // Debug specific source: /api/diagnostic?debug=who|oecd|onet
+  if (debug === 'who') return NextResponse.json(await testWHO())
+  if (debug === 'oecd') return NextResponse.json(await testOECD())
+  if (debug === 'onet') return NextResponse.json(await testONET())
+
   const sources = [
     { name: 'BLS', fn: fetchBLSData },
     { name: 'FRED', fn: fetchFREDData },
