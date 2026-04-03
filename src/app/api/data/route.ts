@@ -3,6 +3,7 @@ import { fetchAllRealData, computeScores } from '@/lib/realData'
 // Force dynamic — do NOT pre-render at build time (API calls would timeout)
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
+export const maxDuration = 30 // Allow up to 30s for external API calls
 
 export async function GET() {
   try {

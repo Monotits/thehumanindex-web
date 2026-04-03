@@ -153,9 +153,10 @@ const FRED_SERIES = [
 
   // inequality — FRED Gini (more current than World Bank)
   // NOTE: FRED reports Gini as whole numbers (e.g. 49.0), not decimals (0.49)
+  // Widened floor to 30 to accommodate variations in Census methodology
   { id: 'SIPOVGINIRUS', domain: 'inequality', name: 'Gini Index (US, Census)',
-    low: 35, high: 55, invert: false,
-    context: '0 = Gini 35 (egalitarian), 100 = 55+ (extreme inequality)' },
+    low: 30, high: 55, invert: false,
+    context: '0 = Gini 30 (very egalitarian), 100 = 55+ (extreme inequality)' },
 
   // decay — yield curve as recession probability proxy
   { id: 'T10Y2Y', domain: 'decay', name: '10Y-2Y Treasury Spread',
@@ -177,15 +178,17 @@ const FRED_SERIES = [
     low: 101, high: 96, invert: true,
     context: '0 = index 101+ (confident), 100 = 96 (deep pessimism)' },
 
-  // policy — Government spending as % GDP (policy responsiveness proxy)
-  { id: 'FYONGDA188S', domain: 'policy', name: 'Federal Debt as % of GDP',
+  // policy — Federal debt as % of GDP (fiscal sustainability)
+  // GFDEGDQ188S = "Federal Debt: Total Public Debt as Percent of GDP" (quarterly, ~120%)
+  { id: 'GFDEGDQ188S', domain: 'policy', name: 'Federal Debt as % of GDP',
     low: 60, high: 150, invert: false,
     context: '0 = 60% debt/GDP (sustainable), 100 = 150%+ (fiscal crisis)' },
 
-  // policy — Social spending
+  // policy — Social spending (in billions of dollars)
+  // G160291A027NBEA reports in billions; US social benefits ~$1.2-1.5T quarterly
   { id: 'G160291A027NBEA', domain: 'policy', name: 'Government Social Benefits',
-    low: 2500000, high: 5000000, invert: false,
-    context: '0 = $2.5T (normal), 100 = $5T+ (crisis-level spending)' },
+    low: 800, high: 2000, invert: false,
+    context: '0 = $800B/quarter (normal), 100 = $2T+/quarter (crisis-level spending)' },
 ]
 
 export async function fetchFREDData(): Promise<DomainDataPoint[]> {

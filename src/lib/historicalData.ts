@@ -60,8 +60,8 @@ const FRED_HISTORICAL: FREDHistoricalSeries[] = [
     low: 180000, high: 800000, invert: false,
     context: '0 = 180K/week (boom), 100 = 800K+ (deep recession)' },
   { id: 'SIPOVGINIRUS', domain: 'inequality', name: 'Gini Index (US, Census)',
-    low: 35, high: 55, invert: false,
-    context: '0 = Gini 35 (egalitarian), 100 = 55+ (extreme inequality)' },
+    low: 30, high: 55, invert: false,
+    context: '0 = Gini 30 (very egalitarian), 100 = 55+ (extreme inequality)' },
   { id: 'T10Y2Y', domain: 'decay', name: '10Y-2Y Treasury Spread',
     low: 2.0, high: -1.5, invert: true,
     context: '0 = 2.0+ spread (healthy), 100 = -1.5 (deeply inverted)' },
@@ -74,12 +74,12 @@ const FRED_HISTORICAL: FREDHistoricalSeries[] = [
   { id: 'CSCICP03USM665S', domain: 'sentiment', name: 'Consumer Confidence (OECD)',
     low: 101, high: 96, invert: true,
     context: '0 = index 101+, 100 = 96 (deep pessimism)' },
-  { id: 'FYONGDA188S', domain: 'policy', name: 'Federal Debt as % of GDP',
+  { id: 'GFDEGDQ188S', domain: 'policy', name: 'Federal Debt as % of GDP',
     low: 60, high: 150, invert: false,
     context: '0 = 60% debt/GDP, 100 = 150%+ (fiscal crisis)' },
   { id: 'G160291A027NBEA', domain: 'policy', name: 'Government Social Benefits',
-    low: 2500000, high: 5000000, invert: false,
-    context: '0 = $2.5T, 100 = $5T+ (crisis spending)' },
+    low: 800, high: 2000, invert: false,
+    context: '0 = $800B/quarter, 100 = $2T+/quarter (crisis spending)' },
 ]
 
 async function fetchFREDForMonth(yearMonth: string): Promise<DomainDataPoint[]> {
