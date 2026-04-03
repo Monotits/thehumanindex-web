@@ -615,17 +615,28 @@ function getAIIndexData(): DomainDataPoint[] {
 // Combined Pipeline
 // ═══════════════════════════════════════════════════════════
 
+// Wrap a promise with a timeout to prevent build-time hangs
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+    ),
+  ])
+}
+
 export async function fetchAllRealData(): Promise<RealDataResult> {
   const errors: string[] = []
+  const TIMEOUT = 15000 // 15s per source
 
   const results = await Promise.allSettled([
-    fetchBLSData(),
-    fetchFREDData(),
-    fetchWorldBankData(),
-    fetchOECDData(),
-    fetchWHOData(),
-    fetchACLEDData(),
-    fetchONETData(),
+    withTimeout(fetchBLSData(), TIMEOUT, 'BLS'),
+    withTimeout(fetchFREDData(), TIMEOUT, 'FRED'),
+    withTimeout(fetchWorldBankData(), TIMEOUT, 'World Bank'),
+    withTimeout(fetchOECDData(), TIMEOUT, 'OECD'),
+    withTimeout(fetchWHOData(), TIMEOUT, 'WHO'),
+    withTimeout(fetchACLEDData(), TIMEOUT, 'ACLED'),
+    withTimeout(fetchONETData(), TIMEOUT, 'O*NET'),
   ])
 
   const allPoints: DomainDataPoint[] = []
@@ -718,11 +729,12 @@ export function computeScores(points: DomainDataPoint[]): ComputedScores {
 
 export async function fetchKeyStat(): Promise<KeyStat> {
   const apiKey = process.env.FRED_API_KEY
+  const FETCH_TIMEOUT = 10000 // 10s
 
   if (apiKey) {
     try {
       const url = `https://api.stlouisfed.org/fred/series/observations?series_id=ICSA&api_key=${apiKey}&file_type=json&sort_order=desc&limit=1`
-      const res = await fetch(url, { next: { revalidate: 86400 } })
+      const res = await withTimeout(fetch(url, { next: { revalidate: 86400 } }), FETCH_TIMEOUT, 'FRED-ICSA')
       if (res.ok) {
         const json = await res.json()
         const obs = json.observations?.[0]
@@ -736,7 +748,7 @@ export async function fetchKeyStat(): Promise<KeyStat> {
 
     try {
       const url = `https://api.stlouisfed.org/fred/series/observations?series_id=UNRATE&api_key=${apiKey}&file_type=json&sort_order=desc&limit=1`
-      const res = await fetch(url, { next: { revalidate: 86400 } })
+      const res = await withTimeout(fetch(url, { next: { revalidate: 86400 } }), FETCH_TIMEOUT, 'FRED-UNRATE')
       if (res.ok) {
         const json = await res.json()
         const obs = json.observations?.[0]
@@ -756,12 +768,12 @@ export async function fetchKeyStat(): Promise<KeyStat> {
     }
     if (process.env.BLS_API_KEY) body.registrationkey = process.env.BLS_API_KEY
 
-    const res = await fetch('https://api.bls.gov/publicAPI/v2/timeseries/data/', {
+    const res = await withTimeout(fetch('https://api.bls.gov/publicAPI/v2/timeseries/data/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
       next: { revalidate: 86400 },
-    })
+    }), FETCH_TIMEOUT, 'BLS-keyStat')
     if (res.ok) {
       const json = await res.json()
       const latest = json.Results?.series?.[0]?.data?.[0]
