@@ -56,14 +56,68 @@ async function testONET() {
   return { status: res.status, key: `${apiKey.substring(0, 8)}...`, bodyPreview: text.substring(0, 500), url }
 }
 
+async function testACLED() {
+  const email = process.env.ACLED_EMAIL
+  const password = process.env.ACLED_PASSWORD
+  if (!email || !password) return { error: 'ACLED_EMAIL or ACLED_PASSWORD missing', email: email ? 'SET' : 'MISSING', password: password ? 'SET' : 'MISSING' }
+
+  // Step 1: Test OAuth token
+  let accessToken = ''
+  try {
+    const tokenRes = await fetch('https://acleddata.com/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        username: email,
+        password: password,
+        grant_type: 'password',
+        client_id: 'acled',
+      }),
+      cache: 'no-store' as RequestCache,
+    })
+    const tokenText = await tokenRes.text()
+    if (!tokenRes.ok) {
+      return { step: 'oauth_token', status: tokenRes.status, error: tokenText.substring(0, 500) }
+    }
+    const tokenJson = JSON.parse(tokenText)
+    accessToken = tokenJson.access_token
+    if (!accessToken) {
+      return { step: 'oauth_token', error: 'no access_token in response', response: tokenText.substring(0, 500) }
+    }
+  } catch (err) {
+    return { step: 'oauth_token', error: String(err) }
+  }
+
+  // Step 2: Test API call
+  try {
+    const currentYear = new Date().getFullYear()
+    const apiUrl = `https://acleddata.com/api/acled/read?event_type=Protests&event_type=Riots&country=United States&year=${currentYear}&limit=0`
+    const res = await fetch(apiUrl, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: 'no-store' as RequestCache,
+    })
+    const text = await res.text()
+    return {
+      step: 'api_call',
+      status: res.status,
+      token: `${accessToken.substring(0, 10)}...`,
+      url: apiUrl,
+      bodyPreview: text.substring(0, 500),
+    }
+  } catch (err) {
+    return { step: 'api_call', token: `${accessToken.substring(0, 10)}...`, error: String(err) }
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const debug = searchParams.get('debug')
 
-  // Debug specific source: /api/diagnostic?debug=who|oecd|onet
+  // Debug specific source: /api/diagnostic?debug=who|oecd|onet|acled
   if (debug === 'who') return NextResponse.json(await testWHO())
   if (debug === 'oecd') return NextResponse.json(await testOECD())
   if (debug === 'onet') return NextResponse.json(await testONET())
+  if (debug === 'acled') return NextResponse.json(await testACLED())
 
   const sources = [
     { name: 'BLS', fn: fetchBLSData },
