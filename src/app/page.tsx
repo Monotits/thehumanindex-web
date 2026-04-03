@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
-import { createClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { CompositeScore, Commentary, Domain } from '@/lib/types'
-import { fetchAllRealData, computeScores, fetchKeyStat, ComputedScores } from '@/lib/realData'
+import { fetchKeyStat } from '@/lib/realData'
 import { MonthlyScore } from '@/lib/historicalData'
 import HomeRouter from '@/components/home/HomeRouter'
 
@@ -10,8 +9,10 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://thehumanindex.org' },
 }
 
-// ISR revalidation every 6 hours (ensures data stays reasonably fresh)
-export const revalidate = 3600 // 1 hour
+// ISR: revalidate every 1 hour.
+// Fresh data comes from the cron job (/api/cron/refresh) which runs daily
+// and calls revalidatePath('/') after writing to the DB.
+export const revalidate = 3600
 
 const DOMAIN_WEIGHTS: Record<string, number> = {
   work_risk: 0.25,
@@ -23,90 +24,11 @@ const DOMAIN_WEIGHTS: Record<string, number> = {
   sentiment: 0.08,
 }
 
-/** Save current month's score to monthly_scores table (fire-and-forget) */
-async function storeMonthlyScore(computed: ComputedScores) {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  if (!serviceRoleKey || !supabaseUrl) return
-
-  try {
-    const sb = createClient(supabaseUrl, serviceRoleKey)
-    const now = new Date()
-    const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-
-    await sb.from('monthly_scores').upsert({
-      year_month: yearMonth,
-      composite: computed.composite,
-      band: computed.band,
-      work_risk: computed.domains.work_risk?.score ?? null,
-      inequality: computed.domains.inequality?.score ?? null,
-      unrest: computed.domains.unrest?.score ?? null,
-      decay: computed.domains.decay?.score ?? null,
-      wellbeing: computed.domains.wellbeing?.score ?? null,
-      policy: computed.domains.policy?.score ?? null,
-      sentiment: computed.domains.sentiment?.score ?? null,
-      active_domains: computed.activeDomains,
-      sources_connected: computed.sources_connected,
-      computed_at: now.toISOString(),
-      metadata: { auto_stored: true },
-    }, { onConflict: 'year_month' })
-
-    console.log(`[THI] Stored monthly score for ${yearMonth}: ${computed.composite}`)
-  } catch (e) {
-    console.error('[THI] Failed to store monthly score:', e)
-  }
-}
-
+/**
+ * Read latest score from Supabase (written by cron job).
+ * No external API calls — all data comes from our DB cache.
+ */
 async function getLatestScore(): Promise<CompositeScore> {
-  // 1. ALWAYS compute from real data APIs first (BLS, FRED, World Bank, OECD, WHO, etc.)
-  //    This ensures the v3 algorithm with proper normalization is always used.
-  //    Supabase is only a fallback if ALL real sources fail.
-  try {
-    const { points } = await fetchAllRealData()
-    const computed = computeScores(points)
-
-    // Only use real data if we got at least 1 domain's data
-    if (computed.activeDomains > 0) {
-      const realScore: CompositeScore = {
-        id: `real-${Date.now()}`,
-        score_type: 'composite',
-        score_value: computed.composite,
-        band: computed.band as CompositeScore['band'],
-        delta: null,
-        computed_at: new Date().toISOString(),
-        metadata: {
-          sources_connected: computed.sources_connected,
-          sources_missing: computed.sources_missing,
-          activeDomains: computed.activeDomains,
-          totalDomains: computed.totalDomains,
-        },
-        sub_indexes: Object.entries(computed.domains).map(([domain, info]) => ({
-          id: `real-sub-${domain}`,
-          composite_score_id: `real-${Date.now()}`,
-          domain: domain as Domain,
-          value: info.score ?? 0,
-          weight: DOMAIN_WEIGHTS[domain] || 0.1,
-          source_updated_at: new Date().toISOString(),
-          raw_data: {
-            sources: info.sources,
-            hasData: info.hasData,
-            dataPoints: info.dataPoints,
-          },
-        })),
-      }
-
-      console.log(`[THI] Score: ${computed.composite} (${computed.band}) | Active: ${computed.activeDomains}/${computed.totalDomains} | Sources: ${computed.sources_connected.join(', ')}`)
-
-      // Auto-store this month's score (fire-and-forget, don't block rendering)
-      storeMonthlyScore(computed).catch(() => {})
-
-      return realScore
-    }
-  } catch (e) {
-    console.error('Real data pipeline failed:', e)
-  }
-
-  // 2. Fallback to Supabase ONLY if real data produced nothing
   try {
     const { data, error } = await supabase
       .from('composite_scores')
@@ -116,15 +38,15 @@ async function getLatestScore(): Promise<CompositeScore> {
       .limit(1)
 
     if (!error && data && data.length > 0) {
-      console.log('[THI] Using Supabase fallback (real data unavailable)')
+      console.log(`[THI] Loaded score from DB: ${data[0].score_value} (${data[0].band})`)
       return data[0] as CompositeScore
     }
   } catch (e) {
     console.error('Supabase score fetch failed:', e)
   }
 
-  // 3. No data available — return zero score with clear indication
-  console.warn('[THI] No data sources available')
+  // No data in DB yet — return zero score
+  console.warn('[THI] No cached scores in DB — run /api/cron/refresh to populate')
   return {
     id: 'no-data',
     score_type: 'composite',
@@ -132,7 +54,12 @@ async function getLatestScore(): Promise<CompositeScore> {
     band: 'low',
     delta: null,
     computed_at: new Date().toISOString(),
-    metadata: { sources_connected: [], sources_missing: ['BLS', 'FRED', 'World Bank', 'OECD', 'O*NET', 'ACLED'], activeDomains: 0, totalDomains: 7 },
+    metadata: {
+      sources_connected: [],
+      sources_missing: ['BLS', 'FRED', 'World Bank', 'OECD', 'O*NET', 'ACLED'],
+      activeDomains: 0,
+      totalDomains: 7,
+    },
     sub_indexes: Object.keys(DOMAIN_WEIGHTS).map(domain => ({
       id: `empty-${domain}`,
       composite_score_id: 'no-data',

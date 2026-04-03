@@ -85,68 +85,42 @@ export default function DashboardPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        let gotFromApi = false
-
-        // 1. ALWAYS try real-time API first (most accurate, freshly computed)
+        // 1. Read latest score from Supabase (populated by cron job)
         try {
-          const res = await fetch('/api/data', { cache: 'no-store' })
-          if (res.ok) {
-            const data: RealDataResponse = await res.json()
-            if (data.scores && data.scores.activeDomains > 0) {
-              const realScore: CompositeScore = {
-                id: `real-${Date.now()}`,
-                score_type: 'composite',
-                score_value: data.scores.composite,
-                band: data.scores.band as CompositeScore['band'],
-                delta: null,
-                computed_at: data.fetched_at,
-                metadata: {
-                  sources_connected: data.scores.sources_connected,
-                  sources_missing: data.scores.sources_missing,
-                  activeDomains: data.scores.activeDomains,
-                  totalDomains: data.scores.totalDomains,
-                },
-                sub_indexes: Object.entries(data.scores.domains).map(([domain, info]) => ({
-                  id: `real-sub-${domain}`,
-                  composite_score_id: `real-${Date.now()}`,
-                  domain: domain as Domain,
-                  value: info.score ?? 0,
-                  weight: DOMAIN_WEIGHTS[domain] || 0.1,
-                  source_updated_at: data.fetched_at,
-                  raw_data: { sources: info.sources, hasData: info.hasData },
-                })),
+          const { data: scores, error } = await supabase
+            .from('composite_scores')
+            .select('*, sub_indexes(*)')
+            .eq('score_type', 'composite')
+            .order('computed_at', { ascending: false })
+            .limit(1)
+
+          if (!error && scores && scores.length > 0) {
+            const s = scores[0] as CompositeScore
+            setScore(s)
+
+            // Extract sources from metadata (written by cron)
+            const meta = s.metadata as Record<string, unknown> | null
+            if (meta?.sources_connected) setDataSources(meta.sources_connected as string[])
+            if (meta?.sources_missing) setMissingSources(meta.sources_missing as string[])
+            if (meta?.errors) setErrors(meta.errors as string[])
+
+            // Extract raw data points from sub_indexes
+            const points: RealDataResponse['raw_points'] = []
+            for (const sub of s.sub_indexes || []) {
+              const rd = sub.raw_data as Record<string, unknown> | null
+              if (rd?.dataPoints && Array.isArray(rd.dataPoints)) {
+                for (const dp of rd.dataPoints) {
+                  points.push(dp as RealDataResponse['raw_points'][0])
+                }
               }
-              setScore(realScore)
-              gotFromApi = true
-              setDataSources(data.scores.sources_connected)
-              setMissingSources(data.scores.sources_missing)
-              setRawPoints(data.raw_points)
             }
-            if (data.errors?.length) setErrors(data.errors)
+            if (points.length > 0) setRawPoints(points)
           }
         } catch {
-          // API not available, fall through to Supabase
+          // Supabase not available
         }
 
-        // 2. Supabase fallback ONLY if real-time API failed
-        if (!gotFromApi) {
-          try {
-            const { data: scores, error } = await supabase
-              .from('composite_scores')
-              .select('*, sub_indexes(*)')
-              .eq('score_type', 'composite')
-              .order('computed_at', { ascending: false })
-              .limit(1)
-
-            if (!error && scores && scores.length > 0) {
-              setScore(scores[0] as CompositeScore)
-            }
-          } catch {
-            // Supabase not available either
-          }
-        }
-
-        // 3. Load historical trend data from monthly_scores
+        // 2. Load historical trend data from monthly_scores
         try {
           const { data: history, error: histError } = await supabase
             .from('monthly_scores')
@@ -163,21 +137,6 @@ export default function DashboardPage() {
                 score: Number(h.composite),
               }
             }))
-          } else {
-            // Fallback to composite_scores history
-            const { data: history2, error: hist2Error } = await supabase
-              .from('composite_scores')
-              .select('score_value, computed_at')
-              .eq('score_type', 'composite')
-              .order('computed_at', { ascending: true })
-              .limit(20)
-
-            if (!hist2Error && history2 && history2.length > 0) {
-              setHistoricalData(history2.map((h: { computed_at: string; score_value: number }) => ({
-                date: new Date(h.computed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                score: h.score_value,
-              })))
-            }
           }
         } catch {
           // No historical data
@@ -193,8 +152,8 @@ export default function DashboardPage() {
     return (
       <div style={{ background: theme.bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 14, color: theme.textTertiary, marginBottom: 8 }}>Connecting to data sources...</div>
-          <div style={{ fontSize: 11, color: theme.textTertiary, opacity: 0.6 }}>FRED · World Bank · BLS · OECD · WHO</div>
+          <div style={{ fontSize: 14, color: theme.textTertiary, marginBottom: 8 }}>Loading dashboard...</div>
+          <div style={{ fontSize: 11, color: theme.textTertiary, opacity: 0.6 }}>Reading cached scores</div>
         </div>
       </div>
     )
