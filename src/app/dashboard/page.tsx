@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CompositeScore, DOMAIN_LABELS, Domain } from '@/lib/types'
+import { CompositeScore, DOMAIN_LABELS } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/theme'
 import { formatDate } from '@/lib/utils'
@@ -21,16 +21,6 @@ interface RealDataResponse {
   raw_points: { domain: string; indicator: string; value: number; normalized: number; source: string; series: string; period: string; context: string }[]
   errors: string[]
   fetched_at: string
-}
-
-const DOMAIN_WEIGHTS: Record<string, number> = {
-  work_risk: 0.25,
-  inequality: 0.18,
-  unrest: 0.15,
-  decay: 0.12,
-  wellbeing: 0.12,
-  policy: 0.10,
-  sentiment: 0.08,
 }
 
 const DOMAIN_SLUGS: Record<string, string> = {
