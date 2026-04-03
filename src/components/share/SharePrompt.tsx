@@ -75,12 +75,13 @@ export function SharePrompt({
     weekNumber,
   }
 
-  if (!show) return null
+  // Always render the modal (even when prompt is hidden) so it doesn't unmount mid-display
+  if (!show && !shareModalOpen) return null
 
   return (
     <>
-      {/* Share Prompt Slide-in Card */}
-      <div
+      {/* Share Prompt Slide-in Card — only render when prompt is visible */}
+      {show && <div
         style={{
           position: 'fixed',
           bottom: 24,
@@ -323,7 +324,7 @@ export function SharePrompt({
             </div>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* Share Card Modal */}
       <ShareCardModal
