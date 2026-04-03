@@ -416,19 +416,19 @@ export async function fetchOECDData(): Promise<DomainDataPoint[]> {
 export async function fetchWHOData(): Promise<DomainDataPoint[]> {
   const WHO_INDICATORS = [
     {
-      url: "https://ghoapi.azureedge.net/api/SDGSUICIDE?$filter=SpatialDim eq 'USA' and Dim1 eq 'BTSX'&$orderby=TimeDim desc&$top=1",
+      url: 'https://ghoapi.azureedge.net/api/SDGSUICIDE?$filter=SpatialDim%20eq%20%27USA%27%20and%20Dim1%20eq%20%27BTSX%27&$orderby=TimeDim%20desc&$top=1',
       domain: 'wellbeing', name: 'Suicide Rate per 100K (WHO)', series: 'SDGSUICIDE',
       low: 5, high: 30, invert: false,
       context: '0 = 5/100K (low suicide rate), 100 = 30+/100K (mental health catastrophe)',
     },
     {
-      url: "https://ghoapi.azureedge.net/api/WHOSIS_000001?$filter=SpatialDim eq 'USA' and Dim1 eq 'BTSX'&$orderby=TimeDim desc&$top=1",
+      url: 'https://ghoapi.azureedge.net/api/WHOSIS_000001?$filter=SpatialDim%20eq%20%27USA%27%20and%20Dim1%20eq%20%27BTSX%27&$orderby=TimeDim%20desc&$top=1',
       domain: 'wellbeing', name: 'Life Expectancy at Birth (WHO)', series: 'WHOSIS_000001',
       low: 82, high: 60, invert: true,
       context: '0 = 82+ years (Japan-level health), 100 = 60 years (health system collapse)',
     },
     {
-      url: "https://ghoapi.azureedge.net/api/SA_0000001688?$filter=SpatialDim eq 'USA' and Dim1 eq 'BTSX'&$orderby=TimeDim desc&$top=1",
+      url: 'https://ghoapi.azureedge.net/api/SA_0000001688?$filter=SpatialDim%20eq%20%27USA%27%20and%20Dim1%20eq%20%27BTSX%27&$orderby=TimeDim%20desc&$top=1',
       domain: 'wellbeing', name: 'Alcohol Consumption per Capita (WHO)', series: 'SA_0000001688',
       low: 5, high: 15, invert: false,
       context: '0 = 5L/year (moderate), 100 = 15L+ (severe substance abuse crisis)',
@@ -440,13 +440,14 @@ export async function fetchWHOData(): Promise<DomainDataPoint[]> {
     WHO_INDICATORS.map(async (ind) => {
       const res = await fetch(ind.url, { cache: 'no-store' as RequestCache })
       if (!res.ok) {
-        console.error(`WHO ${ind.series}: HTTP ${res.status}`)
+        const body = await res.text().catch(() => '')
+        console.error(`WHO ${ind.series}: HTTP ${res.status} — ${body.substring(0, 200)}`)
         return null
       }
       const json = await res.json()
       const item = json?.value?.[0]
       if (!item || item.NumericValue == null) {
-        console.warn(`WHO ${ind.series}: no data in response`)
+        console.warn(`WHO ${ind.series}: no data. Keys: ${JSON.stringify(Object.keys(json || {}))}, value count: ${json?.value?.length || 0}`)
         return null
       }
 
@@ -508,12 +509,11 @@ export async function fetchONETData(): Promise<DomainDataPoint[]> {
   if (!apiKey) return []
 
   const points: DomainDataPoint[] = []
-  const authHeader = 'Basic ' + Buffer.from(`${apiKey}:`).toString('base64')
 
-  // Helper to safely fetch O*NET endpoints
+  // O*NET API v2.0 uses X-API-Key header (not Basic Auth)
   async function onetFetch(path: string) {
     const res = await fetch(`https://services.onetcenter.org/ws/${path}`, {
-      headers: { Authorization: authHeader, Accept: 'application/json' },
+      headers: { 'X-API-Key': apiKey!, Accept: 'application/json' },
       cache: 'no-store' as RequestCache,
     })
     if (!res.ok) {
