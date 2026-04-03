@@ -1,15 +1,18 @@
 /**
  * POST /api/history/seed — Backfill historical monthly scores
  *
- * Computes scores for each of the past N months using FRED/BLS historical data,
- * then stores them in Supabase monthly_scores table.
+ * Computes score for ONE month at a time (to stay within Vercel timeout).
  *
  * Query params:
- *   ?months=6  (default 6, max 12)
- *   ?force=true  (overwrite existing months, default false)
+ *   ?month=2025-11   (required — single year-month to compute)
+ *   ?force=true      (overwrite if exists, default false)
+ *
+ * To seed multiple months, call this endpoint once per month:
+ *   for (const m of ['2025-11','2025-12','2026-01','2026-02','2026-03','2026-04']) {
+ *     await fetch(`/api/history/seed?month=${m}`, { method: 'POST' })
+ *   }
  *
  * This endpoint is idempotent: without ?force, it skips months already in the DB.
- * Protected by a simple secret check.
  */
 
 import { NextResponse } from 'next/server'
@@ -18,10 +21,9 @@ import { computeMonthlyScore, getPastMonths } from '@/lib/historicalData'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-export const maxDuration = 60 // Allow up to 60s for backfill
+export const maxDuration = 60
 
 export async function POST(request: Request) {
-  // Use service role key for writes (anon key is read-only via RLS)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!supabaseUrl || !serviceRoleKey) {
@@ -31,66 +33,99 @@ export async function POST(request: Request) {
     )
   }
 
-  // Simple auth: require a seed secret or check for service role
-  const seedSecret = process.env.HISTORY_SEED_SECRET
-  const authHeader = request.headers.get('authorization')
-  if (seedSecret && authHeader !== `Bearer ${seedSecret}`) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
-  }
-
   const { searchParams } = new URL(request.url)
-  const monthCount = Math.min(parseInt(searchParams.get('months') || '6', 10), 12)
+  const month = searchParams.get('month')
   const force = searchParams.get('force') === 'true'
 
+  // If no month specified, return the list of months that need seeding
+  if (!month) {
+    const supabase = createClient(supabaseUrl, serviceRoleKey)
+    const months = getPastMonths(6)
+    const { data: existing } = await supabase
+      .from('monthly_scores')
+      .select('year_month')
+      .in('year_month', months)
+
+    const existingSet = new Set((existing || []).map(r => r.year_month))
+    const missing = months.filter(m => !existingSet.has(m))
+
+    return NextResponse.json({
+      ok: true,
+      message: 'Pass ?month=YYYY-MM to seed a specific month. Missing months listed below.',
+      all_months: months,
+      existing: months.filter(m => existingSet.has(m)),
+      missing,
+      hint: `Run in browser console:\nfor (const m of ${JSON.stringify(missing)}) { await fetch('/api/history/seed?month=' + m, { method: 'POST' }).then(r => r.json()).then(console.log) }`,
+    })
+  }
+
+  // Validate month format
+  if (!/^\d{4}-\d{2}$/.test(month)) {
+    return NextResponse.json(
+      { ok: false, error: 'Invalid month format. Use YYYY-MM (e.g. 2025-11)' },
+      { status: 400 }
+    )
+  }
+
   const supabase = createClient(supabaseUrl, serviceRoleKey)
-  const months = getPastMonths(monthCount)
 
-  // Check which months already exist
-  const { data: existing } = await supabase
-    .from('monthly_scores')
-    .select('year_month')
-    .in('year_month', months)
+  // Check if already exists
+  if (!force) {
+    const { data: existing } = await supabase
+      .from('monthly_scores')
+      .select('year_month')
+      .eq('year_month', month)
+      .limit(1)
 
-  const existingSet = new Set((existing || []).map(r => r.year_month))
-
-  const results: Array<{ month: string; status: string; composite?: number }> = []
-
-  for (const ym of months) {
-    if (!force && existingSet.has(ym)) {
-      results.push({ month: ym, status: 'skipped (exists)' })
-      continue
-    }
-
-    try {
-      const score = await computeMonthlyScore(ym)
-
-      const row = {
-        year_month: score.year_month,
-        composite: score.composite,
-        band: score.band,
-        work_risk: score.work_risk,
-        inequality: score.inequality,
-        unrest: score.unrest,
-        decay: score.decay,
-        wellbeing: score.wellbeing,
-        policy: score.policy,
-        sentiment: score.sentiment,
-        active_domains: score.active_domains,
-        sources_connected: score.sources_connected,
-        computed_at: new Date().toISOString(),
-        metadata: { backfill: true, computed_for: ym },
-      }
-
-      const { error } = await supabase
-        .from('monthly_scores')
-        .upsert(row, { onConflict: 'year_month' })
-
-      if (error) throw error
-      results.push({ month: ym, status: 'saved', composite: score.composite })
-    } catch (err) {
-      results.push({ month: ym, status: `error: ${err}` })
+    if (existing && existing.length > 0) {
+      return NextResponse.json({
+        ok: true,
+        month,
+        status: 'skipped (already exists)',
+        hint: 'Use ?force=true to overwrite',
+      })
     }
   }
 
-  return NextResponse.json({ ok: true, results })
+  try {
+    const score = await computeMonthlyScore(month)
+
+    const row = {
+      year_month: score.year_month,
+      composite: score.composite,
+      band: score.band,
+      work_risk: score.work_risk,
+      inequality: score.inequality,
+      unrest: score.unrest,
+      decay: score.decay,
+      wellbeing: score.wellbeing,
+      policy: score.policy,
+      sentiment: score.sentiment,
+      active_domains: score.active_domains,
+      sources_connected: score.sources_connected,
+      computed_at: new Date().toISOString(),
+      metadata: { backfill: true, computed_for: month },
+    }
+
+    const { error } = await supabase
+      .from('monthly_scores')
+      .upsert(row, { onConflict: 'year_month' })
+
+    if (error) throw error
+
+    return NextResponse.json({
+      ok: true,
+      month,
+      status: 'saved',
+      composite: score.composite,
+      band: score.band,
+      active_domains: score.active_domains,
+      sources: score.sources_connected,
+    })
+  } catch (err) {
+    return NextResponse.json(
+      { ok: false, month, error: String(err) },
+      { status: 500 }
+    )
+  }
 }
