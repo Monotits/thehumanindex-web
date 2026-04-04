@@ -59,7 +59,7 @@ const FRED_HISTORICAL: FREDHistoricalSeries[] = [
   { id: 'ICSA', domain: 'work_risk', name: 'Initial Jobless Claims',
     low: 180000, high: 800000, invert: false,
     context: '0 = 180K/week (boom), 100 = 800K+ (deep recession)' },
-  { id: 'SIPOVGINIRUS', domain: 'inequality', name: 'Gini Index (US, Census)',
+  { id: 'SIPOVGINIUSA', domain: 'inequality', name: 'Gini Index (US, Census)',
     low: 30, high: 55, invert: false,
     context: '0 = Gini 30 (very egalitarian), 100 = 55+ (extreme inequality)' },
   { id: 'T10Y2Y', domain: 'decay', name: '10Y-2Y Treasury Spread',

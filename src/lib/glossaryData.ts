@@ -69,7 +69,7 @@ export const GLOSSARY: GlossaryEntry[] = [
     whatItMeasures: 'This domain measures how unevenly income and wealth are distributed in society. It uses the Gini coefficient, income share held by the top 10%, and related economic indicators to produce a stress score. A higher score indicates greater concentration of wealth and wider gaps between economic classes.',
     whyItMatters: 'Extreme inequality destabilizes societies. When wealth concentrates at the top, social mobility declines, political polarization increases, and public trust in institutions erodes. Historically, sustained high inequality has preceded periods of social upheaval and institutional breakdown.',
     dataSources: [
-      'U.S. Census Bureau — Gini Index (FRED: SIPOVGINIRUS)',
+      'U.S. Census Bureau — Gini Index (FRED: SIPOVGINIUSA)',
       'World Bank — Gini Index (SI.POV.GINI)',
       'World Bank — Income Share Held by Top 10% (SI.DST.10TH.10)',
     ],
