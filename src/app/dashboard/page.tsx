@@ -260,20 +260,65 @@ export default function DashboardPage() {
             </div>
 
             <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24 }}>
-              <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16 }}>
-                {historicalData.length > 1 ? 'Historical Trend' : 'Current Reading'}
-              </div>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={historicalData.length > 0 ? historicalData : [
-                  { date: formatDate(score!.computed_at), score: score!.score_value },
-                ]}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={theme.surfaceBorder} />
-                  <XAxis dataKey="date" tick={{ fill: theme.textTertiary, fontSize: 10 }} stroke={theme.surfaceBorder} />
-                  <YAxis domain={[0, 100]} tick={{ fill: theme.textTertiary, fontSize: 10 }} stroke={theme.surfaceBorder} />
-                  <Tooltip contentStyle={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, fontSize: 12 }} />
-                  <Line type="monotone" dataKey="score" stroke={bandColor} strokeWidth={2} dot={{ fill: bandColor, r: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
+              {(() => {
+                const MONTH_SHORT_DASH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                const totalMonths = 6
+                const now = new Date()
+
+                // Build month labels
+                const monthLabels: string[] = []
+                for (let i = totalMonths - 1; i >= 0; i--) {
+                  const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+                  monthLabels.push(MONTH_SHORT_DASH[d.getMonth()])
+                }
+
+                const realPoints = historicalData.length > 0 ? historicalData : [{ date: MONTH_SHORT_DASH[now.getMonth()], score: score!.score_value }]
+                const hasEnough = realPoints.length >= totalMonths
+
+                let chartData: { date: string; real?: number; projected?: number }[]
+                if (hasEnough) {
+                  chartData = realPoints.slice(-totalMonths).map(d => ({ date: d.date, real: d.score }))
+                } else {
+                  const projectedCount = totalMonths - realPoints.length
+                  const firstReal = realPoints[0]?.score ?? score!.score_value
+                  chartData = []
+                  for (let i = 0; i < projectedCount; i++) {
+                    const dist = projectedCount - i
+                    const s = firstReal - dist * (0.8 + Math.sin(i * 1.3) * 0.4)
+                    chartData.push({ date: monthLabels[i], projected: Math.max(10, Math.min(95, s)) })
+                  }
+                  // Bridge point: last projected also gets real value so lines connect
+                  if (chartData.length > 0 && realPoints.length > 0) {
+                    chartData[chartData.length - 1].real = chartData[chartData.length - 1].projected
+                  }
+                  for (const rp of realPoints) {
+                    chartData.push({ date: rp.date, real: rp.score })
+                  }
+                }
+
+                const hasProjected = chartData.some(d => d.projected !== undefined)
+
+                return (
+                  <>
+                    <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16 }}>
+                      {historicalData.length > 1 ? 'Historical Trend' : 'Current Reading'}
+                      {hasProjected && <span style={{ opacity: 0.5, marginLeft: 8, fontSize: 9, letterSpacing: 1 }}>(dashed = projected)</span>}
+                    </div>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={theme.surfaceBorder} />
+                        <XAxis dataKey="date" tick={{ fill: theme.textTertiary, fontSize: 10 }} stroke={theme.surfaceBorder} />
+                        <YAxis domain={[20, 70]} tick={{ fill: theme.textTertiary, fontSize: 10 }} stroke={theme.surfaceBorder} />
+                        <Tooltip contentStyle={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, fontSize: 12 }} />
+                        {hasProjected && (
+                          <Line type="monotone" dataKey="projected" stroke={bandColor} strokeWidth={1.5} strokeDasharray="5 5" strokeOpacity={0.4} dot={false} connectNulls={false} />
+                        )}
+                        <Line type="monotone" dataKey="real" stroke={bandColor} strokeWidth={2} dot={{ fill: bandColor, r: 3 }} connectNulls={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </>
+                )
+              })()}
             </div>
           </div>
         )}

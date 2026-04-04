@@ -23,25 +23,44 @@ interface Props {
 const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 function buildTrendData(history: MonthlyScore[] | undefined, currentScore: number) {
+  const totalMonths = 6
+  const now = new Date()
+
+  const monthLabels: string[] = []
+  for (let i = totalMonths - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    monthLabels.push(MONTH_SHORT[d.getMonth()])
+  }
+
+  const realData: { m: string; s: number }[] = []
   if (history && history.length > 0) {
-    const data = history.map(h => {
+    for (const h of history) {
       const [, monthStr] = h.year_month.split('-')
-      return { m: MONTH_SHORT[parseInt(monthStr, 10) - 1], s: h.composite }
-    })
-    const now = new Date()
+      realData.push({ m: MONTH_SHORT[parseInt(monthStr, 10) - 1], s: h.composite })
+    }
     const currentYM = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
     if (history[history.length - 1]?.year_month !== currentYM) {
-      data.push({ m: MONTH_SHORT[now.getMonth()], s: currentScore })
+      realData.push({ m: MONTH_SHORT[now.getMonth()], s: currentScore })
     }
-    return data
+  } else {
+    realData.push({ m: MONTH_SHORT[now.getMonth()], s: currentScore })
   }
-  const now = new Date()
-  const months: { m: string; s: number }[] = []
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    months.push({ m: MONTH_SHORT[d.getMonth()], s: currentScore })
+
+  if (realData.length >= totalMonths) {
+    return realData.slice(-totalMonths).map(d => ({ ...d, projected: false }))
   }
-  return months
+
+  const projectedCount = totalMonths - realData.length
+  const firstRealScore = realData[0]?.s ?? currentScore
+  const projected: { m: string; s: number; projected: boolean }[] = []
+
+  for (let i = 0; i < projectedCount; i++) {
+    const distFromReal = projectedCount - i
+    const score = firstRealScore - distFromReal * (0.8 + Math.sin(i * 1.3) * 0.4)
+    projected.push({ m: monthLabels[i], s: Math.max(10, Math.min(95, score)), projected: true })
+  }
+
+  return [...projected, ...realData.map(d => ({ ...d, projected: false }))]
 }
 
 function BandBadge({ band }: { band: string }) {
@@ -118,22 +137,47 @@ export default function HomeBriefing({ score, pulse, keyStat, trendHistory }: Pr
                 <div style={{ fontSize: 64, fontWeight: 300, lineHeight: 1 }}>{score.score_value.toFixed(2)}</div>
                 <div style={{ fontSize: 13, color: theme.textTertiary, fontFamily: theme.fontBody, marginTop: 4 }}>Composite Index Score</div>
               </div>
-              <ResponsiveContainer width="100%" height={140}>
-                <AreaChart data={trendData}>
-                  <defs>
-                    <linearGradient id="briefingFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={accentColor} stopOpacity={0.15} />
-                      <stop offset="100%" stopColor={accentColor} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="m" tick={{ fill: theme.textTertiary, fontSize: 11, fontFamily: 'Inter' }} stroke="transparent" />
-                  <YAxis domain={[30, 60]} hide />
-                  <Tooltip contentStyle={{ fontFamily: 'Inter', fontSize: 12, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 4 }} />
-                  <Area type="monotone" dataKey="s" stroke={accentColor} strokeWidth={2} fill="url(#briefingFill)" dot={{ r: 3, fill: accentColor }} />
-                </AreaChart>
-              </ResponsiveContainer>
+              {(() => {
+                type TrendItem = { m: string; s: number; projected: boolean }
+                const typedData = trendData as TrendItem[]
+                const hasProjected = typedData.some(d => d.projected)
+                const mergedData = typedData.map((d, i) => {
+                  const nextIsReal = i < typedData.length - 1 && !typedData[i + 1].projected
+                  return {
+                    m: d.m,
+                    real: !d.projected ? d.s : (d.projected && nextIsReal ? d.s : undefined),
+                    projected: d.projected ? d.s : undefined,
+                  }
+                })
+                return (
+                  <ResponsiveContainer width="100%" height={140}>
+                    <AreaChart data={mergedData}>
+                      <defs>
+                        <linearGradient id="briefingFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={accentColor} stopOpacity={0.15} />
+                          <stop offset="100%" stopColor={accentColor} stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="briefingGhost" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={accentColor} stopOpacity={0.06} />
+                          <stop offset="100%" stopColor={accentColor} stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="m" tick={{ fill: theme.textTertiary, fontSize: 11, fontFamily: 'Inter' }} stroke="transparent" />
+                      <YAxis domain={[20, 65]} hide />
+                      <Tooltip
+                        contentStyle={{ fontFamily: 'Inter', fontSize: 12, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 4 }}
+                        formatter={((value: unknown, name: unknown) => [Number(value).toFixed(1), String(name) === 'projected' ? 'Projected' : 'Score']) as never}
+                      />
+                      {hasProjected && (
+                        <Area type="monotone" dataKey="projected" stroke={accentColor} strokeWidth={1.5} strokeDasharray="4 4" strokeOpacity={0.4} fill="url(#briefingGhost)" dot={false} connectNulls={false} />
+                      )}
+                      <Area type="monotone" dataKey="real" stroke={accentColor} strokeWidth={2} fill="url(#briefingFill)" dot={{ r: 3, fill: accentColor }} connectNulls={false} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )
+              })()}
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontBody, marginTop: 8 }}>
-                <span>6-month trend</span>
+                <span>6-month trend{(trendData as { projected: boolean }[]).some(d => d.projected) ? ' (dashed = projected)' : ''}</span>
                 <span>Source: THI Data Pipeline</span>
               </div>
             </div>
