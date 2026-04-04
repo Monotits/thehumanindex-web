@@ -155,10 +155,10 @@ const FRED_SERIES = [
     low: 180000, high: 800000, invert: false,
     context: '0 = 180K/week (boom), 100 = 800K+ (deep recession)' },
 
-  // inequality — FRED Gini (more current than World Bank)
-  // NOTE: FRED reports Gini as whole numbers (e.g. 49.0), not decimals (0.49)
-  // Widened floor to 30 to accommodate variations in Census methodology
-  { id: 'SIPOVGINIRUS', domain: 'inequality', name: 'Gini Index (US, Census)',
+  // inequality — FRED Gini for United States
+  // NOTE: FRED reports Gini as whole numbers (e.g. 41.5), not decimals (0.415)
+  // CRITICAL FIX: Was SIPOVGINIRUS (Russia!) — corrected to SIPOVGINIUSA (United States)
+  { id: 'SIPOVGINIUSA', domain: 'inequality', name: 'Gini Index (US, Census)',
     low: 30, high: 55, invert: false,
     context: '0 = Gini 30 (very egalitarian), 100 = 55+ (extreme inequality)' },
 
