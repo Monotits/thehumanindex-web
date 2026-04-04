@@ -2,7 +2,7 @@
 
 import { useTheme } from '@/lib/theme'
 import { CorrelationInsight } from '@/lib/correlationInsights'
-import { DOMAIN_LABELS } from '@/lib/types'
+import { DOMAIN_LABELS, Domain } from '@/lib/types'
 
 const SEVERITY_STYLES = {
   critical: { bg: '#ef444412', border: '#ef444440', icon: '⚠', color: '#ef4444' },
@@ -61,7 +61,7 @@ export default function CorrelationInsightsPanel({ insights }: { insights: Corre
                     background: `${theme.accent}12`, color: theme.accent,
                     fontFamily: theme.fontMono,
                   }}>
-                    {DOMAIN_LABELS[d] || d}
+                    {DOMAIN_LABELS[d as Domain] || d}
                   </span>
                 ))}
               </div>
