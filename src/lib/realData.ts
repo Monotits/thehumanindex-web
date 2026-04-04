@@ -134,10 +134,10 @@ export async function fetchBLSData(): Promise<DomainDataPoint[]> {
       const val = parseFloat(latest.value)
       points.push(makePoint(
         'work_risk', 'Unemployment Rate', val,
-        normalize(val, 3.5, 15),
+        normalize(val, 3.5, 10),
         'BLS', 'LNS14000000',
         `${latest.year}-${latest.period.replace('M', '')}`,
-        '0 = 3.5% (full employment), 100 = 15%+ (depression)',
+        '0 = 3.5% (full employment), 100 = 10%+ (severe recession)',
       ))
     }
   } catch (err) {
@@ -152,10 +152,13 @@ export async function fetchBLSData(): Promise<DomainDataPoint[]> {
 // ═══════════════════════════════════════════════════════════
 
 const FRED_SERIES = [
-  // work_risk
+  // work_risk — LAGGING (traditional labor metrics)
+  // NOTE: These are lagging indicators. AI displacement shows up in
+  // adoption/investment metrics BEFORE it shows up in unemployment.
+  // Range tightened to reflect current labor market reality.
   { id: 'ICSA', domain: 'work_risk', name: 'Initial Jobless Claims',
-    low: 180000, high: 800000, invert: false,
-    context: '0 = 180K/week (boom), 100 = 800K+ (deep recession)' },
+    low: 180000, high: 500000, invert: false,
+    context: '0 = 180K/week (boom), 100 = 500K+ (recession)' },
 
   // inequality — FRED Gini for United States
   // NOTE: FRED reports Gini as whole numbers (e.g. 41.5), not decimals (0.415)
@@ -964,6 +967,34 @@ const DOMAIN_WEIGHTS: Record<string, number> = {
   sentiment: 0.08,
 }
 
+// Intra-domain indicator weights — leading indicators get 2x weight
+// This ensures forward-looking signals (AI adoption, investment) aren't
+// diluted by lagging indicators (official unemployment, jobless claims)
+// that take 6-18 months to reflect structural changes.
+const INDICATOR_WEIGHTS: Record<string, Record<string, number>> = {
+  work_risk: {
+    // Lagging (traditional labor stats): 1x
+    'Unemployment Rate': 1,
+    'Initial Jobless Claims': 1,
+    // Leading (AI disruption signals): 2x
+    'Hot Technology Count': 2,
+    'Bright Outlook Occupations': 2,
+    'AI-Related Occupations': 2,
+    'Global AI Investment': 2,
+    'Enterprise AI Adoption Rate': 2,
+  },
+}
+
+function getIndicatorWeight(domain: string, indicator: string): number {
+  const domainWeights = INDICATOR_WEIGHTS[domain]
+  if (!domainWeights) return 1
+  // Match by partial indicator name (handles " (O*NET)" suffixes)
+  for (const [key, weight] of Object.entries(domainWeights)) {
+    if (indicator.includes(key)) return weight
+  }
+  return 1
+}
+
 export function computeScores(points: DomainDataPoint[]): ComputedScores {
   const byDomain: Record<string, DomainDataPoint[]> = {}
   for (const p of points) {
@@ -981,7 +1012,15 @@ export function computeScores(points: DomainDataPoint[]): ComputedScores {
     const domainPoints = byDomain[domain] || []
 
     if (domainPoints.length > 0) {
-      const avg = domainPoints.reduce((sum, p) => sum + p.normalized, 0) / domainPoints.length
+      // Weighted average within domain (leading indicators get more weight)
+      let wSum = 0
+      let wTotal = 0
+      for (const p of domainPoints) {
+        const w = getIndicatorWeight(domain, p.indicator)
+        wSum += p.normalized * w
+        wTotal += w
+      }
+      const avg = wTotal > 0 ? wSum / wTotal : 0
       const score = Math.round(avg)
       const sources = Array.from(new Set(domainPoints.map(p => p.source)))
       sources.forEach(s => connectedSources.add(s))
