@@ -13,7 +13,6 @@ import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
 import MultiDomainTrend from '@/components/charts/MultiDomainTrend'
 import StackedAreaDecomposition from '@/components/charts/StackedAreaDecomposition'
 import WeeklyHeatmap from '@/components/charts/WeeklyHeatmap'
-import DomainComparisonBar from '@/components/charts/DomainComparisonBar'
 import SocialFeedSection from '@/components/SocialFeedSection'
 import LayoffTracker from '@/components/LayoffTracker'
 import CorporateLayoffTable from '@/components/CorporateLayoffTable'
@@ -307,12 +306,6 @@ export default function DashboardPage() {
         {/* ═══ ADVANCED CHARTS (moved from Home) ═══ */}
         {hasScore && sortedDomains.length > 0 && (
           <>
-            {/* Domain Comparison Bar */}
-            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
-              <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16 }}>Domain Comparison</div>
-              <DomainComparisonBar domains={sortedDomains} />
-            </div>
-
             {/* Stacked Area Decomposition */}
             <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
               <StackedAreaDecomposition domains={sortedDomains} />
