@@ -53,14 +53,31 @@ export async function GET(request: Request) {
       }, { status: 502 })
     }
 
-    // ── Step 2: Store to composite_scores + sub_indexes ──
+    // ── Step 2: Compute delta from previous score ──
+    let delta: number | null = null
+    try {
+      const { data: prevScores } = await sb
+        .from('composite_scores')
+        .select('score_value')
+        .eq('score_type', 'composite')
+        .order('computed_at', { ascending: false })
+        .limit(1)
+
+      if (prevScores && prevScores.length > 0) {
+        delta = Math.round((computed.composite - prevScores[0].score_value) * 100) / 100
+      }
+    } catch {
+      console.warn('Could not compute delta from previous score')
+    }
+
+    // ── Step 3: Store to composite_scores + sub_indexes ──
     const { data: scoreRow, error: scoreErr } = await sb
       .from('composite_scores')
       .insert({
         score_type: 'composite',
         score_value: computed.composite,
         band: computed.band,
-        delta: null, // TODO: compute delta from previous
+        delta,
         computed_at: new Date().toISOString(),
         metadata: {
           cron: true,
@@ -80,7 +97,7 @@ export async function GET(request: Request) {
     const subRows = Object.entries(computed.domains).map(([domain, info]) => ({
       composite_score_id: scoreRow.id,
       domain,
-      value: info.score ?? 0,
+      value: info.score ?? null,
       weight: getWeight(domain),
       source_updated_at: info.hasData ? new Date().toISOString() : null,
       raw_data: {
@@ -93,7 +110,7 @@ export async function GET(request: Request) {
     const { error: subErr } = await sb.from('sub_indexes').insert(subRows)
     if (subErr) console.error('sub_indexes insert warning:', subErr.message)
 
-    // ── Step 3: Store to monthly_scores (upsert current month) ──
+    // ── Step 4: Store to monthly_scores (upsert current month) ──
     const now = new Date()
     const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 
@@ -116,7 +133,7 @@ export async function GET(request: Request) {
 
     if (monthErr) console.error('monthly_scores upsert warning:', monthErr.message)
 
-    // ── Step 4: Store raw data points (append-only log) ──
+    // ── Step 5: Store raw data points (append-only log) ──
     if (points.length > 0) {
       const rawRows = points.map(p => ({
         source: p.source,
@@ -136,7 +153,7 @@ export async function GET(request: Request) {
       if (rawErr) console.error('raw_data_points insert warning:', rawErr.message)
     }
 
-    // ── Step 5: Trigger ISR revalidation ──
+    // ── Step 6: Trigger ISR revalidation ──
     revalidatePath('/')
     revalidatePath('/dashboard')
     revalidatePath('/pulse')

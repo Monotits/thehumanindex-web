@@ -644,7 +644,13 @@ export async function fetchONETData(): Promise<DomainDataPoint[]> {
 function getAIIndexData(): DomainDataPoint[] {
   // Data from Stanford HAI AI Index Report 2025
   // These are updated annually when new report is published
+  // ⚠ STALENESS CHECK: Warn if data is older than 14 months
   const REPORT_YEAR = '2025'
+  const reportDate = new Date(2025, 3, 1) // April 2025 publication
+  const monthsSinceReport = Math.floor((Date.now() - reportDate.getTime()) / (1000 * 60 * 60 * 24 * 30))
+  if (monthsSinceReport > 14) {
+    console.warn(`[THI] ⚠ AI Index data is ${monthsSinceReport} months old. Update from https://hai.stanford.edu/ai-index`)
+  }
   const points: DomainDataPoint[] = []
 
   // Global corporate AI investment ($ billions)
@@ -679,7 +685,13 @@ function getAIIndexData(): DomainDataPoint[] {
 // ═══════════════════════════════════════════════════════════
 
 function getOECDReferenceData(): DomainDataPoint[] {
+  // ⚠ STALENESS CHECK: Warn if OECD reference data is older than 18 months
   const REPORT_YEAR = '2024'
+  const reportDate = new Date(2024, 5, 1) // Mid-2024 data vintage
+  const monthsSinceReport = Math.floor((Date.now() - reportDate.getTime()) / (1000 * 60 * 60 * 24 * 30))
+  if (monthsSinceReport > 18) {
+    console.warn(`[THI] ⚠ OECD reference data is ${monthsSinceReport} months old. Check if new API is available at sdmx.oecd.org`)
+  }
   const points: DomainDataPoint[] = []
 
   // Life satisfaction (0-10 scale). US: 6.9/10 (OECD BLI 2024)
@@ -820,11 +832,13 @@ export function computeScores(points: DomainDataPoint[]): ComputedScores {
     ? Math.round((weightedSum / activeWeight) * 100) / 100
     : 0
 
+  // Band thresholds — must match utils.ts getBand() and documentation
+  // 0-25: LOW | 26-45: MODERATE | 46-65: ELEVATED | 66-80: HIGH | 81-100: CRITICAL
   let band = 'low'
-  if (composite >= 70) band = 'critical'
-  else if (composite >= 60) band = 'high'
-  else if (composite >= 45) band = 'elevated'
-  else if (composite >= 25) band = 'moderate'
+  if (composite >= 81) band = 'critical'
+  else if (composite >= 66) band = 'high'
+  else if (composite >= 46) band = 'elevated'
+  else if (composite >= 26) band = 'moderate'
 
   const allSources = ['BLS', 'FRED', 'World Bank', 'OECD', 'ACLED', 'O*NET', 'AI Index']
   const connected = Array.from(connectedSources)
