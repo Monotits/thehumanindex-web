@@ -31,6 +31,18 @@ interface RealDataResponse {
   fetched_at: string
 }
 
+interface MonthlyDomainRecord {
+  year_month: string
+  composite: number
+  work_risk: number | null
+  inequality: number | null
+  unrest: number | null
+  decay: number | null
+  wellbeing: number | null
+  policy: number | null
+  sentiment: number | null
+}
+
 const DOMAIN_SLUGS: Record<string, string> = {
   work_risk: 'ai-work-displacement',
   inequality: 'income-inequality',
@@ -79,6 +91,7 @@ export default function DashboardPage() {
   const [rawPoints, setRawPoints] = useState<RealDataResponse['raw_points']>([])
   const [errors, setErrors] = useState<string[]>([])
   const [correlationInsights, setCorrelationInsights] = useState<CorrelationInsight[]>([])
+  const [monthlyDomainHistory, setMonthlyDomainHistory] = useState<MonthlyDomainRecord[]>([])
   const { theme } = useTheme()
 
   useEffect(() => {
@@ -128,7 +141,7 @@ export default function DashboardPage() {
         try {
           const { data: history, error: histError } = await supabase
             .from('monthly_scores')
-            .select('year_month, composite')
+            .select('year_month, composite, work_risk, inequality, unrest, decay, wellbeing, policy, sentiment')
             .order('year_month', { ascending: true })
             .limit(12)
 
@@ -138,6 +151,7 @@ export default function DashboardPage() {
               const [, monthStr] = h.year_month.split('-')
               return { date: MONTH_SHORT[parseInt(monthStr, 10) - 1], score: Number(h.composite) }
             }))
+            setMonthlyDomainHistory(history as MonthlyDomainRecord[])
           }
         } catch {
           // No historical data
@@ -323,7 +337,7 @@ export default function DashboardPage() {
           <>
             {/* Stacked Area Decomposition */}
             <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
-              <StackedAreaDecomposition domains={sortedDomains} />
+              <StackedAreaDecomposition domains={sortedDomains} monthlyHistory={monthlyDomainHistory} />
             </div>
 
             {/* Waterfall + Multi-Domain Trend */}
@@ -332,7 +346,7 @@ export default function DashboardPage() {
                 <WaterfallChart domains={sortedDomains} compositeScore={score!.score_value} />
               </div>
               <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24 }}>
-                <MultiDomainTrend domains={sortedDomains} />
+                <MultiDomainTrend domains={sortedDomains} monthlyHistory={monthlyDomainHistory} />
               </div>
             </div>
 
