@@ -20,16 +20,18 @@
  * ├─────────────────┼─────────┼────────────────────────────────────│
  * │ BLS             │ env     │ work_risk                          │
  * │ FRED            │ env     │ work_risk, decay, sentiment,       │
- * │                 │         │ wellbeing, inequality               │
- * │ World Bank      │ none    │ inequality, decay                  │
- * │ OECD            │ none    │ wellbeing                          │
- * │ WHO GHO         │ none    │ wellbeing                          │
+ * │                 │         │ wellbeing, inequality, policy       │
+ * │ World Bank      │ none    │ inequality, decay, wellbeing       │
+ * │ OECD (static)   │ none    │ wellbeing, decay, unrest           │
  * │ V-Dem (via WB)  │ none    │ decay, unrest                     │
- * │ Pew (via FRED)  │ env     │ sentiment                         │
- * │ CDC (via WB)    │ none    │ wellbeing                          │
  * │ ACLED           │ env     │ unrest (pending access)            │
  * │ O*NET           │ env     │ work_risk (3 indicators)           │
  * │ AI Index        │ static  │ work_risk (annual reference)       │
+ * │ FBI UCR         │ env     │ unrest, decay (crime rates)        │
+ * │ CDC             │ static  │ wellbeing (overdose, divorce)      │
+ * │ Census          │ static  │ wellbeing (uninsured rate)         │
+ * │ HUD             │ static  │ wellbeing (homelessness)           │
+ * │ FBI NICS        │ static  │ unrest (firearm checks)            │
  * └─────────────────┴─────────┴────────────────────────────────────┘
  */
 
@@ -193,6 +195,26 @@ const FRED_SERIES = [
   { id: 'G160291A027NBEA', domain: 'policy', name: 'Government Social Benefits',
     low: 800, high: 2000, invert: false,
     context: '0 = $800B/quarter (normal), 100 = $2T+/quarter (crisis-level spending)' },
+
+  // ── NEW INDICATORS ──────────────────────────────────────
+
+  // sentiment — VIX "Fear Index" (daily, CBOE Volatility Index)
+  // Normal ~15-20, spikes to 30+ in crisis, 80+ in 2008/2020 panic
+  { id: 'VIXCLS', domain: 'sentiment', name: 'VIX Fear Index (CBOE)',
+    low: 12, high: 45, invert: false,
+    context: '0 = VIX 12 (calm markets), 100 = 45+ (extreme fear/panic)' },
+
+  // inequality — Real Median Household Income (annual, Census Bureau)
+  // Higher income = less stress. US ~$75-80K. Inverted: high value = low stress
+  { id: 'MEHOINUSA672N', domain: 'inequality', name: 'Median Household Income',
+    low: 80000, high: 50000, invert: true,
+    context: '0 = $80K+ (strong), 100 = $50K (severe decline in purchasing power)' },
+
+  // inequality — Poverty Rate (annual, Census Bureau)
+  // US ~11-14%. Higher = more stress
+  { id: 'PPAAUS00000A156NCEN', domain: 'inequality', name: 'Poverty Rate (All Ages)',
+    low: 8, high: 22, invert: false,
+    context: '0 = 8% poverty (low), 100 = 22%+ (widespread poverty)' },
 ]
 
 export async function fetchFREDData(): Promise<DomainDataPoint[]> {
@@ -725,6 +747,150 @@ function getOECDReferenceData(): DomainDataPoint[] {
 }
 
 // ═══════════════════════════════════════════════════════════
+// 10. FBI Crime Data API — Violent & Property Crime
+//     Free API: https://api.usa.gov/crime/fbi/sapi
+//     Requires API key from https://api.data.gov/signup/
+// ═══════════════════════════════════════════════════════════
+
+export async function fetchFBICrimeData(): Promise<DomainDataPoint[]> {
+  const apiKey = process.env.FBI_API_KEY || process.env.DATA_GOV_API_KEY
+  if (!apiKey) {
+    console.warn('FBI_API_KEY / DATA_GOV_API_KEY not set, skipping FBI crime data')
+    return []
+  }
+
+  const points: DomainDataPoint[] = []
+
+  try {
+    // National estimates — most recent year available
+    // The API returns data by year; we fetch the latest available
+    const baseUrl = 'https://api.usa.gov/crime/fbi/sapi/api'
+    const currentYear = new Date().getFullYear()
+
+    // Try last 3 years descending (FBI data lags 1-2 years)
+    let violentRate: number | null = null
+    let propertyRate: number | null = null
+    let dataYear = ''
+
+    for (let year = currentYear - 1; year >= currentYear - 3; year--) {
+      try {
+        const res = await fetch(
+          `${baseUrl}/estimates/national/${year}/${year}?API_KEY=${apiKey}`,
+          { cache: 'no-store' as RequestCache }
+        )
+        if (!res.ok) continue
+        const json = await res.json()
+        const results = json?.results || json?.data || json
+        if (Array.isArray(results) && results.length > 0) {
+          const d = results[0]
+          if (d.violent_crime && d.population) {
+            violentRate = (d.violent_crime / d.population) * 100000
+            propertyRate = d.property_crime ? (d.property_crime / d.population) * 100000 : null
+            dataYear = String(year)
+            break
+          }
+        }
+      } catch { continue }
+    }
+
+    if (violentRate !== null) {
+      // US violent crime rate: ~380/100K (2023), peak was ~758/100K (1991)
+      points.push(makePoint(
+        'unrest', 'Violent Crime Rate per 100K (FBI)', Math.round(violentRate),
+        normalize(violentRate, 200, 700),
+        'FBI UCR', 'violent_crime_rate', dataYear,
+        '0 = 200/100K (historically safe), 100 = 700+ (1990s crisis level)',
+      ))
+    }
+
+    if (propertyRate !== null) {
+      // US property crime rate: ~1800/100K (2023), was ~5000/100K (1991)
+      points.push(makePoint(
+        'decay', 'Property Crime Rate per 100K (FBI)', Math.round(propertyRate),
+        normalize(propertyRate, 1000, 4500),
+        'FBI UCR', 'property_crime_rate', dataYear,
+        '0 = 1000/100K (low), 100 = 4500+ (institutional breakdown)',
+      ))
+    }
+  } catch (err) {
+    console.error('FBI Crime Data fetch error:', err)
+  }
+
+  return points
+}
+
+// ═══════════════════════════════════════════════════════════
+// 11. Static Reference Data — CDC, HUD, NICS
+//     Updated periodically from official reports
+// ═══════════════════════════════════════════════════════════
+
+function getPublicHealthReferenceData(): DomainDataPoint[] {
+  const REPORT_YEAR = '2024'
+  const reportDate = new Date(2024, 9, 1) // October 2024 vintage
+  const monthsSinceReport = Math.floor((Date.now() - reportDate.getTime()) / (1000 * 60 * 60 * 24 * 30))
+  if (monthsSinceReport > 14) {
+    console.warn(`[THI] ⚠ Public health reference data is ${monthsSinceReport} months old. Update from CDC/HUD/FBI reports.`)
+  }
+
+  const points: DomainDataPoint[] = []
+
+  // Drug Overdose Deaths per 100K (CDC provisional)
+  // 2022: 32.6/100K (peak), 2024: ~22/100K (declining but still crisis)
+  // Source: CDC NCHS Vital Statistics Rapid Release
+  const overdoseRate = 22.0
+  points.push(makePoint(
+    'wellbeing', 'Drug Overdose Deaths per 100K (CDC)', overdoseRate,
+    normalize(overdoseRate, 8, 35),
+    'CDC', 'drug_overdose_rate', REPORT_YEAR,
+    '0 = 8/100K (pre-crisis baseline), 100 = 35+/100K (catastrophic epidemic)',
+  ))
+
+  // Uninsured Rate (Census ACS)
+  // 2024: 8.2%, was 15.5% in 2010
+  const uninsuredRate = 8.2
+  points.push(makePoint(
+    'wellbeing', 'Uninsured Rate (Census)', uninsuredRate,
+    normalize(uninsuredRate, 4, 18),
+    'Census', 'health_uninsured', REPORT_YEAR,
+    '0 = 4% uninsured (near-universal coverage), 100 = 18%+ (health access crisis)',
+  ))
+
+  // NICS Firearm Background Checks — monthly, normalized to annual rate
+  // Proxy for social anxiety/fear. 2020 peak: ~39.7M/year, normal ~27M/year
+  // Source: FBI NICS monthly reports
+  const nicsAnnual = 31.0 // millions, 2024 estimate
+  points.push(makePoint(
+    'unrest', 'Firearm Background Checks (NICS)', nicsAnnual,
+    normalize(nicsAnnual, 20, 45),
+    'FBI NICS', 'nics_annual', REPORT_YEAR,
+    '0 = 20M/year (baseline calm), 100 = 45M+/year (mass fear-driven arming)',
+  ))
+
+  // Homelessness (HUD Point-in-Time Count)
+  // 2024: ~771K people, 2023: ~653K, 2020: ~580K
+  // Source: HUD Annual Homeless Assessment Report
+  const homelessCount = 771 // thousands
+  points.push(makePoint(
+    'wellbeing', 'Homeless Population (HUD)', homelessCount,
+    normalize(homelessCount, 400, 1200),
+    'HUD', 'pit_homeless_count', REPORT_YEAR,
+    '0 = 400K (manageable), 100 = 1.2M+ (systemic housing collapse)',
+  ))
+
+  // Divorce Rate per 1,000 population (CDC/NCFMR)
+  // 2024: 2.3/1000, was 3.6/1000 in 2010, peak 5.3 in 1981
+  const divorceRate = 2.3
+  points.push(makePoint(
+    'wellbeing', 'Divorce Rate per 1,000 (CDC)', divorceRate,
+    normalize(divorceRate, 1.5, 5.0),
+    'CDC/NCFMR', 'divorce_rate', REPORT_YEAR,
+    '0 = 1.5/1000 (stable families), 100 = 5.0/1000 (social fabric crisis)',
+  ))
+
+  return points
+}
+
+// ═══════════════════════════════════════════════════════════
 // Combined Pipeline
 // ═══════════════════════════════════════════════════════════
 
@@ -754,10 +920,11 @@ export async function fetchAllRealData(): Promise<RealDataResult> {
     // withTimeout(fetchWHOData(), TIMEOUT, 'WHO'),
     withTimeout(fetchACLEDData(), TIMEOUT, 'ACLED'),
     withTimeout(fetchONETData(), TIMEOUT, 'O*NET'),
+    withTimeout(fetchFBICrimeData(), TIMEOUT, 'FBI'),
   ])
 
   const allPoints: DomainDataPoint[] = []
-  const sourceNames = ['BLS', 'FRED', 'World Bank', 'ACLED', 'O*NET']
+  const sourceNames = ['BLS', 'FRED', 'World Bank', 'ACLED', 'O*NET', 'FBI']
 
   results.forEach((r, i) => {
     if (r.status === 'fulfilled') {
@@ -772,6 +939,7 @@ export async function fetchAllRealData(): Promise<RealDataResult> {
   // Add static reference data (always available)
   allPoints.push(...getAIIndexData())
   allPoints.push(...getOECDReferenceData())
+  allPoints.push(...getPublicHealthReferenceData())
 
   console.log(`[Data Pipeline] Total: ${allPoints.length} data points, ${errors.length} errors`)
   // Log each point's raw → normalized for debugging

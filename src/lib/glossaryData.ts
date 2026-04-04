@@ -72,6 +72,8 @@ export const GLOSSARY: GlossaryEntry[] = [
       'U.S. Census Bureau — Gini Index (FRED: SIPOVGINIUSA)',
       'World Bank — Gini Index (SI.POV.GINI)',
       'World Bank — Income Share Held by Top 10% (SI.DST.10TH.10)',
+      'U.S. Census Bureau — Median Household Income (FRED: MEHOINUSA672N)',
+      'U.S. Census Bureau — Poverty Rate (FRED: PPAAUS00000A156NCEN)',
     ],
     methodology: 'The Gini coefficient (0 = perfect equality, 100 = perfect inequality) is normalized against a range of 35-55. Values below 35 score 0 (egalitarian), values above 55 score 100 (extreme inequality). Multiple data sources are averaged to reduce single-source bias.',
     correlations: [
@@ -111,8 +113,10 @@ export const GLOSSARY: GlossaryEntry[] = [
     whyItMatters: 'Social unrest is both a symptom and a cause of civilizational stress. It signals that existing institutions and policies are failing to address population needs. When unrest scores rise, it indicates growing risk of disruption to economic activity, governance, and daily life.',
     dataSources: [
       'World Bank — Political Stability & Absence of Violence Index (PV.EST)',
-      'ACLED — Armed Conflict Location & Event Data (integration planned)',
-      'GDELT — Global Database of Events, Language, and Tone (integration planned)',
+      'OECD — Voter Turnout (BLI/CG_VOTO)',
+      'FBI — Violent Crime Rate per 100K (UCR)',
+      'FBI NICS — Firearm Background Checks (annual)',
+      'ACLED — Armed Conflict Location & Event Data (protests & riots)',
     ],
     methodology: 'Political stability scores from the World Governance Indicators are inverted and normalized: a score of 2.0 (very stable) maps to 0, while -2.0 (severe unrest) maps to 100. Additional conflict event data will be incorporated as data sources are integrated.',
     correlations: [
@@ -155,6 +159,9 @@ export const GLOSSARY: GlossaryEntry[] = [
       'World Bank — Voice & Accountability (VA.EST)',
       'World Bank — Rule of Law (RL.EST)',
       'World Bank — Control of Corruption (CC.EST)',
+      'OECD/Pew — Trust in Government (%)',
+      'FRED — 10Y-2Y Treasury Spread (T10Y2Y)',
+      'FBI — Property Crime Rate per 100K (UCR)',
     ],
     methodology: 'World Governance Indicators are measured on a scale from -2.5 to +2.5. These are inverted and normalized: scores of 2.0-2.5 (excellent governance) map to 0, while -1.0 to -1.5 (failed state) map to 100. The four indicators are averaged for the domain score.',
     correlations: [
@@ -196,7 +203,11 @@ export const GLOSSARY: GlossaryEntry[] = [
       'FRED — Personal Saving Rate (PSAVERT)',
       'World Bank — Life Expectancy at Birth (SP.DYN.LE00.IN)',
       'World Bank — Suicide Rate per 100K (SH.STA.SUIC.P5)',
-      'OECD — Better Life Index dimensions',
+      'OECD — Life Satisfaction (BLI/SW_LIFS)',
+      'CDC — Drug Overdose Deaths per 100K',
+      'U.S. Census — Uninsured Rate (ACS)',
+      'HUD — Homeless Population (Point-in-Time Count)',
+      'CDC/NCFMR — Divorce Rate per 1,000',
     ],
     methodology: 'Each indicator is normalized to 0-100 with inverted scales where appropriate. For example, a 10%+ personal savings rate scores 0 (healthy), while 1% scores 100 (extreme fragility). Life expectancy of 82+ scores 0, while 65 years scores 100 (severe health crisis).',
     correlations: [
@@ -278,6 +289,7 @@ export const GLOSSARY: GlossaryEntry[] = [
     dataSources: [
       'FRED — University of Michigan Consumer Sentiment Index (UMCSENT)',
       'FRED — OECD Consumer Confidence Index (CSCICP03USM665S)',
+      'CBOE — VIX Volatility / Fear Index (FRED: VIXCLS)',
     ],
     methodology: 'Consumer sentiment indices are inverted and normalized: a reading of 100+ (optimistic) scores 0, while 45 (crisis-level pessimism) scores 100. Two independent survey sources are averaged to provide a robust sentiment reading.',
     correlations: [

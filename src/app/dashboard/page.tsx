@@ -13,9 +13,8 @@ import RiskBubbleChart from '@/components/charts/RiskBubbleChart'
 import MultiDomainTrend from '@/components/charts/MultiDomainTrend'
 import StackedAreaDecomposition from '@/components/charts/StackedAreaDecomposition'
 import WeeklyHeatmap from '@/components/charts/WeeklyHeatmap'
-import SocialFeedSection from '@/components/SocialFeedSection'
-import LayoffTracker from '@/components/LayoffTracker'
-import CorporateLayoffTable from '@/components/CorporateLayoffTable'
+import CorrelationInsightsPanel from '@/components/CorrelationInsights'
+import { generateCorrelationInsights, CorrelationInsight } from '@/lib/correlationInsights'
 
 interface RealDataResponse {
   scores: {
@@ -79,6 +78,7 @@ export default function DashboardPage() {
   const [missingSourcesList, setMissingSources] = useState<string[]>([])
   const [rawPoints, setRawPoints] = useState<RealDataResponse['raw_points']>([])
   const [errors, setErrors] = useState<string[]>([])
+  const [correlationInsights, setCorrelationInsights] = useState<CorrelationInsight[]>([])
   const { theme } = useTheme()
 
   useEffect(() => {
@@ -109,7 +109,17 @@ export default function DashboardPage() {
                 }
               }
             }
-            if (points.length > 0) setRawPoints(points)
+            if (points.length > 0) {
+              setRawPoints(points)
+              // Generate cross-domain correlation insights from raw data
+              const insightInputs = points.map(p => ({
+                domain: p.domain,
+                indicator: p.indicator || p.series,
+                value: p.value,
+                normalized: p.normalized,
+              }))
+              setCorrelationInsights(generateCorrelationInsights(insightInputs))
+            }
           }
         } catch {
           // Supabase not available
@@ -303,6 +313,11 @@ export default function DashboardPage() {
           )}
         </div>
 
+        {/* ═══ CORRELATION INSIGHTS ═══ */}
+        {correlationInsights.length > 0 && (
+          <CorrelationInsightsPanel insights={correlationInsights} />
+        )}
+
         {/* ═══ ADVANCED CHARTS (moved from Home) ═══ */}
         {hasScore && sortedDomains.length > 0 && (
           <>
@@ -338,20 +353,22 @@ export default function DashboardPage() {
           </>
         )}
 
-        {/* ═══ Corporate Layoff Tracker ═══ */}
-        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
-          <CorporateLayoffTable />
-        </div>
-
-        {/* ═══ Social Feed ═══ */}
-        <div style={{ marginBottom: 24 }}>
-          <SocialFeedSection />
-        </div>
-
-        {/* ═══ WARN Act Layoff Tracker ═══ */}
-        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
-          <LayoffTracker />
-        </div>
+        {/* ═══ Layoff Tracker CTA ═══ */}
+        <Link href="/layoffs" style={{
+          display: 'block', background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12,
+          padding: 24, marginBottom: 24, textDecoration: 'none',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 6 }}>Work Risk — Deep Dive</div>
+              <div style={{ fontSize: 17, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, marginBottom: 4 }}>Layoff Tracker</div>
+              <div style={{ fontSize: 13, color: theme.textSecondary, lineHeight: 1.5 }}>
+                Corporate layoffs, WARN Act filings, and social signals — updated in real time.
+              </div>
+            </div>
+            <div style={{ fontSize: 24, color: theme.textTertiary }}>→</div>
+          </div>
+        </Link>
 
         {/* Raw Data Points */}
         {rawPoints.length > 0 && (

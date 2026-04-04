@@ -80,6 +80,15 @@ const FRED_HISTORICAL: FREDHistoricalSeries[] = [
   { id: 'G160291A027NBEA', domain: 'policy', name: 'Government Social Benefits',
     low: 800, high: 2000, invert: false,
     context: '0 = $800B/quarter, 100 = $2T+/quarter (crisis spending)' },
+  { id: 'VIXCLS', domain: 'sentiment', name: 'VIX Fear Index (CBOE)',
+    low: 12, high: 45, invert: false,
+    context: '0 = VIX 12 (calm), 100 = 45+ (extreme fear)' },
+  { id: 'MEHOINUSA672N', domain: 'inequality', name: 'Median Household Income',
+    low: 80000, high: 50000, invert: true,
+    context: '0 = $80K+ (strong), 100 = $50K (severe decline)' },
+  { id: 'PPAAUS00000A156NCEN', domain: 'inequality', name: 'Poverty Rate (All Ages)',
+    low: 8, high: 22, invert: false,
+    context: '0 = 8% poverty, 100 = 22%+ (widespread)' },
 ]
 
 async function fetchFREDForMonth(yearMonth: string): Promise<DomainDataPoint[]> {
