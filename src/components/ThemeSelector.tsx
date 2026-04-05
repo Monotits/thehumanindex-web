@@ -47,7 +47,7 @@ export default function ThemeSelector({ isModal, onClose }: Props) {
               style={{
                 padding: 0,
                 border: isActive ? '2px solid #fff' : '2px solid #222',
-                borderRadius: 12,
+                borderRadius: 10,
                 background: '#111',
                 cursor: 'pointer',
                 overflow: 'hidden',

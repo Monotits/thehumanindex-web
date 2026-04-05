@@ -58,8 +58,8 @@ export default function ResultPage() {
   const cardStyle: React.CSSProperties = {
     background: theme.surface,
     border: `1px solid ${theme.surfaceBorder}`,
-    borderRadius: 12,
-    padding: 32,
+    borderRadius: 10,
+    padding: 24,
   }
 
   const sectionTitle: React.CSSProperties = {
@@ -74,11 +74,11 @@ export default function ResultPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: theme.bg, padding: '48px 16px' }}>
-      <div style={{ maxWidth: 960, margin: '0 auto' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <h1 style={{ fontSize: 36, fontWeight: 700, color: theme.text, marginBottom: 16, fontFamily: theme.fontHeading }}>Your Results</h1>
-          <p style={{ fontSize: 16, color: theme.textSecondary, fontFamily: theme.fontBody }}>
+          <h1 style={{ fontSize: 32, fontWeight: 300, color: theme.text, marginBottom: 16, fontFamily: theme.fontHeading }}>Your Results</h1>
+          <p style={{ fontSize: 15, color: theme.textSecondary, fontFamily: theme.fontBody }}>
             Based on your job, skills, and region, here&apos;s your AI exposure assessment.
           </p>
         </div>
@@ -86,8 +86,8 @@ export default function ResultPage() {
         {/* Email Modal Overlay */}
         {showEmailModal && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 32, maxWidth: 420, width: '100%' }}>
-              <h2 style={{ fontSize: 24, fontWeight: 700, color: theme.text, marginBottom: 16, fontFamily: theme.fontHeading }}>Get Your Full Report</h2>
+            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24, maxWidth: 420, width: '100%' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 400, color: theme.text, marginBottom: 16, fontFamily: theme.fontHeading }}>Get Your Full Report</h2>
               <p style={{ fontSize: 14, color: theme.textSecondary, marginBottom: 24, lineHeight: 1.6, fontFamily: theme.fontBody }}>
                 Enter your email to download your complete assessment with personalized career recommendations.
               </p>
@@ -161,7 +161,7 @@ export default function ResultPage() {
 
             {/* CTA */}
             <div style={{ ...cardStyle, background: `${theme.accent}10`, borderColor: `${theme.accent}30`, textAlign: 'center' }}>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: theme.text, margin: '0 0 8px', fontFamily: theme.fontHeading }}>Stay Ahead of the Curve</h3>
+              <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.text, margin: '0 0 8px', fontFamily: theme.fontHeading }}>Stay Ahead of the Curve</h3>
               <p style={{ fontSize: 14, color: theme.textSecondary, margin: '0 0 20px', fontFamily: theme.fontBody }}>
                 Get weekly updates on how AI displacement is evolving — and what it means for your career.
               </p>

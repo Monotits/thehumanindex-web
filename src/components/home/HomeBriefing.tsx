@@ -97,7 +97,7 @@ export default function HomeBriefing({ score, pulse, keyStat, trendHistory }: Pr
   const accentColor = '#0d9488'
 
   return (
-    <div style={{ background: theme.bg, minHeight: '100vh', fontFamily: theme.fontHeading, color: theme.text }}>
+    <div style={{ background: theme.bg, minHeight: '100vh', fontFamily: theme.fontBody, color: theme.text }}>
       {/* Teal accent line instead of red */}
       <div style={{ height: 3, background: `linear-gradient(90deg, ${accentColor}, #14b8a6)` }} />
 
@@ -110,14 +110,14 @@ export default function HomeBriefing({ score, pulse, keyStat, trendHistory }: Pr
               <div style={{ fontSize: 12, color: theme.textTertiary, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12, fontFamily: theme.fontBody }}>
                 Global Stress Assessment — {new Date(score.computed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               </div>
-              <h1 style={{ fontSize: 40, fontWeight: 400, lineHeight: 1.15, margin: '0 0 16px' }}>
+              <h1 style={{ fontSize: 32, fontWeight: 300, lineHeight: 1.2, margin: '0 0 16px' }}>
                 Civilizational Stress Reaches{' '}
                 <span style={{ color: accentColor, fontStyle: 'italic' }}>
                   {BAND_LABELS[score.band] || score.band}
                 </span>{' '}
                 Threshold
               </h1>
-              <p style={{ fontSize: 17, color: theme.textSecondary, lineHeight: 1.7, margin: '0 0 24px', fontFamily: theme.fontBody }}>
+              <p style={{ fontSize: 15, color: theme.textSecondary, lineHeight: 1.7, margin: '0 0 24px', fontFamily: theme.fontBody }}>
                 The composite index stands at {score.score_value.toFixed(2)}, reflecting mounting pressure across multiple domains of civilizational stability.
               </p>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -132,9 +132,9 @@ export default function HomeBriefing({ score, pulse, keyStat, trendHistory }: Pr
             </div>
 
             {/* Score + Chart */}
-            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
+            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24 }}>
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <div style={{ fontSize: 64, fontWeight: 300, lineHeight: 1 }}>{score.score_value.toFixed(2)}</div>
+                <div style={{ fontSize: 48, fontWeight: 200, lineHeight: 1, fontFamily: theme.fontMono }}>{score.score_value.toFixed(2)}</div>
                 <div style={{ fontSize: 13, color: theme.textTertiary, fontFamily: theme.fontBody, marginTop: 4 }}>Composite Index Score</div>
               </div>
               {(() => {
@@ -224,7 +224,7 @@ export default function HomeBriefing({ score, pulse, keyStat, trendHistory }: Pr
               const color = isUp ? '#dc2626' : '#2d7d46'
               const ctx = getDomainContext(m.domain as Domain, m.value, m.delta)
               return (
-                <div key={m.domain} style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 20 }}>
+                <div key={m.domain} style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 20 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                     <DomainIcon domain={m.domain as Domain} size={24} color={theme.textSecondary} />
                     <span style={{ fontSize: 13, color, fontWeight: 600, fontFamily: theme.fontBody }}>{isUp ? '↑' : '↓'} {Math.abs(m.delta).toFixed(2)}</span>
@@ -249,7 +249,7 @@ export default function HomeBriefing({ score, pulse, keyStat, trendHistory }: Pr
         <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <div>
             <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 20px' }}>Weekly Pulse</h2>
-            <article style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 28 }}>
+            <article style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 28 }}>
               <div style={{ fontSize: 11, color: accentColor, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12, fontFamily: theme.fontBody }}>Analysis</div>
               <h3 style={{ fontSize: 22, fontWeight: 400, lineHeight: 1.3, margin: '0 0 12px' }}>{pulse.title}</h3>
               <p style={{ fontSize: 15, color: theme.textSecondary, lineHeight: 1.7, margin: '0 0 16px', fontFamily: theme.fontBody }}>
@@ -268,7 +268,7 @@ export default function HomeBriefing({ score, pulse, keyStat, trendHistory }: Pr
 
           <div>
             <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 20px' }}>Personal Assessment</h2>
-            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 28 }}>
+            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 28 }}>
               <p style={{ fontSize: 15, color: theme.textSecondary, lineHeight: 1.7, margin: '0 0 16px', fontFamily: theme.fontBody }}>
                 How exposed is your job to AI displacement? Take a 2-minute quiz to find out your personal risk score, at-risk tasks, and skill recommendations.
               </p>
@@ -282,7 +282,7 @@ export default function HomeBriefing({ score, pulse, keyStat, trendHistory }: Pr
         {/* ═══ Domain Overview ═══ */}
         <div style={{ padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
           <h2 style={{ fontSize: 24, fontWeight: 400, margin: '0 0 24px' }}>Seven Domains of Stress</h2>
-          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 24 }}>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24 }}>
             {sortedDomains.map(d => {
               const color = d.value >= 70 ? '#ef4444' : d.value >= 55 ? '#f97316' : d.value >= 40 ? '#f59e0b' : d.value >= 25 ? '#3b82f6' : '#22c55e'
               return (
@@ -308,7 +308,7 @@ export default function HomeBriefing({ score, pulse, keyStat, trendHistory }: Pr
 
         {/* ═══ Subscribe ═══ */}
         <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '40px 0', borderBottom: `1px solid ${theme.surfaceBorder}` }}>
-          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, padding: 32 }}>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 32 }}>
             <h3 style={{ fontSize: 20, fontWeight: 400, margin: '0 0 8px' }}>Weekly Briefing</h3>
             <p style={{ fontSize: 14, color: theme.textSecondary, margin: '0 0 20px', fontFamily: theme.fontBody, lineHeight: 1.6 }}>
               Composite score, top movers, and analysis — delivered every Monday.
@@ -316,7 +316,7 @@ export default function HomeBriefing({ score, pulse, keyStat, trendHistory }: Pr
             <SubscribeForm />
           </div>
 
-          <div style={{ background: '#1a2332', borderRadius: 8, padding: 32, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ background: '#1a2332', borderRadius: 10, padding: 32, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <h3 style={{ fontSize: 20, fontWeight: 400, color: '#fff', margin: '0 0 12px', fontFamily: theme.fontHeading }}>For Researchers & Journalists</h3>
             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, margin: '0 0 16px', fontFamily: theme.fontBody }}>
               All our data is open. Read the methodology, explore the index, and cite freely.

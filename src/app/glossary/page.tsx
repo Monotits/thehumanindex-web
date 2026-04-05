@@ -30,13 +30,13 @@ export default function GlossaryIndex() {
         ]}
       />
 
-      <div className="min-h-screen bg-[var(--bg-primary)]">
-        <div className="max-w-4xl mx-auto px-6 py-20">
-          <header className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] mb-4">
+      <div style={{ background: 'var(--thi-bg)', minHeight: '100vh', color: 'var(--thi-text)', fontFamily: 'var(--thi-font-body)' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto', padding: '48px 24px' }}>
+          <header style={{ marginBottom: 48 }}>
+            <h1 style={{ fontSize: 32, fontWeight: 300, margin: '0 0 16px', color: 'var(--thi-text)', fontFamily: 'var(--thi-font-heading)' }}>
               Domain Glossary
             </h1>
-            <p className="text-lg text-[var(--text-secondary)] leading-relaxed max-w-3xl">
+            <p style={{ fontSize: 16, color: 'var(--thi-text-secondary)', lineHeight: 1.7, maxWidth: 640, margin: 0 }}>
               The Human Index tracks civilizational stress across seven interconnected domains.
               Each domain is measured using real data from authoritative sources and normalized
               to a 0-100 stress scale. Explore each domain to understand what it measures,
@@ -44,40 +44,40 @@ export default function GlossaryIndex() {
             </p>
           </header>
 
-          <div className="grid gap-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {GLOSSARY.map((entry) => (
               <Link
                 key={entry.slug}
                 href={`/glossary/${entry.slug}`}
-                className="group block border border-[var(--border-primary)] rounded-lg p-6 hover:border-[var(--accent)] transition-colors"
+                style={{ display: 'block', border: '1px solid var(--thi-surface-border)', borderRadius: 10, padding: 24, textDecoration: 'none', transition: 'border-color 0.2s' }}
               >
-                <div className="flex items-start justify-between gap-4">
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
                   <div>
-                    <h2 className="text-xl font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors mb-2">
+                    <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--thi-text)', marginBottom: 8, margin: '0 0 8px' }}>
                       {entry.title}
                     </h2>
-                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
+                    <p style={{ fontSize: 13, color: 'var(--thi-text-secondary)', lineHeight: 1.6, margin: '0 0 12px' }}>
                       {entry.shortDescription}
                     </p>
-                    <div className="flex flex-wrap gap-2 mt-3">
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                       {entry.dataSources.slice(0, 2).map((src, i) => (
-                        <span key={i} className="text-xs px-2 py-1 rounded bg-[var(--bg-secondary)] text-[var(--text-muted)]">
+                        <span key={i} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'var(--thi-surface)', color: 'var(--thi-text-tertiary)' }}>
                           {src.split('—')[0].trim()}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <span className="text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors text-xl flex-shrink-0">→</span>
+                  <span style={{ color: 'var(--thi-text-tertiary)', fontSize: 18, flexShrink: 0 }}>→</span>
                 </div>
               </Link>
             ))}
           </div>
 
-          <div className="mt-12 text-center">
-            <p className="text-[var(--text-muted)] mb-4">See how these domains combine into one score</p>
+          <div style={{ marginTop: 48, textAlign: 'center' }}>
+            <p style={{ fontSize: 13, color: 'var(--thi-text-tertiary)', marginBottom: 16 }}>See how these domains combine into one score</p>
             <Link
               href="/methodology"
-              className="inline-block px-6 py-3 rounded-lg border border-[var(--accent)] text-[var(--accent)] font-medium hover:bg-[var(--accent)] hover:text-white transition-colors"
+              style={{ display: 'inline-block', padding: '12px 24px', borderRadius: 10, border: '1px solid var(--thi-surface-border)', color: 'var(--thi-text-secondary)', fontWeight: 500, fontSize: 14, textDecoration: 'none' }}
             >
               Read Our Methodology
             </Link>

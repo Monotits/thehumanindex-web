@@ -13,7 +13,7 @@ export default function LayoffsPage() {
 
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', padding: '48px 0', fontFamily: theme.fontBody }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
 
         {/* Header */}
         <div style={{ marginBottom: 32 }}>
@@ -23,7 +23,7 @@ export default function LayoffsPage() {
             Layoffs
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 700, color: theme.isDark ? '#fff' : theme.text, margin: '0' }}>
+            <h1 style={{ fontSize: 32, fontWeight: 300, color: theme.isDark ? '#fff' : theme.text, margin: '0' }}>
               Layoff Tracker
             </h1>
             <ShareButton
@@ -43,12 +43,12 @@ export default function LayoffsPage() {
         </div>
 
         {/* Corporate Layoffs — the main table */}
-        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
+        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24, marginBottom: 24 }}>
           <CorporateLayoffTable />
         </div>
 
         {/* WARN Act Tracker */}
-        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
+        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24, marginBottom: 24 }}>
           <LayoffTracker />
         </div>
 

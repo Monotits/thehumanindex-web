@@ -42,7 +42,7 @@ export default function AboutPage() {
           <p style={{ fontSize: 12, fontWeight: 600, color: accent, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 16, fontFamily: theme.fontMono }}>
             About the Project
           </p>
-          <h1 style={{ fontSize: 38, fontWeight: 800, color: theme.text, fontFamily: theme.fontHeading, lineHeight: 1.2, margin: '0 0 20px' }}>
+          <h1 style={{ fontSize: 32, fontWeight: 300, color: theme.text, fontFamily: theme.fontHeading, lineHeight: 1.2, margin: '0 0 20px' }}>
             We built the dashboard<br />we wished existed.
           </h1>
           <p style={{ fontSize: 17, color: theme.textSecondary, lineHeight: 1.7, fontFamily: theme.fontBody, maxWidth: 520, margin: '0 auto' }}>
@@ -164,7 +164,7 @@ export default function AboutPage() {
         </p>
 
         {/* CTA */}
-        <div style={{ margin: '48px 0 64px', padding: 32, background: `${accent}08`, border: `1px solid ${accent}20`, borderRadius: 12, textAlign: 'center' }}>
+        <div style={{ margin: '48px 0 64px', padding: 32, background: `${accent}08`, border: `1px solid ${accent}20`, borderRadius: 10, textAlign: 'center' }}>
           <h3 style={{ fontSize: 20, fontWeight: 700, color: theme.text, margin: '0 0 10px', fontFamily: theme.fontHeading }}>
             See where you stand
           </h3>

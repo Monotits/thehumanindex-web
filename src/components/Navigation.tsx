@@ -30,7 +30,7 @@ export function Navigation() {
 
   return (
     <nav style={{ position: 'sticky', top: 0, zIndex: 50, borderBottom: `1px solid ${navBorder}`, background: navBg, backdropFilter: 'blur(12px)' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
           {/* Logo */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>

@@ -76,13 +76,13 @@ export default function MethodologyPage() {
   }
 
   return (
-    <div style={{ background: isBriefing ? '#f8f5f0' : theme.bg, minHeight: '100vh', paddingTop: 48, paddingBottom: 48 }}>
+    <div style={{ background: theme.bg, minHeight: '100vh', paddingTop: 48, paddingBottom: 48 }}>
       <FAQPageJsonLd questions={FAQ_QUESTIONS} />
-      <div style={{ maxWidth: 840, margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px' }}>
 
         {/* Header */}
         <div style={{ marginBottom: 40 }}>
-          <h1 style={{ fontSize: 36, fontWeight: 800, color: theme.text, fontFamily: theme.fontHeading, margin: '0 0 12px' }}>Methodology</h1>
+          <h1 style={{ fontSize: 32, fontWeight: 300, color: theme.text, fontFamily: theme.fontHeading, margin: '0 0 12px' }}>Methodology</h1>
           <p style={{ fontSize: 16, color: theme.textSecondary, fontFamily: theme.fontBody, lineHeight: 1.6 }}>
             How we measure civilization&apos;s proximity to irreversible AI-driven structural transformation
           </p>

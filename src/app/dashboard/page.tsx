@@ -191,11 +191,11 @@ export default function DashboardPage() {
 
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', padding: '48px 0', fontFamily: theme.fontBody }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
 
         {/* Header */}
         <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 700, color: theme.isDark ? '#fff' : theme.text, margin: '0 0 8px' }}>
+          <h1 style={{ fontSize: 32, fontWeight: 300, color: theme.isDark ? '#fff' : theme.text, margin: '0 0 8px' }}>
             Dashboard
           </h1>
           <p style={{ fontSize: 15, color: theme.textSecondary, margin: 0 }}>
@@ -207,7 +207,7 @@ export default function DashboardPage() {
         {/* No data state */}
         {!hasScore && (
           <div style={{
-            background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12,
+            background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10,
             padding: 32, marginBottom: 24, textAlign: 'center',
           }}>
             <div style={{ fontSize: 20, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, marginBottom: 12 }}>
@@ -221,7 +221,7 @@ export default function DashboardPage() {
                 const connected = dataSources.includes(s)
                 return (
                   <span key={s} style={{
-                    fontSize: 11, padding: '4px 12px', borderRadius: 12, fontFamily: theme.fontMono,
+                    fontSize: 11, padding: '4px 12px', borderRadius: 10, fontFamily: theme.fontMono,
                     background: connected ? `${theme.accent}15` : `${theme.surfaceBorder}`,
                     border: `1px solid ${connected ? theme.accent + '30' : theme.surfaceBorder}`,
                     color: connected ? theme.accent : theme.textTertiary,
@@ -237,9 +237,9 @@ export default function DashboardPage() {
         {/* Score + Historical Chart */}
         {hasScore && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, marginBottom: 24 }}>
-            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 32, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 32, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16 }}>Composite Index</div>
-              <div style={{ fontSize: 56, fontWeight: 200, color: bandColor, lineHeight: 1, fontFamily: theme.fontMono }}>
+              <div style={{ fontSize: 48, fontWeight: 200, color: bandColor, lineHeight: 1, fontFamily: theme.fontMono }}>
                 {score!.score_value.toFixed(1)}
               </div>
               <div style={{
@@ -275,7 +275,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24 }}>
+            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24 }}>
               {(() => {
                 const MONTH_SHORT_DASH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
                 const totalMonths = 6
@@ -340,7 +340,7 @@ export default function DashboardPage() {
         )}
 
         {/* Domain Breakdown */}
-        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
+        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24, marginBottom: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase' }}>Domain Breakdown</div>
             <Link href="/glossary" style={{ fontSize: 12, color: theme.accent, textDecoration: 'none' }}>Learn about each domain →</Link>
@@ -409,30 +409,30 @@ export default function DashboardPage() {
         {hasScore && sortedDomains.length > 0 && (
           <>
             {/* Stacked Area Decomposition */}
-            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
+            <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24, marginBottom: 24 }}>
               <StackedAreaDecomposition domains={sortedDomains} monthlyHistory={monthlyDomainHistory} />
             </div>
 
             {/* Waterfall + Multi-Domain Trend */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }} className="grid-2col">
-              <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24 }}>
+              <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24 }}>
                 <WaterfallChart domains={sortedDomains} compositeScore={score!.score_value} />
               </div>
-              <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24 }}>
+              <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24 }}>
                 <MultiDomainTrend domains={sortedDomains} monthlyHistory={monthlyDomainHistory} />
               </div>
             </div>
 
             {/* Risk Matrix + Correlation + Heatmap */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }} className="grid-2col">
-              <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24 }}>
+              <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24 }}>
                 <RiskBubbleChart domains={sortedDomains} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24 }}>
+                <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24 }}>
                   <WeeklyHeatmap currentScore={score!.score_value} />
                 </div>
-                <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24 }}>
+                <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24 }}>
                   <CorrelationHeatmap domains={sortedDomains} />
                 </div>
               </div>
@@ -442,7 +442,7 @@ export default function DashboardPage() {
 
         {/* ═══ Layoff Tracker CTA ═══ */}
         <Link href="/layoffs" style={{
-          display: 'block', background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12,
+          display: 'block', background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10,
           padding: 24, marginBottom: 24, textDecoration: 'none',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -459,7 +459,7 @@ export default function DashboardPage() {
 
         {/* Raw Data Points */}
         {rawPoints.length > 0 && (
-          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24, marginBottom: 24 }}>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 24, marginBottom: 24 }}>
             <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 16 }}>
               Raw Indicators ({rawPoints.length} data points)
             </div>
@@ -497,18 +497,18 @@ export default function DashboardPage() {
         )}
 
         {/* Data Sources Status */}
-        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 20, marginBottom: 24 }}>
+        <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 20, marginBottom: 24 }}>
           <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 12 }}>Data Sources</div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {dataSources.map(s => (
               <span key={s} style={{
-                fontSize: 12, padding: '5px 14px', borderRadius: 12, fontFamily: theme.fontMono,
+                fontSize: 12, padding: '5px 14px', borderRadius: 10, fontFamily: theme.fontMono,
                 background: `${theme.accent}15`, border: `1px solid ${theme.accent}30`, color: theme.accent,
               }}>● {s}</span>
             ))}
             {missingSourcesList.map(s => (
               <span key={s} style={{
-                fontSize: 12, padding: '5px 14px', borderRadius: 12, fontFamily: theme.fontMono,
+                fontSize: 12, padding: '5px 14px', borderRadius: 10, fontFamily: theme.fontMono,
                 background: theme.surfaceBorder, color: theme.textTertiary,
               }}>○ {s}</span>
             ))}
@@ -528,7 +528,7 @@ export default function DashboardPage() {
         {/* Methodology & Glossary links */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <Link href="/methodology" style={{
-            background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12,
+            background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10,
             padding: 20, textDecoration: 'none', display: 'block',
           }}>
             <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 8 }}>Methodology</div>
@@ -538,7 +538,7 @@ export default function DashboardPage() {
             </div>
           </Link>
           <Link href="/glossary" style={{
-            background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12,
+            background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10,
             padding: 20, textDecoration: 'none', display: 'block',
           }}>
             <div style={{ fontSize: 11, letterSpacing: 2, color: theme.textTertiary, textTransform: 'uppercase', marginBottom: 8 }}>Domain Glossary</div>

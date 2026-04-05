@@ -10,7 +10,7 @@ export function Footer() {
 
   return (
     <footer style={{ borderTop: `1px solid ${theme.surfaceBorder}`, background: theme.bg, padding: '32px 0 24px' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
         {/* Top row — nav columns */}
         <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 24, marginBottom: 24, fontSize: 13 }}>
           <div>

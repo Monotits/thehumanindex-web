@@ -115,7 +115,7 @@ function GaugeVisual({ score, band }: { score: number; band: string }) {
         })}
       </svg>
       <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', textAlign: 'center' }}>
-        <div style={{ fontSize: 56, fontWeight: 200, color: '#fff', lineHeight: 1 }}>{animated.toFixed(animated === score ? 1 : 0)}</div>
+        <div style={{ fontSize: 48, fontWeight: 200, color: '#fff', lineHeight: 1 }}>{animated.toFixed(animated === score ? 1 : 0)}</div>
       </div>
     </div>
   )
@@ -140,7 +140,7 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
     <div style={{ background: theme.bg, minHeight: '100vh', color: theme.text, fontFamily: theme.fontBody }}>
 
       {/* ═══ Hero ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '60px 24px 40px', textAlign: 'center' }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '60px 24px 40px', textAlign: 'center' }}>
         <div style={{ fontSize: 12, color: theme.textTertiary, textTransform: 'uppercase', letterSpacing: 3, marginBottom: 24 }}>
           Civilizational Stress Index — {new Date(score.computed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
         </div>
@@ -174,7 +174,7 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
       </section>
 
       {/* ═══ Compact Stat Bar ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 32px' }}>
         <div className="stat-bar" style={{
           display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 0,
           background: theme.surface, borderRadius: 10, border: `1px solid ${theme.surfaceBorder}`,
@@ -204,8 +204,8 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
       </section>
 
       {/* ═══ Trend Chart ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 32px' }}>
+        <div style={{ background: theme.surface, borderRadius: 10, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <div>
               <h3 style={{ fontSize: 15, fontWeight: 600, color: '#fff', margin: 0 }}>6-Month Trend</h3>
@@ -286,12 +286,12 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
       </section>
 
       {/* ═══ Domain Overview (simple bars) ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 32px' }}>
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <h2 style={{ fontSize: 24, fontWeight: 300, color: '#fff', margin: '0 0 8px' }}>Seven Signals We Track</h2>
           <p style={{ fontSize: 14, color: theme.textTertiary, margin: 0 }}>Each scored 0-100 from public data. Higher = more stress.</p>
         </div>
-        <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
+        <div style={{ background: theme.surface, borderRadius: 10, border: `1px solid ${theme.surfaceBorder}`, padding: 24 }}>
           {sortedDomains.map(d => {
             const color = d.value >= 70 ? '#ef4444' : d.value >= 55 ? '#f97316' : d.value >= 40 ? '#f59e0b' : d.value >= 25 ? '#3b82f6' : '#22c55e'
             return (
@@ -317,8 +317,8 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
       </section>
 
       {/* ═══ Latest Pulse (Prominent) ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ background: 'linear-gradient(135deg, #0f1419, #1a1a2a)', borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 32 }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 32px' }}>
+        <div style={{ background: 'linear-gradient(135deg, #0f1419, #1a1a2a)', borderRadius: 10, border: `1px solid ${theme.surfaceBorder}`, padding: 32 }}>
           <div style={{ fontSize: 11, color: theme.accent, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12 }}>This Week&apos;s Pulse</div>
           <h2 style={{ fontSize: 26, fontWeight: 300, color: '#fff', lineHeight: 1.3, margin: '0 0 16px' }}>{pulse.title}</h2>
           <p style={{ fontSize: 15, color: theme.textSecondary, lineHeight: 1.8, margin: '0 0 24px' }}>
@@ -336,10 +336,10 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
       </section>
 
       {/* ═══ Quiz CTA + Subscribe ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 32px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="grid-2col">
           {/* Quiz CTA */}
-          <div style={{ background: 'linear-gradient(135deg, #111, #1a1a2a)', border: '1px solid #222', borderRadius: 12, padding: 32, textAlign: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, #111, #1a1a2a)', border: '1px solid #222', borderRadius: 10, padding: 32, textAlign: 'center' }}>
             <h3 style={{ fontSize: 20, fontWeight: 300, color: '#fff', margin: '0 0 8px' }}>How exposed is your job?</h3>
             <p style={{ fontSize: 13, color: theme.textSecondary, margin: '0 0 20px' }}>
               Take a 2-minute assessment to see where you stand in the AI displacement landscape.
@@ -350,7 +350,7 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
           </div>
 
           {/* Subscribe */}
-          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 32, textAlign: 'center' }}>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 10, padding: 32, textAlign: 'center' }}>
             <div style={{ fontSize: 18, fontWeight: 300, color: '#fff', marginBottom: 8 }}>Stay informed. Every week.</div>
             <p style={{ fontSize: 13, color: theme.textSecondary, margin: '0 0 20px' }}>
               Composite score, top movers, and analysis — delivered every Monday.
@@ -363,8 +363,8 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
       </section>
 
       {/* ═══ Methodology Brief ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 32px' }}>
-        <div style={{ background: theme.surface, borderRadius: 12, border: `1px solid ${theme.surfaceBorder}`, padding: 32 }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 32px' }}>
+        <div style={{ background: theme.surface, borderRadius: 10, border: `1px solid ${theme.surfaceBorder}`, padding: 32 }}>
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <h3 style={{ fontSize: 18, fontWeight: 300, color: '#fff', margin: '0 0 4px' }}>How the Index Works</h3>
           </div>
@@ -388,7 +388,7 @@ export default function HomeSignal({ score, pulse, keyStat, trendHistory }: Prop
       </section>
 
       {/* ═══ Audience Positioning ═══ */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 48px', textAlign: 'center' }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 48px', textAlign: 'center' }}>
         <div style={{ fontSize: 11, color: theme.textTertiary, letterSpacing: 1, marginBottom: 16 }}>BUILT FOR</div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
           {['Researchers', 'Policy Analysts', 'Journalists', 'Macro Strategists', 'Everyone'].map(a => (

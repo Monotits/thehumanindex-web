@@ -210,7 +210,7 @@ export default function PulseDetailPage() {
   if (!commentary) {
     return (
       <div style={{ background: theme.bg, minHeight: '100vh', padding: '48px 24px' }}>
-        <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center', paddingTop: 64 }}>
+        <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center', paddingTop: 64 }}>
           <DomainIcon domain="sentiment" size={48} color={theme.textTertiary} />
           <h1 style={{ fontSize: 24, fontWeight: 700, color: theme.isDark ? '#fff' : theme.text, marginTop: 16, marginBottom: 8, fontFamily: theme.fontHeading }}>Pulse not found</h1>
           <p style={{ fontSize: 15, color: theme.textSecondary, marginBottom: 24 }}>This report may have been removed or the URL is incorrect.</p>
@@ -231,7 +231,7 @@ export default function PulseDetailPage() {
 
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', padding: '48px 0', fontFamily: theme.fontBody }}>
-      <div style={{ maxWidth: 780, margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px' }}>
         {/* Breadcrumb */}
         <Link href="/pulse" style={{ color: theme.accent, fontSize: 13, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 28, fontWeight: 500 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -245,7 +245,7 @@ export default function PulseDetailPage() {
           <div style={{
             background: theme.surface,
             border: `1px solid ${theme.surfaceBorder}`,
-            borderRadius: 12,
+            borderRadius: 10,
             padding: '24px 28px',
             marginBottom: 28,
             position: 'relative',
@@ -258,7 +258,7 @@ export default function PulseDetailPage() {
               {/* Score */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 <div style={{
-                  width: 64, height: 64, borderRadius: 12,
+                  width: 64, height: 64, borderRadius: 10,
                   background: `${scoreBandColor(compositeScore)}15`,
                   border: `2px solid ${scoreBandColor(compositeScore)}40`,
                   display: 'flex', flexDirection: 'column',
@@ -314,7 +314,7 @@ export default function PulseDetailPage() {
         {/* Title */}
         <div style={{ marginBottom: 32 }}>
           <h1 style={{
-            fontSize: 32, fontWeight: 700,
+            fontSize: 32, fontWeight: 300,
             color: theme.isDark ? '#fff' : theme.text,
             margin: '0 0 12px',
             fontFamily: theme.fontHeading,
@@ -334,7 +334,7 @@ export default function PulseDetailPage() {
         <article style={{
           background: theme.surface,
           border: `1px solid ${theme.surfaceBorder}`,
-          borderRadius: 12,
+          borderRadius: 10,
           padding: '36px 32px',
         }}>
           {renderMarkdown(commentary.body_markdown, theme)}

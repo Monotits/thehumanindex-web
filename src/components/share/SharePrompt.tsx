@@ -96,7 +96,7 @@ export function SharePrompt({
             width: 340,
             background: theme.surface,
             border: `1px solid ${theme.accent}40`,
-            borderRadius: 12,
+            borderRadius: 10,
             padding: 16,
             boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
             backdropFilter: 'blur(12px)',

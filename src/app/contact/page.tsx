@@ -92,7 +92,7 @@ export default function ContactPage() {
           <p style={{ fontSize: 12, fontWeight: 600, color: theme.accent, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 14, fontFamily: theme.fontMono }}>
             Contact
           </p>
-          <h1 style={{ fontSize: 34, fontWeight: 800, color: theme.text, fontFamily: theme.fontHeading, lineHeight: 1.2, margin: '0 0 14px' }}>
+          <h1 style={{ fontSize: 32, fontWeight: 300, color: theme.text, fontFamily: theme.fontHeading, lineHeight: 1.2, margin: '0 0 14px' }}>
             Get in Touch
           </h1>
           <p style={{ fontSize: 15, color: theme.textSecondary, lineHeight: 1.6, fontFamily: theme.fontBody }}>

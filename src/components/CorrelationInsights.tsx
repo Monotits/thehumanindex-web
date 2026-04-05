@@ -31,7 +31,7 @@ export default function CorrelationInsightsPanel({ insights }: { insights: Corre
             <div key={insight.id} style={{
               background: theme.surface,
               border: `1px solid ${style.border}`,
-              borderRadius: 12,
+              borderRadius: 10,
               padding: 24,
               borderLeft: `3px solid ${style.color}`,
             }}>

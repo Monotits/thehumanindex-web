@@ -120,12 +120,12 @@ export default function PulsePage() {
 
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', padding: '48px 0', fontFamily: theme.fontBody }}>
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px' }}>
         {/* Header */}
         <div style={{ marginBottom: 40 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
             <DomainIcon domain="sentiment" size={24} color={theme.accent} />
-            <h1 style={{ fontSize: 28, fontWeight: 700, color: theme.isDark ? '#fff' : theme.text, margin: 0, fontFamily: theme.fontHeading }}>Weekly Pulse</h1>
+            <h1 style={{ fontSize: 32, fontWeight: 300, color: theme.isDark ? '#fff' : theme.text, margin: 0, fontFamily: theme.fontHeading }}>Weekly Pulse</h1>
           </div>
           <p style={{ fontSize: 15, color: theme.textSecondary, margin: 0, maxWidth: 600, lineHeight: 1.6 }}>
             AI-generated analysis on civilizational stress. Each report breaks down what moved, why it matters, and what to watch next.
@@ -143,7 +143,7 @@ export default function PulsePage() {
                 style={{
                   background: theme.surface,
                   border: `1px solid ${theme.surfaceBorder}`,
-                  borderRadius: 12,
+                  borderRadius: 10,
                   padding: 32,
                   cursor: 'pointer',
                   transition: 'border-color 0.2s, transform 0.2s',
