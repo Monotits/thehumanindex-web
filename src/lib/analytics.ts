@@ -26,6 +26,13 @@ export function trackFirstVisitTheme(theme: string) {
   posthog.capture('first_visit_theme_selected', { theme })
 }
 
+// Track active theme on each page view for usage analysis
+export function trackThemeSession(theme: string) {
+  if (typeof window === 'undefined') return
+  posthog.capture('theme_session', { active_theme: theme })
+  posthog.people.set({ current_theme: theme })
+}
+
 // Track generic events
 export function trackEvent(event: string, properties?: Record<string, unknown>) {
   if (typeof window === 'undefined') return

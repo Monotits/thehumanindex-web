@@ -99,6 +99,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* Inline script to prevent theme flash — runs before React hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('thi-theme');var c=localStorage.getItem('thi-theme-chosen');if(t==='briefing'){document.body.style.background='#fafaf8';document.body.style.color='#1a1a1a';document.body.setAttribute('data-theme','briefing')}else if(t==='terminal'){document.body.style.background='#0a0a0a';document.body.style.color='#e0e0e0';document.body.setAttribute('data-theme','terminal')}else{document.body.style.background='#0a0a0a';document.body.style.color='#e0e0e0';document.body.setAttribute('data-theme','signal')}if(c!=='true'){document.body.setAttribute('data-theme-pending','true')}}catch(e){}})()`,
+          }}
+        />
         <Providers>
           <OrganizationJsonLd />
           <WebSiteJsonLd />

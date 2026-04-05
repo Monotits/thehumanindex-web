@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { trackThemeChange } from './analytics'
+import { trackThemeChange, trackThemeSession } from './analytics'
 
 export type ThemeId = 'terminal' | 'briefing' | 'signal'
 
@@ -106,17 +106,21 @@ const ThemeContext = createContext<ThemeContextType>({
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [themeId, setThemeId] = useState<ThemeId>('signal')
-  const [hasChosenTheme, setHasChosenTheme] = useState(true) // default true to avoid flash
+  const [hasChosenTheme, setHasChosenTheme] = useState(true) // default true to avoid modal flash, corrected on mount
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
     const saved = localStorage.getItem('thi-theme') as ThemeId | null
     const hasChosen = localStorage.getItem('thi-theme-chosen')
     if (saved && THEMES[saved]) {
       setThemeId(saved)
     }
+    // Only show ThemeSelector modal if user has never chosen a theme
     setHasChosenTheme(hasChosen === 'true')
+    // Track active theme for analytics
+    trackThemeSession(saved && THEMES[saved] ? saved : 'signal')
+    // Small delay to let the inline script + initial render settle, then show content
+    requestAnimationFrame(() => setMounted(true))
   }, [])
 
   const setTheme = (id: ThemeId) => {
