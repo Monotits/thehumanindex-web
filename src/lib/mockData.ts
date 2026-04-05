@@ -26,13 +26,13 @@ export const MOCK_COMMENTARIES: Commentary[] = [
     title: 'The AI Acceleration Threshold',
     body_markdown: `# The AI Acceleration Threshold
 
-This week marked a pivotal moment in the displacement trajectory. Three major developments converged to push the composite index to 58 — its highest reading since we began tracking.
+This week marked a pivotal moment in the displacement trajectory. Three major developments converged to push the composite index to 58 — up from 55.7 last week and the highest reading since we began tracking.
 
 ## Key Findings
 
 - **Work Risk Index**: Up 2.1 points to 72, driven by a wave of enterprise AI adoption announcements across Fortune 500 companies. Microsoft, Salesforce, and SAP each announced AI-first restructuring plans affecting a combined 40,000+ roles.
-- **Policy Response**: Lagging at 55, with the EU AI Act implementation still fragmented and no new US federal legislation reaching committee vote. The gap between technological deployment and regulatory response widened to its largest margin.
-- **Income Inequality**: Continues upward pressure at 64 as AI-augmented workers report 23% salary premiums over non-augmented peers in the same roles (Glassdoor Q1 data).
+- **Policy Response**: Still lagging at 55, with the EU AI Act implementation still fragmented and no new US federal legislation reaching committee vote. The gap between technological deployment and regulatory response widened to its largest margin.
+- **Income Inequality**: Continues upward pressure at 64 as AI-augmented workers report 23% salary premiums over non-augmented peers in the same roles (Glassdoor Q1 2026 data).
 
 ## The Convergence Problem
 
@@ -42,7 +42,7 @@ What makes this week significant isn't any single indicator — it's the simulta
 
 Next week's BLS employment situation report (Friday) will be closely watched for further signs of white-collar contraction. Researchers have been mapping existing SOC codes to AI-exposure levels, and we expect these frameworks to sharpen our displacement signal. Tech earnings calls (MSFT, GOOG, META) will also reveal enterprise AI adoption velocity.`,
     composite_score_id: 'mock-score-1',
-    published_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    published_at: '2026-04-01T09:00:00.000Z',
     slug: 'ai-acceleration-threshold',
   },
   {
@@ -51,7 +51,7 @@ Next week's BLS employment situation report (Friday) will be closely watched for
     title: 'The White-Collar Reckoning: March Jobs Data Decoded',
     body_markdown: `# The White-Collar Reckoning: March Jobs Data Decoded
 
-March employment data reveals a structural shift that headline unemployment numbers are hiding. While the topline rate holds near 4.4%, the composition of employment has changed dramatically.
+March employment data reveals a structural shift that headline unemployment numbers are hiding. While the topline rate holds near 4.2%, the composition of employment has changed dramatically. This week's composite holds at 55.7, with Work Risk driving at 69.9.
 
 ## The Numbers Behind the Numbers
 
@@ -75,9 +75,9 @@ The displacement isn't uniform. Tech hubs (SF, Seattle, Austin) show elevated ch
 
 ## What This Means for the Index
 
-This data pushed our Work Risk sub-index to 72 and is the primary driver behind this week's composite reading of 58. The key question: Is this a temporary adjustment or the beginning of a permanent shift?`,
+This data pushed our Work Risk sub-index to 69.9 and is a primary driver behind this week's composite reading. The key question: Is this a temporary adjustment or the beginning of a permanent shift?`,
     composite_score_id: 'mock-score-1',
-    published_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    published_at: '2026-03-25T09:00:00.000Z',
     slug: 'white-collar-reckoning-march-jobs',
   },
   {
@@ -86,7 +86,7 @@ This data pushed our Work Risk sub-index to 72 and is the primary driver behind 
     title: 'Institutional Decay and the Trust Deficit',
     body_markdown: `# Institutional Decay and the Trust Deficit
 
-Institutional trust metrics continue their multi-decade decline. Pew Research's tracking data shows trust in the federal government hovering near historic lows — and when the question turns specifically to the government's ability to manage AI-driven economic transformation, the numbers drop even further.
+Institutional trust metrics continue their multi-decade decline. Pew Research's tracking data shows trust in the federal government hovering near historic lows — and when the question turns specifically to the government's ability to manage AI-driven economic transformation, the numbers drop even further. This week's composite sits at 54.8, with Institutional Decay rising to 41.
 
 ## The Policy Paralysis
 
@@ -104,9 +104,9 @@ Institutional Decay is weighted at 12% in our composite, but its effects are mul
 
 ## The Feedback Loop
 
-Low trust reduces institutional capacity to respond → poor response further erodes trust → repeat. This week's reading of 43 seems moderate, but the trajectory is what concerns us. The velocity of decline has increased 40% quarter-over-quarter.`,
+Low trust reduces institutional capacity to respond — poor response further erodes trust — repeat. This week's reading of 41 seems moderate, but the trajectory is what concerns us. The velocity of decline has increased 40% quarter-over-quarter, up from 38 just three weeks ago.`,
     composite_score_id: 'mock-score-1',
-    published_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    published_at: '2026-03-18T09:00:00.000Z',
     slug: 'institutional-decay-trust-deficit',
   },
   {
@@ -115,7 +115,7 @@ Low trust reduces institutional capacity to respond → poor response further er
     title: 'The Inequality Accelerator: Who Benefits from AI Productivity?',
     body_markdown: `# The Inequality Accelerator: Who Benefits from AI Productivity?
 
-Q1 earnings season revealed a consistent pattern: record profits, flat headcounts, and AI cited as the primary productivity driver. The question our Income Inequality sub-index tries to answer: where is that productivity surplus going?
+Q1 earnings season revealed a consistent pattern: record profits, flat headcounts, and AI cited as the primary productivity driver. The question our Income Inequality sub-index tries to answer: where is that productivity surplus going? This week's composite reads 54.1, with Inequality climbing to 61.
 
 ## The Distribution Problem
 
@@ -139,9 +139,9 @@ Income inequality isn't just an individual phenomenon — it's geographic. Count
 
 ## Index Impact
 
-Income Inequality holds at 64 this week — high, but not at crisis levels. The concern is the rate of change: +6 points over the last 12 weeks, the steepest climb since we began tracking.`,
+Income Inequality climbed to 61 this week — high, but not at crisis levels. The concern is the rate of change: +6 points over the last 10 weeks, the steepest climb since we began tracking.`,
     composite_score_id: 'mock-score-1',
-    published_at: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
+    published_at: '2026-03-11T09:00:00.000Z',
     slug: 'inequality-accelerator-ai-productivity',
   },
   {
@@ -150,11 +150,11 @@ Income Inequality holds at 64 this week — high, but not at crisis levels. The 
     title: 'Wellbeing Watch: The Mental Health Dimension of AI Anxiety',
     body_markdown: `# Wellbeing Watch: The Mental Health Dimension of AI Anxiety
 
-The Social Wellbeing sub-index dropped to 38 this week, driven by new SAMHSA data showing a sharp increase in anxiety and depression diagnoses correlated with occupational uncertainty.
+The Social Wellbeing sub-index rose to 36 this week — remember, higher means more stress — driven by new SAMHSA data showing a sharp increase in anxiety and depression diagnoses correlated with occupational uncertainty. This week's composite reads 53.4.
 
 ## The Anxiety Epidemic
 
-The American Psychological Association's Stress in America surveys have tracked a steady rise in AI-related workplace anxiety — from roughly 36% in 2023 to 57% in 2025. Early 2026 indicators suggest the trend is accelerating, particularly among workers aged 35-54.
+The American Psychological Association's Stress in America surveys have tracked a steady rise in AI-related workplace anxiety — from roughly 36% in 2023 to 52% in late 2025. Early 2026 indicators suggest the trend is accelerating, particularly among workers aged 35-54.
 
 This isn't abstract worry. It's manifesting in concrete health outcomes: rising prescriptions for anxiety medication in working-age demographics, elevated rates of insomnia-related complaints, and increased stress-related healthcare utilization in industries undergoing rapid AI adoption.
 
@@ -172,9 +172,9 @@ Not everything is bleak. Workers who report taking proactive steps — upskillin
 
 ## Index Reading
 
-At 38, Social Wellbeing is actually one of our "better" readings — but it's the fastest-declining domain in the index. Six months ago it was at 29. The trajectory, not the absolute number, is what drives our concern.`,
+At 36, Social Wellbeing is our second-lowest domain reading after Institutional Decay. But it's the fastest-rising domain in the index. Eight weeks ago at launch it was at 29. The upward trajectory — meaning worsening conditions — is what drives our concern.`,
     composite_score_id: 'mock-score-1',
-    published_at: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+    published_at: '2026-03-04T09:00:00.000Z',
     slug: 'wellbeing-watch-mental-health-ai-anxiety',
   },
   {
@@ -183,7 +183,7 @@ At 38, Social Wellbeing is actually one of our "better" readings — but it's th
     title: 'Social Unrest Tracker: From Online Anger to Street Protests',
     body_markdown: `# Social Unrest Tracker: From Online Anger to Street Protests
 
-Our Social Unrest sub-index ticked up to 51 this week after labor actions at three major tech companies and a wave of anti-AI protests in European capitals. This domain has been the most volatile in recent weeks.
+Our Social Unrest sub-index ticked up to 48 this week after labor actions at three major tech companies and a wave of anti-AI protests in European capitals. This domain has been the most volatile in recent weeks. The composite reads 52.6.
 
 ## The Labor Flashpoints
 
@@ -207,7 +207,7 @@ Social media analysis shows a marked increase in protest-related online discours
 
 Historically, social unrest is the most effective driver of policy response. Our models show a 0.72 correlation between the Unrest and Policy Response sub-indexes, with a 4-8 week lag. If the current trajectory holds, we expect policy movement — though whether that takes the form of thoughtful regulation or reactive restriction remains uncertain.`,
     composite_score_id: 'mock-score-1',
-    published_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(),
+    published_at: '2026-02-25T09:00:00.000Z',
     slug: 'social-unrest-tracker-online-anger-protests',
   },
   {
@@ -216,7 +216,7 @@ Historically, social unrest is the most effective driver of policy response. Our
     title: 'Policy Response Gap: Why Regulation Can\'t Keep Up',
     body_markdown: `# Policy Response Gap: Why Regulation Can't Keep Up
 
-The Policy Response sub-index sits at 55, and the story it tells is one of systemic inadequacy. Not bad intent — genuine structural inability to govern at the speed of technological change.
+The Policy Response sub-index sits at 52, and the story it tells is one of systemic inadequacy. Not bad intent — genuine structural inability to govern at the speed of technological change. Composite reads 52.1 this week.
 
 ## The Legislative Timeline Problem
 
@@ -243,9 +243,9 @@ Perhaps the most damaging policy failure isn't in AI regulation but in workforce
 
 ## Index Interpretation
 
-At 55, Policy Response tells us that the gap between disruption speed and institutional response is growing, not shrinking. This is the domain to watch — because when it moves, it affects everything else.`,
+At 52, Policy Response tells us that the gap between disruption speed and institutional response is growing, not shrinking. This is the domain to watch — because when it moves, it affects everything else.`,
     composite_score_id: 'mock-score-1',
-    published_at: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
+    published_at: '2026-02-18T09:00:00.000Z',
     slug: 'policy-response-gap-regulation-cant-keep-up',
   },
   {
@@ -254,7 +254,7 @@ At 55, Policy Response tells us that the gap between disruption speed and instit
     title: 'Sentiment Shift: How Public Perception of AI Changed in 90 Days',
     body_markdown: `# Sentiment Shift: How Public Perception of AI Changed in 90 Days
 
-Public Sentiment at 62 represents something new in our index: a domain where the reading is driven almost entirely by rate of change rather than absolute levels.
+Public Sentiment at 58 represents something new in our index: a domain where the reading is driven almost entirely by rate of change rather than absolute levels. Composite reads 51.4 this week.
 
 ## The Tipping Point
 
@@ -278,7 +278,7 @@ Public Sentiment is our lowest-weighted domain at 8%, and that's deliberate — 
 
 Sentiment and Institutional Decay interact in a way our model captures: declining trust in institutions amplifies negative sentiment, because people feel they have no advocate. The correlation between these two domains is 0.68 and rising.`,
     composite_score_id: 'mock-score-1',
-    published_at: new Date(Date.now() - 42 * 24 * 60 * 60 * 1000).toISOString(),
+    published_at: '2026-02-11T09:00:00.000Z',
     slug: 'sentiment-shift-public-perception-90-days',
   },
   {
@@ -287,7 +287,7 @@ Sentiment and Institutional Decay interact in a way our model captures: declinin
     title: 'Employment Transformation: The Sectors That Are Actually Adapting',
     body_markdown: `# Employment Transformation: The Sectors That Are Actually Adapting
 
-Not everything in the index is headed in one direction. This week we spotlight the sectors showing genuine adaptation to AI disruption — and what we can learn from them.
+Not everything in the index is headed in one direction. This week we spotlight the sectors showing genuine adaptation to AI disruption — and what we can learn from them. Composite sits at 50.8 with Work Risk at 66.
 
 ## Healthcare: The Augmentation Model
 
@@ -309,9 +309,9 @@ The sectors that are adapting share three characteristics: clear boundaries betw
 
 ## What This Means
 
-The Work Risk score of 72 is real and concerning. But it's an average — and within that average, there's enormous variance. The challenge isn't that AI is destroying all work. It's that the destruction and creation are happening in different places, at different speeds, and to different people.`,
+The Work Risk score of 66 is real and concerning. But it's an average — and within that average, there's enormous variance. The challenge isn't that AI is destroying all work. It's that the destruction and creation are happening in different places, at different speeds, and to different people.`,
     composite_score_id: 'mock-score-1',
-    published_at: new Date(Date.now() - 49 * 24 * 60 * 60 * 1000).toISOString(),
+    published_at: '2026-02-15T09:00:00.000Z',
     slug: 'employment-transformation-sectors-adapting',
   },
   {
@@ -336,9 +336,9 @@ Each domain is tracked daily using live data from the Bureau of Labor Statistics
 
 ## How to Read the Score
 
-The composite score runs from 0 to 100. Higher means more stress — more displacement, more inequality, more institutional strain. The score is descriptive, not prescriptive. A reading of 58 doesn't mean the world is ending. It means that across seven measurable dimensions, the AI-driven transformation is generating significant structural stress.
+The composite score runs from 0 to 100. Higher means more stress — more displacement, more inequality, more institutional strain. The score is descriptive, not prescriptive. Our launch reading of 49.5 places us in the Elevated band, which means stress indicators are meaningful and worth monitoring, but not yet at levels that suggest imminent systemic disruption.
 
-The five bands — Low, Moderate, Elevated, High, and Critical — provide context for interpretation. We're currently in the Elevated band, which means stress indicators are meaningful and worth monitoring, but not yet at levels that suggest imminent systemic disruption.
+The five bands — Low, Moderate, Elevated, High, and Critical — provide context for interpretation.
 
 ## What Comes Next
 
@@ -346,7 +346,7 @@ Every week, we publish a Pulse analysis explaining what moved, why, and what to 
 
 This is version one. We'll get better. But we believe it's better to launch something imperfect and improve it transparently than to wait for perfection while the transformation accelerates.`,
     composite_score_id: 'mock-score-1',
-    published_at: new Date(Date.now() - 56 * 24 * 60 * 60 * 1000).toISOString(),
+    published_at: '2026-02-08T09:00:00.000Z',
     slug: 'launch-week-what-human-index-measures',
   },
 ]

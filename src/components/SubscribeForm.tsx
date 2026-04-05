@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useTheme } from '@/lib/theme'
+import posthog from 'posthog-js'
 
 export default function SubscribeForm({ variant = 'default' }: { variant?: 'default' | 'compact' }) {
   const { theme } = useTheme()
@@ -19,6 +20,8 @@ export default function SubscribeForm({ variant = 'default' }: { variant?: 'defa
         body: JSON.stringify({ email }),
       })
       if (res.ok) {
+        posthog.identify(email, { email })
+        posthog.capture('newsletter_subscribed', { variant })
         setStatus('success')
         setEmail('')
       } else {

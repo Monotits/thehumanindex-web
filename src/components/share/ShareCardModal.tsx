@@ -5,6 +5,7 @@ import html2canvas from 'html2canvas'
 import { useTheme } from '@/lib/theme'
 import { CardStyle, CardOrientation, CARD_THEMES } from './cardStyles'
 import { ShareCardData, ShareCardRenderer } from './ShareCardRenderer'
+import posthog from 'posthog-js'
 
 interface ShareCardModalProps {
   data: ShareCardData
@@ -65,9 +66,10 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
     link.download = `human-index-${data.type}-${orientation}-${Date.now()}.png`
     link.href = canvas.toDataURL('image/png')
     link.click()
+    posthog.capture('share_card_downloaded', { card_type: data.type, orientation, style })
     setDownloaded(true)
     setTimeout(() => setDownloaded(false), 2000)
-  }, [captureCard, data.type, orientation])
+  }, [captureCard, data.type, orientation, style])
 
   const handleCopy = useCallback(async () => {
     const canvas = await captureCard()
@@ -78,6 +80,7 @@ export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
         await navigator.clipboard.write([
           new ClipboardItem({ 'image/png': blob })
         ])
+        posthog.capture('share_card_copied', { card_type: data.type, orientation, style })
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
       }, 'image/png')

@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { getPostHogClient } from '@/lib/posthog-server'
 
 export async function POST(request: Request) {
   try {
@@ -19,6 +20,15 @@ export async function POST(request: Request) {
       // If Supabase table doesn't exist yet, that's OK — we still accept the subscription
       console.log('Supabase subscribers table not available, email accepted locally:', email)
     }
+
+    const posthog = getPostHogClient()
+    posthog.identify({ distinctId: email, properties: { email } })
+    posthog.capture({
+      distinctId: email,
+      event: 'newsletter_subscription_created',
+      properties: { email },
+    })
+    await posthog.shutdown()
 
     return Response.json({ success: true, message: 'Subscribed successfully' })
   } catch {

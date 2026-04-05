@@ -1,5 +1,6 @@
 import { QuizInput, QuizResult } from '@/lib/types'
 import { scoreToBand } from '@/lib/utils'
+import { getPostHogClient } from '@/lib/posthog-server'
 
 /**
  * Task automation risk database — based on O*NET task categories
@@ -203,6 +204,22 @@ export async function POST(request: Request) {
         region: input.region || input.country,
       },
     }
+
+    const posthog = getPostHogClient()
+    posthog.capture({
+      distinctId: `anon-quiz-${Date.now()}`,
+      event: 'quiz_evaluated',
+      properties: {
+        job_title: input.job_title,
+        industry: input.industry,
+        exposure_band: band,
+        percentile,
+        final_score: finalScore,
+        task_count: input.tasks.length,
+        country: input.country,
+      },
+    })
+    await posthog.shutdown()
 
     return Response.json(result)
   } catch (error) {

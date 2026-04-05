@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useTheme } from '@/lib/theme'
+import posthog from 'posthog-js'
 
 const SOCIAL_LINKS = [
   {
@@ -60,6 +61,8 @@ export default function ContactPage() {
         body: JSON.stringify({ name, email, subject, message }),
       })
       if (res.ok) {
+        posthog.identify(email, { email, name })
+        posthog.capture('contact_form_submitted', { subject })
         setStatus('sent')
         setName(''); setEmail(''); setSubject(''); setMessage('')
       } else {

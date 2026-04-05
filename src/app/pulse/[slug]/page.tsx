@@ -4,7 +4,6 @@ import { useEffect, useState, ReactNode } from 'react'
 import Link from 'next/link'
 import { Commentary, DOMAIN_LABELS, Domain } from '@/lib/types'
 import { DomainIcon } from '@/components/DomainIcon'
-import { MOCK_COMMENTARIES } from '@/lib/mockData'
 import { supabase } from '@/lib/supabase'
 import { useTheme, ThemeConfig } from '@/lib/theme'
 import { formatDate } from '@/lib/utils'
@@ -189,9 +188,7 @@ export default function PulseDetailPage() {
         if (error) throw error
         setCommentary(data as Commentary)
       } catch {
-        // Fall back to mock data
-        const mock = MOCK_COMMENTARIES.find(c => c.slug === slug)
-        setCommentary(mock || null)
+        setCommentary(null)
       } finally {
         setLoading(false)
       }
@@ -223,11 +220,9 @@ export default function PulseDetailPage() {
   const compositeScore = extractScore(commentary.body_markdown)
   const domainScores = extractDomainScores(commentary.body_markdown)
 
-  // Find adjacent pulse reports for navigation
-  const allPulses = MOCK_COMMENTARIES
-  const currentIdx = allPulses.findIndex(c => c.slug === slug)
-  const prevPulse = currentIdx < allPulses.length - 1 ? allPulses[currentIdx + 1] : null
-  const nextPulse = currentIdx > 0 ? allPulses[currentIdx - 1] : null
+  // Navigation between pulses (disabled — populated from Supabase in future)
+  const prevPulse: Commentary | null = null
+  const nextPulse: Commentary | null = null
 
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', padding: '48px 0', fontFamily: theme.fontBody }}>

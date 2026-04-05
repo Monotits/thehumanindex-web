@@ -8,6 +8,7 @@ import { useTheme } from '@/lib/theme'
 import { ShareButton } from '@/components/share'
 import type { QuizCardData } from '@/components/share'
 import SubscribeForm from '@/components/SubscribeForm'
+import posthog from 'posthog-js'
 
 export default function ResultPage() {
   const { theme } = useTheme()
@@ -19,8 +20,15 @@ export default function ResultPage() {
   useEffect(() => {
     const stored = sessionStorage.getItem('quizResult')
     if (stored) {
-      setResult(JSON.parse(stored))
+      const parsed: QuizResult = JSON.parse(stored)
+      setResult(parsed)
       sessionStorage.removeItem('quizResult')
+      posthog.capture('quiz_result_viewed', {
+        exposure_band: parsed.exposure_band,
+        percentile: parsed.percentile,
+        top_task: parsed.top_tasks_at_risk?.[0]?.task,
+        job_title: parsed.share_card_data?.job_title,
+      })
     } else {
       setResult({
         id: 'result-1',
@@ -47,10 +55,23 @@ export default function ResultPage() {
     e.preventDefault()
     setLoading(true)
     try {
+      posthog.identify(email, { email })
+      posthog.capture('quiz_result_email_submitted', {
+        exposure_band: result?.exposure_band,
+        percentile: result?.percentile,
+      })
       setShowEmailModal(false)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleEmailSkip = () => {
+    posthog.capture('quiz_result_email_skipped', {
+      exposure_band: result?.exposure_band,
+      percentile: result?.percentile,
+    })
+    setShowEmailModal(false)
   }
 
   if (!result) return <div style={{ background: theme.bg, minHeight: '100vh' }} />
@@ -103,7 +124,7 @@ export default function ResultPage() {
                 <button type="submit" disabled={loading} style={{ width: '100%', padding: '10px 0', background: theme.accent, border: 'none', borderRadius: 8, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.fontBody, marginBottom: 8 }}>
                   {loading ? 'Sending...' : 'Get My Report'}
                 </button>
-                <button type="button" onClick={() => setShowEmailModal(false)} style={{ width: '100%', padding: '10px 0', background: theme.bg, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, color: theme.textSecondary, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: theme.fontBody }}>
+                <button type="button" onClick={handleEmailSkip} style={{ width: '100%', padding: '10px 0', background: theme.bg, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 8, color: theme.textSecondary, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: theme.fontBody }}>
                   Skip for Now
                 </button>
               </form>

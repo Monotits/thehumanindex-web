@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { QuizInput } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/lib/theme'
+import posthog from 'posthog-js'
 
 export function QuizForm() {
   const router = useRouter()
@@ -52,11 +53,22 @@ export function QuizForm() {
 
       const result = await response.json()
 
+      posthog.capture('quiz_submitted', {
+        job_title: formData.job_title,
+        industry: formData.industry,
+        task_count: formData.tasks.length,
+        experience_years: formData.experience_years,
+        education_level: formData.education_level,
+        age_range: formData.age_range,
+        country: formData.country,
+      })
+
       // Store result in session storage and redirect
       sessionStorage.setItem('quizResult', JSON.stringify(result))
       router.push('/quiz/result')
     } catch (error) {
       console.error('Quiz submission error:', error)
+      posthog.captureException(error)
       alert('Failed to submit quiz. Please try again.')
     } finally {
       setLoading(false)

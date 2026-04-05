@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTheme } from '@/lib/theme'
 import { ShareCardData } from './ShareCardRenderer'
 import { ShareCardModal } from './ShareCardModal'
+import posthog from 'posthog-js'
 
 interface ShareButtonProps {
   data: ShareCardData
@@ -17,6 +18,11 @@ export function ShareButton({ data, variant = 'button', label = 'Share', style: 
   const [open, setOpen] = useState(false)
   const { theme } = useTheme()
 
+  const handleOpen = () => {
+    posthog.capture('share_card_opened', { card_type: data.type, variant })
+    setOpen(true)
+  }
+
   const ShareIcon = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" />
@@ -27,7 +33,7 @@ export function ShareButton({ data, variant = 'button', label = 'Share', style: 
     return (
       <>
         <button
-          onClick={() => setOpen(true)}
+          onClick={handleOpen}
           title="Share as image"
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
@@ -50,7 +56,7 @@ export function ShareButton({ data, variant = 'button', label = 'Share', style: 
     return (
       <>
         <button
-          onClick={() => setOpen(true)}
+          onClick={handleOpen}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
             background: 'none',
@@ -83,7 +89,7 @@ export function ShareButton({ data, variant = 'button', label = 'Share', style: 
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
           background: `${theme.accent}15`,

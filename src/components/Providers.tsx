@@ -2,7 +2,6 @@
 
 import { ReactNode, useEffect, useState } from 'react'
 import { ThemeProvider, useTheme } from '@/lib/theme'
-import { initAnalytics } from '@/lib/analytics'
 import ThemeSelector from './ThemeSelector'
 
 function ThemeGate({ children }: { children: ReactNode }) {
@@ -34,8 +33,6 @@ function ThemeGate({ children }: { children: ReactNode }) {
 }
 
 export function Providers({ children }: { children: ReactNode }) {
-  useEffect(() => { initAnalytics() }, [])
-
   return (
     <ThemeProvider>
       <ThemeGate>{children}</ThemeGate>

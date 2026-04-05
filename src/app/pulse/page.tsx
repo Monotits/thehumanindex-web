@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Commentary, DOMAIN_LABELS, Domain } from '@/lib/types'
 import { DomainIcon } from '@/components/DomainIcon'
-import { MOCK_COMMENTARIES } from '@/lib/mockData'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/theme'
 import { timeAgo } from '@/lib/utils'
@@ -87,18 +86,9 @@ export default function PulsePage() {
           .eq('type', 'weekly_pulse')
           .order('published_at', { ascending: false })
         if (error) throw error
-        if (data && data.length > 2) {
-          setCommentaries(data as Commentary[])
-        } else {
-          // Merge supabase entries with mock data (supabase first, dedup by slug)
-          const supaEntries = (data || []) as Commentary[]
-          const slugSet = new Set(supaEntries.map(c => c.slug))
-          const mockExtras = MOCK_COMMENTARIES.filter(c => !slugSet.has(c.slug))
-          setCommentaries([...supaEntries, ...mockExtras])
-        }
+        setCommentaries((data || []) as Commentary[])
       } catch {
-        // Fall back to mock data
-        setCommentaries(MOCK_COMMENTARIES)
+        setCommentaries([])
       } finally {
         setLoading(false)
       }

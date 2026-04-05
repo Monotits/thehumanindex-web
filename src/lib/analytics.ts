@@ -1,17 +1,6 @@
 import posthog from 'posthog-js'
 
-// PostHog initialization (client-side only)
-export function initAnalytics() {
-  if (typeof window === 'undefined') return
-  if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
-      capture_pageview: true,
-      capture_pageleave: true,
-      autocapture: true,
-    })
-  }
-}
+// PostHog is initialized via instrumentation-client.ts (Next.js 15.3+)
 
 // Track theme selection for A/B analysis
 export function trackThemeChange(theme: string) {
