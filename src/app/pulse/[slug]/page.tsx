@@ -220,9 +220,9 @@ export default function PulseDetailPage() {
   const compositeScore = extractScore(commentary.body_markdown)
   const domainScores = extractDomainScores(commentary.body_markdown)
 
-  // Navigation between pulses (disabled — populated from Supabase in future)
-  const prevPulse: Commentary | null = null
-  const nextPulse: Commentary | null = null
+  // Navigation between pulses (disabled — will be populated from Supabase in future)
+  const prevPulse = null as Commentary | null
+  const nextPulse = null as Commentary | null
 
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', padding: '48px 0', fontFamily: theme.fontBody }}>
