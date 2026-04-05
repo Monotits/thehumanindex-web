@@ -49,7 +49,6 @@ const DATA_SOURCES = [
 
 export default function MethodologyPage() {
   const { theme, themeId } = useTheme()
-  const isBriefing = themeId === 'briefing'
 
   const sectionStyle: React.CSSProperties = {
     background: theme.surface,
