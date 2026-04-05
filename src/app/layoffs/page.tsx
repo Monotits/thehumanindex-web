@@ -5,6 +5,8 @@ import CorporateLayoffTable from '@/components/CorporateLayoffTable'
 import SocialFeedSection from '@/components/SocialFeedSection'
 import LayoffTracker from '@/components/LayoffTracker'
 import Link from 'next/link'
+import { ShareButton } from '@/components/share'
+import type { LayoffCardData } from '@/components/share'
 
 export default function LayoffsPage() {
   const { theme } = useTheme()
@@ -20,10 +22,22 @@ export default function LayoffsPage() {
             {' / '}
             Layoffs
           </div>
-          <h1 style={{ fontSize: 28, fontWeight: 700, color: theme.isDark ? '#fff' : theme.text, margin: '0 0 8px' }}>
-            Layoff Tracker
-          </h1>
-          <p style={{ fontSize: 15, color: theme.textSecondary, margin: 0, maxWidth: 680, lineHeight: 1.6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: theme.isDark ? '#fff' : theme.text, margin: '0' }}>
+              Layoff Tracker
+            </h1>
+            <ShareButton
+              data={{
+                type: 'layoff',
+                totalAffected: 'Ongoing',
+                topCompanies: [],
+                date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+              } as LayoffCardData}
+              variant="compact"
+              label="Share"
+            />
+          </div>
+          <p style={{ fontSize: 15, color: theme.textSecondary, margin: '8px 0 0', maxWidth: 680, lineHeight: 1.6 }}>
             Real-time tracking of workforce reductions across industries — corporate announcements, WARN Act filings, and social signals.
           </p>
         </div>

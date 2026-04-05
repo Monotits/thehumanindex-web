@@ -8,6 +8,8 @@ import { MOCK_COMMENTARIES } from '@/lib/mockData'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/theme'
 import { timeAgo } from '@/lib/utils'
+import { ShareButton } from '@/components/share'
+import type { PulseCardData } from '@/components/share'
 
 /** Extract a composite score number from markdown body if mentioned */
 function extractScore(body: string): number | null {
@@ -198,7 +200,22 @@ export default function PulsePage() {
                   </div>
                 )}
 
-                <div style={{ marginTop: 16, fontSize: 13, color: theme.accent, fontWeight: 600 }}>Read full analysis →</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>
+                  <div style={{ fontSize: 13, color: theme.accent, fontWeight: 600 }}>Read full analysis →</div>
+                  <div onClick={e => e.preventDefault()}>
+                    <ShareButton
+                      data={{
+                        type: 'pulse',
+                        title: featured.title,
+                        excerpt: excerpt.substring(0, 120),
+                        compositeScore: score,
+                        date: new Date(featured.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                      } as PulseCardData}
+                      variant="compact"
+                      label=""
+                    />
+                  </div>
+                </div>
               </div>
             </Link>
           )

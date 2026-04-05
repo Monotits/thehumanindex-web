@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation'
 import { GLOSSARY, getGlossaryBySlug } from '@/lib/glossaryData'
 import { FAQPageJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd'
 import Link from 'next/link'
+import { ShareButton } from '@/components/share'
+import type { DomainCardData } from '@/components/share'
+import { Domain } from '@/lib/types'
 
 // Generate static paths for all glossary entries
 export function generateStaticParams() {
@@ -65,9 +68,23 @@ export default function GlossaryPage({ params }: { params: { slug: string } }) {
 
           {/* Header */}
           <header className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] mb-4">
-              {entry.title}
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)]" style={{ margin: 0 }}>
+                {entry.title}
+              </h1>
+              <ShareButton
+                data={{
+                  type: 'domain',
+                  domain: entry.domain as Domain,
+                  score: 0,
+                  delta: null,
+                  headline: entry.shortDescription,
+                  date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                } as DomainCardData}
+                variant="compact"
+                label="Share"
+              />
+            </div>
             <p className="text-lg text-[var(--text-secondary)] leading-relaxed max-w-3xl">
               {entry.shortDescription}
             </p>

@@ -15,6 +15,9 @@ import StackedAreaDecomposition from '@/components/charts/StackedAreaDecompositi
 import WeeklyHeatmap from '@/components/charts/WeeklyHeatmap'
 import CorrelationInsightsPanel from '@/components/CorrelationInsights'
 import { generateCorrelationInsights, CorrelationInsight } from '@/lib/correlationInsights'
+import { ShareButton } from '@/components/share'
+import type { CompositeCardData, DomainCardData } from '@/components/share'
+import { Domain } from '@/lib/types'
 
 interface RealDataResponse {
   scores: {
@@ -257,6 +260,19 @@ export default function DashboardPage() {
               <div style={{ marginTop: 16, fontSize: 11, color: theme.textTertiary }}>
                 {activeDomains.length}/{sortedDomains.length} domains active
               </div>
+              <div style={{ marginTop: 12 }}>
+                <ShareButton
+                  data={{
+                    type: 'composite',
+                    score: score!.score_value,
+                    delta: score!.delta,
+                    domains: sortedDomains.map(d => ({ domain: d.domain as Domain, score: Math.round(d.value) })),
+                    date: new Date(score!.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                  } as CompositeCardData}
+                  variant="compact"
+                  label="Share"
+                />
+              </div>
             </div>
 
             <div style={{ background: theme.surface, border: `1px solid ${theme.surfaceBorder}`, borderRadius: 12, padding: 24 }}>
@@ -350,8 +366,20 @@ export default function DashboardPage() {
                   <div style={{ flex: '0 0 200px', fontSize: 11, color: theme.textTertiary, lineHeight: 1.4 }}>{desc}</div>
                   <div style={{ flex: 1 }} />
                   {sources && sources.length > 0 && (
-                    <div style={{ fontSize: 10, color: theme.textTertiary, fontFamily: theme.fontMono }}>{sources.join(' · ')}</div>
+                    <div style={{ fontSize: 10, color: theme.textTertiary, fontFamily: theme.fontMono, marginRight: 8 }}>{sources.join(' · ')}</div>
                   )}
+                  <ShareButton
+                    data={{
+                      type: 'domain',
+                      domain: d.domain as Domain,
+                      score: Math.round(d.value),
+                      delta: null,
+                      headline: desc || '',
+                      date: new Date(score!.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                    } as DomainCardData}
+                    variant="compact"
+                    label=""
+                  />
                 </div>
               </div>
             )
