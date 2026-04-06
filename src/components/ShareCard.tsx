@@ -26,52 +26,70 @@ interface ShareCardProps {
   result: QuizResult
 }
 
-// ── Gauge (half-circle arc) ──────────────────────
-function Gauge({ percentile, color, size = 'normal' }: { percentile: number; color: string; size?: 'normal' | 'large' }) {
-  const isLg = size === 'large'
-  const w = isLg ? 220 : 160
-  const h = isLg ? 120 : 90
-  const cx = w / 2
-  const cy = isLg ? 105 : 78
-  const r = isLg ? 90 : 65
-  const strokeW = isLg ? 10 : 8
-
-  const startAngle = 180
-  const endAngle = 0
-  const sweepAngle = (percentile / 100) * 180
-  const currentAngle = startAngle - sweepAngle
-
-  const toRad = (deg: number) => (deg * Math.PI) / 180
-  const px = (deg: number) => cx + r * Math.cos(toRad(deg))
-  const py = (deg: number) => cy - r * Math.sin(toRad(deg))
-
-  const bgPath = `M ${px(startAngle)} ${py(startAngle)} A ${r} ${r} 0 0 1 ${px(endAngle)} ${py(endAngle)}`
-  const largeArc = sweepAngle > 180 ? 1 : 0
-  const valPath = `M ${px(startAngle)} ${py(startAngle)} A ${r} ${r} 0 ${largeArc} 1 ${px(currentAngle)} ${py(currentAngle)}`
-
-  const tipX = px(currentAngle)
-  const tipY = py(currentAngle)
+// ── Score Ring (circular progress) ──────────────────────
+function ScoreRing({ percentile, color }: { percentile: number; color: string }) {
+  const size = 140
+  const strokeW = 5
+  const r = (size - strokeW * 2) / 2
+  const cx = size / 2
+  const cy = size / 2
+  const circumference = 2 * Math.PI * r
+  const dashOffset = circumference * (1 - percentile / 100)
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} width={w} height={h} style={{ display: 'block', margin: '0 auto' }}>
-      {/* Glow filter */}
-      <defs>
-        <filter id="gaugeGlow">
-          <feGaussianBlur stdDeviation="4" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-      {/* Background track */}
-      <path d={bgPath} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={strokeW} strokeLinecap="round" />
-      {/* Value arc with glow */}
-      <path d={valPath} fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" filter="url(#gaugeGlow)" />
-      {/* Tip dot */}
-      <circle cx={tipX} cy={tipY} r={isLg ? 6 : 4} fill="#fff" />
-      <circle cx={tipX} cy={tipY} r={isLg ? 10 : 7} fill={color} opacity="0.25" />
-    </svg>
+    <div style={{
+      width: size, height: size, position: 'relative',
+      margin: '0 auto',
+    }}>
+      <svg width={size} height={size} style={{ display: 'block', transform: 'rotate(-90deg)' }}>
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+            <stop offset="100%" stopColor={color} stopOpacity="1" />
+          </linearGradient>
+          <filter id="ringGlow">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        {/* Background track */}
+        <circle cx={cx} cy={cy} r={r} fill="none"
+          stroke="rgba(255,255,255,0.05)" strokeWidth={strokeW} />
+        {/* Value arc */}
+        <circle cx={cx} cy={cy} r={r} fill="none"
+          stroke="url(#ringGrad)" strokeWidth={strokeW}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={dashOffset}
+          filter="url(#ringGlow)" />
+        {/* Outer subtle ring */}
+        <circle cx={cx} cy={cy} r={r + strokeW + 3} fill="none"
+          stroke="rgba(255,255,255,0.02)" strokeWidth={1} />
+      </svg>
+      {/* Inner content */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+        <div style={{
+          fontSize: 42, fontWeight: 800, color,
+          fontFamily: FH, lineHeight: 1, letterSpacing: -2,
+          textShadow: `0 0 24px ${color}30`,
+        }}>
+          {percentile}
+        </div>
+        <div style={{
+          fontSize: 11, color: 'rgba(255,255,255,0.3)',
+          fontFamily: FM, letterSpacing: 2, marginTop: 2,
+        }}>
+          / 100
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -189,24 +207,9 @@ export function ShareCard({ result }: ShareCardProps) {
           </span>
         </div>
 
-        {/* ── Gauge + Score ── */}
-        <div style={{ textAlign: 'center', marginBottom: 16, position: 'relative' }}>
-          <Gauge percentile={percentile} color={bandColor} />
-          <div style={{ marginTop: -4 }}>
-            <span style={{
-              fontSize: 48, fontWeight: 800, color: bandColor,
-              lineHeight: 1, letterSpacing: -2, fontFamily: FH,
-              textShadow: `0 0 30px ${bandColor}25`,
-            }}>
-              {percentile}
-            </span>
-            <span style={{
-              fontSize: 16, color: 'rgba(255,255,255,0.3)',
-              marginLeft: 2, fontWeight: 500, fontFamily: FM,
-            }}>
-              /100
-            </span>
-          </div>
+        {/* ── Score Ring ── */}
+        <div style={{ marginBottom: 16, position: 'relative' }}>
+          <ScoreRing percentile={percentile} color={bandColor} />
         </div>
 
         {/* ── Band badge ── */}
