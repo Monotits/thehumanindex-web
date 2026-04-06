@@ -23,10 +23,10 @@ export const revalidate = 0
 export const maxDuration = 60
 
 export async function GET(request: Request) {
-  // Auth check
+  // Auth check — fail-closed: reject if secret is missing or doesn't match
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
   }
 

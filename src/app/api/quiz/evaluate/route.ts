@@ -100,8 +100,29 @@ function matchTask(task: string): { exposure: number; label: string } {
   return { exposure: 0.50, label: task }
 }
 
+// In-memory rate limiter
+const rateMap = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT = 20
+const RATE_WINDOW = 3600000
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const entry = rateMap.get(ip)
+  if (!entry || now > entry.resetAt) {
+    rateMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW })
+    return false
+  }
+  entry.count++
+  return entry.count > RATE_LIMIT
+}
+
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+    if (isRateLimited(ip)) {
+      return Response.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+    }
+
     const input: QuizInput = await request.json()
 
     // Match tasks with risk database

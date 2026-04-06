@@ -16,8 +16,13 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const live = searchParams.get('live') === 'true'
 
-  // Live mode: fetch from external APIs directly (for debugging/testing)
+  // Live mode: fetch from external APIs directly (admin only)
   if (live) {
+    const authHeader = request.headers.get('authorization')
+    const cronSecret = process.env.CRON_SECRET
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     try {
       const { points, errors } = await fetchAllRealData()
       const scores = computeScores(points)
