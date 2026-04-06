@@ -7,8 +7,8 @@ import posthog from 'posthog-js'
 const SOCIAL_LINKS = [
   {
     name: 'X (Twitter)',
-    handle: '@thehumanindex',
-    url: 'https://x.com/thehumanindex',
+    handle: '@thehumanindexhq',
+    url: 'https://x.com/thehumanindexhq',
     icon: (color: string) => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill={color}>
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -17,8 +17,8 @@ const SOCIAL_LINKS = [
   },
   {
     name: 'Instagram',
-    handle: '@thehumanindex',
-    url: 'https://instagram.com/thehumanindex',
+    handle: '@thehumanindexorg',
+    url: 'https://www.instagram.com/thehumanindexorg/',
     icon: (color: string) => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="2" width="20" height="20" rx="5" />
@@ -29,8 +29,8 @@ const SOCIAL_LINKS = [
   },
   {
     name: 'TikTok',
-    handle: '@thehumanindex',
-    url: 'https://tiktok.com/@thehumanindex',
+    handle: '@thehumanindexorg',
+    url: 'https://www.tiktok.com/@thehumanindexorg',
     icon: (color: string) => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill={color}>
         <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.46V13a8.28 8.28 0 005.58 2.16v-3.44a4.85 4.85 0 01-3.59-1.44V6.69h3.59z" />
