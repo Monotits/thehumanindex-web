@@ -3,9 +3,6 @@ import { notFound } from 'next/navigation'
 import { GLOSSARY, getGlossaryBySlug } from '@/lib/glossaryData'
 import { FAQPageJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd'
 import Link from 'next/link'
-import { ShareButton } from '@/components/share'
-import type { DomainCardData } from '@/components/share'
-import { Domain } from '@/lib/types'
 
 // Generate static paths for all glossary entries
 export function generateStaticParams() {
@@ -70,23 +67,9 @@ export default async function GlossaryPage({ params }: { params: Promise<{ slug:
 
           {/* Header */}
           <header style={{ marginBottom: 48 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <h1 style={{ fontSize: 32, fontWeight: 300, margin: 0, color: 'var(--thi-text)', fontFamily: 'var(--thi-font-heading)' }}>
-                {entry.title}
-              </h1>
-              <ShareButton
-                data={{
-                  type: 'domain',
-                  domain: entry.domain as Domain,
-                  score: 0,
-                  delta: null,
-                  headline: entry.shortDescription,
-                  date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-                } as DomainCardData}
-                variant="compact"
-                label="Share"
-              />
-            </div>
+            <h1 style={{ fontSize: 32, fontWeight: 300, margin: '0 0 16px', color: 'var(--thi-text)', fontFamily: 'var(--thi-font-heading)' }}>
+              {entry.title}
+            </h1>
             <p style={{ fontSize: 16, color: 'var(--thi-text-secondary)', lineHeight: 1.7, maxWidth: 640, margin: 0 }}>
               {entry.shortDescription}
             </p>
