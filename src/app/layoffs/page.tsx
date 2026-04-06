@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useTheme } from '@/lib/theme'
 import CorporateLayoffTable from '@/components/CorporateLayoffTable'
 import SocialFeedSection from '@/components/SocialFeedSection'
@@ -7,9 +8,40 @@ import LayoffTracker from '@/components/LayoffTracker'
 import Link from 'next/link'
 import { ShareButton } from '@/components/share'
 import type { LayoffCardData } from '@/components/share'
+import { CorporateLayoffSummary } from '@/lib/corporateLayoffs'
+
+function formatAffected(n: number): string {
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
+  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k`
+  return n.toLocaleString()
+}
 
 export default function LayoffsPage() {
   const { theme } = useTheme()
+  const [layoffData, setLayoffData] = useState<CorporateLayoffSummary | null>(null)
+
+  useEffect(() => {
+    fetch('/api/corporate-layoffs')
+      .then(r => r.json())
+      .then((d: CorporateLayoffSummary) => setLayoffData(d))
+      .catch(() => {})
+  }, [])
+
+  // Build share card data from real layoff data
+  const shareData: LayoffCardData = {
+    type: 'layoff',
+    totalAffected: layoffData
+      ? formatAffected(layoffData.totalAffected)
+      : '...',
+    topCompanies: layoffData
+      ? layoffData.layoffs.slice(0, 5).map(l => ({
+          name: l.company,
+          count: formatAffected(l.peopleAffected),
+          reason: l.reason.map(r => r.replace(/_/g, ' ')).join(', '),
+        }))
+      : [],
+    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+  }
 
   return (
     <div style={{ background: theme.bg, minHeight: '100vh', padding: '48px 0', fontFamily: theme.fontBody }}>
@@ -27,12 +59,7 @@ export default function LayoffsPage() {
               Layoff Tracker
             </h1>
             <ShareButton
-              data={{
-                type: 'layoff',
-                totalAffected: 'Ongoing',
-                topCompanies: [],
-                date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-              } as LayoffCardData}
+              data={shareData}
               variant="compact"
               label="Share"
             />
