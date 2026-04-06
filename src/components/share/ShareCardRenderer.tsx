@@ -63,7 +63,23 @@ export interface LayoffCardData {
   date: string
 }
 
-export type ShareCardData = CompositeCardData | DomainCardData | PulseCardData | QuizCardData | TrendCardData | OverviewCardData | LayoffCardData
+export interface DashboardCardData {
+  type: 'dashboard'
+  compositeScore: number
+  band: string
+  delta: number | null
+  activeDomains: number
+  totalDomains: number
+  domains: { domain: Domain; score: number }[]
+  connectedSources: string[]
+  totalSources: number
+  indicatorCount: number
+  trend: { label: string; score: number }[] // last N months
+  topInsight: string | null // correlation insight text
+  date: string
+}
+
+export type ShareCardData = CompositeCardData | DomainCardData | PulseCardData | QuizCardData | TrendCardData | OverviewCardData | LayoffCardData | DashboardCardData
 
 // ── SAFE FONTS for html2canvas (no custom web fonts) ────────
 // Space Grotesk → Helvetica fallback for headlines
@@ -958,6 +974,244 @@ function LayoffCard({ data, theme, orientation: o }: {
   )
 }
 
+// ── DASHBOARD ────────────────────────────
+
+function DashboardCard({ data, theme, orientation: o }: {
+  data: DashboardCardData; theme: CardTheme; orientation: CardOrientation
+}) {
+  const isV = o === 'vertical'
+  const sc = getScoreColor(data.compositeScore, theme)
+  const sorted = [...data.domains].sort((a, b) => b.score - a.score).slice(0, 5)
+  const cyan = theme.accent
+  const amber = theme.accentSecondary
+
+  // Mini sparkline: compute bar heights from trend data
+  const trendMax = Math.max(...data.trend.map(t => t.score), 1)
+  const trendMin = Math.min(...data.trend.map(t => t.score), 0)
+  const trendRange = Math.max(trendMax - trendMin, 5)
+
+  return (
+    <Wrap theme={theme} orientation={o}>
+      <AmbientGlow color={cyan} x="20%" y="15%" size={isV ? 600 : 350} opacity={0.08} />
+      <AmbientGlow color={sc} x="80%" y="70%" size={isV ? 500 : 300} opacity={0.06} />
+      <Header theme={theme} label="DASHBOARD" date={data.date} isV={isV} />
+
+      <div style={{
+        flex: 1, display: 'flex',
+        flexDirection: isV ? 'column' : 'row',
+        gap: isV ? 48 : 40,
+        position: 'relative',
+      }}>
+        {/* LEFT COLUMN: Score + Trend */}
+        <div style={{
+          flex: isV ? undefined : '0 0 45%',
+          display: 'flex', flexDirection: 'column',
+          justifyContent: 'center', gap: isV ? 40 : 20,
+        }}>
+          {/* Score block */}
+          <div style={{ textAlign: isV ? 'center' : 'left' }}>
+            <div style={{
+              fontSize: isV ? 16 : 8, color: theme.textMuted, fontFamily: FM,
+              letterSpacing: 4, marginBottom: isV ? 12 : 6,
+            }}>
+              COMPOSITE INDEX
+            </div>
+            <div style={{ display: 'flex', alignItems: isV ? 'center' : 'flex-end', gap: isV ? 24 : 14, justifyContent: isV ? 'center' : 'flex-start' }}>
+              <div style={{
+                fontSize: isV ? 120 : 64, fontWeight: 800, color: sc,
+                fontFamily: FH, lineHeight: 0.9, letterSpacing: -2,
+                textShadow: theme.isDark ? `0 0 30px ${sc}25` : 'none',
+              }}>
+                {data.compositeScore.toFixed(1)}
+              </div>
+              <div style={{ paddingBottom: isV ? 8 : 4 }}>
+                <div style={{
+                  padding: isV ? '8px 20px' : '4px 12px',
+                  background: `${sc}18`,
+                  fontSize: isV ? 18 : 10, fontWeight: 700, color: sc,
+                  fontFamily: FM, letterSpacing: 3,
+                }}>
+                  {data.band.toUpperCase()}
+                </div>
+                {data.delta !== null && (
+                  <div style={{
+                    fontSize: isV ? 22 : 12, fontWeight: 600, fontFamily: FM,
+                    color: data.delta > 0 ? theme.scoreColors.high : theme.scoreColors.low,
+                    marginTop: isV ? 10 : 4,
+                  }}>
+                    {data.delta > 0 ? '\u25B2' : '\u25BC'} {Math.abs(data.delta).toFixed(1)} pts
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Mini Trend Sparkline */}
+          {data.trend.length > 1 && (
+            <div>
+              <div style={{
+                fontSize: isV ? 14 : 8, color: theme.textMuted, fontFamily: FM,
+                letterSpacing: 4, marginBottom: isV ? 14 : 8,
+              }}>
+                TREND ({data.trend.length} MONTHS)
+              </div>
+              <div style={{
+                display: 'flex', alignItems: 'flex-end',
+                gap: isV ? 6 : 3, height: isV ? 80 : 44,
+              }}>
+                {data.trend.map((t, i) => {
+                  const pct = ((t.score - trendMin) / trendRange) * 100
+                  const barColor = getScoreColor(t.score, theme)
+                  return (
+                    <div key={i} style={{
+                      flex: 1, display: 'flex', flexDirection: 'column',
+                      alignItems: 'center', justifyContent: 'flex-end', height: '100%',
+                    }}>
+                      <div style={{
+                        width: '100%', minHeight: isV ? 4 : 2,
+                        height: `${Math.max(pct, 5)}%`,
+                        background: `linear-gradient(180deg, ${barColor}, ${barColor}60)`,
+                        boxShadow: theme.isDark ? `0 0 8px ${barColor}20` : 'none',
+                      }} />
+                      <div style={{
+                        fontSize: isV ? 11 : 6, color: theme.textMuted,
+                        fontFamily: FM, marginTop: isV ? 6 : 3, letterSpacing: 0.5,
+                      }}>
+                        {t.label}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Data Pipeline Status */}
+          <div style={{
+            padding: isV ? '20px 24px' : '10px 14px',
+            background: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+          }}>
+            <div style={{
+              fontSize: isV ? 14 : 8, color: theme.textMuted, fontFamily: FM,
+              letterSpacing: 4, marginBottom: isV ? 14 : 8,
+            }}>
+              DATA PIPELINE
+            </div>
+            <div style={{
+              display: 'flex', gap: isV ? 32 : 18, alignItems: 'center',
+              flexWrap: 'wrap',
+            }}>
+              <div>
+                <div style={{ fontSize: isV ? 36 : 20, fontWeight: 700, color: cyan, fontFamily: FH }}>
+                  {data.connectedSources.length}/{data.totalSources}
+                </div>
+                <div style={{ fontSize: isV ? 14 : 7, color: theme.textMuted, fontFamily: FM, letterSpacing: 2 }}>
+                  SOURCES
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: isV ? 36 : 20, fontWeight: 700, color: theme.text, fontFamily: FH }}>
+                  {data.indicatorCount}
+                </div>
+                <div style={{ fontSize: isV ? 14 : 7, color: theme.textMuted, fontFamily: FM, letterSpacing: 2 }}>
+                  INDICATORS
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: isV ? 36 : 20, fontWeight: 700, color: theme.text, fontFamily: FH }}>
+                  {data.activeDomains}/{data.totalDomains}
+                </div>
+                <div style={{ fontSize: isV ? 14 : 7, color: theme.textMuted, fontFamily: FM, letterSpacing: 2 }}>
+                  DOMAINS
+                </div>
+              </div>
+            </div>
+            {/* Source badges */}
+            <div style={{
+              display: 'flex', gap: isV ? 8 : 4, flexWrap: 'wrap',
+              marginTop: isV ? 14 : 8,
+            }}>
+              {data.connectedSources.map(s => (
+                <span key={s} style={{
+                  fontSize: isV ? 13 : 7, padding: isV ? '5px 12px' : '2px 7px',
+                  background: `${cyan}15`, color: cyan,
+                  fontFamily: FM, letterSpacing: 1,
+                }}>
+                  {s}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Top Domains + Insight */}
+        <div style={{
+          flex: 1, display: 'flex', flexDirection: 'column',
+          justifyContent: 'center', gap: isV ? 36 : 16,
+        }}>
+          {/* Domain bars */}
+          <div>
+            <div style={{
+              fontSize: isV ? 14 : 8, color: theme.textMuted, fontFamily: FM,
+              letterSpacing: 4, marginBottom: isV ? 20 : 10,
+            }}>
+              TOP RISK DOMAINS
+            </div>
+            {sorted.map(d => (
+              <DomainBar key={d.domain} domain={d.domain} score={d.score} theme={theme} big={isV} />
+            ))}
+          </div>
+
+          {/* Correlation Insight */}
+          {data.topInsight && (
+            <div style={{
+              padding: isV ? '24px 28px' : '12px 16px',
+              background: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+              borderLeft: `3px solid ${amber}`,
+            }}>
+              <div style={{
+                fontSize: isV ? 14 : 7, color: amber, fontFamily: FM,
+                letterSpacing: 4, marginBottom: isV ? 12 : 6,
+              }}>
+                CROSS-DOMAIN INSIGHT
+              </div>
+              <div style={{
+                fontSize: isV ? 24 : 12, color: theme.textSecondary,
+                fontFamily: FB, lineHeight: 1.5,
+              }}>
+                {truncate(data.topInsight, isV ? 180 : 120)}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div style={{
+        position: 'relative', flexShrink: 0, marginTop: isV ? 32 : 10,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: isV ? '20px 0' : '10px 0',
+        borderTop: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+      }}>
+        <div style={{
+          fontSize: isV ? 22 : 11, color: theme.textSecondary, fontFamily: FB,
+        }}>
+          Explore the full dashboard at thehumanindex.org
+        </div>
+        <div style={{
+          padding: isV ? '10px 24px' : '5px 14px',
+          background: `${cyan}18`,
+          fontSize: isV ? 16 : 8, fontWeight: 700, color: cyan,
+          fontFamily: FM, letterSpacing: 2, flexShrink: 0,
+        }}>
+          thehumanindex.org/dashboard
+        </div>
+      </div>
+      <Footer theme={theme} isV={isV} />
+    </Wrap>
+  )
+}
+
 // ── Main Renderer ───────────────────────────────
 
 export function ShareCardRenderer({ data, theme, orientation = 'horizontal' }: {
@@ -971,5 +1225,6 @@ export function ShareCardRenderer({ data, theme, orientation = 'horizontal' }: {
     case 'trend': return <TrendCard data={data} theme={theme} orientation={orientation} />
     case 'overview': return <OverviewCard data={data} theme={theme} orientation={orientation} />
     case 'layoff': return <LayoffCard data={data} theme={theme} orientation={orientation} />
+    case 'dashboard': return <DashboardCard data={data} theme={theme} orientation={orientation} />
   }
 }

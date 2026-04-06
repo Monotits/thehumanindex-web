@@ -16,7 +16,7 @@ import WeeklyHeatmap from '@/components/charts/WeeklyHeatmap'
 import CorrelationInsightsPanel from '@/components/CorrelationInsights'
 import { generateCorrelationInsights, CorrelationInsight } from '@/lib/correlationInsights'
 import { ShareButton } from '@/components/share'
-import type { CompositeCardData, DomainCardData } from '@/components/share'
+import type { CompositeCardData, DomainCardData, DashboardCardData } from '@/components/share'
 import { Domain } from '@/lib/types'
 
 interface RealDataResponse {
@@ -194,14 +194,37 @@ export default function DashboardPage() {
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
 
         {/* Header */}
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: 32, fontWeight: 300, color: theme.isDark ? '#fff' : theme.text, margin: '0 0 8px' }}>
-            Dashboard
-          </h1>
-          <p style={{ fontSize: 15, color: theme.textSecondary, margin: 0 }}>
-            Real-time civilizational stress monitoring — charts, analysis, and live data feeds
-            {hasScore && <> — Updated {formatDate(score!.computed_at)}</>}
-          </p>
+        <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h1 style={{ fontSize: 32, fontWeight: 300, color: theme.isDark ? '#fff' : theme.text, margin: '0 0 8px' }}>
+              Dashboard
+            </h1>
+            <p style={{ fontSize: 15, color: theme.textSecondary, margin: 0 }}>
+              Real-time civilizational stress monitoring — charts, analysis, and live data feeds
+              {hasScore && <> — Updated {formatDate(score!.computed_at)}</>}
+            </p>
+          </div>
+          {hasScore && (
+            <ShareButton
+              data={{
+                type: 'dashboard',
+                compositeScore: score!.score_value,
+                band: score!.band,
+                delta: score!.delta,
+                activeDomains: activeDomains.length,
+                totalDomains: sortedDomains.length,
+                domains: sortedDomains.map(d => ({ domain: d.domain as Domain, score: Math.round(d.value) })),
+                connectedSources: dataSources,
+                totalSources: dataSources.length + missingSourcesList.length,
+                indicatorCount: rawPoints.length,
+                trend: historicalData.map(h => ({ label: h.date, score: h.score })),
+                topInsight: correlationInsights.length > 0 ? correlationInsights[0].commentary : null,
+                date: new Date(score!.computed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+              } as DashboardCardData}
+              variant="button"
+              label="Share Dashboard"
+            />
+          )}
         </div>
 
         {/* No data state */}
