@@ -346,7 +346,28 @@ function CompositeCard({ data, theme, orientation: o }: {
         </div>
       </div>
 
-      <Footer theme={theme} text="Measuring civilizational stress in the age of AI" isV={isV} />
+      {/* CTA */}
+      <div style={{
+        position: 'relative', flexShrink: 0, marginTop: isV ? 32 : 10,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: isV ? '20px 0' : '10px 0',
+        borderTop: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+      }}>
+        <div style={{
+          fontSize: isV ? 22 : 11, color: theme.textSecondary, fontFamily: FB,
+        }}>
+          How exposed is your job? Take the AI risk quiz.
+        </div>
+        <div style={{
+          padding: isV ? '10px 24px' : '5px 14px',
+          background: `${theme.accentSecondary}18`,
+          fontSize: isV ? 16 : 8, fontWeight: 700, color: theme.accentSecondary,
+          fontFamily: FM, letterSpacing: 2, flexShrink: 0,
+        }}>
+          thehumanindex.org/quiz
+        </div>
+      </div>
+      <Footer theme={theme} isV={isV} />
     </Wrap>
   )
 }
@@ -783,7 +804,28 @@ function OverviewCard({ data, theme, orientation: o }: {
         </div>
       </div>
 
-      <Footer theme={theme} text={`Week ${data.weekNumber} \u2022 Measuring civilizational stress in the age of AI`} isV={isV} />
+      {/* CTA */}
+      <div style={{
+        position: 'relative', flexShrink: 0, marginTop: isV ? 32 : 10,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: isV ? '20px 0' : '10px 0',
+        borderTop: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+      }}>
+        <div style={{
+          fontSize: isV ? 22 : 11, color: theme.textSecondary, fontFamily: FB,
+        }}>
+          How exposed is your job? Take the AI risk quiz.
+        </div>
+        <div style={{
+          padding: isV ? '10px 24px' : '5px 14px',
+          background: `${theme.accentSecondary}18`,
+          fontSize: isV ? 16 : 8, fontWeight: 700, color: theme.accentSecondary,
+          fontFamily: FM, letterSpacing: 2, flexShrink: 0,
+        }}>
+          thehumanindex.org/quiz
+        </div>
+      </div>
+      <Footer theme={theme} text={`Week ${data.weekNumber}`} isV={isV} />
     </Wrap>
   )
 }
@@ -876,7 +918,42 @@ function LayoffCard({ data, theme, orientation: o }: {
         </div>
       </div>
 
-      <Footer theme={theme} text="Tracking workforce changes in tech" isV={isV} />
+      {/* CTA Banner */}
+      <div style={{
+        position: 'relative', flexShrink: 0,
+        marginTop: isV ? 48 : 20,
+        padding: isV ? '28px 32px' : '14px 20px',
+        background: `linear-gradient(135deg, ${amber}12, ${amber}06)`,
+        display: 'flex', alignItems: isV ? 'center' : 'center',
+        justifyContent: 'space-between',
+        gap: isV ? 24 : 16,
+      }}>
+        <div>
+          <div style={{
+            fontSize: isV ? 28 : 14, fontWeight: 700, color: theme.text,
+            fontFamily: FH, lineHeight: 1.3,
+          }}>
+            Is your job at risk?
+          </div>
+          <div style={{
+            fontSize: isV ? 20 : 10, color: theme.textSecondary,
+            fontFamily: FB, marginTop: isV ? 6 : 2,
+          }}>
+            Take the free AI Exposure Quiz
+          </div>
+        </div>
+        <div style={{
+          padding: isV ? '12px 28px' : '6px 16px',
+          background: amber,
+          fontSize: isV ? 18 : 9, fontWeight: 700, color: '#0A192F',
+          fontFamily: FM, letterSpacing: 2, flexShrink: 0,
+          textTransform: 'uppercase',
+        }}>
+          ANALYZE RISK
+        </div>
+      </div>
+
+      <Footer theme={theme} text="thehumanindex.org/quiz" isV={isV} />
     </Wrap>
   )
 }
