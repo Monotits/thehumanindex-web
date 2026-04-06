@@ -777,7 +777,7 @@ function OverviewCard({ data, theme, orientation: o }: {
           }}>
             TOP DOMAIN READINGS
           </div>
-          {sorted.slice(0, isV ? 5 : 3).map(d => (
+          {sorted.slice(0, 5).map(d => (
             <DomainBar key={d.domain} domain={d.domain} score={d.score} theme={theme} big={isV} />
           ))}
         </div>
@@ -844,7 +844,7 @@ function LayoffCard({ data, theme, orientation: o }: {
           }}>
             TOP COMPANIES
           </div>
-          {data.topCompanies.slice(0, isV ? 5 : 3).map((c, i, arr) => (
+          {data.topCompanies.slice(0, 5).map((c, i, arr) => (
             <div key={i} style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
               padding: isV ? '20px 0' : '10px 0',
