@@ -157,6 +157,8 @@ export async function GET(request: Request) {
     revalidatePath('/')
     revalidatePath('/dashboard')
     revalidatePath('/pulse')
+    revalidatePath('/layoffs')
+    revalidatePath('/api/corporate-layoffs')
 
     const duration = Date.now() - startTime
 

@@ -1,6 +1,6 @@
 import { fetchCorporateLayoffs } from '@/lib/corporateLayoffs'
 
-export const revalidate = 86400 // cache 24 hours
+export const revalidate = 14400 // cache 4 hours
 
 const EMPTY_RESPONSE = {
   layoffs: [],
