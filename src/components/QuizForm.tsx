@@ -40,13 +40,25 @@ export function QuizForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Auto-add any text left in the task input before submitting
+    const tasksToSubmit = [...formData.tasks]
+    if (currentTask.trim()) {
+      tasksToSubmit.push(currentTask.trim())
+      setFormData(prev => ({ ...prev, tasks: tasksToSubmit }))
+      setCurrentTask('')
+    }
+
+    if (tasksToSubmit.length === 0) return
+
     setLoading(true)
 
     try {
+      const submitData = { ...formData, tasks: tasksToSubmit }
       const response = await fetch('/api/quiz/evaluate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       })
 
       if (!response.ok) throw new Error('Failed to evaluate quiz')
@@ -54,13 +66,13 @@ export function QuizForm() {
       const result = await response.json()
 
       posthog.capture('quiz_submitted', {
-        job_title: formData.job_title,
-        industry: formData.industry,
-        task_count: formData.tasks.length,
-        experience_years: formData.experience_years,
-        education_level: formData.education_level,
-        age_range: formData.age_range,
-        country: formData.country,
+        job_title: submitData.job_title,
+        industry: submitData.industry,
+        task_count: submitData.tasks.length,
+        experience_years: submitData.experience_years,
+        education_level: submitData.education_level,
+        age_range: submitData.age_range,
+        country: submitData.country,
       })
 
       // Store result in session storage and redirect
@@ -243,21 +255,26 @@ export function QuizForm() {
         </div>
 
         {/* Submit Button */}
+        {formData.tasks.length === 0 && !currentTask.trim() && (
+          <p style={{ fontSize: 12, color: theme.textTertiary, margin: '0 0 -12px', textAlign: 'center' }}>
+            Add at least one task to get your score
+          </p>
+        )}
         <button
           type="submit"
-          disabled={loading || formData.tasks.length === 0}
+          disabled={loading || (formData.tasks.length === 0 && !currentTask.trim())}
           style={{
             width: '100%',
             padding: '14px 0',
-            background: loading || formData.tasks.length === 0 ? theme.surfaceBorder : theme.accent,
+            background: loading || (formData.tasks.length === 0 && !currentTask.trim()) ? theme.surfaceBorder : theme.accent,
             border: 'none',
             borderRadius: 8,
             color: '#fff',
             fontSize: 15,
             fontWeight: 700,
-            cursor: loading || formData.tasks.length === 0 ? 'not-allowed' : 'pointer',
+            cursor: loading || (formData.tasks.length === 0 && !currentTask.trim()) ? 'not-allowed' : 'pointer',
             fontFamily: theme.fontBody,
-            opacity: loading || formData.tasks.length === 0 ? 0.5 : 1,
+            opacity: loading || (formData.tasks.length === 0 && !currentTask.trim()) ? 0.5 : 1,
             transition: 'opacity 0.2s, background 0.2s',
           }}
         >
