@@ -1,13 +1,21 @@
 /**
- * Share Card Visual Styles
+ * Share Card Visual Styles — "The Ethereal Command Center"
  *
- * Three distinct visual themes for share cards:
- * - terminal: Bloomberg-inspired, dark bg, neon accents, monospace
- * - gradient: Modern dark gradient, glassmorphism, vibrant colors
- * - minimal: Clean white, editorial typography, professional
+ * Brand-aligned themes based on THE HUMAN INDEX design system:
+ * - command: Midnight Navy + Cyber Cyan + Warning Amber (primary brand)
+ * - signal: Dark variant with amber-dominant accent
+ * - briefing: Light editorial variant for professional contexts
+ *
+ * Design principles:
+ * - No opaque borders (tonal layering only)
+ * - Cinematic depth via gradients
+ * - Space Grotesk for headlines, Inter for body
+ * - Warning Amber for critical data (surgical highlight)
+ * - Cyber Cyan for data viz and interactive elements
+ * - Max border-radius: 0.75rem (12px) — engineered, not bubbly
  */
 
-export type CardStyle = 'terminal' | 'gradient' | 'minimal'
+export type CardStyle = 'command' | 'signal' | 'briefing'
 export type CardOrientation = 'horizontal' | 'vertical'
 
 export interface CardTheme {
@@ -24,11 +32,14 @@ export interface CardTheme {
   textSecondary: string
   textMuted: string
   accent: string
+  accentSecondary: string
   // Fonts
   fontBody: string
   fontMono: string
   fontHeading: string
-  // Score colors (same across all)
+  // Brand
+  isDark: boolean
+  // Score colors
   scoreColors: {
     low: string
     moderate: string
@@ -39,73 +50,79 @@ export interface CardTheme {
 }
 
 export const CARD_THEMES: Record<CardStyle, CardTheme> = {
-  terminal: {
-    id: 'terminal',
-    name: 'Terminal',
-    description: 'Bloomberg-inspired dark terminal',
-    bg: '#0a0a0a',
-    bgGradient: 'linear-gradient(135deg, #0a0a0a 0%, #0f1419 50%, #0a0a0a 100%)',
-    cardBg: 'rgba(17, 17, 17, 0.9)',
-    cardBorder: '#1a2a1a',
-    text: '#e0e0e0',
-    textSecondary: '#999999',
-    textMuted: '#555555',
-    accent: '#00ff88',
-    fontBody: "'Inter', sans-serif",
-    fontMono: "'JetBrains Mono', 'SF Mono', monospace",
-    fontHeading: "'Inter', sans-serif",
+  command: {
+    id: 'command',
+    name: 'Command',
+    description: 'Ethereal Command Center',
+    bg: '#0A192F',
+    bgGradient: 'linear-gradient(160deg, #0A192F 0%, #0D2137 35%, #091520 65%, #0A192F 100%)',
+    cardBg: 'rgba(13, 33, 55, 0.6)',
+    cardBorder: 'rgba(0, 229, 255, 0.12)',
+    text: '#E8EDF3',
+    textSecondary: '#8BA4BE',
+    textMuted: '#3D5A7A',
+    accent: '#00E5FF',
+    accentSecondary: '#FFB800',
+    fontBody: "Inter, Helvetica, Arial, sans-serif",
+    fontMono: "'Courier New', Courier, monospace",
+    fontHeading: "'Space Grotesk', Helvetica, Arial, sans-serif",
+    isDark: true,
     scoreColors: {
-      low: '#22c55e',
-      moderate: '#3b82f6',
-      elevated: '#f59e0b',
-      high: '#f97316',
-      critical: '#ef4444',
+      low: '#22D68A',
+      moderate: '#00E5FF',
+      elevated: '#FFB800',
+      high: '#FF8A3D',
+      critical: '#FF4757',
     },
   },
-  gradient: {
-    id: 'gradient',
-    name: 'Gradient',
-    description: 'Modern dark gradient',
-    bg: '#0f0f1a',
-    bgGradient: 'linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 30%, #0a1628 70%, #0f0f1a 100%)',
-    cardBg: 'rgba(255, 255, 255, 0.06)',
-    cardBorder: 'rgba(255, 255, 255, 0.1)',
-    text: '#ffffff',
-    textSecondary: '#a0a0b0',
-    textMuted: '#606070',
-    accent: '#a78bfa',
-    fontBody: "'Inter', sans-serif",
-    fontMono: "'JetBrains Mono', monospace",
-    fontHeading: "'Inter', sans-serif",
+  signal: {
+    id: 'signal',
+    name: 'Signal',
+    description: 'Amber alert variant',
+    bg: '#0A0E17',
+    bgGradient: 'linear-gradient(160deg, #0A0E17 0%, #121A2B 35%, #0E1520 65%, #0A0E17 100%)',
+    cardBg: 'rgba(18, 26, 43, 0.6)',
+    cardBorder: 'rgba(255, 184, 0, 0.12)',
+    text: '#E8EDF3',
+    textSecondary: '#8B99AE',
+    textMuted: '#3D4A5A',
+    accent: '#FFB800',
+    accentSecondary: '#00E5FF',
+    fontBody: "Inter, Helvetica, Arial, sans-serif",
+    fontMono: "'Courier New', Courier, monospace",
+    fontHeading: "'Space Grotesk', Helvetica, Arial, sans-serif",
+    isDark: true,
     scoreColors: {
-      low: '#34d399',
-      moderate: '#60a5fa',
-      elevated: '#fbbf24',
-      high: '#fb923c',
-      critical: '#f87171',
+      low: '#22D68A',
+      moderate: '#00B4D8',
+      elevated: '#FFB800',
+      high: '#FF8A3D',
+      critical: '#FF4757',
     },
   },
-  minimal: {
-    id: 'minimal',
-    name: 'Minimal',
-    description: 'Clean white, professional',
-    bg: '#ffffff',
-    bgGradient: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 50%, #fafafa 100%)',
-    cardBg: '#ffffff',
-    cardBorder: '#e5e5e5',
-    text: '#111111',
-    textSecondary: '#555555',
-    textMuted: '#999999',
-    accent: '#111111',
-    fontBody: "'Inter', sans-serif",
-    fontMono: "'JetBrains Mono', monospace",
-    fontHeading: "'Georgia', 'Times New Roman', serif",
+  briefing: {
+    id: 'briefing',
+    name: 'Briefing',
+    description: 'Light editorial',
+    bg: '#F5F6F8',
+    bgGradient: 'linear-gradient(160deg, #F5F6F8 0%, #EBEEF2 50%, #F5F6F8 100%)',
+    cardBg: 'rgba(255, 255, 255, 0.7)',
+    cardBorder: 'rgba(10, 25, 47, 0.08)',
+    text: '#0A192F',
+    textSecondary: '#3D5A7A',
+    textMuted: '#8BA4BE',
+    accent: '#0A192F',
+    accentSecondary: '#FFB800',
+    fontBody: "Inter, Helvetica, Arial, sans-serif",
+    fontMono: "'Courier New', Courier, monospace",
+    fontHeading: "'Space Grotesk', Helvetica, Arial, sans-serif",
+    isDark: false,
     scoreColors: {
-      low: '#16a34a',
-      moderate: '#2563eb',
-      elevated: '#d97706',
-      high: '#ea580c',
-      critical: '#dc2626',
+      low: '#0D9F5F',
+      moderate: '#0077B6',
+      elevated: '#CC9200',
+      high: '#D96C00',
+      critical: '#CC2936',
     },
   },
 }

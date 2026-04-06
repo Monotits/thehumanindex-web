@@ -15,7 +15,7 @@ interface ShareCardModalProps {
 
 export function ShareCardModal({ data, open, onClose }: ShareCardModalProps) {
   const { theme } = useTheme()
-  const [style, setStyle] = useState<CardStyle>('terminal')
+  const [style, setStyle] = useState<CardStyle>('command')
   const [orientation, setOrientation] = useState<CardOrientation>('horizontal')
   const [exporting, setExporting] = useState(false)
   const [copied, setCopied] = useState(false)
