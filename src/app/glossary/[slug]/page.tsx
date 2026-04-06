@@ -13,8 +13,9 @@ export function generateStaticParams() {
 }
 
 // Dynamic metadata for SEO
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const entry = getGlossaryBySlug(params.slug)
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const entry = getGlossaryBySlug(slug)
   if (!entry) return { title: 'Not Found' }
 
   return {
@@ -40,8 +41,9 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   }
 }
 
-export default function GlossaryPage({ params }: { params: { slug: string } }) {
-  const entry = getGlossaryBySlug(params.slug)
+export default async function GlossaryPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const entry = getGlossaryBySlug(slug)
   if (!entry) notFound()
 
   return (
