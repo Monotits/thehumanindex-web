@@ -98,6 +98,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="google-site-verification" content="iLceQwDotiKddHWJtUP3iatXZEtY9e0l789bQonpBWw" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* Inline script to prevent theme flash — runs before React hydration */}
         <script
