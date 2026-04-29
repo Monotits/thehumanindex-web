@@ -43,13 +43,16 @@ export async function GET(request: Request) {
 
   try {
     // ── Step 1: Fetch all external APIs ──
-    const { points, errors, health } = await fetchAllRealData()
+    const { points, errors, health, divergences } = await fetchAllRealData()
     const computed = computeScores(points)
 
     // Confidence: % of sources that returned ok status this run
     const totalSources = health.length
     const okSources = health.filter(h => h.status === 'ok').length
     const confidence = totalSources > 0 ? Math.round((okSources / totalSources) * 100) / 100 : 0
+
+    // Divergence summary: any cross-source pairs flagging warning/critical?
+    const divergenceWarnings = divergences.filter(d => d.status !== 'ok')
 
     if (computed.activeDomains === 0) {
       return NextResponse.json({
@@ -96,6 +99,8 @@ export async function GET(request: Request) {
           confidence,
           sources_ok: okSources,
           sources_total: totalSources,
+          divergences: divergences.length > 0 ? divergences : undefined,
+          divergence_warnings: divergenceWarnings.length,
         },
       })
       .select('id')
@@ -224,6 +229,8 @@ export async function GET(request: Request) {
       sources_ok: okSources,
       sources_total: totalSources,
       health: health.map(h => ({ source: h.source, status: h.status, points: h.dataPoints })),
+      divergences,
+      divergence_warnings: divergenceWarnings.length,
       errors: errors.length > 0 ? errors : undefined,
       duration_ms: duration,
     })

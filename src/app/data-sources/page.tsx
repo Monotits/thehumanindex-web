@@ -36,19 +36,34 @@ export interface DataSourceSummary {
   totalRuns30d: number
 }
 
+export interface DivergenceRow {
+  metric: string
+  domain: string
+  observations: { source: string; indicator: string; rawValue: number; period: string }[]
+  divergencePercent: number
+  status: 'ok' | 'warning' | 'critical'
+  thresholdPercent: number
+}
+
 async function loadSummaries(): Promise<{
   summaries: DataSourceSummary[]
   lastRunAt: string | null
+  divergences: DivergenceRow[]
 }> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !anon) return { summaries: [], lastRunAt: null }
+  if (!url || !anon) return { summaries: [], lastRunAt: null, divergences: [] }
 
   const sb = createClient(url, anon)
 
-  const [latestRes, uptimeRes] = await Promise.all([
+  const [latestRes, uptimeRes, latestCompositeRes] = await Promise.all([
     sb.from('v_data_source_health_latest').select('*'),
     sb.from('v_data_source_uptime_30d').select('*'),
+    sb.from('composite_scores')
+      .select('metadata')
+      .eq('score_type', 'composite')
+      .order('computed_at', { ascending: false })
+      .limit(1),
   ])
 
   const latest: HealthRow[] = (latestRes.data as HealthRow[] | null) || []
@@ -81,10 +96,16 @@ async function loadSummaries(): Promise<{
     .sort()
     .at(-1) || null
 
-  return { summaries, lastRunAt }
+  // Pull divergences from latest composite_scores.metadata (written by cron)
+  const compositeMeta = (latestCompositeRes.data as { metadata: Record<string, unknown> | null }[] | null)?.[0]?.metadata
+  const divergences: DivergenceRow[] = Array.isArray(compositeMeta?.divergences)
+    ? compositeMeta!.divergences as DivergenceRow[]
+    : []
+
+  return { summaries, lastRunAt, divergences }
 }
 
 export default async function DataSourcesPage() {
-  const { summaries, lastRunAt } = await loadSummaries()
-  return <DataSourcesView summaries={summaries} lastRunAt={lastRunAt} />
+  const { summaries, lastRunAt, divergences } = await loadSummaries()
+  return <DataSourcesView summaries={summaries} lastRunAt={lastRunAt} divergences={divergences} />
 }

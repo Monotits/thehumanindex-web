@@ -1,11 +1,12 @@
 'use client'
 
 import { useTheme } from '@/lib/theme'
-import type { DataSourceSummary } from './page'
+import type { DataSourceSummary, DivergenceRow } from './page'
 
 interface Props {
   summaries: DataSourceSummary[]
   lastRunAt: string | null
+  divergences: DivergenceRow[]
 }
 
 const STATUS_LABEL: Record<DataSourceSummary['status'], string> = {
@@ -35,7 +36,7 @@ function formatUptime(u: number | null): string {
   return `${(u * 100).toFixed(1)}%`
 }
 
-export default function DataSourcesView({ summaries, lastRunAt }: Props) {
+export default function DataSourcesView({ summaries, lastRunAt, divergences }: Props) {
   const { theme, themeId } = useTheme()
 
   const okCount = summaries.filter(s => s.status === 'ok').length
@@ -104,6 +105,65 @@ export default function DataSourcesView({ summaries, lastRunAt }: Props) {
               : 'Awaiting first cron run.'}
           </div>
         </div>
+
+        {/* Cross-source divergence panel */}
+        {divergences.length > 0 && (
+          <div style={sectionStyle}>
+            <h2 style={h2Style}>Cross-source agreement</h2>
+            <p style={{ ...pStyle, marginBottom: 16 }}>
+              Where multiple sources publish the same metric, we compare their raw values. Small gaps are normal
+              (different methodologies); large gaps signal a stale source or upstream regression.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {divergences.map(d => {
+                const color = d.status === 'critical' ? '#dc2626' : d.status === 'warning' ? '#f59e0b' : '#22c55e'
+                return (
+                  <div key={d.metric} style={{
+                    border: `1px solid ${color}33`,
+                    background: `${color}0d`,
+                    borderRadius: themeId === 'terminal' ? 3 : 6,
+                    padding: '12px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 6,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>
+                        {d.metric}
+                        <span style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontMono, marginLeft: 8, letterSpacing: 0.4 }}>
+                          {d.domain.toUpperCase()}
+                        </span>
+                      </div>
+                      <span style={{
+                        padding: '2px 8px',
+                        borderRadius: themeId === 'terminal' ? 2 : 999,
+                        background: `${color}1a`,
+                        color,
+                        fontFamily: theme.fontMono,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        letterSpacing: 0.5,
+                      }}>
+                        {d.divergencePercent.toFixed(1)}% — {d.status}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', fontFamily: theme.fontMono, fontSize: 12, color: theme.textSecondary }}>
+                      {d.observations.map(o => (
+                        <span key={o.source}>
+                          <span style={{ color: theme.textTertiary }}>{o.source}:</span> {o.rawValue}
+                          <span style={{ color: theme.textTertiary, marginLeft: 4, fontSize: 10 }}>({o.period})</span>
+                        </span>
+                      ))}
+                      <span style={{ color: theme.textTertiary, marginLeft: 'auto' }}>
+                        threshold {d.thresholdPercent}%
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Source list */}
         {summaries.length === 0 ? (

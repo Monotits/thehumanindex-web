@@ -53,6 +53,7 @@ export interface RealDataResult {
   points: DomainDataPoint[]
   errors: string[]
   health: SourceHealth[]
+  divergences: SourceDivergence[]
 }
 
 export interface SourceHealth {
@@ -63,6 +64,15 @@ export interface SourceHealth {
   durationMs: number                      // fetch duration
   error: string | null                    // error message if failed
   timestamp: string                       // ISO timestamp of this attempt
+}
+
+export interface SourceDivergence {
+  metric: string                          // human-readable metric name (e.g., 'Gini Index')
+  domain: string                          // THI domain (e.g., 'inequality')
+  observations: { source: string; indicator: string; rawValue: number; period: string }[]
+  divergencePercent: number               // (max - min) / mean × 100
+  status: 'ok' | 'warning' | 'critical'   // warning if > threshold, critical if > 2× threshold
+  thresholdPercent: number                // configured threshold for this pair
 }
 
 export interface ComputedScores {
@@ -905,6 +915,91 @@ function getPublicHealthReferenceData(): DomainDataPoint[] {
 }
 
 // ═══════════════════════════════════════════════════════════
+// Cross-Source Divergence Detection
+// ═══════════════════════════════════════════════════════════
+
+// Define metrics we expect multiple sources to report on. We compare the raw
+// values; if they diverge beyond `thresholdPercent`, we flag it. This catches
+// upstream API regressions, methodology drift, and stale data.
+//
+// To add a new pair: define the metric name + domain, and a list of (source,
+// indicatorMatcher) tuples. The matcher is matched against `point.indicator`.
+const PAIRED_INDICATORS: {
+  metric: string
+  domain: string
+  thresholdPercent: number          // % divergence above which we warn
+  members: { source: string; matcher: RegExp }[]
+}[] = [
+  {
+    // FRED (US Census) and World Bank both publish Gini for the US.
+    // Methodologies differ slightly (pre vs post tax-and-transfer), so a
+    // few-point gap is normal; > 10% likely indicates one source is stale.
+    metric: 'Gini Index',
+    domain: 'inequality',
+    thresholdPercent: 10,
+    members: [
+      { source: 'FRED', matcher: /Gini/i },
+      { source: 'World Bank', matcher: /Gini/i },
+    ],
+  },
+  {
+    // World Bank and (when active) WHO both report suicide rates. WHO is
+    // disabled in the live pipeline, so this currently returns 1 observation
+    // and is automatically skipped — but the config is ready for re-enabling.
+    metric: 'Suicide Rate',
+    domain: 'wellbeing',
+    thresholdPercent: 15,
+    members: [
+      { source: 'World Bank', matcher: /Suicide Rate/i },
+      { source: 'WHO', matcher: /Suicide Rate/i },
+    ],
+  },
+]
+
+export function computeSourceDivergences(points: DomainDataPoint[]): SourceDivergence[] {
+  const divergences: SourceDivergence[] = []
+
+  for (const pair of PAIRED_INDICATORS) {
+    const observations: SourceDivergence['observations'] = []
+    for (const member of pair.members) {
+      const match = points.find(p => p.source === member.source && member.matcher.test(p.indicator))
+      if (match) {
+        observations.push({
+          source: member.source,
+          indicator: match.indicator,
+          rawValue: match.value,
+          period: match.period,
+        })
+      }
+    }
+
+    // Need at least 2 observations to compute divergence
+    if (observations.length < 2) continue
+
+    const values = observations.map(o => o.rawValue)
+    const max = Math.max(...values)
+    const min = Math.min(...values)
+    const mean = values.reduce((a, b) => a + b, 0) / values.length
+    const divergencePercent = mean !== 0 ? Math.abs((max - min) / mean) * 100 : 0
+
+    let status: SourceDivergence['status'] = 'ok'
+    if (divergencePercent > pair.thresholdPercent * 2) status = 'critical'
+    else if (divergencePercent > pair.thresholdPercent) status = 'warning'
+
+    divergences.push({
+      metric: pair.metric,
+      domain: pair.domain,
+      observations,
+      divergencePercent: Math.round(divergencePercent * 10) / 10,
+      status,
+      thresholdPercent: pair.thresholdPercent,
+    })
+  }
+
+  return divergences
+}
+
+// ═══════════════════════════════════════════════════════════
 // Combined Pipeline
 // ═══════════════════════════════════════════════════════════
 
@@ -1006,7 +1101,17 @@ export async function fetchAllRealData(): Promise<RealDataResult> {
     console.log(`  [${p.domain}] ${p.indicator}: raw=${p.value} → normalized=${p.normalized}`)
   }
 
-  return { points: allPoints, errors, health }
+  // ── Cross-source divergence detection ──
+  const divergences = computeSourceDivergences(allPoints)
+  for (const d of divergences) {
+    if (d.status !== 'ok') {
+      console.warn(`[Data Pipeline] ⚠ ${d.metric} divergence ${d.divergencePercent}% (${d.status}): ${
+        d.observations.map(o => `${o.source}=${o.rawValue}`).join(' vs ')
+      }`)
+    }
+  }
+
+  return { points: allPoints, errors, health, divergences }
 }
 
 // ═══════════════════════════════════════════════════════════
