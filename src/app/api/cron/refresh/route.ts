@@ -159,6 +159,7 @@ export async function GET(request: Request) {
     revalidatePath('/pulse')
     revalidatePath('/layoffs')
     revalidatePath('/api/corporate-layoffs')
+    revalidatePath('/api/social-feed')
 
     const duration = Date.now() - startTime
 
