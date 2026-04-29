@@ -1,7 +1,12 @@
 import { fetchAllSocialFeed, SocialFeedItem } from '@/lib/socialFeed'
 import { createClient } from '@supabase/supabase-js'
 
-export const revalidate = 3600 // cache for 1 hour
+// Don't statically cache the route — Next.js full-route cache is keyed by path
+// (not query string), so a single bad early hit can poison the cache until
+// revalidate fires. Underlying data is still cached: the Supabase query is
+// fast (~100ms) and live-fetch fallbacks have their own per-fetch revalidate.
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 interface CuratedRow {
   id: string
