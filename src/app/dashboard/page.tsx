@@ -283,6 +283,38 @@ export default function DashboardPage() {
               <div style={{ marginTop: 16, fontSize: 11, color: theme.textTertiary }}>
                 {activeDomains.length}/{sortedDomains.length} domains active
               </div>
+              {(() => {
+                const meta = (score!.metadata as Record<string, unknown> | null) || {}
+                const sourcesOk = typeof meta.sources_ok === 'number' ? meta.sources_ok : null
+                const sourcesTotal = typeof meta.sources_total === 'number' ? meta.sources_total : null
+                const confidence = typeof meta.confidence === 'number' ? meta.confidence : null
+                if (sourcesOk === null || sourcesTotal === null) return null
+                const conf = confidence ?? sourcesOk / Math.max(sourcesTotal, 1)
+                const confColor = conf >= 0.85 ? '#22c55e' : conf >= 0.6 ? '#f59e0b' : '#ef4444'
+                return (
+                  <Link href="/data-sources" style={{ textDecoration: 'none' }}>
+                    <div
+                      title="View source-level health"
+                      style={{
+                        marginTop: 8,
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        padding: '3px 10px',
+                        borderRadius: 999,
+                        background: `${confColor}1a`,
+                        border: `1px solid ${confColor}40`,
+                        fontSize: 10,
+                        color: confColor,
+                        fontFamily: theme.fontMono,
+                        letterSpacing: 0.5,
+                        fontWeight: 600,
+                      }}
+                    >
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: confColor }} />
+                      CONFIDENCE {sourcesOk}/{sourcesTotal} · {Math.round(conf * 100)}%
+                    </div>
+                  </Link>
+                )
+              })()}
               <div style={{ marginTop: 12 }}>
                 <ShareButton
                   data={{

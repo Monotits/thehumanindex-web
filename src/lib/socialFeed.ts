@@ -16,6 +16,10 @@ export interface SocialFeedItem {
   score: number           // upvotes or relevance score
   published_at: string    // ISO date
   fetched_at: string
+  // ── LLM enrichment (only present when served from social_feed_curated) ──
+  relevance_score?: number   // 0-10 from Claude
+  why_matters?: string       // 1-sentence editorial summary from Claude
+  domain_tags?: string[]     // THI domains this relates to
 }
 
 // ── Reddit fetcher ──────────────────────────────────────────

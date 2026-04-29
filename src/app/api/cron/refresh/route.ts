@@ -2,12 +2,14 @@
  * GET /api/cron/refresh — Periodic data refresh (called by Vercel Cron)
  *
  * 1. Fetches all external APIs (FRED, BLS, World Bank, OECD, WHO, O*NET, AI Index)
- * 2. Computes normalized scores
+ *    and tracks per-source health (status + duration + error + data point count).
+ * 2. Computes normalized scores and overall confidence (% sources ok).
  * 3. Stores results in Supabase:
- *    - composite_scores + sub_indexes (latest snapshot for homepage/dashboard)
+ *    - composite_scores + sub_indexes (latest snapshot, includes confidence in metadata)
  *    - monthly_scores (permanent monthly record for trend chart)
- *    - raw_data_points (immutable log)
- * 4. Triggers ISR revalidation so pages show fresh data
+ *    - raw_data_points (immutable log of every fetched indicator)
+ *    - data_source_health (append-only per-source health log)
+ * 4. Triggers ISR revalidation so pages show fresh data.
  *
  * Protected by CRON_SECRET to prevent unauthorized calls.
  * Vercel Cron sends this header automatically.
@@ -41,8 +43,13 @@ export async function GET(request: Request) {
 
   try {
     // ── Step 1: Fetch all external APIs ──
-    const { points, errors } = await fetchAllRealData()
+    const { points, errors, health } = await fetchAllRealData()
     const computed = computeScores(points)
+
+    // Confidence: % of sources that returned ok status this run
+    const totalSources = health.length
+    const okSources = health.filter(h => h.status === 'ok').length
+    const confidence = totalSources > 0 ? Math.round((okSources / totalSources) * 100) / 100 : 0
 
     if (computed.activeDomains === 0) {
       return NextResponse.json({
@@ -86,6 +93,9 @@ export async function GET(request: Request) {
           active_domains: computed.activeDomains,
           total_domains: computed.totalDomains,
           errors: errors.length > 0 ? errors : undefined,
+          confidence,
+          sources_ok: okSources,
+          sources_total: totalSources,
         },
       })
       .select('id')
@@ -153,13 +163,52 @@ export async function GET(request: Request) {
       if (rawErr) console.error('raw_data_points insert warning:', rawErr.message)
     }
 
-    // ── Step 6: Trigger ISR revalidation ──
+    // ── Step 6: Append per-source health log ──
+    // For sources that failed this run, look up their previous last_success_at
+    // and carry it forward so the UI can show "last successful X hours ago".
+    try {
+      const failedSourceNames = health.filter(h => h.status !== 'ok').map(h => h.source)
+      const prevSuccessMap = new Map<string, string>()
+      if (failedSourceNames.length > 0) {
+        const { data: prevHealth } = await sb
+          .from('data_source_health')
+          .select('source,last_success_at')
+          .in('source', failedSourceNames)
+          .eq('status', 'ok')
+          .order('recorded_at', { ascending: false })
+          .limit(50)
+        for (const row of prevHealth || []) {
+          if (!prevSuccessMap.has(row.source) && row.last_success_at) {
+            prevSuccessMap.set(row.source, row.last_success_at)
+          }
+        }
+      }
+
+      const healthRows = health.map(h => ({
+        source: h.source,
+        status: h.status,
+        last_success_at: h.status === 'ok' ? h.timestamp : (prevSuccessMap.get(h.source) ?? null),
+        last_attempt_at: h.timestamp,
+        last_error: h.error,
+        data_points_count: h.dataPoints,
+        domains_covered: h.domains,
+        duration_ms: h.durationMs,
+      }))
+
+      const { error: healthErr } = await sb.from('data_source_health').insert(healthRows)
+      if (healthErr) console.error('data_source_health insert warning:', healthErr.message)
+    } catch (e) {
+      console.error('data_source_health step failed:', e)
+    }
+
+    // ── Step 7: Trigger ISR revalidation ──
     revalidatePath('/')
     revalidatePath('/dashboard')
     revalidatePath('/pulse')
     revalidatePath('/layoffs')
     revalidatePath('/api/corporate-layoffs')
     revalidatePath('/api/social-feed')
+    revalidatePath('/data-sources')
 
     const duration = Date.now() - startTime
 
@@ -171,6 +220,10 @@ export async function GET(request: Request) {
       sources_connected: computed.sources_connected,
       sources_missing: computed.sources_missing,
       monthly_record: yearMonth,
+      confidence,
+      sources_ok: okSources,
+      sources_total: totalSources,
+      health: health.map(h => ({ source: h.source, status: h.status, points: h.dataPoints })),
       errors: errors.length > 0 ? errors : undefined,
       duration_ms: duration,
     })

@@ -15,6 +15,7 @@ export function Navigation() {
     { href: '/layoffs', label: 'Layoffs' },
     { href: '/pulse', label: 'Pulse' },
     { href: '/glossary', label: 'Glossary' },
+    { href: '/data-sources', label: 'Data' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
   ]

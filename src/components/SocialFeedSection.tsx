@@ -153,8 +153,20 @@ export default function SocialFeedSection() {
               {item.title}
             </div>
 
-            {/* Body excerpt */}
-            {item.body && (
+            {/* Why matters (LLM-enriched) takes priority over raw body */}
+            {item.why_matters ? (
+              <div style={{
+                fontSize: 12,
+                color: theme.textSecondary,
+                lineHeight: 1.5,
+                fontFamily: theme.fontBody,
+                fontStyle: 'italic',
+                borderLeft: `2px solid ${theme.accent}40`,
+                paddingLeft: 8,
+              }}>
+                {item.why_matters}
+              </div>
+            ) : item.body ? (
               <div style={{
                 fontSize: 12,
                 color: theme.textSecondary,
@@ -163,14 +175,35 @@ export default function SocialFeedSection() {
               }}>
                 {item.body.slice(0, 160)}{item.body.length > 160 ? '...' : ''}
               </div>
-            )}
+            ) : null}
 
-            {/* Author */}
-            {item.source === 'reddit' && (
-              <div style={{ fontSize: 10, color: theme.textTertiary, marginTop: 6, fontFamily: theme.fontMono }}>
-                {item.author}
-              </div>
-            )}
+            {/* Bottom row: domain tags + relevance + author */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+              {item.domain_tags && item.domain_tags.length > 0 && item.domain_tags.slice(0, 3).map(tag => (
+                <span key={tag} style={{
+                  fontSize: 9,
+                  padding: '2px 6px',
+                  borderRadius: 3,
+                  background: `${theme.accent}15`,
+                  color: theme.accent,
+                  fontFamily: theme.fontMono,
+                  letterSpacing: 0.4,
+                  textTransform: 'uppercase',
+                }}>
+                  {tag}
+                </span>
+              ))}
+              {typeof item.relevance_score === 'number' && (
+                <span style={{ fontSize: 10, color: theme.textTertiary, fontFamily: theme.fontMono }}>
+                  rel {item.relevance_score.toFixed(1)}
+                </span>
+              )}
+              {item.source === 'reddit' && (
+                <span style={{ fontSize: 10, color: theme.textTertiary, fontFamily: theme.fontMono, marginLeft: 'auto' }}>
+                  {item.author}
+                </span>
+              )}
+            </div>
           </a>
         ))}
       </div>

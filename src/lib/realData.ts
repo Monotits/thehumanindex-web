@@ -52,6 +52,17 @@ export interface DomainDataPoint {
 export interface RealDataResult {
   points: DomainDataPoint[]
   errors: string[]
+  health: SourceHealth[]
+}
+
+export interface SourceHealth {
+  source: string                          // 'BLS', 'FRED', 'World Bank', etc.
+  status: 'ok' | 'degraded' | 'failed'    // ok = data returned, degraded = partial, failed = no data
+  dataPoints: number                      // # of data points returned this run
+  domains: string[]                       // unique THI domains this source touched
+  durationMs: number                      // fetch duration
+  error: string | null                    // error message if failed
+  timestamp: string                       // ISO timestamp of this attempt
 }
 
 export interface ComputedScores {
@@ -909,48 +920,93 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 
 export async function fetchAllRealData(): Promise<RealDataResult> {
   const errors: string[] = []
+  const health: SourceHealth[] = []
   const TIMEOUT = 25000 // 25s per source (cron has 60s total, sources run in parallel)
+  const runStartedAt = new Date().toISOString()
 
-  const results = await Promise.allSettled([
-    withTimeout(fetchBLSData(), TIMEOUT, 'BLS'),
-    withTimeout(fetchFREDData(), TIMEOUT, 'FRED'),
-    withTimeout(fetchWorldBankData(), TIMEOUT, 'World Bank'),
+  // ── Live API sources ──
+  type LiveSource = { name: string; fn: () => Promise<DomainDataPoint[]> }
+  const liveSources: LiveSource[] = [
+    { name: 'BLS', fn: fetchBLSData },
+    { name: 'FRED', fn: fetchFREDData },
+    { name: 'World Bank', fn: fetchWorldBankData },
     // OECD live API is in transition (old API shut down, new API hasn't migrated BLI)
     // Using static reference data instead — see getOECDReferenceData()
-    // withTimeout(fetchOECDData(), TIMEOUT, 'OECD'),
     // WHO API deprecated end of 2025; USA data returns empty
     // World Bank already covers suicide rate + life expectancy
-    // withTimeout(fetchWHOData(), TIMEOUT, 'WHO'),
-    withTimeout(fetchACLEDData(), TIMEOUT, 'ACLED'),
-    withTimeout(fetchONETData(), TIMEOUT, 'O*NET'),
-    withTimeout(fetchFBICrimeData(), TIMEOUT, 'FBI'),
-  ])
+    { name: 'ACLED', fn: fetchACLEDData },
+    { name: 'O*NET', fn: fetchONETData },
+    { name: 'FBI', fn: fetchFBICrimeData },
+  ]
+
+  // Run each with timing, capture health regardless of outcome
+  const tracked = await Promise.all(liveSources.map(async (src) => {
+    const startedAt = Date.now()
+    try {
+      const value = await withTimeout(src.fn(), TIMEOUT, src.name)
+      const durationMs = Date.now() - startedAt
+      const domains = Array.from(new Set(value.map(p => p.domain)))
+      health.push({
+        source: src.name,
+        status: value.length > 0 ? 'ok' : 'degraded',
+        dataPoints: value.length,
+        domains,
+        durationMs,
+        error: value.length === 0 ? 'Source returned 0 data points' : null,
+        timestamp: runStartedAt,
+      })
+      console.log(`[Data Pipeline] ${src.name}: ${value.length} data points (${durationMs}ms)`)
+      return { name: src.name, value, ok: true as const }
+    } catch (err) {
+      const durationMs = Date.now() - startedAt
+      const message = err instanceof Error ? err.message : String(err)
+      errors.push(`${src.name}: ${message}`)
+      health.push({
+        source: src.name,
+        status: 'failed',
+        dataPoints: 0,
+        domains: [],
+        durationMs,
+        error: message,
+        timestamp: runStartedAt,
+      })
+      console.warn(`[Data Pipeline] ${src.name}: FAILED — ${message}`)
+      return { name: src.name, value: [] as DomainDataPoint[], ok: false as const }
+    }
+  }))
 
   const allPoints: DomainDataPoint[] = []
-  const sourceNames = ['BLS', 'FRED', 'World Bank', 'ACLED', 'O*NET', 'FBI']
+  for (const t of tracked) allPoints.push(...t.value)
 
-  results.forEach((r, i) => {
-    if (r.status === 'fulfilled') {
-      allPoints.push(...r.value)
-      console.log(`[Data Pipeline] ${sourceNames[i]}: ${r.value.length} data points`)
-    } else {
-      errors.push(`${sourceNames[i]}: ${r.reason}`)
-      console.warn(`[Data Pipeline] ${sourceNames[i]}: FAILED —`, r.reason)
-    }
-  })
+  // ── Static reference data (always available) ──
+  // Tracked as 'ok' so /data-sources page reports 100% uptime for these.
+  const staticSources: { name: string; getter: () => DomainDataPoint[] }[] = [
+    { name: 'AI Index (Stanford)', getter: getAIIndexData },
+    { name: 'OECD (reference)', getter: getOECDReferenceData },
+    { name: 'CDC/HUD/NICS (reference)', getter: getPublicHealthReferenceData },
+  ]
+  for (const s of staticSources) {
+    const startedAt = Date.now()
+    const points = s.getter()
+    allPoints.push(...points)
+    health.push({
+      source: s.name,
+      status: 'ok',
+      dataPoints: points.length,
+      domains: Array.from(new Set(points.map(p => p.domain))),
+      durationMs: Date.now() - startedAt,
+      error: null,
+      timestamp: runStartedAt,
+    })
+  }
 
-  // Add static reference data (always available)
-  allPoints.push(...getAIIndexData())
-  allPoints.push(...getOECDReferenceData())
-  allPoints.push(...getPublicHealthReferenceData())
-
-  console.log(`[Data Pipeline] Total: ${allPoints.length} data points, ${errors.length} errors`)
+  console.log(`[Data Pipeline] Total: ${allPoints.length} data points, ${errors.length} errors, ${health.filter(h => h.status === 'ok').length}/${health.length} sources ok`)
   // Log each point's raw → normalized for debugging
   for (const p of allPoints) {
     console.log(`  [${p.domain}] ${p.indicator}: raw=${p.value} → normalized=${p.normalized}`)
   }
 
-  return { points: allPoints, errors }
+  return { points: allPoints, errors, health }
 }
 
 // ═══════════════════════════════════════════════════════════
