@@ -108,19 +108,27 @@ export async function GET(request: Request) {
 
     if (scoreErr) throw new Error(`composite_scores insert failed: ${scoreErr.message}`)
 
-    // Insert sub_indexes for each domain
-    const subRows = Object.entries(computed.domains).map(([domain, info]) => ({
-      composite_score_id: scoreRow.id,
-      domain,
-      value: info.score ?? null,
-      weight: getWeight(domain),
-      source_updated_at: info.hasData ? new Date().toISOString() : null,
-      raw_data: {
-        sources: info.sources,
-        hasData: info.hasData,
-        dataPoints: info.dataPoints,
-      },
-    }))
+    // Insert sub_indexes for each domain that has a real score.
+    //
+    // The sub_indexes.value column is NOT NULL with a 0..100 check constraint,
+    // so a single null-scored domain rejects the whole batch and leaves the
+    // composite without any sub_indexes (dashboard goes blank). Skip rows
+    // where info.score isn't a finite number — dashboard simply shows fewer
+    // domain cards on days a domain goes dark.
+    const subRows = Object.entries(computed.domains)
+      .filter(([, info]) => typeof info.score === 'number' && Number.isFinite(info.score))
+      .map(([domain, info]) => ({
+        composite_score_id: scoreRow.id,
+        domain,
+        value: Math.max(0, Math.min(100, info.score as number)),
+        weight: getWeight(domain),
+        source_updated_at: info.hasData ? new Date().toISOString() : null,
+        raw_data: {
+          sources: info.sources,
+          hasData: info.hasData,
+          dataPoints: info.dataPoints,
+        },
+      }))
 
     const { error: subErr } = await sb.from('sub_indexes').insert(subRows)
     if (subErr) console.error('sub_indexes insert warning:', subErr.message)
