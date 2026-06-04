@@ -22,6 +22,20 @@ interface CuratedRow {
   headline: string
   excerpt: string | null
   confidence_score: number
+  confidence_tier: 'verified' | 'reported' | 'rumored'
+}
+
+interface RumoredItem {
+  id: string
+  company: string
+  headline: string
+  excerpt: string | null
+  source_name: string
+  source_url: string
+  announcement_date: string
+  people_affected: number | null
+  is_ai_driven: boolean
+  confidence_score: number
 }
 
 interface Stats30d {
@@ -86,20 +100,27 @@ export async function GET() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // ── Try curated (Claude-extracted) feed first ──
+  // ── Try curated (Claude-extracted + verified primary sources) feed first ──
   if (url && anon) {
     try {
       const sb = createClient(url, anon)
-      const [recentRes, statsRes] = await Promise.all([
+      const [recentRes, statsRes, rumoredRes] = await Promise.all([
         sb.from('v_corporate_layoffs_recent').select('*').limit(50),
         sb.from('v_corporate_layoffs_stats_30d').select('*').limit(1),
+        sb.from('v_corporate_layoffs_rumored').select('*').limit(30),
       ])
 
       const rows = (recentRes.data as CuratedRow[] | null) || []
-      if (rows.length > 0) {
+      const rumoredRows = (rumoredRes.data as CuratedRow[] | null) || []
+
+      if (rows.length > 0 || rumoredRows.length > 0) {
         const layoffs = rows.map(mapRowToLayoff).sort((a, b) => b.peopleAffected - a.peopleAffected)
         const stats = (statsRes.data as Stats30d[] | null)?.[0]
 
+        // Verified count for credibility badge on the UI
+        const verifiedCount = rows.filter(r => r.confidence_tier === 'verified').length
+
+        // Top industries (confirmed layoffs only)
         const industryMap = new Map<string, number>()
         for (const l of layoffs) {
           industryMap.set(l.industry, (industryMap.get(l.industry) || 0) + l.peopleAffected)
@@ -109,8 +130,24 @@ export async function GET() {
           .sort((a, b) => b.affected - a.affected)
           .slice(0, 6)
 
+        const rumored: RumoredItem[] = rumoredRows.map(r => ({
+          id: r.id,
+          company: r.company,
+          headline: r.headline,
+          excerpt: r.excerpt,
+          source_name: r.source_name,
+          source_url: r.source_url,
+          announcement_date: r.announcement_date,
+          people_affected: r.people_affected,
+          is_ai_driven: r.is_ai_driven,
+          confidence_score: r.confidence_score,
+        }))
+
         return Response.json({
           layoffs: layoffs.slice(0, 25),
+          rumored,                            // unconfirmed reports, never affect composite
+          rumoredCount: rumoredRows.length,
+          verifiedCount,                      // # of SEC/WARN filings in the confirmed list
           totalAffected: stats?.total_affected ?? layoffs.reduce((s, l) => s + l.peopleAffected, 0),
           totalCompanies: stats?.total_companies ?? layoffs.length,
           aiDrivenPercent: stats?.ai_driven_percent ?? 0,
