@@ -12,6 +12,7 @@ export function Navigation() {
 
   const links = [
     { href: '/dashboard', label: 'Dashboard' },
+    { href: '/global', label: 'Global' },
     { href: '/layoffs', label: 'Layoffs' },
     { href: '/pulse', label: 'Pulse' },
     { href: '/glossary', label: 'Glossary' },
