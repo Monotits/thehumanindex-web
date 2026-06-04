@@ -65,10 +65,12 @@ export async function GET(request: Request) {
     }
 
     // ── Fetch + normalize ──
+    // Per-adapter timeout. Vercel function maxDuration is 60s, so 45s leaves a
+    // 15s safety margin for downstream persistence.
     const { measurements, health, unroutedIndicators } = await fetchAllIndicatorValues(
       indicators,
       countries,
-      20_000
+      45_000
     );
 
     console.log(`[cron-v2] fetched ${measurements.length} measurements across ${health.length} adapters`);

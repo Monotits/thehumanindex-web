@@ -54,19 +54,22 @@ interface WBObservation {
   countryiso3code: string;
 }
 
-async function fetchOneIndicator(
+const COUNTRY_CHUNK_SIZE = 5;
+const PER_REQUEST_TIMEOUT_MS = 15_000; // each chunk request
+const MAX_RETRIES = 1;
+
+async function fetchOneChunk(
   wbCode: string,
-  iso3Codes: string[],
-  timeoutMs: number
+  iso3Chunk: string[],
+  startYear: number,
+  endYear: number,
+  attempt = 0
 ): Promise<WBObservation[]> {
-  // Fetch the most recent 5 years per country to maximize chance of finding a value
-  const currentYear = new Date().getFullYear();
-  const startYear = currentYear - 6;
-  const codesParam = iso3Codes.join(';');
-  const url = `https://api.worldbank.org/v2/country/${codesParam}/indicator/${wbCode}?format=json&date=${startYear}:${currentYear}&per_page=500`;
+  const codesParam = iso3Chunk.join(';');
+  const url = `https://api.worldbank.org/v2/country/${codesParam}/indicator/${wbCode}?format=json&date=${startYear}:${endYear}&per_page=200`;
 
   const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), timeoutMs);
+  const t = setTimeout(() => controller.abort(), PER_REQUEST_TIMEOUT_MS);
   try {
     const res = await fetch(url, {
       headers: { 'User-Agent': 'TheHumanIndex/2.0' },
@@ -74,15 +77,52 @@ async function fetchOneIndicator(
       cache: 'no-store',
     });
     if (!res.ok) {
-      console.warn(`[worldbank] ${wbCode}: HTTP ${res.status}`);
+      console.warn(`[worldbank] ${wbCode} [${codesParam}]: HTTP ${res.status}`);
       return [];
     }
     const json = await res.json();
     if (!Array.isArray(json) || json.length < 2 || !Array.isArray(json[1])) return [];
     return json[1] as WBObservation[];
+  } catch (err) {
+    const isAbort = err instanceof Error && err.name === 'AbortError';
+    if (isAbort && attempt < MAX_RETRIES) {
+      console.warn(`[worldbank] ${wbCode} [${codesParam}]: timeout, retrying (attempt ${attempt + 2})`);
+      return fetchOneChunk(wbCode, iso3Chunk, startYear, endYear, attempt + 1);
+    }
+    throw err;
   } finally {
     clearTimeout(t);
   }
+}
+
+async function fetchOneIndicator(
+  wbCode: string,
+  iso3Codes: string[],
+  _timeoutMs: number
+): Promise<WBObservation[]> {
+  const currentYear = new Date().getFullYear();
+  const startYear = currentYear - 6;
+
+  // Chunk countries — World Bank API is slow for long pipe-separated lists.
+  // Small batches in parallel are faster than one big request.
+  const chunks: string[][] = [];
+  for (let i = 0; i < iso3Codes.length; i += COUNTRY_CHUNK_SIZE) {
+    chunks.push(iso3Codes.slice(i, i + COUNTRY_CHUNK_SIZE));
+  }
+
+  const results = await Promise.allSettled(
+    chunks.map(chunk => fetchOneChunk(wbCode, chunk, startYear, currentYear))
+  );
+
+  const observations: WBObservation[] = [];
+  for (const r of results) {
+    if (r.status === 'fulfilled') {
+      observations.push(...r.value);
+    } else {
+      console.warn(`[worldbank] ${wbCode}: chunk failed —`, r.reason instanceof Error ? r.reason.message : String(r.reason));
+    }
+  }
+  return observations;
 }
 
 export const worldBankAdapter: IndicatorAdapter = {
