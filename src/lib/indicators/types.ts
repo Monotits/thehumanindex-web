@@ -43,6 +43,21 @@ export interface IndicatorMeasurement {
   payload?: Record<string, unknown>; // optional raw source response for audit
 }
 
+/** Cross-source comparison for one (country, indicator) when multiple
+ *  adapters returned values. */
+export interface CrossSourceDivergence {
+  countryCode: string;
+  indicatorId: string;
+  observations: {
+    adapterId: string;
+    rawValue: number;
+    referenceDate: string;
+  }[];
+  divergencePercent: number;     // |max - min| / mean * 100
+  status: 'ok' | 'warning' | 'critical';
+  thresholdPercent: number;
+}
+
 /** Metadata about a single indicator pulled from the registry table. */
 export interface IndicatorRegistryRow {
   id: string;

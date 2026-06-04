@@ -67,11 +67,16 @@ export async function GET(request: Request) {
     // ── Fetch + normalize ──
     // Per-adapter timeout. Vercel function maxDuration is 60s, so 45s leaves a
     // 15s safety margin for downstream persistence.
-    const { measurements, health, unroutedIndicators } = await fetchAllIndicatorValues(
+    const { measurements, allMeasurements, health, unroutedIndicators, divergences } = await fetchAllIndicatorValues(
       indicators,
       countries,
       45_000
     );
+
+    const divergenceWarnings = divergences.filter(d => d.status !== 'ok');
+    if (divergenceWarnings.length > 0) {
+      console.warn(`[cron-v2] ${divergenceWarnings.length} cross-source divergence warnings`);
+    }
 
     console.log(`[cron-v2] fetched ${measurements.length} measurements across ${health.length} adapters`);
     if (unroutedIndicators.length > 0) {
@@ -124,19 +129,22 @@ export async function GET(request: Request) {
     }
 
     // ── Persist indicator_values (append-only audit log) ──
-    if (measurements.length > 0) {
-      const rows = measurements.map(m => ({
-        country_code: m.countryCode,
-        indicator_id: m.indicatorId,
-        raw_value: m.rawValue,
-        normalized_value: m.normalizedValue,
-        reference_date: m.referenceDate,
-        payload: m.payload ?? null,
-      }));
-      // Chunked insert to keep payload size reasonable
+    // We store ALL measurements (primary + secondary cross-source values) so
+    // the audit log captures every adapter's view. Payload carries the
+    // adapter id so v_country_latest_indicators (DISTINCT ON country+indicator)
+    // can later prefer primary by ordering, or we add a primary flag if needed.
+    const persistRows = allMeasurements.map(m => ({
+      country_code: m.countryCode,
+      indicator_id: m.indicatorId,
+      raw_value: m.rawValue,
+      normalized_value: m.normalizedValue,
+      reference_date: m.referenceDate,
+      payload: { ...(m.payload ?? {}), adapter_id: m.adapterId },
+    }));
+    if (persistRows.length > 0) {
       const CHUNK = 500;
-      for (let i = 0; i < rows.length; i += CHUNK) {
-        const { error: ivErr } = await sb.from('indicator_values').insert(rows.slice(i, i + CHUNK));
+      for (let i = 0; i < persistRows.length; i += CHUNK) {
+        const { error: ivErr } = await sb.from('indicator_values').insert(persistRows.slice(i, i + CHUNK));
         if (ivErr) console.error('[cron-v2] indicator_values insert warning:', ivErr.message);
       }
     }
@@ -166,6 +174,7 @@ export async function GET(request: Request) {
       const prev = prevByCountry.get(c.countryCode);
       const delta = prev !== undefined ? Math.round((c.compositeValue - prev) * 100) / 100 : null;
 
+      const countryDivergences = divergences.filter(d => d.countryCode === c.countryCode);
       const { data: insertedComposite, error: compErr } = await sb
         .from('country_composite_scores')
         .insert({
@@ -181,6 +190,8 @@ export async function GET(request: Request) {
             cron_v2: true,
             adapters_health: health,
             unrouted_indicators: unroutedIndicators,
+            divergences: countryDivergences.length > 0 ? countryDivergences : undefined,
+            divergence_warnings: countryDivergences.filter(d => d.status !== 'ok').length,
           },
         })
         .select('id')
@@ -222,9 +233,13 @@ export async function GET(request: Request) {
       countries_tracked: countries.length,
       indicators_active: indicators.length,
       measurements_collected: measurements.length,
+      measurements_all_sources: allMeasurements.length,
       composites_persisted: persistedComposites,
       adapters_health: health,
       unrouted_indicators: unroutedIndicators,
+      divergences_total: divergences.length,
+      divergence_warnings: divergenceWarnings.length,
+      divergence_critical: divergences.filter(d => d.status === 'critical').length,
       summary: compositeSummary,
       duration_ms: duration,
     });
