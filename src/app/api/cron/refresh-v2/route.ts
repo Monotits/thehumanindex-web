@@ -78,6 +78,51 @@ export async function GET(request: Request) {
       console.warn('[cron-v2] indicators without an adapter:', unroutedIndicators);
     }
 
+    // ── Persist per-adapter health to data_source_health ──
+    // Shared with the legacy v1 cron's table so /data-sources displays
+    // unified status across both pipelines. Adapter names are prefixed with
+    // 'v2:' to distinguish from v1 source names.
+    try {
+      const runStartedAt = new Date().toISOString();
+      const failedAdapters = health.filter(h => h.status !== 'ok').map(h => `v2:${h.adapter}`);
+      const prevSuccessMap = new Map<string, string>();
+      if (failedAdapters.length > 0) {
+        const { data: prevHealth } = await sb
+          .from('data_source_health')
+          .select('source,last_success_at')
+          .in('source', failedAdapters)
+          .eq('status', 'ok')
+          .order('recorded_at', { ascending: false })
+          .limit(20);
+        for (const row of (prevHealth as { source: string; last_success_at: string }[] | null) || []) {
+          if (!prevSuccessMap.has(row.source) && row.last_success_at) {
+            prevSuccessMap.set(row.source, row.last_success_at);
+          }
+        }
+      }
+
+      const healthRows = health.map(h => {
+        const source = `v2:${h.adapter}`;
+        return {
+          source,
+          status: h.status,
+          last_success_at: h.status === 'ok' ? runStartedAt : (prevSuccessMap.get(source) ?? null),
+          last_attempt_at: runStartedAt,
+          last_error: h.error,
+          data_points_count: h.measurementsReturned,
+          domains_covered: [] as string[],
+          duration_ms: h.durationMs,
+        };
+      });
+
+      if (healthRows.length > 0) {
+        const { error: healthErr } = await sb.from('data_source_health').insert(healthRows);
+        if (healthErr) console.error('[cron-v2] data_source_health insert warning:', healthErr.message);
+      }
+    } catch (e) {
+      console.error('[cron-v2] source health write failed:', e);
+    }
+
     // ── Persist indicator_values (append-only audit log) ──
     if (measurements.length > 0) {
       const rows = measurements.map(m => ({
