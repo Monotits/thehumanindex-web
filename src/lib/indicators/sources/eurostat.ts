@@ -1,19 +1,33 @@
 /**
- * Eurostat Adapter — EU + candidate country fresh data
+ * Eurostat Adapter — EU + candidate country fresh data (JSON-stat 2.0)
  *
  * Covers our 11 Eurostat-tracked countries (GB, DE, FR, ES, IT, NL, SE, NO,
  * PL, TR, CH) with more current data than the World Bank for:
  *   - unemployment_rate          (Eurostat: une_rt_a, total, age 15-74)
  *   - youth_unemployment_rate    (Eurostat: une_rt_a, age 15-24)
- *   - fertility_rate             (Eurostat: demo_find — total fertility rate)
+ *   - fertility_rate             (Eurostat: demo_find — TOTFERRT)
  *
- * Why include: Eurostat publishes annually with shorter lag than the World
- * Bank. Both datasets stay registered → orchestrator picks Eurostat as
- * primary (higher priority), uses WB as cross-source for divergence
- * detection. Mismatch triggers a flag on /data-sources.
+ * Eurostat deprecated the old SDMX-JSON API in 2024 in favor of the new
+ * REST API returning JSON-stat 2.0 format.
  *
- * Endpoint: https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/
- * Format: SDMX-JSON (complex but well-documented)
+ * Endpoint base: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/<DATASET>
+ * Format param:  format=JSON
+ *
+ * JSON-stat 2.0 structure (relevant slice):
+ *   {
+ *     value: [12.3, 11.5, …],       // flat array, length = prod(size)
+ *     id: ["freq","sex","age","unit","geo","time"],
+ *     size: [1, 1, 1, 1, 5, 10],
+ *     dimension: {
+ *       geo: { category: { index: { DE: 0, FR: 1, … } } },
+ *       time: { category: { index: { "2020": 0, "2021": 1, … } } },
+ *       …
+ *     }
+ *   }
+ *
+ * The flat value array is indexed in C-order (row-major) by the dimension
+ * sizes. The index of (dim0=a, dim1=b, …, dimN=z) is
+ *    a*prod(size[1..]) + b*prod(size[2..]) + … + z
  */
 
 import {
@@ -22,7 +36,6 @@ import {
   AdapterHealth,
 } from '../types';
 
-// Map ISO 3166-1 alpha-2 → Eurostat geo code (mostly identical)
 const COUNTRY_CODES: Record<string, string> = {
   GB: 'UK', DE: 'DE', FR: 'FR', ES: 'ES', IT: 'IT',
   NL: 'NL', SE: 'SE', NO: 'NO', PL: 'PL', TR: 'TR', CH: 'CH',
@@ -37,56 +50,96 @@ const PROVIDED_INDICATORS = new Set([
   'fertility_rate',
 ]);
 
-// SDMX-JSON parsing helpers
-interface SdmxResponse {
-  dataSets: { observations: Record<string, [number]> }[];
-  structure: {
-    dimensions: { observation: { id: string; values: { id: string }[] }[] };
-  };
+interface JsonStat {
+  value: Record<string, number> | (number | null)[];
+  id: string[];
+  size: number[];
+  dimension: Record<string, {
+    category: { index: Record<string, number> | string[] };
+  }>;
 }
 
-function parseSdmx(json: SdmxResponse): Map<string, { value: number; year: number }> {
-  // Returns Map<geoCode, {value, year}>
+/** Normalize index — Eurostat returns either { key: idx } or array of keys */
+function getDimIndex(dim: JsonStat['dimension'][string]): Record<string, number> {
+  const idx = dim.category.index;
+  if (Array.isArray(idx)) {
+    const out: Record<string, number> = {};
+    idx.forEach((k, i) => { out[k] = i; });
+    return out;
+  }
+  return idx;
+}
+
+function parseJsonStat(
+  json: JsonStat
+): Map<string, { value: number; year: number }> {
   const out = new Map<string, { value: number; year: number }>();
-  const ds = json.dataSets?.[0];
-  if (!ds?.observations) return out;
+  if (!json?.value || !json.id || !json.size || !json.dimension) return out;
 
-  const dims = json.structure?.dimensions?.observation;
-  if (!dims) return out;
-
-  // Find geo and time dimension indices
-  const geoIdx = dims.findIndex(d => d.id === 'geo' || d.id === 'GEO');
-  const timeIdx = dims.findIndex(d => d.id === 'time' || d.id === 'TIME_PERIOD');
+  const geoIdx = json.id.findIndex(d => d.toLowerCase() === 'geo');
+  const timeIdx = json.id.findIndex(d => d.toLowerCase() === 'time' || d.toLowerCase() === 'time_period');
   if (geoIdx === -1 || timeIdx === -1) return out;
 
-  const geoValues = dims[geoIdx].values;
-  const timeValues = dims[timeIdx].values;
+  const geoMap = getDimIndex(json.dimension[json.id[geoIdx]]);
+  const timeMap = getDimIndex(json.dimension[json.id[timeIdx]]);
 
-  // observations is keyed by dimension-index combinations like "0:0:0:0:5:2"
-  Object.entries(ds.observations).forEach(([key, [val]]) => {
-    if (val === null || val === undefined) return;
-    const parts = key.split(':').map(p => parseInt(p, 10));
-    const geoCode = geoValues[parts[geoIdx]]?.id;
-    const yearStr = timeValues[parts[timeIdx]]?.id;
-    if (!geoCode || !yearStr) return;
-    const year = parseInt(yearStr, 10);
-    if (!Number.isInteger(year)) return;
+  // Reverse lookups (position → key)
+  const geoKeys: string[] = [];
+  Object.entries(geoMap).forEach(([k, v]) => { geoKeys[v] = k; });
+  const timeKeys: string[] = [];
+  Object.entries(timeMap).forEach(([k, v]) => { timeKeys[v] = k; });
 
-    const existing = out.get(geoCode);
-    if (!existing || year > existing.year) {
-      out.set(geoCode, { value: val, year });
+  // Strides for flat index calculation (C-order: last dim varies fastest)
+  const sizes = json.size;
+  const strides = sizes.map((_, i) => sizes.slice(i + 1).reduce((a, b) => a * b, 1));
+
+  const isObjectValues = !Array.isArray(json.value);
+  const getValueAt = (flatIdx: number): number | null => {
+    if (isObjectValues) {
+      const v = (json.value as Record<string, number>)[String(flatIdx)];
+      return v === undefined ? null : v;
     }
-  });
+    return (json.value as (number | null)[])[flatIdx];
+  };
 
+  // We only care about geo × time combos; for any other dimensions Eurostat
+  // returns size=1 when filters are applied. Loop with all dimensions at 0
+  // except geo and time.
+  const baseCoords = sizes.map(() => 0);
+  for (let g = 0; g < (sizes[geoIdx] ?? 0); g++) {
+    for (let t = 0; t < (sizes[timeIdx] ?? 0); t++) {
+      baseCoords[geoIdx] = g;
+      baseCoords[timeIdx] = t;
+      const flat = baseCoords.reduce((acc, c, i) => acc + c * strides[i], 0);
+      const v = getValueAt(flat);
+      if (v === null || v === undefined) continue;
+      const geoCode = geoKeys[g];
+      const year = parseInt(timeKeys[t], 10);
+      if (!geoCode || !Number.isInteger(year)) continue;
+
+      const existing = out.get(geoCode);
+      if (!existing || year > existing.year) {
+        out.set(geoCode, { value: v, year });
+      }
+    }
+  }
   return out;
 }
 
 async function fetchEurostatDataset(
   dataset: string,
-  filters: string,
+  filters: Record<string, string | string[]>,
   timeoutMs: number
 ): Promise<Map<string, { value: number; year: number }>> {
-  const url = `https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/${dataset}?${filters}&format=SDMX-JSON&lang=EN`;
+  const params = new URLSearchParams();
+  params.set('format', 'JSON');
+  params.set('lang', 'EN');
+  for (const [k, v] of Object.entries(filters)) {
+    if (Array.isArray(v)) v.forEach(x => params.append(k, x));
+    else params.append(k, v);
+  }
+  const url = `https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/${dataset}?${params.toString()}`;
+
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -99,8 +152,8 @@ async function fetchEurostatDataset(
       console.warn(`[eurostat] ${dataset}: HTTP ${res.status}`);
       return new Map();
     }
-    const json = (await res.json()) as SdmxResponse;
-    return parseSdmx(json);
+    const json = (await res.json()) as JsonStat;
+    return parseJsonStat(json);
   } finally {
     clearTimeout(t);
   }
@@ -115,7 +168,7 @@ export const eurostatAdapter: IndicatorAdapter = {
     const startedAt = Date.now();
     const requested = indicatorIds.filter(id => PROVIDED_INDICATORS.has(id));
     const eligibleCountries = countries.filter(c => COUNTRY_CODES[c.code]);
-    const geoList = eligibleCountries.map(c => COUNTRY_CODES[c.code]).join('+');
+    const geoList = eligibleCountries.map(c => COUNTRY_CODES[c.code]);
 
     if (requested.length === 0 || eligibleCountries.length === 0) {
       return {
@@ -137,33 +190,26 @@ export const eurostatAdapter: IndicatorAdapter = {
     const countriesReturned = new Set<string>();
     let lastError: string | null = null;
 
-    // Each indicator has its own Eurostat dataset and filter pattern
-    const dispatches: { indicatorId: string; dataset: string; filters: string }[] = [];
+    const currentYear = new Date().getFullYear();
+    const sinceYear = currentYear - 5;
 
-    if (requested.includes('unemployment_rate')) {
-      // une_rt_a: annual unemployment rate. Filter: sex=T (total), age=Y15-74,
-      // unit=PC_ACT (percent of active population), geo=our list
-      dispatches.push({
+    const dispatches: { indicatorId: string; dataset: string; filters: Record<string, string | string[]> }[] = [
+      ...(requested.includes('unemployment_rate') ? [{
         indicatorId: 'unemployment_rate',
         dataset: 'une_rt_a',
-        filters: `sex=T&age=Y15-74&unit=PC_ACT&geo=${geoList}`,
-      });
-    }
-    if (requested.includes('youth_unemployment_rate')) {
-      dispatches.push({
+        filters: { sex: 'T', age: 'Y15-74', unit: 'PC_ACT', geo: geoList, sinceTimePeriod: String(sinceYear) },
+      }] : []),
+      ...(requested.includes('youth_unemployment_rate') ? [{
         indicatorId: 'youth_unemployment_rate',
         dataset: 'une_rt_a',
-        filters: `sex=T&age=Y15-24&unit=PC_ACT&geo=${geoList}`,
-      });
-    }
-    if (requested.includes('fertility_rate')) {
-      // demo_find: total fertility rate (births per woman)
-      dispatches.push({
+        filters: { sex: 'T', age: 'Y15-24', unit: 'PC_ACT', geo: geoList, sinceTimePeriod: String(sinceYear) },
+      }] : []),
+      ...(requested.includes('fertility_rate') ? [{
         indicatorId: 'fertility_rate',
         dataset: 'demo_find',
-        filters: `indic_de=TOTFERRT&geo=${geoList}`,
-      });
-    }
+        filters: { indic_de: 'TOTFERRT', geo: geoList, sinceTimePeriod: String(sinceYear) },
+      }] : []),
+    ];
 
     const results = await Promise.allSettled(
       dispatches.map(d =>
