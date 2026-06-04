@@ -24,16 +24,19 @@ import {
   normalizeIndicator,
 } from './types';
 import { worldBankAdapter } from './sources/worldBank';
+import { nasaGissAdapter } from './sources/nasaGiss';
+import { whoGhoAdapter } from './sources/whoGho';
+import { oecdHousingAdapter } from './sources/oecdHousing';
+import { referenceSeedAdapter } from './sources/referenceSeed';
 
 // Registry of all adapters. Add new sources here.
 const ADAPTERS: IndicatorAdapter[] = [
-  worldBankAdapter,
-  // oecdAdapter,            // TODO
-  // whoAdapter,             // TODO
-  // nasaGissAdapter,        // TODO
-  // wriAqueductAdapter,     // TODO
-  // dataReportalAdapter,    // TODO
-  // gallupAdapter,          // TODO (annual download, may be local-cache)
+  worldBankAdapter,     // 5 live: unemployment, youth_unemployment, gini, fertility, suicide
+  nasaGissAdapter,      // 1 live: temperature_anomaly (global proxy)
+  whoGhoAdapter,        // 2 live: depression_prevalence, anxiety_prevalence
+  oecdHousingAdapter,   // 1 seed: housing_affordability
+  referenceSeedAdapter, // 8 seed: water, air, burnout, divorce, trust, loneliness, screen, digital
+  // Only ai_job_anxiety remains unrouted — needs custom social-feed composite
 ];
 
 export interface NormalizedMeasurement extends IndicatorMeasurement {
