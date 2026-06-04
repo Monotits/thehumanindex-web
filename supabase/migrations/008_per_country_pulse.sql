@@ -13,11 +13,11 @@ ALTER TABLE commentary
 
 -- Slug is no longer globally unique — it's unique per (country, locale).
 -- This lets the same slug ('weekly-pulse-2026-w23') exist for US/en, TR/en, TR/tr.
-DROP INDEX IF EXISTS commentary_slug_key;
+-- Drop the UNIQUE constraint first; the backing index (commentary_slug_key)
+-- goes away automatically. Trying to DROP INDEX directly fails because it's
+-- owned by the constraint.
+ALTER TABLE commentary DROP CONSTRAINT IF EXISTS commentary_slug_key;
 DROP INDEX IF EXISTS idx_commentary_slug;
-
-ALTER TABLE commentary
-  DROP CONSTRAINT IF EXISTS commentary_slug_key;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_commentary_country_locale_slug
   ON commentary(country_code, locale, slug);
