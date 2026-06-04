@@ -30,39 +30,46 @@ import {
 const GISS_URL = 'https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv';
 const PROVIDED_INDICATORS = new Set(['temperature_anomaly']);
 
+/**
+ * NASA GISS CSV format:
+ *   - Comma-separated values
+ *   - Header rows of metadata (skipped until we find the data header)
+ *   - Data header: "Year,Jan,Feb,...,Dec,J-D,D-N,DJF,MAM,JJA,SON"
+ *   - Data rows like: "2025,145,152,142,...,141,146,..."
+ *   - Values are in 0.01°C (so 145 means +1.45°C anomaly vs 1951-1980 baseline)
+ *   - Missing values shown as "***"
+ */
 function parseLatestAnnualAnomaly(csv: string): { year: number; value: number } | null {
   const lines = csv.split('\n').map(l => l.trim()).filter(Boolean);
-  let headerIdx = -1;
   let jdColIdx = -1;
+  let dataStartIdx = -1;
 
-  // Find header row that contains both "Year" and "J-D"
-  for (let i = 0; i < Math.min(lines.length, 10); i++) {
-    const parts = lines[i].split(/\s+/);
+  for (let i = 0; i < Math.min(lines.length, 20); i++) {
+    const parts = lines[i].split(',').map(p => p.trim());
     if (parts[0] === 'Year' && parts.includes('J-D')) {
-      headerIdx = i;
       jdColIdx = parts.indexOf('J-D');
+      dataStartIdx = i + 1;
       break;
     }
   }
-  if (headerIdx === -1) return null;
+  if (jdColIdx === -1) return null;
 
   let latestYear = 0;
   let latestValue: number | null = null;
 
-  for (let i = headerIdx + 1; i < lines.length; i++) {
-    const line = lines[i];
-    // Skip section headers / footers
-    if (!/^\d{4}/.test(line)) continue;
-    const parts = line.split(/\s+/);
+  for (let i = dataStartIdx; i < lines.length; i++) {
+    const parts = lines[i].split(',').map(p => p.trim());
     const year = parseInt(parts[0], 10);
-    if (!Number.isInteger(year)) continue;
+    if (!Number.isInteger(year) || year < 1880 || year > 2100) continue;
     const raw = parts[jdColIdx];
-    if (!raw || raw === '***' || raw === '*') continue;
-    const value = parseFloat(raw);
-    if (!Number.isFinite(value)) continue;
+    if (!raw || raw === '***' || raw === '*' || raw === '') continue;
+    const num = parseFloat(raw);
+    if (!Number.isFinite(num)) continue;
+    // Values are in 0.01°C — convert to actual °C
+    const valueC = num / 100;
     if (year > latestYear) {
       latestYear = year;
-      latestValue = value;
+      latestValue = valueC;
     }
   }
   return latestValue !== null ? { year: latestYear, value: latestValue } : null;

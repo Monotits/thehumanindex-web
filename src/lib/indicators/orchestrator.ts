@@ -25,17 +25,18 @@ import {
 } from './types';
 import { worldBankAdapter } from './sources/worldBank';
 import { nasaGissAdapter } from './sources/nasaGiss';
-import { whoGhoAdapter } from './sources/whoGho';
+// import { whoGhoAdapter } from './sources/whoGho';  // Disabled: WHO indicator codes need investigation; depression+anxiety served by seed for now
 import { oecdHousingAdapter } from './sources/oecdHousing';
 import { referenceSeedAdapter } from './sources/referenceSeed';
 
 // Registry of all adapters. Add new sources here.
+// Order matters: the first adapter that lists an indicator wins routing.
 const ADAPTERS: IndicatorAdapter[] = [
   worldBankAdapter,     // 5 live: unemployment, youth_unemployment, gini, fertility, suicide
   nasaGissAdapter,      // 1 live: temperature_anomaly (global proxy)
-  whoGhoAdapter,        // 2 live: depression_prevalence, anxiety_prevalence
   oecdHousingAdapter,   // 1 seed: housing_affordability
-  referenceSeedAdapter, // 8 seed: water, air, burnout, divorce, trust, loneliness, screen, digital
+  referenceSeedAdapter, // 10 seed: water, air, burnout, divorce, trust, loneliness, screen, digital, depression, anxiety
+  // whoGhoAdapter,     // TODO: re-enable once correct WHO indicator codes are confirmed
   // Only ai_job_anxiety remains unrouted — needs custom social-feed composite
 ];
 

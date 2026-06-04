@@ -20,6 +20,8 @@
  *   - loneliness                (OECD Better Life Index + Eurobarometer 2023)
  *   - screen_time               (DataReportal Digital Report 2024)
  *   - digital_addiction         (Pew Research + Eurostat ICT 2023)
+ *   - depression_prevalence     (IHME GBD 2021)
+ *   - anxiety_prevalence        (IHME GBD 2021)
  *
  * Future: replace with live API adapters as upstream sources expose them.
  */
@@ -143,6 +145,32 @@ const SEEDS: SeedEntry[] = [
       NL: 22, SE: 20, NO: 22, PL: 25, TR: 35, CH: 21,
       JP: 21, KR: 33, IN: 30, SG: 29,
       AU: 27, NZ: 25, BR: 32, AR: 30, ZA: 28, IL: 28, AE: 33,
+    },
+  },
+
+  // ── depression_prevalence (% adults with depressive disorder; IHME GBD 2021) ──
+  {
+    indicatorId: 'depression_prevalence',
+    year: 2021,
+    source: 'IHME Global Burden of Disease 2021',
+    values: {
+      US: 4.6, CA: 4.7, MX: 4.0, GB: 3.9, DE: 3.6, FR: 4.5, ES: 4.1, IT: 4.0,
+      NL: 4.6, SE: 3.6, NO: 3.7, PL: 3.4, TR: 4.4, CH: 3.6,
+      JP: 2.7, KR: 3.4, IN: 3.5, SG: 3.0,
+      AU: 4.5, NZ: 4.3, BR: 5.6, AR: 5.5, ZA: 4.6, IL: 3.6, AE: 3.4,
+    },
+  },
+
+  // ── anxiety_prevalence (% adults with anxiety disorder; IHME GBD 2021) ──
+  {
+    indicatorId: 'anxiety_prevalence',
+    year: 2021,
+    source: 'IHME Global Burden of Disease 2021',
+    values: {
+      US: 6.6, CA: 6.0, MX: 4.4, GB: 5.4, DE: 5.0, FR: 5.7, ES: 5.5, IT: 5.2,
+      NL: 5.9, SE: 4.6, NO: 4.7, PL: 4.2, TR: 5.9, CH: 5.0,
+      JP: 4.0, KR: 4.0, IN: 4.3, SG: 4.2,
+      AU: 6.4, NZ: 6.1, BR: 9.3, AR: 7.6, ZA: 5.5, IL: 4.8, AE: 5.6,
     },
   },
 ];
