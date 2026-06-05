@@ -129,24 +129,24 @@ hr
 log "\n${BOLD}── PHASE 2: RESEARCH (5 articles) ──${RESET}"
 
 post_json /api/research/run \
-  '{"locale":"en","countryCode":"global"}' \
-  "Research 1/5 — global/en"
-
-post_json /api/research/run \
   '{"locale":"en","countryCode":"US","countryName":"United States"}' \
-  "Research 2/5 — US/en"
+  "Research 1/5 — US/en"
 
 post_json /api/research/run \
   '{"locale":"en","countryCode":"GB","countryName":"United Kingdom"}' \
-  "Research 3/5 — GB/en"
+  "Research 2/5 — GB/en"
 
 post_json /api/research/run \
   '{"locale":"en","countryCode":"DE","countryName":"Germany"}' \
-  "Research 4/5 — DE/en"
+  "Research 3/5 — DE/en"
 
 post_json /api/research/run \
   '{"locale":"en","countryCode":"JP","countryName":"Japan"}' \
-  "Research 5/5 — JP/en"
+  "Research 4/5 — JP/en"
+
+post_json /api/research/run \
+  '{"locale":"en","countryCode":"KR","countryName":"South Korea"}' \
+  "Research 5/5 — KR/en"
 
 # ────────────────────────────────────────────────────────────
 # 3) PER-COUNTRY PULSE — 1 batch (5 ülke × 2 locale)
