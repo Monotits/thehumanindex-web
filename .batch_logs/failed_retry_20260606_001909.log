@@ -1,0 +1,104 @@
+[1mRetry failed pulses (31 pairs) —  6 Haz 2026 Cmt +03 00:19:09[0m
+Log: scripts/../.batch_logs/failed_retry_20260606_001909.log
+
+[1/31] [1mBR/fr[0m
+  [31m✗ (48s) status=error[0m
+
+[2/31] [1mBR/pt-br[0m
+  [33m⚠ (64s) val: body has no ## section headings[0m
+
+[3/31] [1mBR/nl[0m
+  [31m✗ (58s) status=error[0m
+
+[4/31] [1mBR/ja[0m
+  [32m✓ (76s) 信頼なき接続社会、ブラジルのデジタル断層線[0m
+
+[5/31] [1mDE/pt-br[0m
+  [32m✓ (57s) Ansiedade Digital e Recessão Marcam Primeira Leitura da Alem[0m
+
+[6/31] [1mDE/nl[0m
+  [31m✗ (51s) status=error[0m
+
+[7/31] [1mDE/ja[0m
+  [32m✓ (89s) AIの波と縮む経済——ドイツの静かな転換点[0m
+
+[8/31] [1mES/de[0m
+  [32m✓ (57s) KI-Angst und leere Wiegen: Spaniens doppelte Krise[0m
+
+[9/31] [1mES/it[0m
+  [33m⚠ (68s) val: body has no ## section headings[0m
+
+[10/31] [1mES/nl[0m
+  [33m⚠ (78s) val: body has no ## section headings[0m
+
+[11/31] [1mFR/de[0m
+  [32m✓ (57s) Algorithmen und Argwohn: Frankreich im digitalen Stresstest[0m
+
+[12/31] [1mFR/fr[0m
+  [32m✓ (51s) France : sous la modération, la pression technologique s'acc[0m
+
+[13/31] [1mFR/es[0m
+  [32m✓ (52s) Francia y el vértigo tecnológico: cuando la IA reescribe el [0m
+
+[14/31] [1mFR/pt-br[0m
+  [32m✓ (51s) França Estável na Superfície, em Ebulição Tecnológica[0m
+
+[15/31] [1mFR/it[0m
+  [31m✗ (60s) status=error[0m
+
+[16/31] [1mFR/ja[0m
+  [33m⚠ (90s) val: body has no ## section headings[0m
+
+[17/31] [1mGB/fr[0m
+  [31m✗ (54s) status=error[0m
+
+[18/31] [1mGB/es[0m
+  [32m✓ (55s) Tecnología y deuda: las fracturas ocultas del Reino Unido[0m
+
+[19/31] [1mGB/pt-br[0m
+  [32m✓ (59s) Reino Unido: Ansiedade com IA Beira o Limite[0m
+
+[20/31] [1mIT/es[0m
+  [32m✓ (57s) Italia: la calma estadística oculta fracturas profundas[0m
+
+[21/31] [1mIT/pt-br[0m
+  [32m✓ (49s) IA e berços vazios assombram a Itália moderna[0m
+
+[22/31] [1mIT/ja[0m
+  [32m✓ (89s) AIと少子化が交錯する、イタリアの静かな断層[0m
+
+[23/31] [1mJP/es[0m
+  [32m✓ (55s) Japón: la ansiedad de la IA y el reloj demográfico[0m
+
+[24/31] [1mNL/pt-br[0m
+  [32m✓ (49s) Holanda na corda bamba entre tecnologia e habitação[0m
+
+[25/31] [1mNL/ja[0m
+  [32m✓ (85s) AIと住宅、オランダを揺るがす二つの断層[0m
+
+[26/31] [1mTR/es[0m
+  [32m✓ (49s) Turquía: inflación, desconfianza y el miedo al algoritmo[0m
+
+[27/31] [1mTR/pt-br[0m
+  [32m✓ (64s) Turquia: inflação, desconfiança e ansiedade tecnológica[0m
+
+[28/31] [1mTR/ja[0m
+  [32m✓ (83s) 信頼崩壊とAI不安——揺れるトルコ社会の断層[0m
+
+[29/31] [1mUS/fr[0m
+  [33m⚠ (60s) val: body has no ## section headings[0m
+
+[30/31] [1mUS/pt-br[0m
+  [32m✓ (49s) A Nação que Teme a Máquina que Construiu[0m
+
+[31/31] [1mUS/ja[0m
+  [32m✓ (88s) AI不安が臨界点へ　デジタル化の影に揺れる米国[0m
+
+[1m── Summary ──[0m
+  Retried:      31
+  Published:    [32m21[0m
+  Validation/draft: 5
+  Failed:       5
+  Timeouts:     0
+  Wall time:    1955s (32min)
+Log: scripts/../.batch_logs/failed_retry_20260606_001909.log
