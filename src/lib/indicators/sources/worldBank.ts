@@ -48,6 +48,8 @@ const INDICATOR_TO_WB_CODE: Record<string, string> = {
   life_expectancy: 'SP.DYN.LE00.IN',         // Life expectancy at birth, years
   gov_debt_pct_gdp: 'GC.DOD.TOTL.GD.ZS',     // Central government gross debt, % of GDP
   co2_per_capita: 'EN.GHG.CO2.PC.CE.AR5',    // CO2 emissions per capita (AR5), tonnes
+  mortality_rate_under5: 'SH.DYN.MORT',      // Under-5 mortality per 1,000
+  renewable_energy_pct: 'EG.FEC.RNEW.ZS',    // Renewable share of final energy, %
   // income_share_top_10: 'SI.DST.10TH.10',   // optional future
 };
 
