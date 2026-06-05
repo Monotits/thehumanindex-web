@@ -111,14 +111,14 @@ SELECT DISTINCT ON (iv.country_code, iv.indicator_id, iv.payload->>'adapter_id')
   iv.raw_value,
   iv.normalized_value,
   iv.reference_date,
-  iv.created_at AS recorded_at,
+  iv.fetched_at AS recorded_at,
   iv.payload
 FROM indicator_values iv
 ORDER BY
   iv.country_code,
   iv.indicator_id,
   iv.payload->>'adapter_id',
-  iv.created_at DESC;
+  iv.fetched_at DESC;
 
 GRANT SELECT ON v_indicator_source_breakdown TO anon, authenticated;
 
