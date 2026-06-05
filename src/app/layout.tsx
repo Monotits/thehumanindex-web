@@ -74,6 +74,27 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: 'https://thehumanindex.org',
+    // Per-locale homepage URLs. Next.js renders these as
+    // <link rel="alternate" hreflang="X" href="..."/> in <head>. Combined with
+    // the sitemap's hreflang block, this gives Google the strongest possible
+    // signal that the site has 10 language variants of the homepage.
+    //
+    // For sub-pages, each route should override alternates.languages with its
+    // own path via generateMetadata. Until UI sprint ships per-locale routes,
+    // homepage-level signal is what we have.
+    languages: {
+      'en': 'https://thehumanindex.org/',
+      'tr': 'https://thehumanindex.org/tr/',
+      'de': 'https://thehumanindex.org/de/',
+      'es': 'https://thehumanindex.org/es/',
+      'fr': 'https://thehumanindex.org/fr/',
+      'ja': 'https://thehumanindex.org/ja/',
+      'pt-br': 'https://thehumanindex.org/pt-br/',
+      'pl': 'https://thehumanindex.org/pl/',
+      'it': 'https://thehumanindex.org/it/',
+      'nl': 'https://thehumanindex.org/nl/',
+      'x-default': 'https://thehumanindex.org/',
+    },
     types: {
       'application/rss+xml': 'https://thehumanindex.org/feed.xml',
     },
