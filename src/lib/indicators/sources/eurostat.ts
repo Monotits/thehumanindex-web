@@ -48,6 +48,7 @@ const PROVIDED_INDICATORS = new Set([
   'unemployment_rate',
   'youth_unemployment_rate',
   'fertility_rate',
+  'gini_index',
 ]);
 
 interface JsonStat {
@@ -208,6 +209,13 @@ export const eurostatAdapter: IndicatorAdapter = {
         indicatorId: 'fertility_rate',
         dataset: 'demo_find',
         filters: { indic_de: 'TOTFERRT', geo: geoList, sinceTimePeriod: String(sinceYear) },
+      }] : []),
+      ...(requested.includes('gini_index') ? [{
+        // Gini coefficient of equivalised disposable income (EU-SILC).
+        // Eurostat scales 0-100 (no decimal), matches our normalize bounds 25-55.
+        indicatorId: 'gini_index',
+        dataset: 'ilc_di12',
+        filters: { geo: geoList, sinceTimePeriod: String(sinceYear) },
       }] : []),
     ];
 

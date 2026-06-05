@@ -1,0 +1,67 @@
+{
+  "common": {
+    "loading": "Yükleniyor…",
+    "error": "Bir şeyler ters gitti",
+    "retry": "Tekrar dene",
+    "viewMore": "Daha fazla",
+    "viewAll": "Hepsini gör",
+    "lastUpdated": "Son güncelleme",
+    "source": "Kaynak",
+    "sources": "Kaynaklar",
+    "methodology": "Metodoloji",
+    "confidence": "Güven",
+    "stress": "stres",
+    "deltaSuffix": "önceki haftaya göre"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "global": "Küresel",
+    "layoffs": "İşten Çıkarmalar",
+    "pulse": "Nabız",
+    "glossary": "Sözlük",
+    "research": "Araştırma",
+    "data": "Veri",
+    "about": "Hakkında",
+    "contact": "İletişim"
+  },
+  "bands": {
+    "low": "Düşük",
+    "moderate": "Orta",
+    "elevated": "Yüksek",
+    "high": "Çok Yüksek",
+    "critical": "Kritik"
+  },
+  "metaIndexes": {
+    "economic": "Ekonomik Stres",
+    "social": "Sosyal Stres",
+    "mental": "Zihinsel Stres",
+    "technological": "Teknolojik Stres",
+    "environmental": "Çevresel Stres"
+  },
+  "tiers": {
+    "verified": "Doğrulandı",
+    "reported": "Bildirildi",
+    "rumored": "Doğrulanmadı"
+  },
+  "home": {
+    "title": "İnsanlık Endeksi",
+    "subtitle": "Medeniyet stresi, ölçülebilir hâliyle.",
+    "ctaQuiz": "2 dakikalık risk testini al",
+    "ctaGlobal": "Ülkeleri karşılaştır"
+  },
+  "dashboard": {
+    "compositeIndex": "Bileşik Endeks",
+    "domainsActive": "{active}/{total} alan aktif",
+    "thisWeeksMovers": "Bu Haftanın Öne Çıkanları",
+    "historicalTrend": "Tarihsel Eğilim"
+  },
+  "global": {
+    "title": "Küresel Panel",
+    "subtitle": "Takip edilen ülkeler için 5 meta-endeks üzerinden insanlık stres skoru.",
+    "country": "Ülke",
+    "indicatorDetail": "Gösterge Detayı",
+    "allCountriesRanking": "Tüm Ülkeler — Stres Sıralaması",
+    "rankingHelp": "Bileşik stres skoruna göre sıralı. Değiştirmek için bir satıra tıkla.",
+    "aboutTitle": "Bu sayfa hakkında"
+  }
+}

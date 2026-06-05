@@ -1,0 +1,67 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "viewMore": "View more",
+    "viewAll": "View all",
+    "lastUpdated": "Last updated",
+    "source": "Source",
+    "sources": "Sources",
+    "methodology": "Methodology",
+    "confidence": "Confidence",
+    "stress": "stress",
+    "deltaSuffix": "vs. previous"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "global": "Global",
+    "layoffs": "Layoffs",
+    "pulse": "Pulse",
+    "glossary": "Glossary",
+    "research": "Research",
+    "data": "Data",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "bands": {
+    "low": "Low",
+    "moderate": "Moderate",
+    "elevated": "Elevated",
+    "high": "High",
+    "critical": "Critical"
+  },
+  "metaIndexes": {
+    "economic": "Economic Stress",
+    "social": "Social Stress",
+    "mental": "Mental Stress",
+    "technological": "Technological Stress",
+    "environmental": "Environmental Stress"
+  },
+  "tiers": {
+    "verified": "Verified",
+    "reported": "Reported",
+    "rumored": "Unconfirmed"
+  },
+  "home": {
+    "title": "The Human Index",
+    "subtitle": "Civilizational stress, measured.",
+    "ctaQuiz": "Take the 2-minute risk quiz",
+    "ctaGlobal": "Compare countries"
+  },
+  "dashboard": {
+    "compositeIndex": "Composite Index",
+    "domainsActive": "{active}/{total} domains active",
+    "thisWeeksMovers": "This Week's Movers",
+    "historicalTrend": "Historical Trend"
+  },
+  "global": {
+    "title": "Global Dashboard",
+    "subtitle": "Human stress score across 5 meta-indexes for tracked countries.",
+    "country": "Country",
+    "indicatorDetail": "Indicator Detail",
+    "allCountriesRanking": "All Countries — Stress Ranking",
+    "rankingHelp": "Sorted by composite stress score. Click any row to switch.",
+    "aboutTitle": "About this view"
+  }
+}
