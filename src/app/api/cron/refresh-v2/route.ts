@@ -128,6 +128,38 @@ export async function GET(request: Request) {
       console.error('[cron-v2] source health write failed:', e);
     }
 
+    // ── Persist cross-source validations (migration 017) ──
+    // Append-only event log: one row per (country, indicator) divergence
+    // computation per run. Powers the streak view and transparency API.
+    if (divergences.length > 0) {
+      const csvRows = divergences.map(d => ({
+        country_code: d.countryCode,
+        indicator_id: d.indicatorId,
+        observations: d.observations.map(o => ({
+          adapter_id: o.adapterId,
+          raw_value: o.rawValue,
+          reference_date: o.referenceDate,
+        })),
+        divergence_pct: d.divergencePercent,
+        status: d.status,
+        threshold_pct: d.thresholdPercent,
+        metadata: {
+          run_id: new Date().toISOString(),
+          observation_count: d.observations.length,
+        },
+      }));
+      const CHUNK_CSV = 200;
+      for (let i = 0; i < csvRows.length; i += CHUNK_CSV) {
+        const slice = csvRows.slice(i, i + CHUNK_CSV);
+        const { error: csvErr } = await sb.from('cross_source_validations').insert(slice);
+        if (csvErr) {
+          // Soft-fail: keep cron running even if this table isn't migrated yet.
+          console.warn('[cron-v2] cross_source_validations write skipped:', csvErr.message);
+          break;
+        }
+      }
+    }
+
     // ── Persist indicator_values (append-only audit log) ──
     // We store ALL measurements (primary + secondary cross-source values) so
     // the audit log captures every adapter's view. Payload carries the
