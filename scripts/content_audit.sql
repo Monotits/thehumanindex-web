@@ -1,6 +1,11 @@
 -- ============================================================================
 -- Content factory audit — Supabase SQL Editor'de çalıştır
 -- (Pulse, Glossary, Research stock'unu görüntülemek için)
+--
+-- Kolon adları gerçek şemaya göre düzeltildi:
+--   commentary, glossary_entries, research_articles → published_at
+--   corporate_layoffs_curated → country_code, confidence_tier, extracted_at
+--   social_feed_curated → published_at, fetched_at, enriched_at
 -- ============================================================================
 
 -- ── 1. Pulse: per-country × per-locale son yayınlanan ──
@@ -8,10 +13,10 @@ SELECT
   COALESCE(country_code, 'global') AS country,
   COALESCE(locale, 'en')           AS locale,
   COUNT(*)                          AS pulse_count,
-  MAX(created_at)                   AS last_published,
-  EXTRACT(DAY FROM (now() - MAX(created_at))) AS days_since_last
+  MAX(published_at)                 AS last_published,
+  EXTRACT(DAY FROM (now() - MAX(published_at)))::int AS days_since_last
 FROM commentary
-WHERE created_at > now() - interval '90 days'
+WHERE published_at > now() - interval '90 days'
 GROUP BY 1, 2
 ORDER BY days_since_last NULLS LAST, country, locale;
 
@@ -20,7 +25,7 @@ SELECT
   COALESCE(country_code, 'global') AS country,
   COALESCE(locale, 'en')           AS locale,
   COUNT(*)                         AS entries,
-  MAX(created_at)                  AS last_added
+  MAX(published_at)                AS last_added
 FROM glossary_entries
 GROUP BY 1, 2
 ORDER BY entries DESC;
@@ -48,33 +53,33 @@ SELECT
   COALESCE(country_code, 'global') AS country,
   COALESCE(locale, 'en')           AS locale,
   COUNT(*)                         AS article_count,
-  MAX(created_at)                  AS last_published
+  MAX(published_at)                AS last_published
 FROM research_articles
 GROUP BY 1, 2, 3
 ORDER BY topic, country;
 
--- Hangi topic'ler hiç yazılmadı?
-SELECT 'No articles for any topic yet' AS msg
+-- Hangi topic'ler hiç yazılmadı? (toplam article sayısı 0 ise göster)
+SELECT 'No articles yet' AS msg
 WHERE NOT EXISTS (SELECT 1 FROM research_articles);
 
--- ── 4. Layoff curated stock ──
+-- ── 4. Layoff curated stock (son 60 gün) ──
 SELECT
   COALESCE(country_code, 'unknown') AS country,
   confidence_tier,
   COUNT(*) AS layoff_events,
-  MAX(detected_at) AS most_recent
+  MAX(extracted_at) AS most_recent
 FROM corporate_layoffs_curated
-WHERE detected_at > now() - interval '60 days'
+WHERE extracted_at > now() - interval '60 days'
 GROUP BY 1, 2
 ORDER BY layoff_events DESC;
 
--- ── 5. Social feed enrichment stock ──
+-- ── 5. Social feed enrichment stock (son 7 gün) ──
 SELECT
   source,
-  curated,
+  CASE WHEN enriched_at IS NOT NULL THEN 'enriched' ELSE 'pending' END AS state,
   COUNT(*) AS posts
 FROM social_feed_curated
-WHERE created_at > now() - interval '7 days'
+WHERE fetched_at > now() - interval '7 days'
 GROUP BY 1, 2
 ORDER BY 1, 2;
 
@@ -87,3 +92,26 @@ FROM country_composite_scores
 WHERE computed_at > now() - interval '7 days'
 GROUP BY 1
 ORDER BY 1 DESC;
+
+-- ── 7. Indicator snapshots stock (migration 018 sonrası) ──
+SELECT
+  snapshot_date,
+  COUNT(*) AS snapshot_rows,
+  COUNT(DISTINCT country_code) AS countries,
+  COUNT(DISTINCT indicator_id) AS indicators
+FROM indicator_snapshots
+WHERE snapshot_date > CURRENT_DATE - 7
+GROUP BY 1
+ORDER BY 1 DESC;
+
+-- ── 8. Cross-source validation stock (migration 017 sonrası) ──
+SELECT
+  status,
+  COUNT(*) AS validations
+FROM cross_source_validations
+WHERE run_at > now() - interval '7 days'
+GROUP BY 1
+ORDER BY 1;
+
+-- Persistent divergence streaks
+SELECT * FROM v_recent_divergence_streaks LIMIT 10;
