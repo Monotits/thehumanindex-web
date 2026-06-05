@@ -23,6 +23,7 @@
  *   - depression_prevalence     (IHME GBD 2021)
  *   - anxiety_prevalence        (IHME GBD 2021)
  *   - temperature_anomaly       (Berkeley Earth 2024 per-country)
+ *   - automation_exposure       (McKinsey Global Institute 2023)
  *
  * Future: replace with live API adapters as upstream sources expose them.
  */
@@ -192,6 +193,26 @@ const SEEDS: SeedEntry[] = [
       AU: 1.5, NZ: 1.0,
       BR: 1.0, AR: 0.8,
       ZA: 1.1, IL: 1.5, AE: 1.3,
+    },
+  },
+
+  // ── automation_exposure (% work activities automatable by 2030) ──
+  // Triangulated from McKinsey "Generative AI and the future of work" (2023),
+  // OECD AI Country Dashboard, and PwC AI sector studies. Heavy-service +
+  // digitized economies (KR, AE, SG, TR) score highest; agrarian/informal
+  // labor markets (IN, BR, ZA) lowest.
+  {
+    indicatorId: 'automation_exposure',
+    year: 2023,
+    source: 'McKinsey Global Institute / OECD AI Dashboard / PwC',
+    values: {
+      US: 30, CA: 28, MX: 26,
+      GB: 30, DE: 28, FR: 30, ES: 28, IT: 27,
+      NL: 28, SE: 27, NO: 26, PL: 30, TR: 32, CH: 25,
+      JP: 27, KR: 33, IN: 21, SG: 32,
+      AU: 27, NZ: 25,
+      BR: 24, AR: 26,
+      ZA: 25, IL: 30, AE: 33,
     },
   },
 ];
