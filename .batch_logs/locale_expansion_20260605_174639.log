@@ -1,0 +1,291 @@
+[1mQ: Locale Expansion Batch —  5 Haz 2026 Cum +03 17:46:39[0m
+PD endpoint: http://localhost:3001
+Session log: scripts/../.batch_logs/locale_expansion_20260605_174639.log
+[36m────────────────────────────────────────────────────────────[0m
+
+[1m[36m▶ Connectivity check[0m
+[32m✓ PD reachable.[0m
+[36m────────────────────────────────────────────────────────────[0m
+
+[1m── PHASE 1: GLOSSARY (12 batches) ──[0m
+
+[1m[36m▶ Glossary 01/12 — DE/de[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"de","countryCode":"DE","countryName":"Deutschland","limit":8}
+  342s. Response:
+    {
+        "success": true,
+        "locale": "de",
+        "countryCode": "DE",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 01/12 — DE/de completed.[0m
+
+[1m[36m▶ Glossary 02/12 — global/de[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"de","countryCode":"global","limit":8}
+  375s. Response:
+    {
+        "success": true,
+        "locale": "de",
+        "countryCode": "global",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 02/12 — global/de completed.[0m
+
+[1m[36m▶ Glossary 03/12 — FR/fr[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"fr","countryCode":"FR","countryName":"France","limit":8}
+  331s. Response:
+    {
+        "success": true,
+        "locale": "fr",
+        "countryCode": "FR",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 03/12 — FR/fr completed.[0m
+
+[1m[36m▶ Glossary 04/12 — global/fr[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"fr","countryCode":"global","limit":8}
+  294s. Response:
+    {
+        "success": true,
+        "locale": "fr",
+        "countryCode": "global",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 04/12 — global/fr completed.[0m
+
+[1m[36m▶ Glossary 05/12 — ES/es[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"es","countryCode":"ES","countryName":"España","limit":8}
+  294s. Response:
+    {
+        "success": true,
+        "locale": "es",
+        "countryCode": "ES",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 05/12 — ES/es completed.[0m
+
+[1m[36m▶ Glossary 06/12 — MX/es[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"es","countryCode":"MX","countryName":"México","limit":8}
+  270s. Response:
+    {
+        "success": true,
+        "locale": "es",
+        "countryCode": "MX",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 06/12 — MX/es completed.[0m
+
+[1m[36m▶ Glossary 07/12 — global/es[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"es","countryCode":"global","limit":8}
+  327s. Response:
+    {
+        "success": true,
+        "locale": "es",
+        "countryCode": "global",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 07/12 — global/es completed.[0m
+
+[1m[36m▶ Glossary 08/12 — BR/pt-br[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"pt-br","countryCode":"BR","countryName":"Brasil","limit":8}
+  349s. Response:
+    {
+        "success": true,
+        "locale": "pt-br",
+        "countryCode": "BR",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 08/12 — BR/pt-br completed.[0m
+
+[1m[36m▶ Glossary 09/12 — global/pt-br[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"pt-br","countryCode":"global","limit":8}
+  368s. Response:
+    {
+        "success": true,
+        "locale": "pt-br",
+        "countryCode": "global",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 09/12 — global/pt-br completed.[0m
+
+[1m[36m▶ Glossary 10/12 — IT/it[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"it","countryCode":"IT","countryName":"Italia","limit":8}
+  319s. Response:
+    {
+        "success": true,
+        "locale": "it",
+        "countryCode": "IT",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 10/12 — IT/it completed.[0m
+
+[1m[36m▶ Glossary 11/12 — NL/nl[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"nl","countryCode":"NL","countryName":"Nederland","limit":8}
+  336s. Response:
+    {
+        "success": true,
+        "locale": "nl",
+        "countryCode": "NL",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 11/12 — NL/nl completed.[0m
+
+[1m[36m▶ Glossary 12/12 — JP/ja[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"ja","countryCode":"JP","countryName":"日本","limit":8}
+  348s. Response:
+    {
+        "success": true,
+        "locale": "ja",
+        "countryCode": "JP",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 12/12 — JP/ja completed.[0m
+[36m────────────────────────────────────────────────────────────[0m
+
+[1m── PHASE 2: RESEARCH (6 articles, native-locale each) ──[0m
+
+[1m[36m▶ Research 1/6 — DE/de[0m
+  POST http://localhost:3001/api/research/run
+  body: {"locale":"de","countryCode":"DE","countryName":"Deutschland"}
+  181s. Response:
+    {
+        "error": "spawnSync /bin/sh ETIMEDOUT"
+    }
+[31m✗ Research 1/6 — DE/de error (see body).[0m
+
+[1m[36m▶ Research 2/6 — FR/fr[0m
+  POST http://localhost:3001/api/research/run
+  body: {"locale":"fr","countryCode":"FR","countryName":"France"}
+  152s. Response:
+    {
+        "success": true,
+        "result": {
+            "topic": "ai-displacement-outlook",
+            "slug": "ai-displacement-labor-market-france-fr",
+            "title": "La France face au choc silencieux de l'IA : un indice d'anxi\u00e9t\u00e9 au plafond",
+            "wordCount": 1743
+        }
+    }
+[32m✓ Research 2/6 — FR/fr completed.[0m
+
+[1m[36m▶ Research 3/6 — ES/es[0m
+  POST http://localhost:3001/api/research/run
+  body: {"locale":"es","countryCode":"ES","countryName":"España"}
+  120s. Response:
+    {
+        "success": true,
+        "result": {
+            "topic": "ai-displacement-outlook",
+            "slug": "ia-desplazamiento-laboral-espana-es",
+            "title": "La Automatizaci\u00f3n en el Pa\u00eds del 24%: Espa\u00f1a ante la Doble Presi\u00f3n del Desempleo Estructural y la IA",
+            "wordCount": 2145
+        }
+    }
+[32m✓ Research 3/6 — ES/es completed.[0m
+
+[1m[36m▶ Research 4/6 — BR/pt-br[0m
+  POST http://localhost:3001/api/research/run
+  body: {"locale":"pt-br","countryCode":"BR","countryName":"Brasil"}
+  163s. Response:
+    {
+        "success": true,
+        "result": {
+            "topic": "ai-displacement-outlook",
+            "slug": "ai-deslocamento-empregos-ansiedade-brasil-br",
+            "title": "A Ansiedade que Chegou Antes da Crise: O Brasil Diante da Substitui\u00e7\u00e3o de Empregos por Intelig\u00eancia Artificial",
+            "wordCount": 1821
+        }
+    }
+[32m✓ Research 4/6 — BR/pt-br completed.[0m
+
+[1m[36m▶ Research 5/6 — IT/it[0m
+  POST http://localhost:3001/api/research/run
+  body: {"locale":"it","countryCode":"IT","countryName":"Italia"}
+  179s. Response:
+    {
+        "success": true,
+        "result": {
+            "topic": "ai-displacement-outlook",
+            "slug": "ai-job-displacement-outlook-it",
+            "title": "L'Italia nell'Era dell'Automazione: Quali Lavori Sono a Rischio e con Quale Velocit\u00e0",
+            "wordCount": 2007
+        }
+    }
+[32m✓ Research 5/6 — IT/it completed.[0m
+
+[1m[36m▶ Research 6/6 — JP/ja[0m
+  POST http://localhost:3001/api/research/run
+  body: {"locale":"ja","countryCode":"JP","countryName":"日本"}
+  167s. Response:
+    {
+        "success": true,
+        "result": {
+            "topic": "ai-displacement-outlook",
+            "slug": "ai-job-displacement-outlook-jp",
+            "title": "\u4f4e\u5931\u696d\u7387\u3068\u3044\u3046\u8703\u6c17\u697c\u2014\u2014\u65e5\u672c\u306eAI\u96c7\u7528\u4e0d\u5b89\u304c\u6620\u3057\u51fa\u3059\u6b21\u306e\u65ad\u5c64\u7dda",
+            "wordCount": 83
+        }
+    }
+[32m✓ Research 6/6 — JP/ja completed.[0m
+[36m────────────────────────────────────────────────────────────[0m
+
+[1m── PHASE 3: PER-COUNTRY PULSE (mega-batch) ──[0m
+
+[1m[36m▶ Per-country Pulse — 7 new locales across all pulse_active countries[0m
+  POST http://localhost:3001/api/thi/generate-country-pulse
+  body: {"locales":["de","fr","es","pt-br","it","nl","ja"],"publish":true}
+[31m✗ curl failed: curl: (28) Operation timed out after 600006 milliseconds with 0 bytes received[0m
+[36m────────────────────────────────────────────────────────────[0m
+
+[1m[32mAll phases done.[0m
+Full session log: scripts/../.batch_logs/locale_expansion_20260605_174639.log
+
+Next: rerun scripts/content_audit.sql to verify growth.
