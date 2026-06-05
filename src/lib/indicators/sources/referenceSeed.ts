@@ -22,6 +22,7 @@
  *   - digital_addiction         (Pew Research + Eurostat ICT 2023)
  *   - depression_prevalence     (IHME GBD 2021)
  *   - anxiety_prevalence        (IHME GBD 2021)
+ *   - temperature_anomaly       (Berkeley Earth 2024 per-country)
  *
  * Future: replace with live API adapters as upstream sources expose them.
  */
@@ -171,6 +172,26 @@ const SEEDS: SeedEntry[] = [
       NL: 5.9, SE: 4.6, NO: 4.7, PL: 4.2, TR: 5.9, CH: 5.0,
       JP: 4.0, KR: 4.0, IN: 4.3, SG: 4.2,
       AU: 6.4, NZ: 6.1, BR: 9.3, AR: 7.6, ZA: 5.5, IL: 4.8, AE: 5.6,
+    },
+  },
+
+  // ── temperature_anomaly (°C vs 1951-1980 baseline; Berkeley Earth 2024 per-country) ──
+  // Land-temperature anomaly. Higher = more warming-driven environmental stress.
+  // Northern Europe + Russia warm fastest (Arctic amplification); SH countries
+  // (BR, AR, AU) warm slowest. UAE/IN/ZA see severe absolute heat but lower
+  // anomaly because their baseline was already hot.
+  {
+    indicatorId: 'temperature_anomaly',
+    year: 2024,
+    source: 'Berkeley Earth Country Reports 2024',
+    values: {
+      US: 1.6, CA: 1.9, MX: 1.4,
+      GB: 1.5, DE: 1.7, FR: 1.6, ES: 1.5, IT: 1.5,
+      NL: 1.7, SE: 2.1, NO: 2.0, PL: 1.9, TR: 1.5, CH: 1.6,
+      JP: 1.3, KR: 1.4, IN: 0.9, SG: 1.0,
+      AU: 1.5, NZ: 1.0,
+      BR: 1.0, AR: 0.8,
+      ZA: 1.1, IL: 1.5, AE: 1.3,
     },
   },
 ];

@@ -39,14 +39,21 @@ const ADAPTERS: IndicatorAdapter[] = [
   // Live primary sources
   eurostatAdapter,              // 11 EU+ countries: unemployment, youth_unemployment, fertility, gini (fresher than WB)
   imfAdapter,                   // 25 countries: inflation_rate (primary), unemployment_rate (cross-source with WB+Eurostat)
-  worldBankAdapter,             // 25 countries: unemployment + youth + gini + fertility + suicide
-  nasaGissAdapter,              // temperature_anomaly (global proxy)
+  worldBankAdapter,             // 25 countries: 10 indicators
   socialFeedComputedAdapter,    // ai_job_anxiety from social_feed_curated
 
   // Static seeds (annual refresh)
   oecdHousingAdapter,           // housing_affordability
-  referenceSeedAdapter,         // water, air, burnout, divorce, trust, loneliness, screen, digital, depression, anxiety
+  referenceSeedAdapter,         // 11 indicators including per-country temperature_anomaly (Berkeley Earth 2024)
+
+  // nasaGissAdapter — DISABLED. Single global value didn't differentiate
+  // countries. Replaced by referenceSeed's per-country Berkeley Earth values
+  // which capture geographical reality (NH amplification, equatorial drift).
 ];
+
+// Suppress unused-import warning while we keep nasaGiss source file around
+// for future re-enable when we have a per-country live API.
+void nasaGissAdapter;
 
 export interface NormalizedMeasurement extends IndicatorMeasurement {
   normalizedValue: number | null;
