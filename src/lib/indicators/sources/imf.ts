@@ -59,12 +59,12 @@ async function fetchOneSeries(
   iso3Codes: string[],
   timeoutMs: number
 ): Promise<Map<string, { value: number; year: number }>> {
-  // IMF API supports filtering by countries via the URL path or query. We use
-  // query for simplicity (?periods=…). IMF returns ALL countries by default;
-  // we filter client-side. The payload is small.
+  // IMF API ignores ?periods=… query and the documented filter syntax has
+  // moved. Fetch the full series and filter client-side. The payload is
+  // ~150-300KB for a single series across 200+ countries × 50+ years; trivial.
+  const url = `https://www.imf.org/external/datamapper/api/v1/${series}`;
   const currentYear = new Date().getFullYear();
-  const periods = [currentYear - 3, currentYear - 2, currentYear - 1, currentYear].join(',');
-  const url = `https://www.imf.org/external/datamapper/api/v1/${series}?periods=${periods}`;
+  const minYear = currentYear - 5;  // accept any reasonably recent value
 
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
@@ -93,6 +93,7 @@ async function fetchOneSeries(
         if (val === null || val === undefined) continue;
         const year = parseInt(yearStr, 10);
         if (!Number.isInteger(year)) continue;
+        if (year < minYear) continue;       // skip historical noise
         if (year > latestYear) {
           latestYear = year;
           latestValue = Number(val);
