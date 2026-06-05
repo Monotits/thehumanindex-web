@@ -1,0 +1,134 @@
+[1mFire missing pulses (41 pairs) —  5 Haz 2026 Cum +03 21:59:41[0m
+Log: scripts/../.batch_logs/missing_pulses_20260605_215941.log
+
+[1/41] [1mBR/fr[0m
+  [31m✗ (54s) status=error[0m
+
+[2/41] [1mBR/pt-br[0m
+  [33m⚠ (55s) validation: body too long (927 ~words, max 900);body contains placeholder text[0m
+
+[3/41] [1mBR/nl[0m
+  [33m⚠ (71s) validation: body has no ## section headings[0m
+
+[4/41] [1mBR/ja[0m
+  [33m⚠ (108s) validation: body too long (993 ~words, max 900)[0m
+
+[5/41] [1mDE/fr[0m
+  [32m✓ (59s) Allemagne : l'IA s'impose comme première source d'inquiétude[0m
+
+[6/41] [1mDE/es[0m
+  [32m✓ (49s) Alemania frena: IA, recesión y la transición inacabada[0m
+
+[7/41] [1mDE/pt-br[0m
+  [33m⚠ (55s) validation: body contains placeholder text[0m
+
+[8/41] [1mDE/nl[0m
+  [31m✗ (56s) status=error[0m
+
+[9/41] [1mDE/ja[0m
+  [33m⚠ (67s) validation: body too long (1000 ~words, max 900)[0m
+
+[10/41] [1mES/de[0m
+  [31m✗ (56s) status=error[0m
+
+[11/41] [1mES/pt-br[0m
+  [32m✓ (47s) Espanha: Ansiedade Digital Sobre Um Mercado de Trabalho Frág[0m
+
+[12/41] [1mES/it[0m
+  [31m✗ (51s) status=error[0m
+
+[13/41] [1mES/nl[0m
+  [31m✗ (57s) status=error[0m
+
+[14/41] [1mES/ja[0m
+  [32m✓ (75s) AIの波と空洞化する人口——スペインの静かな岐路[0m
+
+[15/41] [1mFR/de[0m
+  [31m✗ (49s) status=error[0m
+
+[16/41] [1mFR/fr[0m
+  [33m⚠ (60s) validation: body has no ## section headings[0m
+
+[17/41] [1mFR/es[0m
+  [33m⚠ (51s) validation: body contains placeholder text[0m
+
+[18/41] [1mFR/pt-br[0m
+  [33m⚠ (54s) validation: body too long (928 ~words, max 900)[0m
+
+[19/41] [1mFR/it[0m
+  [31m✗ (51s) status=error[0m
+
+[20/41] [1mFR/ja[0m
+  [33m⚠ (84s) validation: body too long (925 ~words, max 900)[0m
+
+[21/41] [1mGB/de[0m
+  [32m✓ (52s) Großbritannien im Griff der KI-Angst[0m
+
+[22/41] [1mGB/fr[0m
+  [31m✗ (45s) status=error[0m
+
+[23/41] [1mGB/es[0m
+  [33m⚠ (45s) validation: body contains placeholder text[0m
+
+[24/41] [1mGB/pt-br[0m
+  [33m⚠ (66s) validation: body contains placeholder text[0m
+
+[25/41] [1mGB/ja[0m
+  [32m✓ (80s) AIの不安が照らす英国の構造的断層[0m
+
+[26/41] [1mIT/es[0m
+  [33m⚠ (44s) validation: body contains placeholder text[0m
+
+[27/41] [1mIT/pt-br[0m
+  [33m⚠ (45s) validation: body contains placeholder text[0m
+
+[28/41] [1mIT/ja[0m
+  [33m⚠ (73s) validation: body too long (945 ~words, max 900)[0m
+
+[29/41] [1mJP/es[0m
+  [33m⚠ (65s) validation: body too long (903 ~words, max 900);body contains placeholder text[0m
+
+[30/41] [1mJP/ja[0m
+  [32m✓ (56s) AIと少子化が映す、日本の静かな岐路[0m
+
+[31/41] [1mNL/pt-br[0m
+  [33m⚠ (57s) validation: body too long (940 ~words, max 900);body contains placeholder text[0m
+
+[32/41] [1mNL/ja[0m
+  [33m⚠ (83s) validation: body too long (912 ~words, max 900)[0m
+
+[33/41] [1mTR/es[0m
+  [33m⚠ (50s) validation: body contains placeholder text[0m
+
+[34/41] [1mTR/pt-br[0m
+  [33m⚠ (51s) validation: body contains placeholder text[0m
+
+[35/41] [1mTR/ja[0m
+  [33m⚠ (82s) validation: body too long (904 ~words, max 900)[0m
+
+[36/41] [1mUS/de[0m
+  [32m✓ (50s) Amerika unter Algorithmus-Druck: KI verändert den Alltag[0m
+
+[37/41] [1mUS/fr[0m
+  [31m✗ (48s) status=error[0m
+
+[38/41] [1mUS/es[0m
+  [32m✓ (45s) La máquina acecha: EE.UU. en la encrucijada digital[0m
+
+[39/41] [1mUS/pt-br[0m
+  [33m⚠ (53s) validation: body contains placeholder text[0m
+
+[40/41] [1mUS/it[0m
+  [32m✓ (46s) L'America e l'Algoritmo: Ansia Tecnologica ai Massimi Storic[0m
+
+[41/41] [1mUS/ja[0m
+  [33m⚠ (85s) validation: body too long (956 ~words, max 900)[0m
+
+[1m── Summary ──[0m
+  Attempted:    41
+  Published:    [32m10[0m
+  Validation/draft: 22
+  Failed:       9
+  Timeouts:     0
+  Wall time:    2434s (40min)
+Log: scripts/../.batch_logs/missing_pulses_20260605_215941.log
