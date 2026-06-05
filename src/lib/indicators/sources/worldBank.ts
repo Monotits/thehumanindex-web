@@ -50,6 +50,8 @@ const INDICATOR_TO_WB_CODE: Record<string, string> = {
   co2_per_capita: 'EN.GHG.CO2.PC.CE.AR5',    // CO2 emissions per capita (AR5), tonnes
   mortality_rate_under5: 'SH.DYN.MORT',      // Under-5 mortality per 1,000
   renewable_energy_pct: 'EG.FEC.RNEW.ZS',    // Renewable share of final energy, %
+  alcohol_consumption_per_capita: 'SH.ALC.PCAP.LI', // Liters pure alcohol per capita 15+
+  age_dependency_ratio: 'SP.POP.DPND',        // Dependents as % of working-age (15-64)
   // income_share_top_10: 'SI.DST.10TH.10',   // optional future
 };
 
