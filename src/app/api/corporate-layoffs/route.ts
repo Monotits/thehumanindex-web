@@ -12,7 +12,7 @@ interface CuratedRow {
   workforce_percent: number | null
   total_employees: number | null
   industry: string | null
-  country: string | null
+  country_code: string | null
   reasons: string[] | null
   is_ai_driven: boolean
   announcement_date: string
@@ -92,7 +92,7 @@ function mapRowToLayoff(r: CuratedRow): CorporateLayoff {
     source: r.source_name,
     sourceUrl: r.source_url,
     isNew,
-    country: r.country || 'US',
+    country: r.country_code || 'US',
   }
 }
 
