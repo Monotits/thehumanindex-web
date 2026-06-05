@@ -43,6 +43,7 @@ const INDICATOR_TO_WB_CODE: Record<string, string> = {
   gini_index: 'SI.POV.GINI',
   fertility_rate: 'SP.DYN.TFRT.IN',
   suicide_rate: 'SH.STA.SUIC.P5',
+  inflation_rate: 'FP.CPI.TOTL.ZG',          // Consumer price inflation, annual %
   // income_share_top_10: 'SI.DST.10TH.10',   // optional future
 };
 
