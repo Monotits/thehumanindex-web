@@ -49,14 +49,14 @@ ORDER BY glossary_count, t.country;
 
 -- ── 3. Research: yayınlanan makaleler ──
 SELECT
-  topic,
+  topic_id,
   COALESCE(country_code, 'global') AS country,
   COALESCE(locale, 'en')           AS locale,
   COUNT(*)                         AS article_count,
   MAX(published_at)                AS last_published
 FROM research_articles
 GROUP BY 1, 2, 3
-ORDER BY topic, country;
+ORDER BY topic_id, country;
 
 -- Hangi topic'ler hiç yazılmadı? (toplam article sayısı 0 ise göster)
 SELECT 'No articles yet' AS msg
