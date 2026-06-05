@@ -28,6 +28,7 @@ import { oecdHousingAdapter } from './sources/oecdHousing';
 import { referenceSeedAdapter } from './sources/referenceSeed';
 import { socialFeedComputedAdapter } from './sources/socialFeedComputed';
 import { eurostatAdapter } from './sources/eurostat';
+import { imfAdapter } from './sources/imf';
 
 // Registry of all adapters in PRIORITY ORDER.
 // Earlier entries win for the primary measurement when multiple adapters
@@ -36,8 +37,9 @@ import { eurostatAdapter } from './sources/eurostat';
 // secondary cross-check sources for divergence detection.
 const ADAPTERS: IndicatorAdapter[] = [
   // Live primary sources
-  eurostatAdapter,              // 11 EU+ countries: unemployment, youth_unemployment, fertility (fresher than WB)
-  worldBankAdapter,             // 25 countries: same indicators + gini, suicide (fallback for non-EU)
+  eurostatAdapter,              // 11 EU+ countries: unemployment, youth_unemployment, fertility, gini (fresher than WB)
+  imfAdapter,                   // 25 countries: inflation_rate (primary), unemployment_rate (cross-source with WB+Eurostat)
+  worldBankAdapter,             // 25 countries: unemployment + youth + gini + fertility + suicide
   nasaGissAdapter,              // temperature_anomaly (global proxy)
   socialFeedComputedAdapter,    // ai_job_anxiety from social_feed_curated
 
