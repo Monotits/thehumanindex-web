@@ -181,6 +181,45 @@ export async function GET(request: Request) {
       }
     }
 
+    // ── Upsert daily indicator snapshots (migration 018) ──
+    // One row per (country, indicator, day) with the primary measurement.
+    // Idempotent across multiple runs same day — unique constraint
+    // (snapshot_date, country_code, indicator_id) → upsert on conflict.
+    if (measurements.length > 0) {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      // Count adapter coverage per pair to fill source_count
+      const adapterCountByPair = new Map<string, number>();
+      for (const am of allMeasurements) {
+        const k = `${am.countryCode}|${am.indicatorId}`;
+        adapterCountByPair.set(k, (adapterCountByPair.get(k) ?? 0) + 1);
+      }
+
+      const snapRows = measurements.map(m => ({
+        snapshot_date: today,
+        country_code: m.countryCode,
+        indicator_id: m.indicatorId,
+        raw_value: m.rawValue,
+        normalized_value: m.normalizedValue,
+        primary_adapter: m.adapterId,
+        source_count: adapterCountByPair.get(`${m.countryCode}|${m.indicatorId}`) ?? 1,
+        reference_date: m.referenceDate.split('T')[0],
+        recorded_at: new Date().toISOString(),
+      }));
+
+      const CHUNK_SNAP = 500;
+      for (let i = 0; i < snapRows.length; i += CHUNK_SNAP) {
+        const { error: snapErr } = await sb
+          .from('indicator_snapshots')
+          .upsert(snapRows.slice(i, i + CHUNK_SNAP), {
+            onConflict: 'snapshot_date,country_code,indicator_id',
+          });
+        if (snapErr) {
+          console.warn('[cron-v2] indicator_snapshots upsert skipped:', snapErr.message);
+          break;
+        }
+      }
+    }
+
     // ── Compose per-country scores ──
     const compositions = composeCountryScores(
       measurements,
