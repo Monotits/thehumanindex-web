@@ -24,6 +24,8 @@
  *   - anxiety_prevalence        (IHME GBD 2021)
  *   - temperature_anomaly       (Berkeley Earth 2024 per-country)
  *   - automation_exposure       (McKinsey Global Institute 2023)
+ *   - life_satisfaction         (OECD Better Life Index 2024)
+ *   - work_life_balance         (OECD Employment Database 2024)
  *
  * Future: replace with live API adapters as upstream sources expose them.
  */
@@ -213,6 +215,42 @@ const SEEDS: SeedEntry[] = [
       AU: 27, NZ: 25,
       BR: 24, AR: 26,
       ZA: 25, IL: 30, AE: 33,
+    },
+  },
+
+  // ── life_satisfaction (Cantril ladder 0-10, OECD Better Life 2024) ──
+  // Nordic countries top the rankings (7.4-7.5); East Asia mid-low; ZA at
+  // floor (4.9). Inverted in normalize: high = low stress, low = high stress.
+  {
+    indicatorId: 'life_satisfaction',
+    year: 2024,
+    source: 'OECD Better Life Index 2024',
+    values: {
+      US: 6.7, CA: 7.0, MX: 6.5,
+      GB: 6.8, DE: 6.8, FR: 6.6, ES: 6.5, IT: 6.3,
+      NL: 7.1, SE: 7.4, NO: 7.3, PL: 6.1, TR: 5.7, CH: 7.4,
+      JP: 5.9, KR: 5.8, IN: 4.0, SG: 6.5,
+      AU: 7.1, NZ: 7.0,
+      BR: 6.1, AR: 6.0,
+      ZA: 4.9, IL: 7.1, AE: 6.7,
+    },
+  },
+
+  // ── work_life_balance (% employees working ≥50 hours/week, OECD 2024) ──
+  // Direct stress: higher = worse. Korea and Türkiye lead; Netherlands and
+  // Sweden near zero. India + China not in OECD; estimated from ILO data.
+  {
+    indicatorId: 'work_life_balance',
+    year: 2024,
+    source: 'OECD Employment Database 2024',
+    values: {
+      US: 10.0, CA: 3.7, MX: 26.5,
+      GB: 12.2, DE: 5.3, FR: 8.0, ES: 4.0, IT: 9.5,
+      NL: 0.4, SE: 1.0, NO: 2.6, PL: 5.1, TR: 28.1, CH: 4.4,
+      JP: 17.8, KR: 26.5, IN: 14.5, SG: 18.5,
+      AU: 12.5, NZ: 13.2,
+      BR: 7.6, AR: 21.0,
+      ZA: 16.2, IL: 14.6, AE: 18.0,
     },
   },
 ];
