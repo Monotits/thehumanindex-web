@@ -1,0 +1,336 @@
+[1mJ2 Content Batch Fill —  5 Haz 2026 Cum +03 14:22:35[0m
+PD endpoint: http://localhost:3001
+Session log: scripts/../.batch_logs/20260605_142235.log
+[36m────────────────────────────────────────────────────────────[0m
+
+[1m[36m▶ Connectivity check[0m
+[32m✓ PD reachable.[0m
+[36m────────────────────────────────────────────────────────────[0m
+
+[1m── PHASE 1: GLOSSARY (10 batches) ──[0m
+
+[1m[36m▶ Glossary 01/10 — global/en[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"en","countryCode":"global","limit":8}
+  304s elapsed. Response:
+    {
+        "success": true,
+        "locale": "en",
+        "countryCode": "global",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 01/10 — global/en completed.[0m
+
+[1m[36m▶ Glossary 02/10 — US/en[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"en","countryCode":"US","countryName":"United States","limit":8}
+  204s elapsed. Response:
+    {
+        "success": true,
+        "locale": "en",
+        "countryCode": "US",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 02/10 — US/en completed.[0m
+
+[1m[36m▶ Glossary 03/10 — GB/en[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"en","countryCode":"GB","countryName":"United Kingdom","limit":8}
+  246s elapsed. Response:
+    {
+        "success": true,
+        "locale": "en",
+        "countryCode": "GB",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 03/10 — GB/en completed.[0m
+
+[1m[36m▶ Glossary 04/10 — DE/en[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"en","countryCode":"DE","countryName":"Germany","limit":8}
+  214s elapsed. Response:
+    {
+        "success": true,
+        "locale": "en",
+        "countryCode": "DE",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 04/10 — DE/en completed.[0m
+
+[1m[36m▶ Glossary 05/10 — JP/en[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"en","countryCode":"JP","countryName":"Japan","limit":8}
+  232s elapsed. Response:
+    {
+        "success": true,
+        "locale": "en",
+        "countryCode": "JP",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 05/10 — JP/en completed.[0m
+
+[1m[36m▶ Glossary 06/10 — global/tr[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"tr","countryCode":"global","limit":8}
+  413s elapsed. Response:
+    {
+        "success": true,
+        "locale": "tr",
+        "countryCode": "global",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 06/10 — global/tr completed.[0m
+
+[1m[36m▶ Glossary 07/10 — US/tr[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"tr","countryCode":"US","countryName":"ABD","limit":8}
+  408s elapsed. Response:
+    {
+        "success": true,
+        "locale": "tr",
+        "countryCode": "US",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 07/10 — US/tr completed.[0m
+
+[1m[36m▶ Glossary 08/10 — GB/tr[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"tr","countryCode":"GB","countryName":"Birleşik Krallık","limit":8}
+  351s elapsed. Response:
+    {
+        "success": true,
+        "locale": "tr",
+        "countryCode": "GB",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 08/10 — GB/tr completed.[0m
+
+[1m[36m▶ Glossary 09/10 — DE/tr[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"tr","countryCode":"DE","countryName":"Almanya","limit":8}
+  347s elapsed. Response:
+    {
+        "success": true,
+        "locale": "tr",
+        "countryCode": "DE",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 09/10 — DE/tr completed.[0m
+
+[1m[36m▶ Glossary 10/10 — JP/tr[0m
+  POST http://localhost:3001/api/glossary/run
+  body: {"locale":"tr","countryCode":"JP","countryName":"Japonya","limit":8}
+  419s elapsed. Response:
+    {
+        "success": true,
+        "locale": "tr",
+        "countryCode": "JP",
+        "requested": 8,
+        "generated": 8,
+        "skipped": 0,
+        "errors": []
+    }
+[32m✓ Glossary 10/10 — JP/tr completed.[0m
+[36m────────────────────────────────────────────────────────────[0m
+
+[1m── PHASE 2: RESEARCH (5 articles) ──[0m
+
+[1m[36m▶ Research 1/5 — global/en[0m
+  POST http://localhost:3001/api/research/run
+  body: {"locale":"en","countryCode":"global"}
+  0s elapsed. Response:
+    {
+        "error": "Research articles require a real country, not \"global\""
+    }
+[31m✗ Research 1/5 — global/en returned an error (see body above).[0m
+
+[1m[36m▶ Research 2/5 — US/en[0m
+  POST http://localhost:3001/api/research/run
+  body: {"locale":"en","countryCode":"US","countryName":"United States"}
+  87s elapsed. Response:
+    {
+        "success": true,
+        "result": {
+            "topic": "ai-displacement-outlook",
+            "slug": "ai-job-displacement-outlook-us",
+            "title": "The Automation Reckoning: AI Job Displacement and the American Labor Market",
+            "wordCount": 1961
+        }
+    }
+[32m✓ Research 2/5 — US/en completed.[0m
+
+[1m[36m▶ Research 3/5 — GB/en[0m
+  POST http://localhost:3001/api/research/run
+  body: {"locale":"en","countryCode":"GB","countryName":"United Kingdom"}
+  77s elapsed. Response:
+    {
+        "success": true,
+        "result": {
+            "topic": "ai-displacement-outlook",
+            "slug": "ai-job-displacement-outlook-gb-2026",
+            "title": "The Automation Fault Line: Britain's AI Job Anxiety and What the Numbers Actually Show",
+            "wordCount": 1916
+        }
+    }
+[32m✓ Research 3/5 — GB/en completed.[0m
+
+[1m[36m▶ Research 4/5 — DE/en[0m
+  POST http://localhost:3001/api/research/run
+  body: {"locale":"en","countryCode":"DE","countryName":"Germany"}
+  181s elapsed. Response:
+    {
+        "error": "spawnSync /bin/sh ETIMEDOUT"
+    }
+[31m✗ Research 4/5 — DE/en returned an error (see body above).[0m
+
+[1m[36m▶ Research 5/5 — JP/en[0m
+  POST http://localhost:3001/api/research/run
+  body: {"locale":"en","countryCode":"JP","countryName":"Japan"}
+  100s elapsed. Response:
+    {
+        "success": true,
+        "result": {
+            "topic": "ai-displacement-outlook",
+            "slug": "ai-job-displacement-outlook-jp",
+            "title": "The Calm Before the Algorithm: Japan's Hidden AI Employment Crisis",
+            "wordCount": 2074
+        }
+    }
+[32m✓ Research 5/5 — JP/en completed.[0m
+[36m────────────────────────────────────────────────────────────[0m
+
+[1m── PHASE 3: PER-COUNTRY PULSE (5 ülke × 2 locale = 10 pulse) ──[0m
+
+[1m[36m▶ Per-country Pulse batch[0m
+  POST http://localhost:3001/api/thi/generate-country-pulse
+  body: {"locales":["en","tr"],"publish":true}
+  582s elapsed. Response:
+    {
+        "success": true,
+        "summary": {
+            "countries": 5,
+            "locales": 2,
+            "published": 9,
+            "drafted": 1,
+            "failed": 0
+        },
+        "results": [
+            {
+                "country": "DE",
+                "locale": "en",
+                "status": "published",
+                "title": "Steady Surface, Deep Currents: Germany's First Reading",
+                "slug": "weekly-pulse-de-2026-w23",
+                "composite": 38.5
+            },
+            {
+                "country": "DE",
+                "locale": "tr",
+                "status": "published",
+                "title": "Makinelerin G\u00f6lgesinde Almanya: D\u00f6n\u00fc\u015f\u00fcm Sanc\u0131lar\u0131",
+                "slug": "weekly-pulse-de-2026-w23",
+                "composite": 38.5
+            },
+            {
+                "country": "GB",
+                "locale": "en",
+                "status": "published",
+                "title": "Britain Holds Steady, But the Machines Are Restless",
+                "slug": "pulse-gb-2026-w23",
+                "composite": 42.8
+            },
+            {
+                "country": "GB",
+                "locale": "tr",
+                "status": "published",
+                "title": "Yapay Zeka Kayg\u0131s\u0131 ve Bor\u00e7 K\u0131skac\u0131ndaki Birle\u015fik Krall\u0131k",
+                "slug": "weekly-pulse-gb-2026-w23",
+                "composite": 42.8
+            },
+            {
+                "country": "JP",
+                "locale": "en",
+                "status": "published",
+                "title": "Japan's Steady Score Masks a Structural Reckoning",
+                "slug": "weekly-pulse-jp-2026-w23",
+                "composite": 34.4
+            },
+            {
+                "country": "JP",
+                "locale": "tr",
+                "status": "published",
+                "title": "Yapay Zeka ve Ya\u015flanma Japonya'y\u0131 K\u00f6\u015feye S\u0131k\u0131\u015ft\u0131r\u0131yor",
+                "slug": "weekly-pulse-jp-2026-w23",
+                "composite": 34.4
+            },
+            {
+                "country": "TR",
+                "locale": "en",
+                "status": "published",
+                "title": "Between the Lira and the Algorithm",
+                "slug": "weekly-pulse-tr-2026-w23",
+                "composite": 51.9
+            },
+            {
+                "country": "TR",
+                "locale": "tr",
+                "status": "published",
+                "title": "Algoritma Kayg\u0131s\u0131 ve Enflasyon K\u0131skac\u0131nda T\u00fcrkiye",
+                "slug": "weekly-pulse-tr-2026-w23",
+                "composite": 51.9
+            },
+            {
+                "country": "US",
+                "locale": "en",
+                "status": "published",
+                "title": "Wired, Anxious, and Running on Debt",
+                "slug": "weekly-pulse-us-2026-w23",
+                "composite": 47.4
+            },
+            {
+                "country": "US",
+                "locale": "tr",
+                "status": "validation_failed",
+                "title": "Algoritman\u0131n G\u00f6lgesinde: Amerika'da Teknolojik Kayg\u0131n\u0131n Anatomisi",
+                "slug": "weekly-pulse-us-2026-w23",
+                "composite": 47.4,
+                "validation_issues": [
+                    "body contains placeholder text"
+                ]
+            }
+        ]
+    }
+[32m✓ Per-country Pulse batch completed.[0m
+[36m────────────────────────────────────────────────────────────[0m
+
+[1m[32mAll phases done.[0m
+Full session log: scripts/../.batch_logs/20260605_142235.log
+
+Next: rerun scripts/content_audit.sql in Supabase to verify growth.
