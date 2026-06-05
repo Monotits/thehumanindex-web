@@ -44,6 +44,10 @@ const INDICATOR_TO_WB_CODE: Record<string, string> = {
   fertility_rate: 'SP.DYN.TFRT.IN',
   suicide_rate: 'SH.STA.SUIC.P5',
   inflation_rate: 'FP.CPI.TOTL.ZG',          // Consumer price inflation, annual %
+  gdp_growth_rate: 'NY.GDP.MKTP.KD.ZG',      // Real GDP growth, annual %
+  life_expectancy: 'SP.DYN.LE00.IN',         // Life expectancy at birth, years
+  gov_debt_pct_gdp: 'GC.DOD.TOTL.GD.ZS',     // Central government gross debt, % of GDP
+  co2_per_capita: 'EN.GHG.CO2.PC.CE.AR5',    // CO2 emissions per capita (AR5), tonnes
   // income_share_top_10: 'SI.DST.10TH.10',   // optional future
 };
 
