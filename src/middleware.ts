@@ -35,8 +35,16 @@ export default createMiddleware({
 });
 
 export const config = {
-  matcher: [
-    // Match all paths except internal Next.js paths, API, and static files
-    '/((?!api|_next|_vercel|.*\\..*).*)',
-  ],
+  // ONLY run middleware on explicit non-default locale prefixes (/tr, /de, etc.).
+  //
+  // Why this matters: with `localePrefix: 'as-needed'` next-intl ALSO touches
+  // unprefixed routes (English default) for header/cookie management. In our
+  // setup we don't have a [locale] route group yet, and that side-effect was
+  // causing every English-root nav link (/countries, /rankings, /research,
+  // /transparency, etc.) to 404 in production.
+  //
+  // Restricting the matcher to locale-prefixed paths means English routes
+  // bypass the middleware entirely — no rewrites, no 404 risk. Adding the
+  // [locale] route group later is the correct way to widen this matcher.
+  matcher: ['/(tr|de|es|fr|ja|pt-br|pl|it|nl)/:path*'],
 };
