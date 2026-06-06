@@ -2,8 +2,9 @@ import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import { Inter, Newsreader, IBM_Plex_Mono } from 'next/font/google'
 import './globals.css'
-import { Navigation } from '@/components/Navigation'
-import { Footer } from '@/components/Footer'
+import { SiteHeader } from '@/components/ui/SiteHeader'
+import { SiteFooter } from '@/components/ui/SiteFooter'
+import { THEME_BOOTSTRAP_SCRIPT } from '@/components/ui/ThemeProvider'
 import { OrganizationJsonLd, WebSiteJsonLd, DatasetJsonLd } from '@/components/JsonLd'
 import { Providers } from '@/components/Providers'
 import { Analytics } from '@vercel/analytics/react'
@@ -147,21 +148,17 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="google-site-verification" content="iLceQwDotiKddHWJtUP3iatXZEtY9e0l789bQonpBWw" />
+        {/* Pre-hydration theme bootstrap — prevents flash of incorrect theme */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} ${inter.variable} ${plexMono.variable} antialiased`}>
-        {/* Inline script to prevent theme flash — runs before React hydration */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('thi-theme');var c=localStorage.getItem('thi-theme-chosen');if(t==='briefing'){document.body.style.background='#fafaf8';document.body.style.color='#1a1a1a';document.body.setAttribute('data-theme','briefing')}else if(t==='terminal'){document.body.style.background='#0a0a0a';document.body.style.color='#e0e0e0';document.body.setAttribute('data-theme','terminal')}else{document.body.style.background='#0a0a0a';document.body.style.color='#e0e0e0';document.body.setAttribute('data-theme','signal')}if(c!=='true'){document.body.setAttribute('data-theme-pending','true')}}catch(e){}})()`,
-          }}
-        />
         <Providers>
           <OrganizationJsonLd />
           <WebSiteJsonLd />
           <DatasetJsonLd />
-          <Navigation />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
+          <SiteHeader />
+          <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
+          <SiteFooter />
         </Providers>
         <Analytics />
         <GoogleAnalytics />
