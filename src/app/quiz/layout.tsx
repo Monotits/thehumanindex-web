@@ -2,13 +2,13 @@ import type { Metadata } from 'next'
 import { WebApplicationJsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
-  title: 'AI Exposure Assessment Quiz — How Safe Is Your Job?',
+  title: 'Civilizational stress exposure — Personal assessment | The Human Index',
   description:
-    'Take the free AI displacement exposure quiz. Find out how vulnerable your job, skills, and region are to AI automation in under 3 minutes.',
+    'Five quick questions on where you live, what you do, and what worries you. We map your answers to our live indicators and surface the civilizational stresses that matter most for someone in your situation.',
   openGraph: {
-    title: 'AI Exposure Assessment Quiz — The Human Index',
+    title: 'Civilizational stress exposure — The Human Index',
     description:
-      'How exposed is your job to AI displacement? Take the free assessment quiz and get your personalized exposure score.',
+      'A 60-second personal stress profile against live country-level data across 5 meta-indexes.',
   },
   alternates: { canonical: 'https://thehumanindex.org/quiz' },
 }
