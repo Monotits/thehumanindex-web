@@ -27,15 +27,16 @@ async function loadRankings(): Promise<RankingRow[]> {
 
   const sb = createClient(sbUrl, sbKey);
 
-  const [compositesRes, countriesRes] = await Promise.all([
-    sb.from('v_country_latest_composite').select('country_code, score_value, computed_at'),
+  // Three parallel queries — no per-country fan-out
+  const [compositesRes, countriesRes, metaRes] = await Promise.all([
+    sb.from('v_country_latest_composite').select('country_code, score_value'),
     sb.from('countries').select('code, name, flag_emoji').eq('active', true),
+    sb.from('v_country_latest_meta_indexes').select('country_code, meta_index, value'),
   ]);
 
   const composites = (compositesRes.data ?? []) as Array<{
     country_code: string;
     score_value: number;
-    computed_at: string;
   }>;
   const countryMeta = new Map(
     (countriesRes.data ?? []).map((r) => [
@@ -43,43 +44,17 @@ async function loadRankings(): Promise<RankingRow[]> {
       r as { code: string; name: string; flag_emoji: string | null },
     ]),
   );
-
-  const idResults = await Promise.all(
-    composites.map((c) =>
-      sb
-        .from('country_composite_scores')
-        .select('id, country_code')
-        .eq('country_code', c.country_code)
-        .order('computed_at', { ascending: false })
-        .limit(1)
-        .then((r) => r.data?.[0] as { id: string; country_code: string } | undefined),
-    ),
-  );
-
-  const idByCountry = new Map<string, string>();
-  for (const r of idResults) if (r) idByCountry.set(r.country_code, r.id);
-  const allIds = Array.from(idByCountry.values());
-
-  const metaRes = await sb
-    .from('meta_index_scores')
-    .select('country_composite_score_id, meta_index, value')
-    .in('country_composite_score_id', allIds);
-
   const metaRows = (metaRes.data ?? []) as Array<{
-    country_composite_score_id: string;
+    country_code: string;
     meta_index: MetaIndex;
     value: number | null;
   }>;
 
-  const idToCountry = new Map<string, string>();
-  idByCountry.forEach((id, cc) => idToCountry.set(id, cc));
-
   const perCountry = new Map<string, Partial<Record<MetaIndex, number>>>();
   for (const row of metaRows) {
-    const cc = idToCountry.get(row.country_composite_score_id);
-    if (!cc || row.value === null) continue;
-    if (!perCountry.has(cc)) perCountry.set(cc, {});
-    perCountry.get(cc)![row.meta_index] = row.value;
+    if (row.value === null) continue;
+    if (!perCountry.has(row.country_code)) perCountry.set(row.country_code, {});
+    perCountry.get(row.country_code)![row.meta_index] = row.value;
   }
 
   return composites
