@@ -11,8 +11,23 @@ interface PulseRow {
   country_code: string;
   locale: string;
   title: string;
-  excerpt: string | null;
+  body_markdown: string | null;
   published_at: string;
+}
+
+/** Strip markdown, collapse whitespace, take first ~240 chars. */
+function makeExcerpt(body: string | null | undefined): string {
+  if (!body) return '';
+  const stripped = body
+    .replace(/```[\s\S]*?```/g, '')          // code blocks
+    .replace(/`[^`]*`/g, '')                 // inline code
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')    // images
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links → label
+    .replace(/[#*_>~\-]/g, ' ')              // markdown punct
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (stripped.length <= 240) return stripped;
+  return stripped.slice(0, 237).trimEnd() + '…';
 }
 
 interface CountryRow {
@@ -37,7 +52,7 @@ async function loadPulses(locale: string): Promise<{
   // Try requested locale; fall back to English if empty
   let pulsesRes = await sb
     .from('commentary')
-    .select('id, slug, country_code, locale, title, excerpt, published_at')
+    .select('id, slug, country_code, locale, title, body_markdown, published_at')
     .eq('type', 'weekly_pulse')
     .eq('locale', locale)
     .order('published_at', { ascending: false })
@@ -49,7 +64,7 @@ async function loadPulses(locale: string): Promise<{
       fallbackUsed = true;
       pulsesRes = await sb
         .from('commentary')
-        .select('id, slug, country_code, locale, title, excerpt, published_at')
+        .select('id, slug, country_code, locale, title, body_markdown, published_at')
         .eq('type', 'weekly_pulse')
         .eq('locale', 'en')
         .order('published_at', { ascending: false })
@@ -225,11 +240,14 @@ function FeaturedPulse({
       <h3 className="font-serif text-2xl font-semibold leading-snug mb-3 text-balance group-hover:underline decoration-foreground-subtle/40 underline-offset-2">
         {pulse.title}
       </h3>
-      {pulse.excerpt && (
-        <p className="text-foreground-muted text-base line-clamp-3 text-pretty">
-          {pulse.excerpt}
-        </p>
-      )}
+      {(() => {
+        const ex = makeExcerpt(pulse.body_markdown);
+        return ex ? (
+          <p className="text-foreground-muted text-base line-clamp-3 text-pretty">
+            {ex}
+          </p>
+        ) : null;
+      })()}
     </Link>
   );
 }
