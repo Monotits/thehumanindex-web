@@ -28,7 +28,17 @@ import {
 } from '../types';
 
 const GISS_URL = 'https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv';
-const PROVIDED_INDICATORS = new Set(['temperature_anomaly']);
+
+// AUDIT PHASE 5 FINDING: NASA GISS provides only a single GLOBAL mean
+// anomaly. Applying it to all 25 countries as a proxy was misleading —
+// e.g., TR composite environmental meta carried 0.012°C (a monthly slice
+// near baseline) when reality is +1.5°C per Berkeley Earth.
+//
+// referenceSeed adapter now carries per-country Berkeley Earth 2024
+// values for temperature_anomaly. This adapter no longer provides it.
+// Kept as registered adapter (no-op) so we can re-enable if NASA exposes
+// per-country anomalies in the future.
+const PROVIDED_INDICATORS = new Set<string>();
 
 /**
  * NASA GISS CSV format:
