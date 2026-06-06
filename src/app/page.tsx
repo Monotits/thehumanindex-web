@@ -3,8 +3,11 @@ import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { StressBand } from '@/components/ui/StressBand';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
+import { SparklineMini } from '@/components/ui/SparklineMini';
+import { StressHeatmap, type HeatmapCountry } from '@/components/ui/StressHeatmap';
 import { bandFor, META_INDEXES, META_LABELS, META_WEIGHT, type MetaIndex } from '@/lib/ui/tokens';
 import { getActiveLocale } from '@/lib/ui/locale';
+import { loadCompositeHistory, pointsToDenseSeries, trendSummary } from '@/lib/ui/history';
 
 export const metadata: Metadata = {
   title: 'The Human Index — Civilizational Stress Tracker',
@@ -23,6 +26,7 @@ interface CountrySummary {
   name: string;
   flag_emoji: string | null;
   composite: number;
+  history?: Array<number | null>;
 }
 
 interface MetaAvg {
@@ -42,30 +46,40 @@ async function loadHomeData(locale: string) {
   const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!sbUrl || !sbKey) {
-    return { countries: [], metaAvgs: [], pulses: [], globalAvg: null, lastUpdate: null };
+    return {
+      countries: [] as CountrySummary[],
+      heatmap: [] as HeatmapCountry[],
+      metaAvgs: [] as MetaAvg[],
+      pulses: [] as PulsePreview[],
+      globalAvg: null,
+      lastUpdate: null,
+    };
   }
   const sb = createClient(sbUrl, sbKey);
 
-  // 1. Latest composite per country + country name
-  const compositesRes = await sb
-    .from('v_country_latest_composite')
-    .select('country_code, score_value, computed_at');
+  // 3 parallel queries — composites, country names, per-country meta scores
+  const [compositesRes, countriesRes, metaRes] = await Promise.all([
+    sb.from('v_country_latest_composite').select('country_code, score_value, computed_at'),
+    sb.from('countries').select('code, name, flag_emoji').eq('active', true),
+    sb.from('v_country_latest_meta_indexes').select('country_code, meta_index, value'),
+  ]);
+
   const composites = (compositesRes.data ?? []) as Array<{
     country_code: string;
     score_value: number;
     computed_at: string;
   }>;
-
-  const countriesRes = await sb
-    .from('countries')
-    .select('code, name, flag_emoji')
-    .eq('active', true);
   const countryMeta = new Map(
     (countriesRes.data ?? []).map((r) => [
       (r as { code: string }).code,
       r as { code: string; name: string; flag_emoji: string | null },
     ]),
   );
+  const metaRows = (metaRes.data ?? []) as Array<{
+    country_code: string;
+    meta_index: MetaIndex;
+    value: number | null;
+  }>;
 
   const countries: CountrySummary[] = composites
     .map((c) => {
@@ -85,26 +99,23 @@ async function loadHomeData(locale: string) {
       null,
     ) ?? null;
 
-  // 2. Latest meta-index averages across countries
-  const latestComposites = composites.map((c) =>
-    sb
-      .from('country_composite_scores')
-      .select('id')
-      .eq('country_code', c.country_code)
-      .order('computed_at', { ascending: false })
-      .limit(1),
-  );
-  // Pull meta_index_scores for latest composite per country in bulk
-  const ids = (
-    await Promise.all(latestComposites.map((q) => q.then((r) => r.data?.[0]?.id)))
-  ).filter(Boolean) as string[];
+  // Per-country meta map
+  const perCountry = new Map<string, Partial<Record<MetaIndex, number>>>();
+  for (const row of metaRows) {
+    if (row.value === null) continue;
+    if (!perCountry.has(row.country_code)) perCountry.set(row.country_code, {});
+    perCountry.get(row.country_code)![row.meta_index] = row.value;
+  }
 
-  const metaRes = await sb
-    .from('meta_index_scores')
-    .select('meta_index, value')
-    .in('country_composite_score_id', ids);
-  const metaRows = (metaRes.data ?? []) as Array<{ meta_index: MetaIndex; value: number | null }>;
+  const heatmap: HeatmapCountry[] = countries.map((c) => ({
+    country_code: c.country_code,
+    name: c.name,
+    flag_emoji: c.flag_emoji,
+    composite: c.composite,
+    meta: perCountry.get(c.country_code) ?? {},
+  }));
 
+  // Global meta averages
   const metaSums = new Map<MetaIndex, { sum: number; count: number }>();
   for (const m of META_INDEXES) metaSums.set(m, { sum: 0, count: 0 });
   for (const row of metaRows) {
@@ -144,7 +155,7 @@ async function loadHomeData(locale: string) {
   }
   const pulses = (pulsesRes.data ?? []) as PulsePreview[];
 
-  return { countries, metaAvgs, pulses, globalAvg, lastUpdate };
+  return { countries, heatmap, metaAvgs, pulses, globalAvg, lastUpdate };
 }
 
 function formatRelativeTime(iso: string | null): string {
@@ -162,10 +173,21 @@ function formatRelativeTime(iso: string | null): string {
 
 export default async function HomePage() {
   const locale = await getActiveLocale();
-  const { countries, metaAvgs, pulses, globalAvg, lastUpdate } = await loadHomeData(locale);
+  const { countries, heatmap, metaAvgs, pulses, globalAvg, lastUpdate } = await loadHomeData(locale);
 
-  const top5 = countries.slice(0, 5);
-  const bottom5 = countries.slice(-5).reverse();
+  let top5 = countries.slice(0, 5);
+  let bottom5 = countries.slice(-5).reverse();
+
+  // History for sparklines on Top 5 / Bottom 5 only — keep query cheap.
+  const featuredCodes = [...top5, ...bottom5].map((c) => c.country_code);
+  const historyMap = await loadCompositeHistory(featuredCodes, 60);
+  const attachHistory = (c: CountrySummary): CountrySummary => ({
+    ...c,
+    history: pointsToDenseSeries(historyMap.get(c.country_code) ?? [], 60),
+  });
+  top5 = top5.map(attachHistory);
+  bottom5 = bottom5.map(attachHistory);
+
   const globalBand = bandFor(globalAvg);
 
   return (
@@ -240,6 +262,24 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── HEATMAP ── */}
+      {heatmap.length > 0 && (
+        <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-14 border-b border-border">
+          <div className="mb-8 max-w-2xl">
+            <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">
+              Where stress is concentrated
+            </h2>
+            <p className="text-foreground-muted">
+              Every cell is one country&apos;s score on one meta-index, colored by
+              stress band. Read across a row to see a country&apos;s full profile;
+              read down a column to see how a single dimension varies between
+              countries.
+            </p>
+          </div>
+          <StressHeatmap countries={heatmap} />
+        </section>
+      )}
 
       {/* ── TOP / BOTTOM 5 ── */}
       <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-14">
@@ -355,19 +395,37 @@ function CountryColumn({
     <div>
       <h2 className="font-serif text-xl sm:text-2xl font-semibold mb-5">{title}</h2>
       <ul className="divide-y divide-border border-y border-border">
-        {countries.map((c, i) => (
-          <li key={c.country_code} className="py-3 flex items-center gap-4">
-            <span className="text-xs text-foreground-subtle tabular-nums w-6">{i + 1}</span>
-            <span className="text-lg" aria-hidden="true">{c.flag_emoji ?? '🏳️'}</span>
-            <Link
-              href={`/country/${c.country_code.toLowerCase()}`}
-              className="flex-1 text-base font-medium hover:underline underline-offset-2 decoration-foreground-subtle/40"
-            >
-              {c.name}
-            </Link>
-            <StressBand score={c.composite} variant="pill" size="sm" />
-          </li>
-        ))}
+        {countries.map((c, i) => {
+          const ts = c.history ? trendSummary(c.history) : null;
+          return (
+            <li key={c.country_code} className="py-3 flex items-center gap-3 sm:gap-4">
+              <span className="text-xs text-foreground-subtle tabular-nums w-6">{i + 1}</span>
+              <span className="text-lg" aria-hidden="true">{c.flag_emoji ?? '🏳️'}</span>
+              <Link
+                href={`/country/${c.country_code.toLowerCase()}`}
+                className="flex-1 text-base font-medium hover:underline underline-offset-2 decoration-foreground-subtle/40 truncate"
+              >
+                {c.name}
+              </Link>
+              {c.history && c.history.filter((v) => v !== null).length >= 2 && (
+                <SparklineMini
+                  data={c.history}
+                  width={60}
+                  height={18}
+                  stroke={
+                    ts?.direction === 'up'
+                      ? 'var(--band-high)'
+                      : ts?.direction === 'down'
+                        ? 'var(--band-low)'
+                        : 'var(--foreground-subtle)'
+                  }
+                  className="hidden sm:inline-block"
+                />
+              )}
+              <StressBand score={c.composite} variant="pill" size="sm" />
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

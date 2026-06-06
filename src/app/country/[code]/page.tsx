@@ -5,6 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 import { StressBand } from '@/components/ui/StressBand';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { SourceAttribution } from '@/components/ui/SourceAttribution';
+import { SparklineMini } from '@/components/ui/SparklineMini';
+import { loadCompositeHistory, pointsToDenseSeries, trendSummary } from '@/lib/ui/history';
 import {
   bandFor,
   freshnessFor,
@@ -61,6 +63,7 @@ interface CountryDetailData {
   indicatorValues: Map<string, IndicatorValueRow>;
   latestPulse: PulsePreview | null;
   pulseFallbackUsed: boolean;
+  compositeHistory: Array<number | null>;
 }
 
 // ── Data loaders ───────────────────────────────────────────────────
@@ -78,6 +81,7 @@ async function loadCountryDetail(
     indicatorValues: new Map(),
     latestPulse: null,
     pulseFallbackUsed: false,
+    compositeHistory: [],
   };
 
   const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -162,6 +166,10 @@ async function loadCountryDetail(
       .maybeSingle();
   }
 
+  // Composite history (last 90 days) for the hero sparkline
+  const historyMap = await loadCompositeHistory([upper], 90);
+  const compositeHistory = pointsToDenseSeries(historyMap.get(upper) ?? [], 90);
+
   return {
     country,
     composite,
@@ -171,6 +179,7 @@ async function loadCountryDetail(
     indicatorValues,
     latestPulse: (pulseRes.data as PulsePreview | null) ?? null,
     pulseFallbackUsed,
+    compositeHistory,
   };
 }
 
@@ -260,8 +269,12 @@ export default async function CountryDetailPage({
 
   if (!data.country) notFound();
 
-  const { country, composite, computedAt, metaValues, indicators, indicatorValues, latestPulse, pulseFallbackUsed } = data;
+  const {
+    country, composite, computedAt, metaValues, indicators, indicatorValues,
+    latestPulse, pulseFallbackUsed, compositeHistory,
+  } = data;
   const band = bandFor(composite);
+  const trend = trendSummary(compositeHistory);
 
   // Group indicators by meta-index
   const byMeta = new Map<MetaIndex, IndicatorRow[]>();
@@ -303,13 +316,55 @@ export default async function CountryDetailPage({
                 <div className="text-xs uppercase tracking-wider text-foreground-subtle mb-1">
                   Composite stress
                 </div>
-                <div className="flex items-baseline gap-3">
+                <div className="flex items-baseline gap-3 flex-wrap">
                   <span className="font-mono tabular-nums text-5xl sm:text-6xl font-semibold">
                     {composite.toFixed(1)}
                   </span>
                   {band && (
                     <StressBand band={band} score={null} showScore={false} variant="pill" size="lg" />
                   )}
+                  {/* 90-day trend mini chart */}
+                  {compositeHistory.filter((v) => v !== null).length >= 2 && (
+                    <span className="inline-flex items-center gap-2 ml-1">
+                      <SparklineMini
+                        data={compositeHistory}
+                        width={120}
+                        height={36}
+                        filled
+                        showEndPoint
+                        stroke={
+                          trend.direction === 'up'
+                            ? 'var(--band-high)'
+                            : trend.direction === 'down'
+                              ? 'var(--band-low)'
+                              : 'var(--foreground-subtle)'
+                        }
+                        ariaLabel="90-day composite trend"
+                      />
+                      <span
+                        className="text-xs font-mono tabular-nums"
+                        style={{
+                          color:
+                            trend.direction === 'up'
+                              ? 'var(--band-high)'
+                              : trend.direction === 'down'
+                                ? 'var(--band-low)'
+                                : 'var(--foreground-subtle)',
+                        }}
+                      >
+                        {trend.direction === 'up' && '▲'}
+                        {trend.direction === 'down' && '▼'}
+                        {trend.direction === 'flat' && '◆'}{' '}
+                        {trend.delta > 0 ? '+' : ''}
+                        {trend.delta.toFixed(1)}
+                      </span>
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2 text-xs text-foreground-subtle">
+                  90-day trend{trend.direction !== 'flat'
+                    ? ` · ${trend.direction === 'up' ? 'stress rising' : 'stress easing'}`
+                    : ''}
                 </div>
               </div>
               <div>
