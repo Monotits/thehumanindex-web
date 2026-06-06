@@ -1,5 +1,5 @@
 import { META_LABELS, META_TEXT_CLASS, META_BG_CLASS, type MetaIndex } from '@/lib/ui/tokens';
-import clsx from 'clsx';
+import { cn } from '@/lib/ui/cn';
 
 interface MetaCategoryBadgeProps {
   meta: MetaIndex;
@@ -38,7 +38,7 @@ export function MetaCategoryBadge({
 
   if (variant === 'inline') {
     return (
-      <span className={clsx('font-medium', META_TEXT_CLASS[meta], className)}>
+      <span className={cn('font-medium', META_TEXT_CLASS[meta], className)}>
         {label}
       </span>
     );
@@ -46,12 +46,12 @@ export function MetaCategoryBadge({
 
   if (variant === 'dot') {
     return (
-      <span className={clsx('inline-flex items-center gap-1.5', className)}>
+      <span className={cn('inline-flex items-center gap-1.5', className)}>
         <span
           aria-hidden="true"
-          className={clsx('inline-block w-2 h-2 rounded-full', META_BG_CLASS[meta])}
+          className={cn('inline-block w-2 h-2 rounded-full', META_BG_CLASS[meta])}
         />
-        <span className={clsx('font-medium', META_TEXT_CLASS[meta])}>{label}</span>
+        <span className={cn('font-medium', META_TEXT_CLASS[meta])}>{label}</span>
       </span>
     );
   }
@@ -59,7 +59,7 @@ export function MetaCategoryBadge({
   if (variant === 'pill') {
     return (
       <span
-        className={clsx(
+        className={cn(
           'inline-flex items-center rounded-full font-medium',
           META_TEXT_CLASS[meta],
           'bg-background-alt',
@@ -75,7 +75,7 @@ export function MetaCategoryBadge({
   // badge (filled, default)
   return (
     <span
-      className={clsx(
+      className={cn(
         'inline-flex items-center rounded font-medium',
         META_BG_CLASS[meta],
         sizeClass,

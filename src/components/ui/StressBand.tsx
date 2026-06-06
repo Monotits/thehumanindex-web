@@ -1,5 +1,5 @@
 import { bandFor, BAND_LABELS, BAND_BG_CLASS, BAND_TEXT_CLASS, type StressBand } from '@/lib/ui/tokens';
-import clsx from 'clsx';
+import { cn } from '@/lib/ui/cn';
 
 interface StressBandProps {
   score: number | null | undefined;
@@ -39,7 +39,7 @@ export function StressBand({
   const band = forcedBand ?? bandFor(score ?? null);
   if (!band) {
     return (
-      <span className={clsx('inline-flex items-center gap-1 text-foreground-subtle', className)}>
+      <span className={cn('inline-flex items-center gap-1 text-foreground-subtle', className)}>
         —
       </span>
     );
@@ -60,9 +60,9 @@ export function StressBand({
 
   if (variant === 'inline') {
     return (
-      <span className={clsx('inline-flex items-baseline gap-1', BAND_TEXT_CLASS[band], className)}>
+      <span className={cn('inline-flex items-baseline gap-1', BAND_TEXT_CLASS[band], className)}>
         {showScore && score !== null && score !== undefined && (
-          <span className={clsx('font-mono tabular-nums font-medium', scoreSize)}>
+          <span className={cn('font-mono tabular-nums font-medium', scoreSize)}>
             {score.toFixed(1)}
           </span>
         )}
@@ -74,7 +74,7 @@ export function StressBand({
   if (variant === 'pill') {
     return (
       <span
-        className={clsx(
+        className={cn(
           'inline-flex items-center gap-1.5 rounded-full font-medium',
           BAND_BG_CLASS[band],
           sizeClass,
@@ -92,7 +92,7 @@ export function StressBand({
   // badge (default)
   return (
     <span
-      className={clsx(
+      className={cn(
         'inline-flex items-center gap-1.5 rounded font-medium',
         BAND_BG_CLASS[band],
         sizeClass,

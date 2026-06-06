@@ -7,7 +7,7 @@ import {
   type ConfidenceTier,
   type Freshness,
 } from '@/lib/ui/tokens';
-import clsx from 'clsx';
+import { cn } from '@/lib/ui/cn';
 
 interface SourceAttributionProps {
   /** Display name of the source organization. */
@@ -74,7 +74,7 @@ export function SourceAttribution({
   if (variant === 'block') {
     return (
       <div
-        className={clsx(
+        className={cn(
           'flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-foreground-muted',
           className,
         )}
@@ -100,7 +100,7 @@ export function SourceAttribution({
   // inline (default)
   return (
     <span
-      className={clsx(
+      className={cn(
         'inline-flex flex-wrap items-baseline gap-1.5 text-xs text-foreground-muted',
         className,
       )}

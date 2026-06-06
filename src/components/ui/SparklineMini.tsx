@@ -1,4 +1,4 @@
-import clsx from 'clsx';
+import { cn } from '@/lib/ui/cn';
 
 interface SparklineMiniProps {
   /** Array of numeric values to plot (chronological order). */
@@ -49,7 +49,7 @@ export function SparklineMini({
   if (cleanData.length < 2) {
     return (
       <span
-        className={clsx('inline-flex items-center text-foreground-subtle', className)}
+        className={cn('inline-flex items-center text-foreground-subtle', className)}
         style={{ width, height }}
         aria-label={ariaLabel ?? 'No trend data'}
       >
@@ -98,7 +98,7 @@ export function SparklineMini({
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      className={clsx('inline-block align-middle', className)}
+      className={cn('inline-block align-middle', className)}
       preserveAspectRatio="none"
     >
       {filled && (
