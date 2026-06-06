@@ -141,6 +141,17 @@ export async function GET(
 
     const streak = streakByIndicator.get(ind.id);
 
+    // Freshness classification for primary source's reference_date
+    let freshness: 'fresh' | 'aging' | 'stale' | 'very_stale' | null = null;
+    if (primarySource) {
+      const refDate = new Date(primarySource.reference_date);
+      const ageYears = (Date.now() - refDate.getTime()) / (365.25 * 24 * 3600 * 1000);
+      if (ageYears > 5) freshness = 'very_stale';
+      else if (ageYears > 3) freshness = 'stale';
+      else if (ageYears > 2) freshness = 'aging';
+      else freshness = 'fresh';
+    }
+
     return {
       indicator_id: ind.id,
       name: ind.name,
@@ -156,6 +167,7 @@ export async function GET(
             : null,
         reference_date: primarySource.reference_date,
         recorded_at: primarySource.recorded_at,
+        freshness,
       },
       sources: sources.map(s => ({
         adapter: s.adapter_id,
