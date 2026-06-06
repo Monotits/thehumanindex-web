@@ -1,10 +1,10 @@
-import { bandFor, BAND_LABELS, BAND_BG_CLASS, BAND_TEXT_CLASS, type StressBand } from '@/lib/ui/tokens';
+import { bandFor, BAND_LABELS, BAND_BG_CLASS, BAND_TEXT_CLASS, type StressBand as Band } from '@/lib/ui/tokens';
 import { cn } from '@/lib/ui/cn';
 
 interface StressBandProps {
   score: number | null | undefined;
   /** Force a specific band regardless of score */
-  band?: StressBand;
+  band?: Band;
   /** Visual style */
   variant?: 'badge' | 'pill' | 'inline';
   /** Show the numeric score next to the band label */

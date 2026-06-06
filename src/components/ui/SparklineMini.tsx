@@ -1,4 +1,5 @@
 import { cn } from '@/lib/ui/cn';
+import { useId } from 'react';
 
 interface SparklineMiniProps {
   /** Array of numeric values to plot (chronological order). */
@@ -88,8 +89,9 @@ export function SparklineMini({
       ? `M${firstValidX},${height} L${pointsStr} L${lastValidX},${height} Z`
       : '';
 
-  // Gradient id for fill
-  const gradId = `spark-grad-${Math.random().toString(36).slice(2, 8)}`;
+  // Gradient id for fill (stable across SSR + hydration via useId)
+  const uniqueId = useId();
+  const gradId = `spark-grad-${uniqueId.replace(/:/g, '')}`;
 
   return (
     <svg
