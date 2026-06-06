@@ -28,6 +28,9 @@ const nextConfig = {
       { source: '/dashboard/:path*',    destination: '/country/us', permanent: true },
       { source: '/global',              destination: '/countries',  permanent: true },
       { source: '/global/:path*',       destination: '/countries',  permanent: true },
+      // /settings was a theme picker — ThemeToggle now lives in the
+      // header, so the page is obsolete. Redirect to home.
+      { source: '/settings',            destination: '/',           permanent: true },
     ]
   },
   async headers() {

@@ -1,196 +1,361 @@
-'use client'
+import Link from 'next/link';
+import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
+import { StressBand } from '@/components/ui/StressBand';
+import {
+  META_INDEXES,
+  META_LABELS,
+  META_WEIGHT,
+  BAND_LABELS,
+  type StressBand as Band,
+} from '@/lib/ui/tokens';
 
-import { DOMAIN_LABELS, Domain } from '@/lib/types'
-import { DomainIcon } from '@/components/DomainIcon'
-import { FAQPageJsonLd } from '@/components/JsonLd'
-import { useTheme } from '@/lib/theme'
+export const dynamic = 'force-static';
 
-const FAQ_QUESTIONS = [
-  { question: 'What is The Human Index?', answer: 'The Human Index is a real-time composite indicator that measures civilizational stress caused by AI-driven economic transformation across seven key domains.' },
-  { question: 'How is the composite score calculated?', answer: 'The composite score is a weighted average of seven domain indices: AI Work Displacement Risk (25%), Income Inequality (18%), Social Unrest (15%), Institutional Decay (12%), Public Wellbeing (12%), Policy Response (10%), and Public Sentiment (8%).' },
-  { question: 'What are the exposure bands?', answer: 'Scores are categorized into five bands: Low (0-25), Moderate (26-45), Elevated (46-65), High (66-80), and Critical (81-100). Each band indicates the severity of structural stress.' },
-  { question: 'How often is the data updated?', answer: 'The Human Index is updated daily with live data from 10+ sources including BLS, FRED, World Bank, OECD, WHO, V-Dem governance indicators, and O*NET occupational data. Layoff data from WARN Act filings is updated daily. Sentiment data is refreshed hourly from Reddit and RSS feeds. AI Index data is updated annually.' },
-  { question: 'What data sources does The Human Index use?', answer: 'Connected sources: BLS (unemployment), FRED (jobless claims, savings rate, consumer sentiment, Gini, treasury spread, debt/GDP), World Bank/V-Dem (governance, corruption, rule of law, political stability, inequality), OECD (life satisfaction, trust in government, voter turnout), WHO (suicide rate, life expectancy, alcohol consumption), O*NET (hot technologies, bright outlook occupations, AI-related occupations), Stanford AI Index (AI investment, enterprise adoption), WARN Act Firehose (federal layoff filings), Reddit/RSS (public discourse). ACLED integration pending.' },
-]
+const BAND_BOUNDS: { band: Band; min: number; max: number; description: string }[] = [
+  { band: 'low',      min: 0,  max: 25, description: 'Functional society — stressors present but bounded' },
+  { band: 'moderate', min: 26, max: 45, description: 'Strain visible in headline indicators' },
+  { band: 'elevated', min: 46, max: 65, description: 'Recurring strain across multiple meta-indexes' },
+  { band: 'high',     min: 66, max: 80, description: 'Acute stress; institutional buffer eroding' },
+  { band: 'critical', min: 81, max: 100, description: 'Sustained crisis-level signals' },
+];
 
-const DOMAIN_DESCRIPTIONS: Record<string, string> = {
-  work_risk: 'Tracks AI-driven work displacement through unemployment rates, jobless claims, occupational disruption signals, corporate AI investment, and enterprise adoption rates. Sources: BLS, FRED (ICSA), O*NET (Hot Technologies, Bright Outlook, AI Occupations), Stanford AI Index.',
-  inequality: 'Measures income and wealth concentration via Gini coefficients and income distribution. Sources: FRED (Census Gini), World Bank (Gini, Income Share Top 10%).',
-  unrest: 'Monitors social tension through political stability indices and civic engagement metrics. Sources: World Bank/V-Dem (Political Stability), OECD (Voter Turnout). ACLED integration pending.',
-  decay: 'Tracks institutional effectiveness, democratic quality, corruption, and rule of law. Sources: World Bank/V-Dem WGI (Government Effectiveness, Voice & Accountability, Rule of Law, Control of Corruption), FRED (Treasury Spread), OECD (Trust in Government).',
-  wellbeing: 'Measures life satisfaction, health outcomes, financial security, and substance use. Sources: OECD (Life Satisfaction), FRED (Personal Saving Rate), WHO (Suicide Rate, Life Expectancy, Alcohol Consumption), World Bank (Suicide Rate, Life Expectancy).',
-  policy: 'Assesses fiscal sustainability and government spending responsiveness. Sources: FRED (Federal Debt as % GDP, Government Social Benefits).',
-  sentiment: 'Analyzes consumer confidence and public economic outlook. Sources: FRED (U. Michigan Consumer Sentiment, OECD Consumer Confidence), Reddit/RSS (layoff tracking, public discourse).',
+const FRESHNESS_TIERS = [
+  { tier: 'Fresh',      window: 'within 2 years',  status: 'Counts at full weight' },
+  { tier: 'Aging',      window: '2 to 3 years',    status: 'Counts at full weight, visibly tagged' },
+  { tier: 'Stale',      window: '3 to 5 years',    status: 'Counts with downweight + warning' },
+  { tier: 'Very stale', window: 'over 5 years',    status: 'Excluded or held until refresh' },
+];
+
+const CONFIDENCE_TIERS = [
+  { tier: 'Verified', when: 'Filed with a regulator or official statistical agency (SEC EDGAR, WARN Act, World Bank, Eurostat, IMF, OECD)' },
+  { tier: 'Reported', when: 'Wire service or established news outlet, single source' },
+  { tier: 'Rumored',  when: 'Tracked but not surfaced to scores until corroborated' },
+];
+
+export const metadata = {
+  title: 'Methodology — How the composite is computed | The Human Index',
+  description:
+    'How The Human Index turns 31 indicators across 25 countries into a single composite stress score. Sources, normalization, weights, fallback chain, freshness tiers, confidence tiers — all of it.',
+  alternates: { canonical: 'https://thehumanindex.org/methodology' },
+};
+
+function weightRationale(meta: string): string {
+  switch (meta) {
+    case 'economic':
+      return 'Felt first — income, jobs, housing are the most immediate pressure surface.';
+    case 'social':
+      return 'Sustained communal trust and cohesion underpin every other meta.';
+    case 'mental':
+      return 'Population-level mental load — anxiety, suicide, loneliness — measured separately from economic stress.';
+    case 'technological':
+      return 'Automation exposure and digital displacement are real but slower to translate into lived stress.';
+    case 'environmental':
+      return 'Accumulates over decades; weighted lowest only because year-on-year movement is slow.';
+    default:
+      return '';
+  }
 }
-
-const WEIGHTS: Record<string, number> = {
-  work_risk: 0.25, inequality: 0.18, unrest: 0.15, decay: 0.12, wellbeing: 0.12, policy: 0.10, sentiment: 0.08,
-}
-
-const BANDS = [
-  { label: 'LOW', range: '0-25', color: '#22c55e', desc: 'Minimal structural stress. Institutional capacity strong, jobs relatively secure, income distribution stable.' },
-  { label: 'MODERATE', range: '26-45', color: '#3b82f6', desc: 'Growing tensions emerging. Some job displacement beginning, policy lag evident, social cohesion fraying at edges.' },
-  { label: 'ELEVATED', range: '46-65', color: '#f59e0b', desc: 'Significant stress indicators. Widespread displacement anxiety, institutional erosion, increasing social fragmentation.' },
-  { label: 'HIGH', range: '66-80', color: '#ea580c', desc: 'Substantial system stress. Institutional failures emerging, large-scale displacement, social unrest widespread.' },
-  { label: 'CRITICAL', range: '81-100', color: '#dc2626', desc: 'Structural transformation underway. System capacity overwhelmed, cascading failures across domains, irreversible change in progress.' },
-]
-
-const DATA_SOURCES = [
-  'Bureau of Labor Statistics (BLS) — Unemployment rate, labor market data',
-  'Federal Reserve Economic Data (FRED) — Jobless claims, Gini, savings rate, consumer sentiment, treasury spread, debt/GDP',
-  'World Bank / V-Dem (WGI) — Gini index, governance effectiveness, rule of law, corruption, political stability',
-  'OECD — Life satisfaction, trust in government, voter turnout',
-  'WHO Global Health Observatory — Suicide rate, life expectancy, alcohol consumption',
-  'O*NET Center — Hot technologies, bright outlook occupations, AI-related occupations',
-  'Stanford AI Index — Corporate AI investment, enterprise adoption rate (annual)',
-  'WARN Act Firehose — Federal layoff filings (Worker Adjustment and Retraining Notification)',
-  'Reddit / RSS — Layoff tracking, public sentiment from 7 subreddits + 5 news feeds',
-]
 
 export default function MethodologyPage() {
-  const { theme, themeId } = useTheme()
-
-  const sectionStyle: React.CSSProperties = {
-    background: theme.surface,
-    border: `1px solid ${theme.surfaceBorder}`,
-    borderRadius: themeId === 'terminal' ? 4 : 10,
-    padding: '28px 32px',
-    marginBottom: 24,
-  }
-
-  const h2Style: React.CSSProperties = {
-    fontSize: 22,
-    fontWeight: 700,
-    color: theme.text,
-    fontFamily: theme.fontHeading,
-    margin: '0 0 20px',
-  }
-
-  const pStyle: React.CSSProperties = {
-    fontSize: 15,
-    lineHeight: 1.7,
-    color: theme.textSecondary,
-    fontFamily: theme.fontBody,
-    margin: '0 0 12px',
-  }
-
   return (
-    <div style={{ background: theme.bg, minHeight: '100vh', paddingTop: 48, paddingBottom: 48 }}>
-      <FAQPageJsonLd questions={FAQ_QUESTIONS} />
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px' }}>
-
-        {/* Header */}
-        <div style={{ marginBottom: 40 }}>
-          <h1 style={{ fontSize: 32, fontWeight: 300, color: theme.text, fontFamily: theme.fontHeading, margin: '0 0 12px' }}>Methodology</h1>
-          <p style={{ fontSize: 16, color: theme.textSecondary, fontFamily: theme.fontBody, lineHeight: 1.6 }}>
-            How we measure civilization&apos;s proximity to irreversible AI-driven structural transformation
+    <article className="min-h-screen">
+      {/* ── HEADER ── */}
+      <header className="border-b border-border bg-background-alt/40">
+        <div className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <p className="text-xs uppercase tracking-wider text-foreground-muted mb-3 font-medium">
+            Methodology
+          </p>
+          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight tracking-tight text-balance">
+            How we compute civilizational stress.
+          </h1>
+          <p className="mt-5 text-base sm:text-lg text-foreground-muted text-pretty max-w-2xl leading-relaxed">
+            Every score is the output of a published formula running over
+            sourced indicators. Below is the formula, the inputs, and the
+            choices we made — including the ones that could reasonably go
+            another way.
           </p>
         </div>
+      </header>
 
-        {/* Overview */}
-        <div style={sectionStyle}>
-          <h2 style={h2Style}>Overview</h2>
-          <p style={pStyle}>
-            The Human Index combines seven distinct domain indices into a single Civilization Stress score. Each domain
-            captures a critical aspect of societal stability in the face of transformative AI adoption.
+      {/* ── SHAPE OF THE INDEX ── */}
+      <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-4">
+          The shape of the index
+        </h2>
+        <div className="prose prose-thi">
+          <p>
+            For every country we track, on every cron run, the system produces:
           </p>
-          <p style={{ ...pStyle, marginBottom: 0 }}>
-            Rather than speculating about future scenarios, we measure current real-world data points that correlate with
-            structural fragility. Our methodology is transparent, reproducible, and updated weekly.
+          <ul>
+            <li>A normalized score for each of <strong>31 indicators</strong> on a 0–100 stress scale (lower means less stress).</li>
+            <li>A score for each of <strong>5 meta-indexes</strong>, averaged from its constituent indicators.</li>
+            <li>One <strong>composite</strong> score per country, a weighted average of the 5 meta-indexes.</li>
+          </ul>
+          <p>
+            Everything else on the site — Pulse, Research, Glossary, Country
+            detail pages — reads from those three layers.
           </p>
         </div>
+      </section>
 
-        {/* Seven Domains */}
-        <div style={{ marginBottom: 32 }}>
-          <h2 style={{ ...h2Style, marginBottom: 24 }}>The Seven Domains</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {Object.entries(DOMAIN_LABELS).map(([key, label]) => {
-              const domainKey = key as Domain
-              return (
-                <div key={key} style={sectionStyle}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                    <DomainIcon domain={domainKey} size={28} color={theme.accent} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
-                        <h3 style={{ fontSize: 17, fontWeight: 700, color: theme.text, margin: 0, fontFamily: theme.fontHeading }}>{label}</h3>
-                        <span style={{
-                          fontSize: 12,
-                          color: theme.textTertiary,
-                          background: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
-                          padding: '4px 12px',
-                          borderRadius: 20,
-                          fontFamily: theme.fontMono,
-                        }}>
-                          {Math.round(WEIGHTS[key] * 100)}% weight
-                        </span>
-                      </div>
-                      <p style={{ ...pStyle, marginBottom: 0 }}>{DOMAIN_DESCRIPTIONS[key]}</p>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+      {/* ── FORMULA ── */}
+      <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-4">
+          The composite formula
+        </h2>
+        <p className="text-foreground-muted mb-8 leading-relaxed">
+          The composite is a weighted average of the five meta-indexes. The
+          weights below were chosen to reflect how immediately each domain
+          shows up in daily life — economic stress hits first, environmental
+          stress accumulates last.
+        </p>
+
+        <div className="rounded-lg border border-border bg-background-alt/30 p-6 mb-6">
+          <code className="block font-mono text-sm text-foreground-muted">
+            composite = 0.25·economic + 0.20·social + 0.20·mental + 0.20·technological + 0.15·environmental
+          </code>
         </div>
 
-        {/* Band Definitions */}
-        <div style={{ marginBottom: 32 }}>
-          <h2 style={{ ...h2Style, marginBottom: 24 }}>Exposure Bands</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {BANDS.map(band => (
-              <div key={band.label} style={{
-                ...sectionStyle,
-                borderLeft: `4px solid ${band.color}`,
-                marginBottom: 0,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: band.color }} />
-                  <h3 style={{ fontSize: 15, fontWeight: 700, color: theme.text, margin: 0, fontFamily: theme.fontHeading }}>
-                    {band.label} ({band.range})
-                  </h3>
-                </div>
-                <p style={{ ...pStyle, marginBottom: 0, fontSize: 14 }}>{band.desc}</p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b border-border-strong text-xs uppercase tracking-wider text-foreground-muted">
+                <th className="text-left py-3 pr-3 font-medium">Meta-index</th>
+                <th className="text-right py-3 pr-3 font-medium">Weight</th>
+                <th className="text-left py-3 pr-3 font-medium">Why this weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              {META_INDEXES.map((m) => (
+                <tr key={m} className="border-b border-border">
+                  <td className="py-3 pr-3">
+                    <MetaCategoryBadge meta={m} variant="dot" size="md" />
+                  </td>
+                  <td className="py-3 pr-3 text-right font-mono tabular-nums font-semibold">
+                    {Math.round(META_WEIGHT[m] * 100)}%
+                  </td>
+                  <td className="py-3 pr-3 text-foreground-muted">
+                    {weightRationale(m)}
+                  </td>
+                </tr>
+              ))}
+              <tr className="border-b border-border-strong">
+                <td className="py-3 pr-3 font-medium">Total</td>
+                <td className="py-3 pr-3 text-right font-mono tabular-nums font-semibold">
+                  100%
+                </td>
+                <td className="py-3 pr-3" />
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* ── INDICATOR NORMALIZATION ── */}
+      <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-4">
+          From raw measurement to stress score
+        </h2>
+        <div className="prose prose-thi">
+          <p>
+            Each indicator has its own native unit — Gini coefficient, GDP per
+            capita, temperature anomaly °C, suicide rate per 100k. To make them
+            comparable, we map each to a 0–100 stress scale using fixed bounds
+            that are documented in the source code per indicator.
+          </p>
+          <ul>
+            <li>
+              <strong>Stress-positive indicators</strong> (higher = worse, e.g.
+              unemployment, homicide rate, temperature anomaly): mapped linearly
+              between a low-stress bound and a high-stress bound.
+            </li>
+            <li>
+              <strong>Stress-negative indicators</strong> (higher = better, e.g.
+              life expectancy, life satisfaction): inverted so the resulting
+              score still aligns with the stress direction.
+            </li>
+            <li>
+              Bounds are reviewed periodically as part of the normalization
+              sanity sweep audits.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      {/* ── BAND THRESHOLDS ── */}
+      <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-4">
+          Stress bands
+        </h2>
+        <p className="text-foreground-muted mb-8 leading-relaxed">
+          Score bands convert continuous numbers into editorial categories.
+          They are calibrated so that what we have actually been measuring
+          across 25 countries spreads roughly evenly across the lower four
+          bands, with the critical band reserved for genuinely uncommon
+          situations.
+        </p>
+
+        <ul className="divide-y divide-border border-y border-border">
+          {BAND_BOUNDS.map((b) => (
+            <li key={b.band} className="py-4 flex items-center gap-4 flex-wrap">
+              <div className="w-28 shrink-0">
+                <StressBand band={b.band} score={null} showScore={false} variant="pill" size="md" />
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Data Sources */}
-        <div style={sectionStyle}>
-          <h2 style={h2Style}>Primary Data Sources</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {DATA_SOURCES.map(src => (
-              <div key={src} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ color: theme.accent, fontWeight: 700, fontSize: 16 }}>•</span>
-                <span style={{ fontSize: 14, color: theme.textSecondary, fontFamily: theme.fontBody }}>{src}</span>
+              <div className="font-mono tabular-nums text-sm text-foreground-muted w-20 shrink-0">
+                {b.min} – {b.max}
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Disclaimers */}
-        <div style={{
-          ...sectionStyle,
-          borderColor: '#92400e40',
-          background: theme.isDark ? 'rgba(251, 191, 36, 0.04)' : 'rgba(251, 191, 36, 0.08)',
-        }}>
-          <h2 style={{ ...h2Style, fontSize: 17 }}>Important Disclaimers</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {[
-              'The Human Index is based on model estimates and historical correlations. Future outcomes are inherently uncertain.',
-              'Individual exposure scores are probabilistic estimates, not predictions. Many factors influence personal outcomes.',
-              'This is not investment, career, or financial advice. Consult qualified professionals for personal decisions.',
-              'Data is subject to revision as sources are updated. Historical scores may be recalculated with new information.',
-            ].map((text, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: 14, marginTop: 1 }}>⚠</span>
-                <span style={{ fontSize: 14, color: theme.textSecondary, lineHeight: 1.6, fontFamily: theme.fontBody }}>{text}</span>
+              <div className="flex-1 text-sm text-foreground-muted">
+                {b.description}
               </div>
-            ))}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* ── FRESHNESS + CONFIDENCE ── */}
+      <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-4">
+          Freshness and confidence
+        </h2>
+        <p className="text-foreground-muted mb-8 leading-relaxed">
+          Not all data points are equal. Two visible signals tell you how much
+          to trust any given number on the site.
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          <div>
+            <h3 className="font-serif text-lg font-semibold mb-3">
+              Freshness
+            </h3>
+            <p className="text-sm text-foreground-muted mb-4">
+              How recently the underlying observation was made.
+            </p>
+            <ul className="space-y-3 text-sm">
+              {FRESHNESS_TIERS.map((t) => (
+                <li key={t.tier}>
+                  <span className="font-mono text-xs uppercase tracking-wide text-foreground">
+                    {t.tier}
+                  </span>
+                  <span className="text-foreground-muted"> — {t.window}.</span>
+                  <span className="text-foreground-subtle"> {t.status}.</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-serif text-lg font-semibold mb-3">
+              Confidence
+            </h3>
+            <p className="text-sm text-foreground-muted mb-4">
+              Where the data point came from determines how it is used.
+            </p>
+            <ul className="space-y-3 text-sm">
+              {CONFIDENCE_TIERS.map((t) => (
+                <li key={t.tier}>
+                  <span className="font-mono text-xs uppercase tracking-wide text-foreground">
+                    {t.tier}
+                  </span>
+                  <span className="text-foreground-muted"> — {t.when}.</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
+      </section>
 
-      </div>
-    </div>
-  )
+      {/* ── FALLBACK CHAIN ── */}
+      <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-4">
+          When multiple sources publish the same indicator
+        </h2>
+        <div className="prose prose-thi">
+          <p>
+            For indicators with more than one independent source (e.g. inflation
+            from IMF WEO and World Bank, temperature from NASA GISS and Berkeley
+            Earth), the orchestrator does three things on every cron run:
+          </p>
+          <ol>
+            <li>
+              <strong>Compare</strong> the latest reading from each adapter. If
+              they agree within a per-indicator threshold, the primary source
+              wins.
+            </li>
+            <li>
+              <strong>Flag</strong> any divergence that exceeds the threshold.
+              The divergence is recorded and visible on{' '}
+              <Link href="/transparency">the transparency dashboard</Link> —
+              we never silently pick a side without leaving a record.
+            </li>
+            <li>
+              <strong>Fall back</strong> to the next available source if the
+              primary fails, so the country&apos;s composite continues to update
+              even during an outage.
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      {/* ── WHAT THIS IS NOT ── */}
+      <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-4">
+          What this is — and is not
+        </h2>
+        <div className="prose prose-thi">
+          <p>
+            The Human Index is a <strong>directional, peer-comparable</strong> stress
+            scoreboard. It is intended for editorial framing, prioritization, and
+            longitudinal comparison.
+          </p>
+          <p>
+            It is <strong>not</strong> a clinical instrument, not a policy
+            optimization target, not a substitute for the original sources. The
+            absolute number means less than its movement over time and relative
+            to peers.
+          </p>
+        </div>
+      </section>
+
+      {/* ── LINKS ── */}
+      <section className="border-t border-border bg-background-alt/40">
+        <div className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <h2 className="font-serif text-lg font-semibold mb-4">
+            See it in the open
+          </h2>
+          <div className="flex flex-wrap gap-4 text-sm">
+            <Link
+              href="/transparency"
+              className="text-foreground-muted hover:text-foreground underline underline-offset-2 decoration-foreground-subtle/40"
+            >
+              Transparency dashboard
+            </Link>
+            <Link
+              href="/data-sources"
+              className="text-foreground-muted hover:text-foreground underline underline-offset-2 decoration-foreground-subtle/40"
+            >
+              Source health per source
+            </Link>
+            <Link
+              href="/glossary"
+              className="text-foreground-muted hover:text-foreground underline underline-offset-2 decoration-foreground-subtle/40"
+            >
+              Indicator glossary
+            </Link>
+            <a
+              href="https://github.com/Monotits/thehumanindex-web"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground-muted hover:text-foreground underline underline-offset-2 decoration-foreground-subtle/40"
+            >
+              Source code (GitHub)
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Suppress unused imports (Turkish band labels reserved) */}
+      {void BAND_LABELS as unknown as null}
+      {void META_LABELS as unknown as null}
+    </article>
+  );
 }
