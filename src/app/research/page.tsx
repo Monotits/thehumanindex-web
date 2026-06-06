@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { META_INDEXES, type MetaIndex } from '@/lib/ui/tokens';
+import { getActiveLocale } from '@/lib/ui/locale';
 
 export const metadata: Metadata = {
   title: 'Research — The Human Index',
@@ -11,7 +12,8 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://thehumanindex.org/research' },
 };
 
-export const revalidate = 1800;
+// Locale-aware: dynamic so we re-render per NEXT_LOCALE cookie.
+export const dynamic = 'force-dynamic';
 
 interface ResearchRow {
   id: string;
@@ -28,27 +30,47 @@ interface ResearchRow {
   published_at: string;
 }
 
-async function loadResearch(): Promise<{
+async function loadResearch(locale: string): Promise<{
   articles: ResearchRow[];
   countryNames: Map<string, { name: string; flag: string | null }>;
+  fallbackUsed: boolean;
 }> {
   const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!sbUrl || !sbKey) return { articles: [], countryNames: new Map() };
+  if (!sbUrl || !sbKey)
+    return { articles: [], countryNames: new Map(), fallbackUsed: false };
 
   const sb = createClient(sbUrl, sbKey);
 
-  const [articlesRes, countriesRes] = await Promise.all([
-    sb
-      .from('research_articles')
-      .select(
-        'id, slug, country_code, locale, topic_id, title, subtitle, excerpt, related_indicators, related_meta_indexes, reading_time_min, published_at',
-      )
-      .eq('locale', 'en')
-      .order('published_at', { ascending: false })
-      .limit(24),
-    sb.from('countries').select('code, name, flag_emoji').eq('active', true),
-  ]);
+  // Try requested locale first; if empty, fall back to English
+  let articlesRes = await sb
+    .from('research_articles')
+    .select(
+      'id, slug, country_code, locale, topic_id, title, subtitle, excerpt, related_indicators, related_meta_indexes, reading_time_min, published_at',
+    )
+    .eq('locale', locale)
+    .order('published_at', { ascending: false })
+    .limit(24);
+
+  let fallbackUsed = false;
+  if (!articlesRes.data || articlesRes.data.length === 0) {
+    if (locale !== 'en') {
+      fallbackUsed = true;
+      articlesRes = await sb
+        .from('research_articles')
+        .select(
+          'id, slug, country_code, locale, topic_id, title, subtitle, excerpt, related_indicators, related_meta_indexes, reading_time_min, published_at',
+        )
+        .eq('locale', 'en')
+        .order('published_at', { ascending: false })
+        .limit(24);
+    }
+  }
+
+  const countriesRes = await sb
+    .from('countries')
+    .select('code, name, flag_emoji')
+    .eq('active', true);
 
   const articles = (articlesRes.data ?? []) as ResearchRow[];
   const countryNames = new Map(
@@ -60,11 +82,12 @@ async function loadResearch(): Promise<{
       },
     ]),
   );
-  return { articles, countryNames };
+  return { articles, countryNames, fallbackUsed };
 }
 
 export default async function ResearchPage() {
-  const { articles, countryNames } = await loadResearch();
+  const locale = await getActiveLocale();
+  const { articles, countryNames, fallbackUsed } = await loadResearch(locale);
 
   // Group: featured (first 2) + rest
   const featured = articles.slice(0, 2);
@@ -86,6 +109,12 @@ export default async function ResearchPage() {
               Each piece connects specific indicators to a broader meta-index narrative.
               Every claim is traceable back to its source.
             </p>
+            {fallbackUsed && (
+              <p className="mt-4 text-xs text-foreground-subtle">
+                Articles are not yet translated for the selected language —
+                showing the English edition.
+              </p>
+            )}
           </div>
         </div>
       </section>
