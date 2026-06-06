@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { StressBand } from '@/components/ui/StressBand';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { SparklineMini } from '@/components/ui/SparklineMini';
-import { StressHeatmap, type HeatmapCountry } from '@/components/ui/StressHeatmap';
+import { WorldMap, type WorldMapCountry } from '@/components/ui/WorldMap';
 import { bandFor, META_INDEXES, META_LABELS, META_WEIGHT, type MetaIndex } from '@/lib/ui/tokens';
 import { getActiveLocale } from '@/lib/ui/locale';
 import { loadCompositeHistory, pointsToDenseSeries, trendSummary } from '@/lib/ui/history';
@@ -48,7 +48,7 @@ async function loadHomeData(locale: string) {
   if (!sbUrl || !sbKey) {
     return {
       countries: [] as CountrySummary[],
-      heatmap: [] as HeatmapCountry[],
+      mapData: [] as WorldMapCountry[],
       metaAvgs: [] as MetaAvg[],
       pulses: [] as PulsePreview[],
       globalAvg: null,
@@ -107,7 +107,7 @@ async function loadHomeData(locale: string) {
     perCountry.get(row.country_code)![row.meta_index] = row.value;
   }
 
-  const heatmap: HeatmapCountry[] = countries.map((c) => ({
+  const mapData: WorldMapCountry[] = countries.map((c) => ({
     country_code: c.country_code,
     name: c.name,
     flag_emoji: c.flag_emoji,
@@ -155,7 +155,7 @@ async function loadHomeData(locale: string) {
   }
   const pulses = (pulsesRes.data ?? []) as PulsePreview[];
 
-  return { countries, heatmap, metaAvgs, pulses, globalAvg, lastUpdate };
+  return { countries, mapData, metaAvgs, pulses, globalAvg, lastUpdate };
 }
 
 function formatRelativeTime(iso: string | null): string {
@@ -173,7 +173,7 @@ function formatRelativeTime(iso: string | null): string {
 
 export default async function HomePage() {
   const locale = await getActiveLocale();
-  const { countries, heatmap, metaAvgs, pulses, globalAvg, lastUpdate } = await loadHomeData(locale);
+  const { countries, mapData, metaAvgs, pulses, globalAvg, lastUpdate } = await loadHomeData(locale);
 
   let top5 = countries.slice(0, 5);
   let bottom5 = countries.slice(-5).reverse();
@@ -263,21 +263,19 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── HEATMAP ── */}
-      {heatmap.length > 0 && (
+      {/* ── WORLD MAP ── */}
+      {mapData.length > 0 && (
         <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-14 border-b border-border">
           <div className="mb-8 max-w-2xl">
             <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">
-              Where stress is concentrated
+              Where stress lives, on the map.
             </h2>
             <p className="text-foreground-muted">
-              Every cell is one country&apos;s score on one meta-index, colored by
-              stress band. Read across a row to see a country&apos;s full profile;
-              read down a column to see how a single dimension varies between
-              countries.
+              Twenty-five countries colored by their composite stress score.
+              Hover any tracked country for a full readout — click to dive in.
             </p>
           </div>
-          <StressHeatmap countries={heatmap} />
+          <WorldMap countries={mapData} />
         </section>
       )}
 
