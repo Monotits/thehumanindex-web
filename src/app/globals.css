@@ -180,6 +180,84 @@ body {
 .meta-bg-environmental    { background-color: var(--meta-environmental); color: #fff; }
 
 /* ═══════════════════════════════════════════════════════════════
+   EDITORIAL PROSE (.prose-thi)
+   Used by Pulse/Glossary readers via renderMarkdown() output.
+   Keeps the tone close to a long-form publication: serif body,
+   generous leading, restrained spacing, scoped to its container.
+   ═══════════════════════════════════════════════════════════════ */
+.prose-thi {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 18px;
+  line-height: 1.75;
+  color: var(--foreground);
+}
+.prose-thi p {
+  margin: 0 0 1.4em;
+  text-wrap: pretty;
+}
+.prose-thi h2 {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 1.6em;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 2.2em 0 0.6em;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.prose-thi h3 {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 1.25em;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 1.9em 0 0.5em;
+  letter-spacing: -0.005em;
+}
+.prose-thi a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(0,0,0,0.2);
+}
+.prose-thi a:hover {
+  color: var(--link-hover);
+  text-decoration-color: currentColor;
+}
+.prose-thi strong { font-weight: 600; }
+.prose-thi em     { font-style: italic; }
+.prose-thi code {
+  font-family: var(--font-plex-mono), 'SF Mono', Consolas, monospace;
+  font-size: 0.88em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: var(--background-alt);
+}
+.prose-thi blockquote {
+  border-left: 3px solid var(--border-strong);
+  padding: 0.2em 0 0.2em 1.2em;
+  margin: 1.6em 0;
+  color: var(--foreground-muted);
+  font-style: italic;
+}
+.prose-thi ul,
+.prose-thi ol {
+  padding-left: 1.4em;
+  margin: 0 0 1.4em;
+}
+.prose-thi li {
+  margin: 0.4em 0;
+}
+.prose-thi ul li { list-style: disc; }
+.prose-thi ol li { list-style: decimal; }
+.prose-thi hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2.4em auto;
+  width: 40%;
+}
+.prose-thi > :first-child { margin-top: 0; }
+.prose-thi > :last-child  { margin-bottom: 0; }
+
+/* ═══════════════════════════════════════════════════════════════
    STRESS BAND UTILITY CLASSES
    ═══════════════════════════════════════════════════════════════ */
 .band-text-low       { color: var(--band-low); }

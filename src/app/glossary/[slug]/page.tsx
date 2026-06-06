@@ -1,205 +1,238 @@
-import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-import { GLOSSARY, getGlossaryBySlug } from '@/lib/glossaryData'
-import { FAQPageJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd'
-import Link from 'next/link'
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
+import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
+import { renderMarkdown } from '@/lib/ui/markdown';
+import { getActiveLocale } from '@/lib/ui/locale';
+import { META_INDEXES, type MetaIndex } from '@/lib/ui/tokens';
 
-// Generate static paths for all glossary entries
-export function generateStaticParams() {
-  return GLOSSARY.map((entry) => ({ slug: entry.slug }))
+export const dynamic = 'force-dynamic';
+
+interface GlossaryEntry {
+  id: string;
+  slug: string;
+  country_code: string;
+  locale: string;
+  term: string;
+  short_definition: string;
+  body_markdown: string;
+  related_indicators: string[] | null;
+  related_meta_indexes: string[] | null;
+  related_terms: string[] | null;
+  sources: Array<{ name: string; url?: string }> | null;
+  published_at: string;
 }
 
-// Dynamic metadata for SEO
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params
-  const entry = getGlossaryBySlug(slug)
-  if (!entry) return { title: 'Not Found' }
+interface RelatedTermLite {
+  slug: string;
+  term: string;
+  short_definition: string;
+}
+
+async function loadEntry(slug: string, locale: string) {
+  const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!sbUrl || !sbKey) {
+    return { entry: null, related: [] as RelatedTermLite[] };
+  }
+  const sb = createClient(sbUrl, sbKey);
+
+  const select =
+    'id, slug, country_code, locale, term, short_definition, body_markdown, related_indicators, related_meta_indexes, related_terms, sources, published_at';
+
+  // Try requested locale + global country
+  let res = await sb
+    .from('glossary_entries')
+    .select(select)
+    .eq('slug', slug)
+    .eq('locale', locale)
+    .eq('country_code', 'global')
+    .maybeSingle();
+
+  if (!res.data && locale !== 'en') {
+    res = await sb
+      .from('glossary_entries')
+      .select(select)
+      .eq('slug', slug)
+      .eq('locale', 'en')
+      .eq('country_code', 'global')
+      .maybeSingle();
+  }
+
+  const entry = res.data as GlossaryEntry | null;
+  if (!entry) return { entry: null, related: [] as RelatedTermLite[] };
+
+  // Related terms: resolve slugs to full term + short definition
+  const relSlugs = (entry.related_terms ?? []).filter(Boolean).slice(0, 8);
+  let related: RelatedTermLite[] = [];
+  if (relSlugs.length > 0) {
+    const relRes = await sb
+      .from('glossary_entries')
+      .select('slug, term, short_definition')
+      .in('slug', relSlugs)
+      .eq('locale', entry.locale)
+      .eq('country_code', 'global');
+    related = (relRes.data ?? []) as RelatedTermLite[];
+  }
+
+  return { entry, related };
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!sbUrl || !sbKey) return { title: 'Glossary — The Human Index' };
+
+  const sb = createClient(sbUrl, sbKey);
+  const res = await sb
+    .from('glossary_entries')
+    .select('term, short_definition')
+    .eq('slug', slug)
+    .eq('locale', 'en')
+    .eq('country_code', 'global')
+    .maybeSingle();
+
+  const data = res.data as { term: string; short_definition: string } | null;
+  if (!data) return { title: 'Glossary — The Human Index' };
 
   return {
-    title: `${entry.title} — What It Means & Why It Matters`,
-    description: entry.shortDescription,
-    keywords: [
-      entry.title.toLowerCase(),
-      `${entry.title.toLowerCase()} index`,
-      `${entry.title.toLowerCase()} score`,
-      'civilizational stress',
-      'human index',
-      'AI impact',
-    ],
-    alternates: {
-      canonical: `https://thehumanindex.org/glossary/${entry.slug}`,
-    },
-    openGraph: {
-      title: `${entry.title} — The Human Index`,
-      description: entry.shortDescription,
-      url: `https://thehumanindex.org/glossary/${entry.slug}`,
-      type: 'article',
-    },
-  }
+    title: `${data.term} — Glossary | The Human Index`,
+    description: data.short_definition,
+    alternates: { canonical: `https://thehumanindex.org/glossary/${slug}` },
+  };
 }
 
-export default async function GlossaryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const entry = getGlossaryBySlug(slug)
-  if (!entry) notFound()
+export default async function GlossaryEntryPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const locale = await getActiveLocale();
+  const { entry, related } = await loadEntry(slug, locale);
+
+  if (!entry) notFound();
+
+  const fallbackUsed = entry.locale !== locale;
+  const html = renderMarkdown(entry.body_markdown);
+
+  const validMeta = (entry.related_meta_indexes ?? []).filter(
+    (m): m is MetaIndex => (META_INDEXES as readonly string[]).includes(m),
+  );
 
   return (
-    <>
-      <FAQPageJsonLd questions={entry.faq} />
-      <BreadcrumbJsonLd
-        items={[
-          { name: 'Home', url: 'https://thehumanindex.org' },
-          { name: 'Glossary', url: 'https://thehumanindex.org/glossary' },
-          { name: entry.title, url: `https://thehumanindex.org/glossary/${entry.slug}` },
-        ]}
-      />
+    <article className="min-h-screen">
+      {/* ── HEADER ── */}
+      <header className="border-b border-border bg-background-alt/40">
+        <div className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="mb-6 text-xs uppercase tracking-wider text-foreground-muted font-medium">
+            <Link href="/glossary" className="hover:text-foreground transition-colors">
+              ← Glossary
+            </Link>
+          </div>
 
-      <div style={{ background: 'var(--thi-bg)', minHeight: '100vh', color: 'var(--thi-text)', fontFamily: 'var(--thi-font-body)' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto', padding: '48px 24px' }}>
-          {/* Breadcrumb */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--thi-text-tertiary)', marginBottom: 32 }}>
-            <Link href="/" style={{ color: 'var(--thi-text-tertiary)', textDecoration: 'none' }}>Home</Link>
-            <span>/</span>
-            <Link href="/glossary" style={{ color: 'var(--thi-text-tertiary)', textDecoration: 'none' }}>Glossary</Link>
-            <span>/</span>
-            <span style={{ color: 'var(--thi-text-secondary)' }}>{entry.title}</span>
-          </nav>
+          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight tracking-tight text-balance mb-4">
+            {entry.term}
+          </h1>
 
-          {/* Header */}
-          <header style={{ marginBottom: 48 }}>
-            <h1 style={{ fontSize: 32, fontWeight: 300, margin: '0 0 16px', color: 'var(--thi-text)', fontFamily: 'var(--thi-font-heading)' }}>
-              {entry.title}
-            </h1>
-            <p style={{ fontSize: 16, color: 'var(--thi-text-secondary)', lineHeight: 1.7, maxWidth: 640, margin: 0 }}>
-              {entry.shortDescription}
-            </p>
-          </header>
+          <p className="text-lg sm:text-xl text-foreground-muted text-pretty max-w-2xl leading-relaxed">
+            {entry.short_definition}
+          </p>
 
-          {/* What It Measures */}
-          <section style={{ marginBottom: 48 }}>
-            <h2 style={{ fontSize: 24, fontWeight: 400, color: 'var(--thi-text)', marginBottom: 16 }}>What It Measures</h2>
-            <p style={{ fontSize: 15, color: 'var(--thi-text-secondary)', lineHeight: 1.7 }}>{entry.whatItMeasures}</p>
-          </section>
-
-          {/* Why It Matters */}
-          <section style={{ marginBottom: 48 }}>
-            <h2 style={{ fontSize: 24, fontWeight: 400, color: 'var(--thi-text)', marginBottom: 16 }}>Why It Matters</h2>
-            <p style={{ fontSize: 15, color: 'var(--thi-text-secondary)', lineHeight: 1.7 }}>{entry.whyItMatters}</p>
-          </section>
-
-          {/* Data Sources */}
-          <section style={{ marginBottom: 48 }}>
-            <h2 style={{ fontSize: 24, fontWeight: 400, color: 'var(--thi-text)', marginBottom: 16 }}>Data Sources</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {entry.dataSources.map((source, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: 15, color: 'var(--thi-text-secondary)' }}>
-                  <span style={{ color: 'var(--thi-accent)', marginTop: 6, fontSize: 8 }}>●</span>
-                  <span>{source}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Methodology */}
-          <section style={{ marginBottom: 48 }}>
-            <h2 style={{ fontSize: 24, fontWeight: 400, color: 'var(--thi-text)', marginBottom: 16 }}>Methodology</h2>
-            <p style={{ fontSize: 15, color: 'var(--thi-text-secondary)', lineHeight: 1.7 }}>{entry.methodology}</p>
-          </section>
-
-          {/* Correlations */}
-          <section style={{ marginBottom: 48 }}>
-            <h2 style={{ fontSize: 24, fontWeight: 400, color: 'var(--thi-text)', marginBottom: 16 }}>
-              How It Connects to Other Domains
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {entry.correlations.map((c, i) => (
-                <div key={i} style={{ borderLeft: '2px solid var(--thi-accent)', paddingLeft: 16 }}>
-                  <p style={{ fontSize: 15, color: 'var(--thi-text-secondary)', lineHeight: 1.7, margin: 0 }}>{c}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Actionable Insights */}
-          <section style={{ marginBottom: 48 }}>
-            <h2 style={{ fontSize: 24, fontWeight: 400, color: 'var(--thi-text)', marginBottom: 24 }}>
-              What You Can Do
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-              <InsightBlock title="For Individuals" items={entry.actionableInsights.individual} accent="var(--thi-accent)" />
-              <InsightBlock title="For Policymakers" items={entry.actionableInsights.policymaker} accent="#f59e0b" />
-              <InsightBlock title="For Businesses" items={entry.actionableInsights.business} accent="#3b82f6" />
-            </div>
-          </section>
-
-          {/* FAQ */}
-          <section style={{ marginBottom: 48 }}>
-            <h2 style={{ fontSize: 24, fontWeight: 400, color: 'var(--thi-text)', marginBottom: 24 }}>
-              Frequently Asked Questions
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {entry.faq.map((item, i) => (
-                <details key={i} style={{ border: '1px solid var(--thi-surface-border)', borderRadius: 10, overflow: 'hidden' }}>
-                  <summary style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 20, cursor: 'pointer', fontSize: 15, fontWeight: 500, color: 'var(--thi-text)' }}>
-                    {item.question}
-                    <span style={{ color: 'var(--thi-text-tertiary)', fontSize: 18, flexShrink: 0, marginLeft: 16 }}>+</span>
-                  </summary>
-                  <div style={{ padding: '0 20px 20px' }}>
-                    <p style={{ fontSize: 15, color: 'var(--thi-text-secondary)', lineHeight: 1.7, margin: 0 }}>{item.answer}</p>
-                  </div>
-                </details>
-              ))}
-            </div>
-          </section>
-
-          {/* Cross-links */}
-          <section style={{ borderTop: '1px solid var(--thi-surface-border)', paddingTop: 32 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--thi-text)', marginBottom: 16 }}>Explore Other Domains</h2>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-              {GLOSSARY.filter((g) => g.slug !== entry.slug).map((g) => (
-                <Link
-                  key={g.slug}
-                  href={`/glossary/${g.slug}`}
-                  style={{ padding: '8px 16px', borderRadius: 10, border: '1px solid var(--thi-surface-border)', fontSize: 13, color: 'var(--thi-text-secondary)', textDecoration: 'none' }}
-                >
-                  {g.title}
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          {/* CTA */}
-          <div style={{ marginTop: 48, textAlign: 'center' }}>
-            <p style={{ fontSize: 13, color: 'var(--thi-text-tertiary)', marginBottom: 16 }}>Want to see live data?</p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <Link href="/dashboard" style={{ padding: '12px 24px', borderRadius: 10, background: 'var(--thi-accent)', color: '#fff', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
-                View Dashboard
-              </Link>
-              <Link href="/quiz" style={{ padding: '12px 24px', borderRadius: 10, border: '1px solid var(--thi-surface-border)', color: 'var(--thi-text-secondary)', fontSize: 14, textDecoration: 'none' }}>
-                Take the AI Exposure Quiz
-              </Link>
-            </div>
+          {/* Meta badges + fallback */}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            {validMeta.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {validMeta.map((m) => (
+                  <MetaCategoryBadge key={m} meta={m} variant="pill" size="sm" />
+                ))}
+              </div>
+            )}
+            {fallbackUsed && (
+              <span className="text-xs text-foreground-subtle">
+                · English edition — not yet translated
+              </span>
+            )}
           </div>
         </div>
-      </div>
-    </>
-  )
-}
+      </header>
 
-function InsightBlock({ title, items, accent }: { title: string; items: string[]; accent: string }) {
-  return (
-    <div style={{ border: '1px solid var(--thi-surface-border)', borderRadius: 10, padding: 24 }}>
-      <h3 style={{ fontSize: 18, fontWeight: 600, color: accent, marginBottom: 16, margin: '0 0 16px' }}>
-        {title}
-      </h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {items.map((item, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: 15, color: 'var(--thi-text-secondary)', lineHeight: 1.6 }}>
-            <span style={{ fontFamily: 'var(--thi-font-mono)', fontSize: 11, marginTop: 3, flexShrink: 0, color: accent }}>{String(i + 1).padStart(2, '0')}</span>
-            <span>{item}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
+      {/* ── BODY ── */}
+      <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div
+          className="prose prose-thi"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      </section>
+
+      {/* ── SOURCES ── */}
+      {entry.sources && entry.sources.length > 0 && (
+        <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+          <h2 className="text-xs uppercase tracking-wider text-foreground-subtle font-medium mb-4">
+            Sources
+          </h2>
+          <ul className="space-y-2 text-sm">
+            {entry.sources.map((s, i) => (
+              <li key={i} className="text-foreground-muted">
+                {s.url ? (
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:underline underline-offset-2"
+                  >
+                    {s.name}
+                  </a>
+                ) : (
+                  s.name
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* ── RELATED ── */}
+      {related.length > 0 && (
+        <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+          <h2 className="font-serif text-xl sm:text-2xl font-semibold mb-6">
+            See also
+          </h2>
+          <ul className="grid sm:grid-cols-2 gap-3">
+            {related.map((r) => (
+              <li key={r.slug}>
+                <Link
+                  href={`/glossary/${r.slug}`}
+                  className="group block rounded-lg border border-border bg-background hover:bg-background-alt/60 p-4 transition-colors h-full"
+                >
+                  <h3 className="font-serif text-base font-semibold mb-1 group-hover:underline decoration-foreground-subtle/40 underline-offset-2">
+                    {r.term}
+                  </h3>
+                  <p className="text-xs text-foreground-muted line-clamp-2 leading-relaxed">
+                    {r.short_definition}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* ── BACK ── */}
+      <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-border">
+        <Link
+          href="/glossary"
+          className="inline-flex items-center gap-2 text-sm text-foreground-muted hover:text-foreground"
+        >
+          ← All glossary terms
+        </Link>
+      </section>
+    </article>
+  );
 }
