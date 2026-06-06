@@ -2,11 +2,119 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════
+   THE HUMAN INDEX — DESIGN TOKENS
+   Sentez kararı: ChatGPT (kategorik renkler) + Gemini (muted aesthetic)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Typography ──
+   - Editorial başlık + makaleler: Newsreader (Pentagram, Google Fonts)
+   - UI gövde + sans-serif: Inter
+   - Sayısal + tabular figures: IBM Plex Mono
+*/
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
 :root {
-  --background: #0a0a0a;
-  --foreground: #e0e0e0;
+  /* ── Color tokens — Light Theme (default) ── */
+  --background:        #FAFAF8;  /* warm off-white */
+  --background-alt:    #F2F2EF;  /* card / section bg */
+  --foreground:        #1A1A1A;  /* primary text */
+  --foreground-muted:  #595956;  /* secondary text */
+  --foreground-subtle: #8A8A85;  /* tertiary */
+  --border:            #E0E0DC;  /* hairlines */
+  --border-strong:     #C7C7C2;  /* dividers */
+
+  /* ── Meta-index categorical palette (5 categories) ──
+     Decision: tutarlı her yerde. İçeriklerde meta için bu renkler kullanılır.
+  */
+  --meta-economic:        #475569;  /* Slate */
+  --meta-economic-bg:     #475569;
+  --meta-social:          #4F46E5;  /* Indigo */
+  --meta-social-bg:       #4F46E5;
+  --meta-mental:          #7C3AED;  /* Violet */
+  --meta-mental-bg:       #7C3AED;
+  --meta-technological:   #0891B2;  /* Cyan */
+  --meta-technological-bg:#0891B2;
+  --meta-environmental:   #059669;  /* Emerald */
+  --meta-environmental-bg:#059669;
+
+  /* ── Stress band palette (composite + meta scores) ──
+     Gemini'nin "muted aesthetic" — Reuters/Economist tonu, alarmist değil.
+  */
+  --band-low:        #6B8E5A;  /* sage green: 0-25 */
+  --band-low-bg:     rgba(107, 142, 90, 0.12);
+  --band-moderate:   #D6A35C;  /* soft amber: 26-45 */
+  --band-moderate-bg:rgba(214, 163, 92, 0.14);
+  --band-elevated:   #C97447;  /* burnt sienna: 46-65 */
+  --band-elevated-bg:rgba(201, 116, 71, 0.14);
+  --band-high:       #A53E3E;  /* muted crimson: 66-80 */
+  --band-high-bg:    rgba(165, 62, 62, 0.14);
+  --band-critical:   #5D1F1F;  /* deep burgundy: 81-100 */
+  --band-critical-bg:rgba(93, 31, 31, 0.16);
+
+  /* ── Freshness palette (data age signal) ── */
+  --freshness-fresh:      #16A34A;  /* green */
+  --freshness-aging:      #CA8A04;  /* yellow */
+  --freshness-stale:      #DC2626;  /* red */
+  --freshness-very-stale: #991B1B;  /* dark red */
+
+  /* ── Confidence tier palette ── */
+  --confidence-verified: #15803D;  /* dark green */
+  --confidence-reported: #B45309;  /* amber */
+  --confidence-rumored:  #6B7280;  /* gray */
+
+  /* ── Accent (used sparingly for CTAs) ── */
+  --accent:        #1F2937;   /* near-black */
+  --accent-fg:     #FAFAF8;
+  --accent-hover:  #111827;
+  --link:          #1F4F8A;   /* navy */
+  --link-hover:    #0F3162;
+
+  /* ── Component tokens ── */
+  --radius-sm:  4px;
+  --radius:     6px;
+  --radius-lg:  10px;
+  --shadow-sm:  0 1px 2px 0 rgba(0,0,0,0.04);
+  --shadow:     0 2px 8px -2px rgba(0,0,0,0.08), 0 4px 16px -4px rgba(0,0,0,0.06);
+  --shadow-lg:  0 8px 24px -6px rgba(0,0,0,0.12);
 }
 
+/* ── Dark mode ── */
+[data-theme="dark"],
+.dark {
+  --background:        #0E0E0C;
+  --background-alt:    #1A1A17;
+  --foreground:        #ECECE8;
+  --foreground-muted:  #A0A09B;
+  --foreground-subtle: #6B6B66;
+  --border:            #2D2D29;
+  --border-strong:     #3D3D38;
+
+  --meta-economic:        #94A3B8;
+  --meta-social:          #818CF8;
+  --meta-mental:          #A78BFA;
+  --meta-technological:   #22D3EE;
+  --meta-environmental:   #34D399;
+
+  --band-low:        #8FB97F;
+  --band-low-bg:     rgba(143, 185, 127, 0.14);
+  --band-moderate:   #E5B870;
+  --band-moderate-bg:rgba(229, 184, 112, 0.14);
+  --band-elevated:   #E08D60;
+  --band-elevated-bg:rgba(224, 141, 96, 0.14);
+  --band-high:       #C56565;
+  --band-high-bg:    rgba(197, 101, 101, 0.16);
+  --band-critical:   #8B3030;
+  --band-critical-bg:rgba(139, 48, 48, 0.20);
+
+  --accent:        #ECECE8;
+  --accent-fg:     #0E0E0C;
+  --accent-hover:  #FFFFFF;
+  --link:          #7BB1F0;
+  --link-hover:    #B0CFFF;
+}
+
+/* ── Base layer ── */
 html, body {
   overflow-x: hidden;
   max-width: 100vw;
@@ -16,122 +124,71 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-feature-settings: 'cv02','cv03','cv04','cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+/* Editorial typography for prose */
+.font-editorial,
+.prose {
+  font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+  font-variation-settings: 'opsz' 28;
 }
 
-::-webkit-scrollbar-track {
-  background: #111827;
+/* Mono for numbers — tabular figures alignment */
+.font-mono,
+.tabular {
+  font-family: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #374151;
-  border-radius: 3px;
-}
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--background-alt); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--foreground-subtle); }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #4b5563;
-}
-
-/* Selection */
+/* ── Selection ── */
 ::selection {
-  background: rgba(245, 158, 11, 0.3);
-  color: #f9fafb;
+  background: rgba(31, 79, 138, 0.22);
+  color: var(--foreground);
 }
 
+/* ── Utilities ── */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  .text-balance { text-wrap: balance; }
+  .text-pretty  { text-wrap: pretty; }
 }
 
-/* ═══════════════════════════════════════════════════
-   RESPONSIVE LAYOUT SYSTEM
-   Mobile-first breakpoint: 768px
-   ═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   META-INDEX UTILITY CLASSES
+   Usage: <span class="meta-text-economic">Economic</span>
+          <div class="meta-bg-technological">...</div>
+   ═══════════════════════════════════════════════════════════════ */
+.meta-text-economic       { color: var(--meta-economic); }
+.meta-text-social         { color: var(--meta-social); }
+.meta-text-mental         { color: var(--meta-mental); }
+.meta-text-technological  { color: var(--meta-technological); }
+.meta-text-environmental  { color: var(--meta-environmental); }
 
-/* ── Navigation ── */
-@media (max-width: 768px) {
-  .mobile-menu-btn {
-    display: block !important;
-  }
-  .desktop-nav {
-    display: none !important;
-  }
-}
+.meta-bg-economic         { background-color: var(--meta-economic); color: #fff; }
+.meta-bg-social           { background-color: var(--meta-social); color: #fff; }
+.meta-bg-mental           { background-color: var(--meta-mental); color: #fff; }
+.meta-bg-technological    { background-color: var(--meta-technological); color: #fff; }
+.meta-bg-environmental    { background-color: var(--meta-environmental); color: #fff; }
 
-/* ── Grid helpers: collapse to 1 column on mobile ── */
-@media (max-width: 768px) {
-  .grid-hero { grid-template-columns: 1fr !important; gap: 24px !important; }
-  .grid-2col { grid-template-columns: 1fr !important; gap: 16px !important; }
-  .grid-3col { grid-template-columns: 1fr !important; gap: 12px !important; }
-  .grid-stats { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-  .grid-movers { grid-template-columns: 1fr !important; gap: 12px !important; }
-  .grid-methodology { grid-template-columns: 1fr !important; gap: 16px !important; }
-}
+/* ═══════════════════════════════════════════════════════════════
+   STRESS BAND UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════ */
+.band-text-low       { color: var(--band-low); }
+.band-text-moderate  { color: var(--band-moderate); }
+.band-text-elevated  { color: var(--band-elevated); }
+.band-text-high      { color: var(--band-high); }
+.band-text-critical  { color: var(--band-critical); }
 
-/* ── Stat bar: stack on very small screens ── */
-@media (max-width: 480px) {
-  .grid-stats { grid-template-columns: 1fr 1fr !important; }
-  .stat-bar { flex-direction: column !important; }
-  .stat-bar > * { border-right: none !important; border-bottom: 1px solid rgba(128,128,128,0.15); padding: 8px 0 !important; }
-  .stat-bar > *:last-child { border-bottom: none; }
-}
-
-/* ── Table: horizontal scroll wrapper ── */
-.table-scroll-wrapper {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-@media (max-width: 768px) {
-  .table-scroll-wrapper > * { min-width: 600px; }
-}
-
-/* ── Domain Comparison Bar: simplify on mobile ── */
-@media (max-width: 768px) {
-  .domain-bar-row {
-    grid-template-columns: 24px 1fr 52px !important;
-    gap: 6px !important;
-  }
-  .domain-bar-row .hide-mobile { display: none !important; }
-  .domain-bar-header { display: none !important; }
-}
-
-/* ── General spacing/typography mobile ── */
-@media (max-width: 768px) {
-  .mobile-padding { padding-left: 16px !important; padding-right: 16px !important; }
-  .mobile-text-sm { font-size: 13px !important; }
-  .mobile-heading-sm { font-size: 28px !important; }
-  .mobile-stack { flex-direction: column !important; }
-  .mobile-full { width: 100% !important; }
-  .mobile-hide { display: none !important; }
-}
-
-/* ── Data sources strip: wrap on mobile ── */
-@media (max-width: 768px) {
-  .sources-strip {
-    flex-wrap: wrap !important;
-    gap: 6px !important;
-    justify-content: center !important;
-  }
-}
-
-/* ── Footer: single column on mobile ── */
-@media (max-width: 768px) {
-  .footer-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 20px !important;
-  }
-}
-
-/* ── Pulse page: responsive cards ── */
-@media (max-width: 768px) {
-  .pulse-card .hide-mobile { display: none !important; }
-  .pulse-card .show-mobile-inline { display: inline-flex !important; }
-  .pulse-nav { flex-direction: column !important; }
-}
+.band-bg-low       { background-color: var(--band-low-bg);      color: var(--band-low); }
+.band-bg-moderate  { background-color: var(--band-moderate-bg); color: var(--band-moderate); }
+.band-bg-elevated  { background-color: var(--band-elevated-bg); color: var(--band-elevated); }
+.band-bg-high      { background-color: var(--band-high-bg);     color: var(--band-high); }
+.band-bg-critical  { background-color: var(--band-critical-bg); color: var(--band-critical); }
