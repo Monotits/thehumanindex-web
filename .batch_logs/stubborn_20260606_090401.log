@@ -1,0 +1,41 @@
+[1mStubborn pulses retry (10 pairs, 300s timeout) —  6 Haz 2026 Cmt +03 09:04:01[0m
+Log: scripts/../.batch_logs/stubborn_20260606_090401.log
+
+[1/10] [1mBR/fr[0m
+  [31m✗ (50s) status=already_published[0m
+
+[2/10] [1mBR/nl[0m
+  [31m✗ (55s) status=already_published[0m
+
+[3/10] [1mDE/nl[0m
+  [31m✗ (55s) status=already_published[0m
+
+[4/10] [1mFR/it[0m
+  [31m✗ (50s) status=already_published[0m
+
+[5/10] [1mGB/fr[0m
+  [31m✗ (42s) status=already_published[0m
+
+[6/10] [1mBR/pt-br[0m
+  [32m✓ (46s) Telas, Algoritmos e Desconfiança: as Tensões do Brasil[0m
+
+[7/10] [1mES/it[0m
+  [31m✗ (41s) status=already_published[0m
+
+[8/10] [1mES/nl[0m
+  [32m✓ (72s) Spanje's open wond: jeugdwerkloosheid ontmoet AI-angst[0m
+
+[9/10] [1mFR/ja[0m
+  [31m✗ (84s) status=already_published[0m
+
+[10/10] [1mUS/fr[0m
+  [31m✗ (48s) status=already_published[0m
+
+[1m── Summary ──[0m
+  Retried:      10
+  Published:    [32m2[0m
+  Validation:   0
+  Failed:       8
+  Timeouts:     0
+  Wall time:    544s (9min)
+Log: scripts/../.batch_logs/stubborn_20260606_090401.log
