@@ -26,6 +26,7 @@
  *   - automation_exposure       (McKinsey Global Institute 2023)
  *   - life_satisfaction         (OECD Better Life Index 2024)
  *   - work_life_balance         (OECD Employment Database 2024)
+ *   - gov_debt_pct_gdp          (IMF WEO October 2024 — 25-country coverage)
  *
  * Future: replace with live API adapters as upstream sources expose them.
  */
@@ -251,6 +252,30 @@ const SEEDS: SeedEntry[] = [
       AU: 12.5, NZ: 13.2,
       BR: 7.6, AR: 21.0,
       ZA: 16.2, IL: 14.6, AE: 18.0,
+    },
+  },
+
+  // ── gov_debt_pct_gdp (General gov gross debt, % of GDP, IMF WEO Oct 2024) ──
+  // Migration 023 replaces WB GC.DOD.TOTL.GD.ZS which had 12/25 NULL coverage
+  // (notably missing JP at 252%, the world's highest). IMF General-Government
+  // basis is harmonized across countries. Updates annually each January from
+  // the latest WEO database release.
+  //
+  // Spread: from AE (~28%) to JP (~252%). With normalize bounds 30-200 (post
+  // Migration 021), values clamp at 100 stress for JP/SG, register meaningful
+  // gradient for everyone else.
+  {
+    indicatorId: 'gov_debt_pct_gdp',
+    year: 2024,
+    source: 'IMF World Economic Outlook October 2024',
+    values: {
+      US: 123, CA: 107, MX: 57,
+      GB: 104, DE: 63, FR: 111, ES: 105, IT: 139,
+      NL: 47, SE: 33, NO: 44, PL: 49, TR: 28, CH: 38,
+      JP: 252, KR: 55, IN: 83, SG: 173,
+      AU: 49, NZ: 46,
+      BR: 88, AR: 91,
+      ZA: 75, IL: 64, AE: 28,
     },
   },
 ];

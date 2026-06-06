@@ -46,7 +46,9 @@ const INDICATOR_TO_WB_CODE: Record<string, string> = {
   inflation_rate: 'FP.CPI.TOTL.ZG',          // Consumer price inflation, annual %
   gdp_growth_rate: 'NY.GDP.MKTP.KD.ZG',      // Real GDP growth, annual %
   life_expectancy: 'SP.DYN.LE00.IN',         // Life expectancy at birth, years
-  gov_debt_pct_gdp: 'GC.DOD.TOTL.GD.ZS',     // Central government gross debt, % of GDP
+  // gov_debt_pct_gdp: REMOVED — WB code GC.DOD.TOTL.GD.ZS missing for
+  // 12/25 countries (JP, DE, IT, AR, etc.). Audit Phase 1 finding.
+  // Now sourced from referenceSeed via IMF WEO October 2024.
   co2_per_capita: 'EN.GHG.CO2.PC.CE.AR5',    // CO2 emissions per capita (AR5), tonnes
   mortality_rate_under5: 'SH.DYN.MORT',      // Under-5 mortality per 1,000
   renewable_energy_pct: 'EG.FEC.RNEW.ZS',    // Renewable share of final energy, %
