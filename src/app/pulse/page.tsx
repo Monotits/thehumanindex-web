@@ -1,317 +1,272 @@
-'use client'
+import Link from 'next/link';
+import { createClient } from '@supabase/supabase-js';
+import { getActiveLocale } from '@/lib/ui/locale';
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { Commentary, DOMAIN_LABELS, Domain } from '@/lib/types'
-import { DomainIcon } from '@/components/DomainIcon'
-import { supabase } from '@/lib/supabase'
-import { useTheme } from '@/lib/theme'
-import { timeAgo } from '@/lib/utils'
-import { ShareButton } from '@/components/share'
-import type { PulseCardData } from '@/components/share'
+// Locale-aware: dynamic so we re-render per NEXT_LOCALE cookie.
+export const dynamic = 'force-dynamic';
 
-/** Extract a composite score number from markdown body if mentioned */
-function extractScore(body: string): number | null {
-  // Look for patterns like "composite score stands at **60.1**" or "composite...58" or "reading of 58"
-  const patterns = [
-    /composite[^.]*?(\d{2,3}(?:\.\d)?)/i,
-    /reading of (\d{2,3}(?:\.\d)?)/i,
-    /index.*?at\s+\*?\*?(\d{2,3}(?:\.\d)?)/i,
-    /Weekly Pulse at \*?\*?(\d{2,3}(?:\.\d)?)/i,
-  ]
-  for (const p of patterns) {
-    const m = body.match(p)
-    if (m) return parseFloat(m[1])
-  }
-  return null
+interface PulseRow {
+  id: string;
+  slug: string;
+  country_code: string;
+  locale: string;
+  title: string;
+  excerpt: string | null;
+  published_at: string;
 }
 
-/** Extract key domains mentioned in the body */
-function extractDomains(body: string): Domain[] {
-  const domainKeywords: Record<Domain, RegExp[]> = {
-    work_risk: [/work risk/i, /employment/i, /job/i, /labor/i, /workforce/i, /displacement/i],
-    inequality: [/inequality/i, /income/i, /gini/i, /wage/i],
-    unrest: [/unrest/i, /protest/i, /strike/i, /labor action/i],
-    decay: [/institutional/i, /trust/i, /decay/i, /congress/i, /policy paralysis/i],
-    wellbeing: [/wellbeing/i, /well-being/i, /mental health/i, /anxiety/i, /health/i],
-    policy: [/policy/i, /regulation/i, /legislation/i, /AI Act/i, /regulatory/i],
-    sentiment: [/sentiment/i, /public perception/i, /polling/i, /gallup/i],
+interface CountryRow {
+  code: string;
+  name: string;
+  flag_emoji: string | null;
+}
+
+async function loadPulses(locale: string): Promise<{
+  pulses: PulseRow[];
+  countryNames: Map<string, CountryRow>;
+  fallbackUsed: boolean;
+}> {
+  const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!sbUrl || !sbKey) {
+    return { pulses: [], countryNames: new Map(), fallbackUsed: false };
   }
-  const found: Domain[] = []
-  for (const [domain, patterns] of Object.entries(domainKeywords)) {
-    if (patterns.some(p => p.test(body))) {
-      found.push(domain as Domain)
+
+  const sb = createClient(sbUrl, sbKey);
+
+  // Try requested locale; fall back to English if empty
+  let pulsesRes = await sb
+    .from('commentary')
+    .select('id, slug, country_code, locale, title, excerpt, published_at')
+    .eq('type', 'weekly_pulse')
+    .eq('locale', locale)
+    .order('published_at', { ascending: false })
+    .limit(40);
+
+  let fallbackUsed = false;
+  if (!pulsesRes.data || pulsesRes.data.length === 0) {
+    if (locale !== 'en') {
+      fallbackUsed = true;
+      pulsesRes = await sb
+        .from('commentary')
+        .select('id, slug, country_code, locale, title, excerpt, published_at')
+        .eq('type', 'weekly_pulse')
+        .eq('locale', 'en')
+        .order('published_at', { ascending: false })
+        .limit(40);
     }
   }
-  return found.slice(0, 3) // max 3
+
+  const countriesRes = await sb
+    .from('countries')
+    .select('code, name, flag_emoji')
+    .eq('active', true);
+
+  const pulses = (pulsesRes.data ?? []) as PulseRow[];
+  const countryNames = new Map<string, CountryRow>(
+    (countriesRes.data ?? []).map((r) => [
+      (r as { code: string }).code,
+      r as CountryRow,
+    ]),
+  );
+
+  return { pulses, countryNames, fallbackUsed };
 }
 
-function scoreBandColor(score: number): string {
-  if (score >= 66) return '#ef4444'
-  if (score >= 46) return '#f59e0b'
-  if (score >= 26) return '#3b82f6'
-  return '#22c55e'
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
-function scoreBandLabel(score: number): string {
-  if (score >= 81) return 'CRITICAL'
-  if (score >= 66) return 'HIGH'
-  if (score >= 46) return 'ELEVATED'
-  if (score >= 26) return 'MODERATE'
-  return 'LOW'
-}
+export default async function PulsePage() {
+  const locale = await getActiveLocale();
+  const { pulses, countryNames, fallbackUsed } = await loadPulses(locale);
 
-/** Strip markdown bold markers for clean excerpt */
-function cleanExcerpt(markdown: string): string {
-  return markdown
-    .split('\n')
-    .filter(l => !l.startsWith('#') && l.trim().length > 0)
-    .join(' ')
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .substring(0, 220)
-}
+  // Group: featured (latest 2) + monthly buckets
+  const featured = pulses.slice(0, 2);
+  const rest = pulses.slice(2);
 
-export default function PulsePage() {
-  const [commentaries, setCommentaries] = useState<Commentary[]>([])
-  const [loading, setLoading] = useState(true)
-  const { theme } = useTheme()
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('commentary')
-          .select('*')
-          .eq('type', 'weekly_pulse')
-          .order('published_at', { ascending: false })
-        if (error) throw error
-        setCommentaries((data || []) as Commentary[])
-      } catch {
-        setCommentaries([])
-      } finally {
-        setLoading(false)
-      }
-    }
-    load()
-  }, [])
-
-  if (loading) {
-    return (
-      <div style={{ background: theme.bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: theme.textTertiary, fontFamily: theme.fontMono, fontSize: 13 }}>Loading pulse data...</div>
-      </div>
-    )
+  // Bucket by year-month
+  const buckets = new Map<string, PulseRow[]>();
+  for (const p of rest) {
+    const ym = p.published_at.slice(0, 7); // YYYY-MM
+    if (!buckets.has(ym)) buckets.set(ym, []);
+    buckets.get(ym)!.push(p);
   }
-
-  // Separate featured (latest) from rest
-  const featured = commentaries[0]
-  const rest = commentaries.slice(1)
+  const monthKeys = Array.from(buckets.keys()).sort().reverse();
 
   return (
-    <div style={{ background: theme.bg, minHeight: '100vh', padding: '48px 0', fontFamily: theme.fontBody }}>
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px' }}>
-        {/* Header */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <DomainIcon domain="sentiment" size={24} color={theme.accent} />
-            <h1 style={{ fontSize: 32, fontWeight: 300, color: theme.isDark ? '#fff' : theme.text, margin: 0, fontFamily: theme.fontHeading }}>Weekly Pulse</h1>
+    <div className="min-h-screen">
+      {/* ── HEADER ── */}
+      <section className="border-b border-border bg-background-alt/40">
+        <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="max-w-3xl">
+            <p className="text-xs uppercase tracking-wider text-foreground-muted mb-3 font-medium">
+              Pulse
+            </p>
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight tracking-tight text-balance">
+              Weekly editorial on civilizational stress.
+            </h1>
+            <p className="mt-5 text-base sm:text-lg text-foreground-muted text-pretty max-w-2xl">
+              Short, sourced briefings on what the indicators are doing and why
+              it matters. Per country, per week.
+            </p>
+            {fallbackUsed && (
+              <p className="mt-4 text-xs text-foreground-subtle">
+                Weekly Pulse is not yet translated for the selected language —
+                showing the English edition.
+              </p>
+            )}
           </div>
-          <p style={{ fontSize: 15, color: theme.textSecondary, margin: 0, maxWidth: 600, lineHeight: 1.6 }}>
-            AI-generated analysis on civilizational stress. Each report breaks down what moved, why it matters, and what to watch next.
-          </p>
         </div>
+      </section>
 
-        {/* Featured article */}
-        {featured && (() => {
-          const score = extractScore(featured.body_markdown)
-          const domains = extractDomains(featured.body_markdown)
-          const excerpt = cleanExcerpt(featured.body_markdown)
-          return (
-            <Link href={`/pulse/${featured.slug}`} style={{ textDecoration: 'none', display: 'block', marginBottom: 32 }}>
-              <div
-                style={{
-                  background: theme.surface,
-                  border: `1px solid ${theme.surfaceBorder}`,
-                  borderRadius: 10,
-                  padding: 32,
-                  cursor: 'pointer',
-                  transition: 'border-color 0.2s, transform 0.2s',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = theme.accent + '66'
-                  e.currentTarget.style.transform = 'translateY(-1px)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = theme.surfaceBorder
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
-              >
-                {/* Top decorative accent line */}
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${theme.accent}, transparent)` }} />
+      {/* ── FEATURED ── */}
+      {featured.length > 0 && (
+        <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="grid md:grid-cols-2 gap-6">
+            {featured.map((p) => (
+              <FeaturedPulse
+                key={p.id}
+                pulse={p}
+                country={countryNames.get(p.country_code)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontSize: 10, color: theme.accent, fontFamily: theme.fontMono, letterSpacing: 2, textTransform: 'uppercase', fontWeight: 600 }}>Latest Pulse</span>
-                    <span style={{ fontSize: 11, color: theme.textTertiary }}>{timeAgo(featured.published_at)}</span>
-                  </div>
-                  {score !== null && (
-                    <div style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      background: `${scoreBandColor(score)}15`,
-                      border: `1px solid ${scoreBandColor(score)}30`,
-                      borderRadius: 8, padding: '6px 12px',
-                    }}>
-                      <span style={{ fontSize: 18, fontWeight: 700, color: scoreBandColor(score), fontFamily: theme.fontMono }}>{score.toFixed(1)}</span>
-                      <span style={{ fontSize: 9, color: scoreBandColor(score), fontFamily: theme.fontMono, letterSpacing: 1 }}>{scoreBandLabel(score)}</span>
-                    </div>
-                  )}
-                </div>
-
-                <h2 style={{ fontSize: 24, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, margin: '0 0 12px', fontFamily: theme.fontHeading, lineHeight: 1.3 }}>{featured.title}</h2>
-                <p style={{ fontSize: 15, color: theme.textSecondary, lineHeight: 1.7, margin: '0 0 16px' }}>{excerpt}...</p>
-
-                {/* Domain tags */}
-                {domains.length > 0 && (
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {domains.map(d => (
-                      <div key={d} style={{
-                        display: 'flex', alignItems: 'center', gap: 5,
-                        padding: '4px 10px', borderRadius: 6,
-                        background: `${theme.textTertiary}15`,
-                        fontSize: 11, color: theme.textSecondary,
-                      }}>
-                        <DomainIcon domain={d} size={12} color={theme.textSecondary} />
-                        {DOMAIN_LABELS[d]}
-                      </div>
+      {/* ── ARCHIVE BY MONTH ── */}
+      {monthKeys.length > 0 && (
+        <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+          <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-8">
+            Archive
+          </h2>
+          <div className="space-y-12">
+            {monthKeys.map((ym) => {
+              const items = buckets.get(ym)!;
+              const label = new Date(`${ym}-01`).toLocaleDateString('en-US', {
+                month: 'long',
+                year: 'numeric',
+              });
+              return (
+                <div key={ym}>
+                  <h3 className="text-xs uppercase tracking-wider text-foreground-subtle mb-4 font-medium">
+                    {label}
+                  </h3>
+                  <ul className="divide-y divide-border border-y border-border">
+                    {items.map((p) => (
+                      <PulseRowItem
+                        key={p.id}
+                        pulse={p}
+                        country={countryNames.get(p.country_code)}
+                      />
                     ))}
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>
-                  <div style={{ fontSize: 13, color: theme.accent, fontWeight: 600 }}>Read full analysis →</div>
-                  <div onClick={e => e.preventDefault()}>
-                    <ShareButton
-                      data={{
-                        type: 'pulse',
-                        title: featured.title,
-                        excerpt: excerpt.substring(0, 120),
-                        compositeScore: score,
-                        date: new Date(featured.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-                      } as PulseCardData}
-                      variant="compact"
-                      label=""
-                    />
-                  </div>
+                  </ul>
                 </div>
-              </div>
-            </Link>
-          )
-        })()}
-
-        {/* Divider */}
-        {rest.length > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-            <span style={{ fontSize: 11, color: theme.textTertiary, fontFamily: theme.fontMono, letterSpacing: 2, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Previous Reports</span>
-            <div style={{ flex: 1, height: 1, background: theme.surfaceBorder }} />
+              );
+            })}
           </div>
-        )}
+        </section>
+      )}
 
-        {/* Article list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {rest.map(c => {
-            const score = extractScore(c.body_markdown)
-            const domains = extractDomains(c.body_markdown)
-            const excerpt = cleanExcerpt(c.body_markdown)
-            return (
-              <Link key={c.id} href={`/pulse/${c.slug}`} style={{ textDecoration: 'none' }}>
-                <div
-                  style={{
-                    background: theme.surface,
-                    border: `1px solid ${theme.surfaceBorder}`,
-                    borderRadius: 10,
-                    padding: '20px 24px',
-                    cursor: 'pointer',
-                    transition: 'border-color 0.2s',
-                    display: 'flex',
-                    gap: 20,
-                    alignItems: 'flex-start',
-                  }}
-                  className="pulse-card"
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = theme.accent + '44')}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = theme.surfaceBorder)}
-                >
-                  {/* Score badge */}
-                  {score !== null && (
-                    <div style={{
-                      minWidth: 52, textAlign: 'center',
-                      padding: '8px 0',
-                      borderRadius: 8,
-                      background: `${scoreBandColor(score)}12`,
-                      border: `1px solid ${scoreBandColor(score)}25`,
-                      flexShrink: 0,
-                    }}
-                    className="hide-mobile"
-                    >
-                      <div style={{ fontSize: 16, fontWeight: 700, color: scoreBandColor(score), fontFamily: theme.fontMono }}>{score.toFixed(0)}</div>
-                      <div style={{ fontSize: 7, color: scoreBandColor(score), fontFamily: theme.fontMono, letterSpacing: 1, marginTop: 2 }}>{scoreBandLabel(score)}</div>
-                    </div>
-                  )}
-
-                  {/* Content */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 10, color: theme.accent, fontFamily: theme.fontMono, letterSpacing: 1, textTransform: 'uppercase' }}>Weekly Pulse</span>
-                        {/* Mobile score inline */}
-                        {score !== null && (
-                          <span className="show-mobile-inline" style={{
-                            display: 'none',
-                            fontSize: 10, fontWeight: 700, color: scoreBandColor(score), fontFamily: theme.fontMono,
-                            padding: '2px 6px', borderRadius: 4,
-                            background: `${scoreBandColor(score)}15`,
-                          }}>{score.toFixed(0)}</span>
-                        )}
-                      </div>
-                      <span style={{ fontSize: 11, color: theme.textTertiary }}>{timeAgo(c.published_at)}</span>
-                    </div>
-                    <h2 style={{ fontSize: 17, fontWeight: 600, color: theme.isDark ? '#fff' : theme.text, margin: '0 0 6px', fontFamily: theme.fontHeading, lineHeight: 1.3 }}>{c.title}</h2>
-                    <p style={{ fontSize: 13, color: theme.textSecondary, lineHeight: 1.6, margin: 0 }} className="hide-mobile">{excerpt.substring(0, 160)}...</p>
-
-                    {/* Domain chips */}
-                    {domains.length > 0 && (
-                      <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }} className="hide-mobile">
-                        {domains.map(d => (
-                          <span key={d} style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 4,
-                            fontSize: 10, color: theme.textTertiary,
-                            padding: '2px 8px', borderRadius: 4,
-                            background: `${theme.textTertiary}10`,
-                          }}>
-                            <DomainIcon domain={d} size={10} color={theme.textTertiary} />
-                            {DOMAIN_LABELS[d].split(' ')[0]}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            )
-          })}
-        </div>
-
-        {/* Footer note */}
-        <div style={{ marginTop: 48, padding: '20px 0', borderTop: `1px solid ${theme.surfaceBorder}`, textAlign: 'center' }}>
-          <p style={{ fontSize: 12, color: theme.textTertiary, lineHeight: 1.6, margin: 0 }}>
-            Pulse reports are AI-generated weekly using live data from BLS, FRED, World Bank, OECD, O*NET, and sentiment analysis.
-            <br />
-            Domain scores are real. Contextual analysis is AI-generated and fact-checked before publication.
+      {/* Empty state */}
+      {pulses.length === 0 && (
+        <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+          <p className="text-foreground-muted">
+            No Pulse articles published yet. Check back soon.
           </p>
-        </div>
-      </div>
+        </section>
+      )}
     </div>
-  )
+  );
+}
+
+// ── Components ─────────────────────────────────────────────────────
+
+function FeaturedPulse({
+  pulse,
+  country,
+}: {
+  pulse: PulseRow;
+  country: CountryRow | undefined;
+}) {
+  return (
+    <Link
+      href={`/pulse/${pulse.slug}`}
+      className="group block rounded-lg border border-border bg-background-alt/30 hover:bg-background-alt p-7 transition-colors"
+    >
+      <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-foreground-subtle mb-3">
+        {country ? (
+          <>
+            <span className="text-base" aria-hidden="true">
+              {country.flag_emoji ?? '🌐'}
+            </span>
+            <span>{country.name}</span>
+          </>
+        ) : pulse.country_code === 'global' ? (
+          <>
+            <span className="text-base" aria-hidden="true">
+              🌐
+            </span>
+            <span>Global</span>
+          </>
+        ) : (
+          <span>{pulse.country_code}</span>
+        )}
+        <span aria-hidden="true">·</span>
+        <time dateTime={pulse.published_at} className="tabular-nums">
+          {formatDate(pulse.published_at)}
+        </time>
+      </div>
+      <h3 className="font-serif text-2xl font-semibold leading-snug mb-3 text-balance group-hover:underline decoration-foreground-subtle/40 underline-offset-2">
+        {pulse.title}
+      </h3>
+      {pulse.excerpt && (
+        <p className="text-foreground-muted text-base line-clamp-3 text-pretty">
+          {pulse.excerpt}
+        </p>
+      )}
+    </Link>
+  );
+}
+
+function PulseRowItem({
+  pulse,
+  country,
+}: {
+  pulse: PulseRow;
+  country: CountryRow | undefined;
+}) {
+  return (
+    <li>
+      <Link
+        href={`/pulse/${pulse.slug}`}
+        className="flex items-start sm:items-center gap-4 py-4 hover:bg-background-alt/40 -mx-4 px-4 rounded transition-colors group"
+      >
+        <span className="text-lg shrink-0 mt-0.5 sm:mt-0" aria-hidden="true">
+          {country?.flag_emoji ?? (pulse.country_code === 'global' ? '🌐' : '🏳️')}
+        </span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 text-xs text-foreground-subtle uppercase tracking-wider mb-1">
+            <span>
+              {country?.name ?? (pulse.country_code === 'global' ? 'Global' : pulse.country_code)}
+            </span>
+          </div>
+          <h4 className="font-serif text-lg leading-snug font-medium group-hover:underline decoration-foreground-subtle/40 underline-offset-2">
+            {pulse.title}
+          </h4>
+        </div>
+        <time
+          dateTime={pulse.published_at}
+          className="text-xs text-foreground-subtle tabular-nums shrink-0 mt-1 sm:mt-0"
+        >
+          {formatDate(pulse.published_at)}
+        </time>
+      </Link>
+    </li>
+  );
 }

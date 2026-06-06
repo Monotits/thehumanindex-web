@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { StressBand } from '@/components/ui/StressBand';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { bandFor, META_INDEXES, META_LABELS, META_WEIGHT, type MetaIndex } from '@/lib/ui/tokens';
+import { getActiveLocale } from '@/lib/ui/locale';
 
 export const metadata: Metadata = {
   title: 'The Human Index — Civilizational Stress Tracker',
@@ -12,9 +13,10 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://thehumanindex.org' },
 };
 
-// ISR — refreshed every 30 min, but the cron actually updates the underlying
-// data every 12h, so this is mostly to bust the next-data cache.
-export const revalidate = 1800;
+// Locale-aware (Pulse preview varies per NEXT_LOCALE cookie) → dynamic.
+// Composite data is read every request but it's cheap (one view + two simple
+// queries), and the cron updates the underlying data every 12h.
+export const dynamic = 'force-dynamic';
 
 interface CountrySummary {
   country_code: string;
@@ -36,7 +38,7 @@ interface PulsePreview {
   published_at: string;
 }
 
-async function loadHomeData() {
+async function loadHomeData(locale: string) {
   const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!sbUrl || !sbKey) {
@@ -123,14 +125,23 @@ async function loadHomeData() {
       ? Math.round((countries.reduce((s, c) => s + c.composite, 0) / countries.length) * 10) / 10
       : null;
 
-  // 3. Latest pulses, 4 most recent across (country, locale=en)
-  const pulsesRes = await sb
+  // 3. Latest pulses, 4 most recent — locale-aware with English fallback.
+  let pulsesRes = await sb
     .from('commentary')
     .select('country_code, locale, title, slug, published_at')
     .eq('type', 'weekly_pulse')
-    .eq('locale', 'en')
+    .eq('locale', locale)
     .order('published_at', { ascending: false })
     .limit(4);
+  if ((!pulsesRes.data || pulsesRes.data.length === 0) && locale !== 'en') {
+    pulsesRes = await sb
+      .from('commentary')
+      .select('country_code, locale, title, slug, published_at')
+      .eq('type', 'weekly_pulse')
+      .eq('locale', 'en')
+      .order('published_at', { ascending: false })
+      .limit(4);
+  }
   const pulses = (pulsesRes.data ?? []) as PulsePreview[];
 
   return { countries, metaAvgs, pulses, globalAvg, lastUpdate };
@@ -150,7 +161,8 @@ function formatRelativeTime(iso: string | null): string {
 }
 
 export default async function HomePage() {
-  const { countries, metaAvgs, pulses, globalAvg, lastUpdate } = await loadHomeData();
+  const locale = await getActiveLocale();
+  const { countries, metaAvgs, pulses, globalAvg, lastUpdate } = await loadHomeData(locale);
 
   const top5 = countries.slice(0, 5);
   const bottom5 = countries.slice(-5).reverse();
