@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'AI Layoff Tracker',
+  title: 'Labor stress signals — Live layoff tracker | The Human Index',
   description:
-    'Track AI-related layoffs across the tech industry and beyond. Real-time data on companies reducing headcount due to automation and AI adoption.',
+    'Real-time corporate layoff signals from SEC EDGAR, WARN Act filings, and verified news — feeding the Economic meta-index in The Human Index civilizational stress framework.',
   openGraph: {
-    title: 'AI Layoff Tracker — The Human Index',
+    title: 'Labor stress signals — The Human Index',
     description:
-      'Real-time tracking of AI-driven workforce displacement across industries.',
+      'Where the labor market is breaking. Aggregated layoff signals contributing to the Economic meta-index.',
     url: 'https://thehumanindex.org/layoffs',
   },
   alternates: {
