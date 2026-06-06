@@ -18,10 +18,10 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        serif: ['Newsreader', 'Georgia', 'serif'],
-        mono: ['"IBM Plex Mono"', '"SF Mono"', 'Consolas', 'monospace'],
-        editorial: ['Newsreader', 'Georgia', 'serif'],
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-newsreader)', 'Georgia', 'serif'],
+        mono: ['var(--font-plex-mono)', '"SF Mono"', 'Consolas', 'monospace'],
+        editorial: ['var(--font-newsreader)', 'Georgia', 'serif'],
       },
       colors: {
         // ── Surface tokens ──

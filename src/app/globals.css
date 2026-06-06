@@ -8,11 +8,13 @@
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Typography ──
-   - Editorial başlık + makaleler: Newsreader (Pentagram, Google Fonts)
+   - Editorial başlık + makaleler: Newsreader (Pentagram)
    - UI gövde + sans-serif: Inter
    - Sayısal + tabular figures: IBM Plex Mono
+
+   Fonts loaded via next/font/google in layout.tsx — exposed as CSS variables:
+     --font-newsreader, --font-inter, --font-plex-mono
 */
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
   /* ── Color tokens — Light Theme (default) ── */
@@ -123,7 +125,7 @@ html, body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   font-feature-settings: 'cv02','cv03','cv04','cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -132,14 +134,13 @@ body {
 /* Editorial typography for prose */
 .font-editorial,
 .prose {
-  font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+  font-family: var(--font-newsreader), Georgia, 'Times New Roman', serif;
   font-variation-settings: 'opsz' 28;
 }
 
 /* Mono for numbers — tabular figures alignment */
-.font-mono,
 .tabular {
-  font-family: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  font-family: var(--font-plex-mono), 'SF Mono', Consolas, monospace;
   font-variant-numeric: tabular-nums;
 }
 
