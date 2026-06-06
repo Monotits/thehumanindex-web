@@ -20,11 +20,18 @@
 import createMiddleware from 'next-intl/middleware';
 import { LOCALES, DEFAULT_LOCALE } from './i18n/config';
 
+/**
+ * NOTE: localeDetection disabled until per-locale [locale] route group
+ * is built out. With detection on, Turkish/German/etc. browsers were
+ * being redirected to /tr/countries etc. which 404 because we don't
+ * have a [locale] folder in src/app/ yet. Default English remains the
+ * only working surface for now.
+ */
 export default createMiddleware({
   locales: LOCALES,
   defaultLocale: DEFAULT_LOCALE,
   localePrefix: 'as-needed',
-  localeDetection: true,
+  localeDetection: false,
 });
 
 export const config = {
