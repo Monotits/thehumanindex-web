@@ -17,6 +17,19 @@ const nextConfig = {
       },
     ]
   },
+  // 301 redirects for retired routes — preserves SEO equity from
+  // backlinks/social shares that point to old paths. After UI Sprint
+  // Faz 4.1 the old 7-domain dashboard concepts are obsolete; the
+  // closest new surfaces are /country/us (US-focused detail) and
+  // /countries (multi-country index).
+  async redirects() {
+    return [
+      { source: '/dashboard',           destination: '/country/us', permanent: true },
+      { source: '/dashboard/:path*',    destination: '/country/us', permanent: true },
+      { source: '/global',              destination: '/countries',  permanent: true },
+      { source: '/global/:path*',       destination: '/countries',  permanent: true },
+    ]
+  },
   async headers() {
     return [
       {
