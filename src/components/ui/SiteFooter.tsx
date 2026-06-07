@@ -84,18 +84,13 @@ export function SiteFooter() {
             <ul className="space-y-2 text-sm text-foreground-muted">
               <li><Link href="/contact" className="hover:text-foreground">Contact</Link></li>
               <li>
-                <a
-                  href="https://x.com/humanerror"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-foreground"
-                >
-                  @humanerror
+                <a href="mailto:hello@thehumanindex.org" className="hover:text-foreground">
+                  hello@thehumanindex.org
                 </a>
               </li>
               <li>
-                <a href="mailto:hello@thehumanindex.org" className="hover:text-foreground">
-                  hello@thehumanindex.org
+                <a href="mailto:press@thehumanindex.org" className="hover:text-foreground">
+                  press@thehumanindex.org
                 </a>
               </li>
             </ul>
@@ -117,7 +112,7 @@ export function SiteFooter() {
         {/* Bottom strip */}
         <div className="mt-8 pt-6 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-foreground-subtle">
           <div>
-            © {new Date().getFullYear()} The Human Index · Umay.dev. Data CC BY-NC 4.0. Code MIT.
+            © {new Date().getFullYear()} The Human Index. Data CC BY-NC 4.0. Code MIT.
           </div>
           <div className="flex items-center gap-3">
             <span>Cron refreshes every 12h</span>
