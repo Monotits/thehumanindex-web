@@ -101,27 +101,10 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: 'https://thehumanindex.org',
-    // Per-locale homepage URLs. Next.js renders these as
-    // <link rel="alternate" hreflang="X" href="..."/> in <head>. Combined with
-    // the sitemap's hreflang block, this gives Google the strongest possible
-    // signal that the site has 10 language variants of the homepage.
-    //
-    // For sub-pages, each route should override alternates.languages with its
-    // own path via generateMetadata. Until UI sprint ships per-locale routes,
-    // homepage-level signal is what we have.
-    languages: {
-      'en': 'https://thehumanindex.org/',
-      'tr': 'https://thehumanindex.org/tr/',
-      'de': 'https://thehumanindex.org/de/',
-      'es': 'https://thehumanindex.org/es/',
-      'fr': 'https://thehumanindex.org/fr/',
-      'ja': 'https://thehumanindex.org/ja/',
-      'pt-br': 'https://thehumanindex.org/pt-br/',
-      'pl': 'https://thehumanindex.org/pl/',
-      'it': 'https://thehumanindex.org/it/',
-      'nl': 'https://thehumanindex.org/nl/',
-      'x-default': 'https://thehumanindex.org/',
-    },
+    // English-only. Per-locale hreflang URLs removed in Faz 13 wind-down —
+    // they pointed at /tr, /de etc. routes that 404. Single canonical
+    // URL = clean signal to Google. Re-add hreflang map only when
+    // [locale] route group exists.
     types: {
       'application/rss+xml': 'https://thehumanindex.org/feed.xml',
     },

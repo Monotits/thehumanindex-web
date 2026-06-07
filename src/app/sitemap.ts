@@ -79,16 +79,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ['/layoffs',       'daily',   0.7],
   ];
 
+  // English-only after Faz 13 wind-down. The /tr, /de etc. prefixed
+  // routes return 404 (no [locale] folder), so emitting them to Google
+  // creates broken-link signals. Sticking to the canonical root path
+  // for every static surface.
   for (const [path, changeFrequency, priority] of staticPaths) {
-    for (const locale of LOCALES) {
-      out.push({
-        url: localizedUrl(path, locale),
-        lastModified: now,
-        changeFrequency,
-        priority,
-        alternates: { languages: buildAlternates(path) },
-      });
-    }
+    out.push({
+      url: `${BASE}${path}`,
+      lastModified: now,
+      changeFrequency,
+      priority,
+    });
   }
 
   // ── Dynamic content from Supabase ──
@@ -160,18 +161,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ── Pulse pages ──
-  // Current page route is /pulse/[slug] (no country segment in URL — the
-  // slug itself encodes the country, e.g. weekly-pulse-us-2026-w23).
+  // English-only. The slug is unique per (country, locale='en') in the DB
+  // now that the wind-down cleanup ran.
   const pulses = (pulsesRes.data ?? []) as MinPulse[];
   const seenPulse = new Set<string>();
   for (const p of pulses) {
-    const locale = p.locale || DEFAULT_LOCALE;
-    if (!LOCALES.includes(locale as (typeof LOCALES)[number])) continue;
-    const key = `${locale}|${p.slug}`;
-    if (seenPulse.has(key)) continue;
-    seenPulse.add(key);
+    if ((p.locale || DEFAULT_LOCALE) !== DEFAULT_LOCALE) continue;
+    if (seenPulse.has(p.slug)) continue;
+    seenPulse.add(p.slug);
     out.push({
-      url: localizedUrl(`/pulse/${p.slug}`, locale),
+      url: `${BASE}/pulse/${p.slug}`,
       lastModified: p.published_at,
       changeFrequency: 'monthly',
       priority: 0.75,
@@ -179,18 +178,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ── Glossary entries ──
-  // Page route is /glossary/[slug]. The (country, locale) selection happens
-  // server-side via query, but each (slug, locale) pair gets its own URL.
+  // English-only.
   const glossary = (glossaryRes.data ?? []) as MinGlossary[];
   const seenGlossary = new Set<string>();
   for (const g of glossary) {
-    const locale = g.locale || DEFAULT_LOCALE;
-    if (!LOCALES.includes(locale as (typeof LOCALES)[number])) continue;
-    const key = `${locale}|${g.slug}`;
-    if (seenGlossary.has(key)) continue;
-    seenGlossary.add(key);
+    if ((g.locale || DEFAULT_LOCALE) !== DEFAULT_LOCALE) continue;
+    if (seenGlossary.has(g.slug)) continue;
+    seenGlossary.add(g.slug);
     out.push({
-      url: localizedUrl(`/glossary/${g.slug}`, locale),
+      url: `${BASE}/glossary/${g.slug}`,
       lastModified: g.published_at,
       changeFrequency: 'monthly',
       priority: 0.65,
