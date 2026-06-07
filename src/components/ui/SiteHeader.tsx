@@ -23,14 +23,13 @@ interface NavLink {
 }
 
 const PRIMARY_NAV: NavLink[] = [
-  { href: '/',                       label: 'Home' },
-  { href: '/countries',              label: 'Countries' },
-  { href: '/countries?view=table',   label: 'Rankings' },
-  { href: '/pulse',                  label: 'Pulse' },
-  { href: '/research',               label: 'Research' },
-  { href: '/glossary',               label: 'Glossary' },
-  { href: '/methodology',            label: 'Methodology', shortLabel: 'Method' },
-  { href: '/transparency',           label: 'Transparency', shortLabel: 'Trust' },
+  { href: '/',            label: 'Home' },
+  { href: '/countries',   label: 'Countries' },
+  { href: '/pulse',       label: 'Pulse' },
+  { href: '/research',    label: 'Research' },
+  { href: '/glossary',    label: 'Glossary' },
+  { href: '/methodology', label: 'Methodology', shortLabel: 'Method' },
+  { href: '/transparency',label: 'Transparency', shortLabel: 'Trust' },
 ];
 
 export function SiteHeader() {
