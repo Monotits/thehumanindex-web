@@ -56,7 +56,7 @@ export function SiteFooter() {
             <h3 className="text-sm font-semibold text-foreground mb-3 font-serif">Data</h3>
             <ul className="space-y-2 text-sm text-foreground-muted">
               <li><Link href="/countries" className="hover:text-foreground">Countries (25)</Link></li>
-              <li><Link href="/rankings" className="hover:text-foreground">Rankings</Link></li>
+              <li><Link href="/countries?view=table" className="hover:text-foreground">Rankings</Link></li>
               <li><Link href="/data-sources" className="hover:text-foreground">Data sources</Link></li>
               <li><Link href="/api/transparency" className="hover:text-foreground">API access</Link></li>
             </ul>

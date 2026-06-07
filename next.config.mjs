@@ -31,6 +31,11 @@ const nextConfig = {
       // /settings was a theme picker — ThemeToggle now lives in the
       // header, so the page is obsolete. Redirect to home.
       { source: '/settings',            destination: '/',           permanent: true },
+      // /rankings was a separate page showing the same data as /countries
+      // in a different layout. Merged into /countries with a view-mode
+      // toggle in Faz 6.3. /rankings → /countries?view=table preserves
+      // SEO equity and the analytical user's mental model.
+      { source: '/rankings',            destination: '/countries?view=table', permanent: true },
     ]
   },
   async headers() {
