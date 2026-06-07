@@ -15,15 +15,20 @@ import { NewsletterCTA } from './NewsletterCTA';
  * Bottom strip: copyright, license badge, AI crawler-friendly note.
  */
 
+// Source organizations the platform pulls from, in the order they're declared
+// in src/lib/indicators/sources/*. Kept in sync with adapters by hand — if you
+// add or remove a source adapter, update this list too.
+// Live per-source uptime + freshness lives at /transparency.
 const SOURCES = [
   'World Bank',
   'Eurostat',
-  'IMF WEO',
+  'IMF',
   'OECD',
-  'WRI Aqueduct',
   'WHO',
-  'IHME GBD',
+  'NASA GISS',
   'Berkeley Earth',
+  'IHME GBD',
+  'WRI Aqueduct',
   'Gallup',
 ];
 
@@ -111,8 +116,16 @@ export function SiteFooter() {
 
         {/* Source attribution strip */}
         <div className="mt-10 pt-6 border-t border-border">
-          <div className="text-xs text-foreground-subtle mb-3 uppercase tracking-wide font-medium">
-            Powered by data from
+          <div className="flex items-baseline justify-between gap-3 mb-3">
+            <div className="text-xs text-foreground-subtle uppercase tracking-wide font-medium">
+              Powered by data from
+            </div>
+            <Link
+              href="/transparency"
+              className="text-xs text-foreground-subtle hover:text-foreground underline underline-offset-2 decoration-foreground-subtle/30"
+            >
+              live source health →
+            </Link>
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-foreground-muted">
             {SOURCES.map(s => (

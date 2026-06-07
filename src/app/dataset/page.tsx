@@ -82,8 +82,9 @@ export default function DatasetPage() {
               The Human Index Dataset.
             </h1>
             <p className="mt-5 text-base sm:text-lg text-foreground-muted text-pretty max-w-2xl leading-relaxed">
-              25 countries. 31 indicators. 5 meta-indexes. Refreshed every 12
-              hours. Every row traces back to a public statistical source.
+              25 countries. 31 indicators. 5 meta-indexes. The pipeline checks
+              every 12 hours; underlying sources publish on their own cadence.
+              Every row traces back to a public statistical source.
               Free programmatic access for research, journalism, and AI
               applications.
             </p>
@@ -95,9 +96,9 @@ export default function DatasetPage() {
       <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Stat label="Countries" value="25" caption="Across 6 continents" />
-          <Stat label="Indicators" value="31" caption="Daily refresh" />
-          <Stat label="Sources" value="9" caption="Public statistical bodies" />
-          <Stat label="Refresh" value="12h" caption="Continuous cron" />
+          <Stat label="Indicators" value="31" caption="Five meta-indexes" />
+          <Stat label="Sources" value="10" caption="Public statistical bodies" />
+          <Stat label="Pipeline check" value="12h" caption="Source cadence varies" />
         </div>
       </section>
 
