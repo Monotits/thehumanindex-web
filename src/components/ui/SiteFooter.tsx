@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { NewsletterCTA } from './NewsletterCTA';
 
 /**
  * SiteFooter — UI Sprint Plan v1
@@ -29,6 +30,15 @@ const SOURCES = [
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-background-alt/30 mt-16">
+      {/* Footer newsletter band — high visibility */}
+      <div className="border-b border-border">
+        <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="max-w-3xl">
+            <NewsletterCTA variant="footer" />
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Column 1 — About */}

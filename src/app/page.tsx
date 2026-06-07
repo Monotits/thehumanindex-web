@@ -5,6 +5,7 @@ import { StressBand } from '@/components/ui/StressBand';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { SparklineMini } from '@/components/ui/SparklineMini';
 import { WorldMap, type WorldMapCountry } from '@/components/ui/WorldMap';
+import { NewsletterCTA } from '@/components/ui/NewsletterCTA';
 import { bandFor, META_INDEXES, META_LABELS, META_WEIGHT, type MetaIndex } from '@/lib/ui/tokens';
 import { getActiveLocale } from '@/lib/ui/locale';
 import { loadCompositeHistory, pointsToDenseSeries, trendSummary } from '@/lib/ui/history';
@@ -42,6 +43,11 @@ interface PulsePreview {
   published_at: string;
 }
 
+interface FeaturedPulse extends PulsePreview {
+  body_markdown: string | null;
+  fallbackUsed: boolean;
+}
+
 async function loadHomeData(locale: string) {
   const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -49,6 +55,7 @@ async function loadHomeData(locale: string) {
     return {
       countries: [] as CountrySummary[],
       mapData: [] as WorldMapCountry[],
+      featured: null as FeaturedPulse | null,
       metaAvgs: [] as MetaAvg[],
       pulses: [] as PulsePreview[],
       globalAvg: null,
@@ -136,26 +143,33 @@ async function loadHomeData(locale: string) {
       ? Math.round((countries.reduce((s, c) => s + c.composite, 0) / countries.length) * 10) / 10
       : null;
 
-  // 3. Latest pulses, 4 most recent — locale-aware with English fallback.
+  // 3. Latest pulses — fetch 5 (1 featured + 4 preview list) — locale-aware
+  //    with English fallback for body_markdown excerpt rendering.
   let pulsesRes = await sb
     .from('commentary')
-    .select('country_code, locale, title, slug, published_at')
+    .select('country_code, locale, title, slug, published_at, body_markdown')
     .eq('type', 'weekly_pulse')
     .eq('locale', locale)
     .order('published_at', { ascending: false })
-    .limit(4);
+    .limit(5);
+  let pulseFallback = false;
   if ((!pulsesRes.data || pulsesRes.data.length === 0) && locale !== 'en') {
+    pulseFallback = true;
     pulsesRes = await sb
       .from('commentary')
-      .select('country_code, locale, title, slug, published_at')
+      .select('country_code, locale, title, slug, published_at, body_markdown')
       .eq('type', 'weekly_pulse')
       .eq('locale', 'en')
       .order('published_at', { ascending: false })
-      .limit(4);
+      .limit(5);
   }
-  const pulses = (pulsesRes.data ?? []) as PulsePreview[];
+  const allPulses = (pulsesRes.data ?? []) as Array<PulsePreview & { body_markdown: string | null }>;
+  const featured: FeaturedPulse | null = allPulses.length > 0
+    ? { ...allPulses[0], fallbackUsed: pulseFallback }
+    : null;
+  const pulses = allPulses.slice(1, 5) as PulsePreview[];
 
-  return { countries, mapData, metaAvgs, pulses, globalAvg, lastUpdate };
+  return { countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate };
 }
 
 function formatRelativeTime(iso: string | null): string {
@@ -171,9 +185,35 @@ function formatRelativeTime(iso: string | null): string {
   return `${days}d ago`;
 }
 
+function makeExcerpt(body: string | null | undefined, maxLen = 380): string {
+  if (!body) return '';
+  const stripped = body
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`[^`]*`/g, '')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/^#+\s+/gm, '')
+    .replace(/[*_>~]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (stripped.length <= maxLen) return stripped;
+  const cut = stripped.slice(0, maxLen).lastIndexOf('. ');
+  return (cut > maxLen * 0.6 ? stripped.slice(0, cut + 1) : stripped.slice(0, maxLen - 1).trimEnd() + '…');
+}
+
+function readingMinutes(body: string | null | undefined): number {
+  if (!body) return 0;
+  return Math.max(1, Math.round(body.trim().split(/\s+/).length / 220));
+}
+
 export default async function HomePage() {
   const locale = await getActiveLocale();
-  const { countries, mapData, metaAvgs, pulses, globalAvg, lastUpdate } = await loadHomeData(locale);
+  const { countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate } = await loadHomeData(locale);
+
+  // Country name lookup for the featured Pulse byline
+  const featuredCountry = featured
+    ? mapData.find((c) => c.country_code === featured.country_code) ?? null
+    : null;
 
   let top5 = countries.slice(0, 5);
   let bottom5 = countries.slice(-5).reverse();
@@ -263,6 +303,64 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── TODAY'S STORY ── */}
+      {featured && (
+        <section className="border-b border-border">
+          <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-14">
+            <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+              {/* Left rail: kicker + meta */}
+              <div className="lg:col-span-3 lg:pt-2">
+                <p className="text-xs uppercase tracking-[0.18em] text-foreground-muted font-medium mb-3">
+                  Today&apos;s story
+                </p>
+                <div className="flex items-center gap-2 text-sm text-foreground-muted mb-2">
+                  {featuredCountry?.flag_emoji && (
+                    <span className="text-lg" aria-hidden="true">
+                      {featuredCountry.flag_emoji}
+                    </span>
+                  )}
+                  <span className="font-medium text-foreground">
+                    {featuredCountry?.name ?? (featured.country_code === 'global' ? 'Global' : featured.country_code)}
+                  </span>
+                </div>
+                <div className="text-xs text-foreground-subtle tabular-nums">
+                  <time dateTime={featured.published_at}>
+                    {new Date(featured.published_at).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </time>
+                  {' · '}
+                  {readingMinutes(featured.body_markdown)} min read
+                </div>
+                {featured.fallbackUsed && (
+                  <p className="mt-3 text-[11px] text-foreground-subtle leading-relaxed">
+                    Not yet translated for the selected language —
+                    showing the English edition.
+                  </p>
+                )}
+              </div>
+
+              {/* Right column: headline + excerpt + CTA */}
+              <div className="lg:col-span-9">
+                <Link href={`/pulse/${featured.slug}`} className="group block">
+                  <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-tight text-balance group-hover:underline decoration-foreground-subtle/40 underline-offset-4">
+                    {featured.title}
+                  </h2>
+                  <p className="mt-6 font-serif text-lg sm:text-xl text-foreground-muted text-pretty leading-relaxed max-w-prose-wide">
+                    {makeExcerpt(featured.body_markdown)}
+                  </p>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-foreground border-b border-foreground/30 pb-0.5 group-hover:border-foreground transition-colors">
+                    Read the full analysis →
+                  </span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── WORLD MAP ── */}
       {mapData.length > 0 && (
         <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-14 border-b border-border">
@@ -278,6 +376,11 @@ export default async function HomePage() {
           <WorldMap countries={mapData} />
         </section>
       )}
+
+      {/* ── NEWSLETTER (hero variant) ── */}
+      <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-14 border-b border-border">
+        <NewsletterCTA variant="hero" />
+      </section>
 
       {/* ── TOP / BOTTOM 5 ── */}
       <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-14">

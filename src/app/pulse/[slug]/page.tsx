@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { renderMarkdown } from '@/lib/ui/markdown';
 import { getActiveLocale } from '@/lib/ui/locale';
+import { NewsletterCTA } from '@/components/ui/NewsletterCTA';
 
 export const dynamic = 'force-dynamic';
 
@@ -192,6 +193,11 @@ export default async function PulseReaderPage({
           className="prose prose-thi"
           dangerouslySetInnerHTML={{ __html: html }}
         />
+      </section>
+
+      {/* ── NEWSLETTER (inline variant) ── */}
+      <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+        <NewsletterCTA variant="inline" />
       </section>
 
       {/* ── RELATED ── */}
