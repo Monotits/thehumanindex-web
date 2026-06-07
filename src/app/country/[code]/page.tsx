@@ -6,7 +6,9 @@ import { StressBand } from '@/components/ui/StressBand';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { SourceAttribution } from '@/components/ui/SourceAttribution';
 import { SparklineMini } from '@/components/ui/SparklineMini';
-import { loadCompositeHistory, pointsToDenseSeries, trendSummary } from '@/lib/ui/history';
+import { CompositeLineChart, type CompositePoint } from '@/components/ui/CompositeLineChart';
+import { cn } from '@/lib/ui/cn';
+import { loadCompositeHistory, pointsToDenseSeries, trendSummary, type CompositeHistoryPoint } from '@/lib/ui/history';
 import {
   bandFor,
   freshnessFor,
@@ -64,6 +66,7 @@ interface CountryDetailData {
   latestPulse: PulsePreview | null;
   pulseFallbackUsed: boolean;
   compositeHistory: Array<number | null>;
+  compositeHistoryPoints: CompositePoint[];
 }
 
 // ── Data loaders ───────────────────────────────────────────────────
@@ -82,6 +85,7 @@ async function loadCountryDetail(
     latestPulse: null,
     pulseFallbackUsed: false,
     compositeHistory: [],
+    compositeHistoryPoints: [],
   };
 
   const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -166,9 +170,16 @@ async function loadCountryDetail(
       .maybeSingle();
   }
 
-  // Composite history (last 90 days) for the hero sparkline
+  // Composite history (last 90 days) — used for both the hero sparkline
+  // (dense series for SparklineMini) and the full line chart (sparse
+  // point list with real dates for tooltip).
   const historyMap = await loadCompositeHistory([upper], 90);
-  const compositeHistory = pointsToDenseSeries(historyMap.get(upper) ?? [], 90);
+  const rawPoints: CompositeHistoryPoint[] = historyMap.get(upper) ?? [];
+  const compositeHistory = pointsToDenseSeries(rawPoints, 90);
+  const compositeHistoryPoints: CompositePoint[] = rawPoints.map((p) => ({
+    date: p.date,
+    value: p.value,
+  }));
 
   return {
     country,
@@ -180,6 +191,7 @@ async function loadCountryDetail(
     latestPulse: (pulseRes.data as PulsePreview | null) ?? null,
     pulseFallbackUsed,
     compositeHistory,
+    compositeHistoryPoints,
   };
 }
 
@@ -271,7 +283,7 @@ export default async function CountryDetailPage({
 
   const {
     country, composite, computedAt, metaValues, indicators, indicatorValues,
-    latestPulse, pulseFallbackUsed, compositeHistory,
+    latestPulse, pulseFallbackUsed, compositeHistory, compositeHistoryPoints,
   } = data;
   const band = bandFor(composite);
   const trend = trendSummary(compositeHistory);
@@ -380,8 +392,28 @@ export default async function CountryDetailPage({
         </div>
       </section>
 
+      {/* ── COMPOSITE LINE CHART ── */}
+      {compositeHistoryPoints.length >= 2 && (
+        <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="mb-6 max-w-2xl">
+            <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">
+              Composite trend, 90 days
+            </h2>
+            <p className="text-foreground-muted">
+              Daily-bucketed composite stress score. Dashed gridlines mark
+              the band thresholds (25 / 45 / 65 / 80) — crossing one signals
+              a category change.
+            </p>
+          </div>
+          <CompositeLineChart data={compositeHistoryPoints} height={300} />
+        </section>
+      )}
+
       {/* ── 5 META CARDS ── */}
-      <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <section className={cn(
+        "max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10",
+        compositeHistoryPoints.length >= 2 && "border-t border-border"
+      )}>
         <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">
           Stress by domain
         </h2>
