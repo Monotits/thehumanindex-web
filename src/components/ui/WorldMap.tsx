@@ -158,7 +158,10 @@ export function WorldMap({ countries, className }: WorldMapProps) {
               const band = country ? bandFor(country.composite) : null;
               const fill = band
                 ? `var(--band-${band})`
-                : 'var(--background-alt)';
+                : // Untracked: a clearly visible muted grey — distinct from
+                  // both page bg and the tracked-country band palette. Picks
+                  // up the page's warm tone via border-strong.
+                  'var(--border-strong)';
               const stroke = 'var(--background)';
               const isTracked = !!country;
               const isHovered = hover?.country_code === iso2;
@@ -178,17 +181,21 @@ export function WorldMap({ countries, className }: WorldMapProps) {
                       strokeWidth: 0.5,
                       outline: 'none',
                       cursor: isTracked ? 'pointer' : 'default',
-                      opacity: isTracked ? 0.92 : 0.55,
+                      // Tracked = saturated; untracked = high opacity but
+                      // the underlying fill is already a muted grey, so the
+                      // whole landmass is clearly visible without competing
+                      // with tracked countries' band colors.
+                      opacity: isTracked ? 0.92 : 0.85,
                       transition: 'opacity 120ms, stroke-width 120ms',
                     },
                     hover: {
                       fill,
                       stroke: isTracked
                         ? 'var(--foreground)'
-                        : 'var(--border-strong)',
-                      strokeWidth: isTracked ? 1.2 : 0.5,
+                        : 'var(--foreground-subtle)',
+                      strokeWidth: isTracked ? 1.2 : 0.7,
                       outline: 'none',
-                      opacity: isTracked ? 1 : 0.65,
+                      opacity: isTracked ? 1 : 0.95,
                       cursor: isTracked ? 'pointer' : 'default',
                     },
                     pressed: {
