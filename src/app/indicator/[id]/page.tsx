@@ -181,9 +181,15 @@ async function loadIndicator(id: string) {
       return { date: d, value: Math.round(mean * 10) / 10 };
     });
 
-  // 5. Related Pulse articles — search bodies for the indicator id or its name
-  //    Simple: pull latest 20 weekly pulses and filter client-side by name match.
+  // 5. Related Pulse articles — search bodies for the indicator id or its name.
+  //    Simple: pull latest 30 weekly pulses and filter client-side by name match.
   //    (Postgres full-text would be cleaner; this is a pragmatic v1.)
+  //
+  //    Build the regex defensively: indicator names can contain regex special
+  //    characters (e.g. "Government Debt (% of GDP)") and we must not let
+  //    those leak into the regex source — that was a hard-fail build error.
+  //    Strip everything except a-z0-9 from each candidate word, drop short
+  //    stopwords, drop empties.
   const pulsesRes = await sb
     .from('commentary')
     .select('slug, title, country_code, published_at, body_markdown')
@@ -191,27 +197,39 @@ async function loadIndicator(id: string) {
     .eq('locale', 'en')
     .order('published_at', { ascending: false })
     .limit(30);
-  const nameRegex = new RegExp(
-    indicator.name.toLowerCase().split(/\s+/).filter((w) => w.length > 3).join('|') || indicator.id,
-    'i',
-  );
-  const related: PulsePreview[] = (
-    (pulsesRes.data ?? []) as Array<{
-      slug: string;
-      title: string;
-      country_code: string;
-      published_at: string;
-      body_markdown: string | null;
-    }>
-  )
-    .filter((p) => nameRegex.test(p.title) || (p.body_markdown && nameRegex.test(p.body_markdown)))
-    .slice(0, 4)
-    .map((p) => ({
-      slug: p.slug,
-      title: p.title,
-      country_code: p.country_code,
-      published_at: p.published_at,
-    }));
+
+  const STOPWORDS = new Set([
+    'and', 'the', 'with', 'from', 'into', 'over', 'rate', 'index', 'per',
+  ]);
+  const words = indicator.name
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) => w.replace(/[^a-z0-9]/g, ''))
+    .filter((w) => w.length > 3 && !STOPWORDS.has(w));
+  const idSafe = indicator.id.replace(/[^a-z0-9]/gi, '');
+  const tokens = words.length > 0 ? words : idSafe ? [idSafe] : [];
+
+  let related: PulsePreview[] = [];
+  if (tokens.length > 0) {
+    const nameRegex = new RegExp(tokens.join('|'), 'i');
+    related = (
+      (pulsesRes.data ?? []) as Array<{
+        slug: string;
+        title: string;
+        country_code: string;
+        published_at: string;
+        body_markdown: string | null;
+      }>
+    )
+      .filter((p) => nameRegex.test(p.title) || (p.body_markdown && nameRegex.test(p.body_markdown)))
+      .slice(0, 4)
+      .map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        country_code: p.country_code,
+        published_at: p.published_at,
+      }));
+  }
 
   return { indicator, values, trend, related };
 }
