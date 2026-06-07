@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { renderMarkdown } from '@/lib/ui/markdown';
 import { getActiveLocale } from '@/lib/ui/locale';
 import { NewsletterCTA } from '@/components/ui/NewsletterCTA';
+import { bandFor, BAND_LABELS } from '@/lib/ui/tokens';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,10 +83,30 @@ async function loadPulse(slug: string, locale: string) {
     .order('published_at', { ascending: false })
     .limit(3);
 
+  // Live composite score for this Pulse's country — used to surface drift
+  // between the score quoted in the article (a snapshot at publish time) and
+  // the current ranking. Skip for 'global' Pulses which don't have a single
+  // composite to compare against.
+  let liveComposite: number | null = null;
+  if (pulse.country_code && pulse.country_code !== 'global') {
+    try {
+      const liveRes = await sb
+        .from('v_country_latest_composite')
+        .select('score_value')
+        .eq('country_code', pulse.country_code)
+        .maybeSingle();
+      const v = (liveRes.data as { score_value: number } | null)?.score_value;
+      liveComposite = typeof v === 'number' ? v : null;
+    } catch {
+      liveComposite = null;
+    }
+  }
+
   return {
     pulse,
     country,
     related: (relRes.data ?? []) as RelatedRow[],
+    liveComposite,
   };
 }
 
@@ -118,13 +139,16 @@ export default async function PulseReaderPage({
 }) {
   const { slug } = await params;
   const locale = await getActiveLocale();
-  const { pulse, country, related } = await loadPulse(slug, locale);
+  const { pulse, country, related, liveComposite } = await loadPulse(slug, locale);
 
   if (!pulse) notFound();
 
   const fallbackUsed = pulse.locale !== locale;
   const html = renderMarkdown(pulse.body_markdown);
   const readingMin = approximateReadingMinutes(pulse.body_markdown);
+  const liveBand = bandFor(liveComposite);
+  const liveBandLabel = liveBand ? BAND_LABELS[liveBand] : null;
+  const showLiveStrip = country != null && liveComposite != null && liveBand != null;
 
   return (
     <article className="min-h-screen">
@@ -181,6 +205,46 @@ export default async function PulseReaderPage({
 
       {/* ── BODY ── */}
       <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Snapshot drift note — every Pulse quotes the composite at publish
+            time, but the underlying pipeline keeps moving. Surface the
+            current live score so readers can never be misled by editorial
+            sticking to a stale number. */}
+        {showLiveStrip && (
+          <aside
+            className="mb-8 rounded-lg border border-border bg-background-alt/40 px-4 py-3 text-sm text-foreground-muted flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2"
+            aria-label="Live composite drift"
+          >
+            <div>
+              <strong className="text-foreground font-medium">
+                This Pulse reflects {country?.name ?? 'the country'}&apos;s reading on{' '}
+                {shortDate(pulse.published_at)}.
+              </strong>{' '}
+              The pipeline keeps moving — current composite is shown on the right.
+            </div>
+            <div className="flex items-baseline gap-2 shrink-0">
+              <span className="text-xs uppercase tracking-wider text-foreground-subtle">
+                Live now
+              </span>
+              <span
+                className="font-mono tabular-nums text-lg font-semibold"
+                style={{ color: liveBand ? `var(--band-${liveBand})` : undefined }}
+              >
+                {liveComposite!.toFixed(1)}
+              </span>
+              <span className="text-xs text-foreground-muted">
+                {liveBandLabel}
+              </span>
+              {country && (
+                <Link
+                  href={`/country/${country.code.toLowerCase()}`}
+                  className="text-xs underline underline-offset-2 decoration-foreground-subtle/40 hover:text-foreground ml-1"
+                >
+                  country page →
+                </Link>
+              )}
+            </div>
+          </aside>
+        )}
         <div
           className="prose prose-thi"
           dangerouslySetInnerHTML={{ __html: html }}
