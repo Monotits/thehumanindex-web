@@ -62,16 +62,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     number,
   ]> = [
     ['/',              'daily',   1.0],
-    ['/dashboard',     'daily',   0.9],
-    ['/pulse',         'weekly',  0.8],
+    ['/countries',     'daily',   0.95],
+    ['/indicators',    'weekly',  0.9],
+    ['/top-10',        'weekly',  0.9],
+    ['/pulse',         'weekly',  0.85],
+    ['/research',      'weekly',  0.75],
     ['/glossary',      'weekly',  0.7],
+    ['/transparency',  'weekly',  0.65],
     ['/data-sources',  'weekly',  0.6],
-    ['/methodology',   'monthly', 0.6],
+    ['/methodology',   'monthly', 0.7],
     ['/about',         'monthly', 0.5],
     ['/contact',       'yearly',  0.3],
-    ['/quiz',          'monthly', 0.6],
-    ['/quiz/result',   'monthly', 0.4],
-    ['/global',        'daily',   0.85], // legacy country-style landing
+    ['/quiz',          'monthly', 0.65],
+    ['/layoffs',       'daily',   0.7],
   ];
 
   for (const [path, changeFrequency, priority] of staticPaths) {
@@ -93,7 +96,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const sb = createClient(supabaseUrl, anonKey);
 
-  const [pulsesRes, glossaryRes] = await Promise.all([
+  const [pulsesRes, glossaryRes, countriesRes, indicatorsRes] = await Promise.all([
     sb
       .from('commentary')
       .select('country_code,locale,slug,published_at')
@@ -105,7 +108,43 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .select('country_code,locale,slug,published_at')
       .order('published_at', { ascending: false })
       .limit(20000),
+    sb.from('countries').select('code').eq('active', true),
+    sb.from('indicators').select('id').eq('active', true),
   ]);
+
+  // ── Country detail pages (en only — locale routes come later) ──
+  const countries = (countriesRes.data ?? []) as Array<{ code: string }>;
+  for (const c of countries) {
+    out.push({
+      url: `${BASE}/country/${c.code.toLowerCase()}`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    });
+  }
+
+  // ── Indicator detail pages ──
+  const indicators = (indicatorsRes.data ?? []) as Array<{ id: string }>;
+  for (const i of indicators) {
+    out.push({
+      url: `${BASE}/indicator/${i.id}`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.85,
+    });
+  }
+
+  // ── Top-10 ranking pages (catalog-driven, static slugs) ──
+  // Imported lazily to avoid widening the bundle from a sitemap edge call.
+  const { TOP_10_CATALOG } = await import('@/lib/ui/top10-catalog');
+  for (const t of TOP_10_CATALOG) {
+    out.push({
+      url: `${BASE}/top-10/${t.slug}`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.85,
+    });
+  }
 
   // ── Pulse pages ──
   // Current page route is /pulse/[slug] (no country segment in URL — the
