@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 /**
  * GET /api/unsubscribe?token=...
@@ -20,7 +20,11 @@ async function processUnsubscribe(token: string): Promise<{ ok: boolean; email?:
   }
 
   try {
-    const { data, error } = await supabase
+    if (!supabaseAdmin) {
+      console.error('[unsubscribe] SUPABASE_SERVICE_ROLE_KEY missing')
+      return { ok: false }
+    }
+    const { data, error } = await supabaseAdmin
       .from('subscribers')
       .update({ unsubscribed_at: new Date().toISOString() })
       .eq('unsubscribe_token', token)

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getPostHogClient } from '@/lib/posthog-server'
 import { welcomeEmail } from '@/lib/email-templates'
 
@@ -49,9 +49,13 @@ export async function POST(request: Request) {
     // resending welcome emails on resubscribe doesn't invalidate old
     // unsubscribe links in earlier issues.
     let storedToken = unsubscribeToken
+    if (!supabaseAdmin) {
+      console.error('[subscribe] SUPABASE_SERVICE_ROLE_KEY missing — cannot persist subscriber')
+    }
     try {
+      if (!supabaseAdmin) throw new Error('Missing service role key')
       // First, look up an existing row so we can preserve its token.
-      const { data: existing } = await supabase
+      const { data: existing } = await supabaseAdmin!
         .from('subscribers')
         .select('email, unsubscribe_token, unsubscribed_at')
         .eq('email', email)
@@ -61,13 +65,13 @@ export async function POST(request: Request) {
         storedToken = existing.unsubscribe_token as string
         // If they had unsubscribed, re-activate the row.
         if (existing.unsubscribed_at) {
-          await supabase
+          await supabaseAdmin!
             .from('subscribers')
             .update({ unsubscribed_at: null, subscribed_at: new Date().toISOString(), source })
             .eq('email', email)
         }
       } else {
-        const { error } = await supabase
+        const { error } = await supabaseAdmin!
           .from('subscribers')
           .insert({
             email,
