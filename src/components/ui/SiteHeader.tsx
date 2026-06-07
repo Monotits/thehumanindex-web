@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/ui/cn';
 import { ThemeToggle } from './ThemeToggle';
-import { LanguageSwitcher } from './LanguageSwitcher';
 
 /**
  * SiteHeader — UI Sprint Plan v1
@@ -94,7 +93,6 @@ export function SiteHeader() {
 
           {/* Right actions */}
           <div className="flex items-center gap-1">
-            <LanguageSwitcher />
             <ThemeToggle />
             {/* Mobile menu trigger */}
             <button

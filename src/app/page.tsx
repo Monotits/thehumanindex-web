@@ -334,12 +334,6 @@ export default async function HomePage() {
                   {' · '}
                   {readingMinutes(featured.body_markdown)} min read
                 </div>
-                {featured.fallbackUsed && (
-                  <p className="mt-3 text-[11px] text-foreground-subtle leading-relaxed">
-                    Not yet translated for the selected language —
-                    showing the English edition.
-                  </p>
-                )}
               </div>
 
               {/* Right column: headline + excerpt + CTA */}

@@ -96,12 +96,6 @@ export default async function GlossaryPage() {
               Indicators, meta-indexes, methodology vocabulary. Each entry
               connects back to where the underlying data comes from.
             </p>
-            {fallbackUsed && (
-              <p className="mt-4 text-xs text-foreground-subtle">
-                Glossary is not yet translated for the selected language —
-                showing the English edition.
-              </p>
-            )}
           </div>
         </div>
       </section>

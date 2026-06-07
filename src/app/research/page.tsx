@@ -109,12 +109,6 @@ export default async function ResearchPage() {
               Each piece connects specific indicators to a broader meta-index narrative.
               Every claim is traceable back to its source.
             </p>
-            {fallbackUsed && (
-              <p className="mt-4 text-xs text-foreground-subtle">
-                Articles are not yet translated for the selected language —
-                showing the English edition.
-              </p>
-            )}
           </div>
         </div>
       </section>

@@ -475,12 +475,6 @@ export default async function CountryDetailPage({
                   year: 'numeric',
                 })}
               </time>
-              {pulseFallbackUsed && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <span>English edition</span>
-                </>
-              )}
             </div>
             <h3 className="font-serif text-2xl font-semibold leading-snug mb-3 text-balance group-hover:underline decoration-foreground-subtle/40 underline-offset-2">
               {latestPulse.title}

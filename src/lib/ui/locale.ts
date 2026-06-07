@@ -1,28 +1,29 @@
 /**
- * Server-side locale helpers — read NEXT_LOCALE cookie in server components.
+ * Locale helpers — currently English-only.
  *
- * Usage in a page.tsx:
- *   import { getActiveLocale } from '@/lib/ui/locale';
- *   const locale = await getActiveLocale();
- *   // pass to Supabase queries / API fetches
+ * The site was originally built with cookie-driven 10-locale content
+ * fetching (Faz 3.1). After traffic analysis showed near-zero
+ * non-English search demand and brand voice constraints favoured a
+ * single-language editorial register, we collapsed to English-only.
+ *
+ * This module stays in place as the central locale entry point so we
+ * can flip it back on later without touching every consumer. Every
+ * page that calls getActiveLocale() will simply receive 'en' for now;
+ * if we re-enable multi-locale fetching, this function changes and
+ * everything downstream still works.
+ *
+ * The next-intl messages files (src/i18n/messages/) and middleware
+ * are kept dormant — they're cheap to maintain and ready when needed.
  */
 
-import { cookies } from 'next/headers';
-import { LOCALES, DEFAULT_LOCALE, type Locale } from '@/i18n/config';
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/config';
 
 /**
- * Read NEXT_LOCALE cookie and return a validated Locale value.
- * Defaults to English when missing/invalid.
+ * Returns the active locale for content fetching.
+ *
+ * Pinned to English ('en') until traffic data justifies re-enabling
+ * the cookie-driven multi-locale path.
  */
 export async function getActiveLocale(): Promise<Locale> {
-  try {
-    const store = await cookies();
-    const raw = store.get('NEXT_LOCALE')?.value;
-    if (raw && (LOCALES as readonly string[]).includes(raw)) {
-      return raw as Locale;
-    }
-  } catch {
-    // cookies() can throw if accessed outside a request scope
-  }
   return DEFAULT_LOCALE;
 }

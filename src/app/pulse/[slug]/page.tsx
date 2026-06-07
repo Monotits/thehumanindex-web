@@ -175,14 +175,6 @@ export default async function PulseReaderPage({
             </time>
             <span aria-hidden="true">·</span>
             <span>{readingMin} min read</span>
-            {fallbackUsed && (
-              <>
-                <span aria-hidden="true">·</span>
-                <span className="text-foreground-subtle">
-                  English edition — not yet translated
-                </span>
-              </>
-            )}
           </div>
         </div>
       </header>

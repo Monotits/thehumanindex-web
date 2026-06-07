@@ -129,12 +129,6 @@ export default async function PulsePage() {
               Short, sourced briefings on what the indicators are doing and why
               it matters. Per country, per week.
             </p>
-            {fallbackUsed && (
-              <p className="mt-4 text-xs text-foreground-subtle">
-                Weekly Pulse is not yet translated for the selected language —
-                showing the English edition.
-              </p>
-            )}
           </div>
         </div>
       </section>

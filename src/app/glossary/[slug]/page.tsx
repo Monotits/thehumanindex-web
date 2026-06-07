@@ -154,11 +154,6 @@ export default async function GlossaryEntryPage({
                 ))}
               </div>
             )}
-            {fallbackUsed && (
-              <span className="text-xs text-foreground-subtle">
-                · English edition — not yet translated
-              </span>
-            )}
           </div>
         </div>
       </header>
