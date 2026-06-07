@@ -40,20 +40,27 @@ const ADAPTERS: IndicatorAdapter[] = [
   eurostatAdapter,              // 11 EU+ countries: unemployment, youth_unemployment, fertility, gini (fresher than WB)
   imfAdapter,                   // 25 countries: inflation_rate (primary), unemployment_rate (cross-source with WB+Eurostat)
   worldBankAdapter,             // 25 countries: 10 indicators
-  socialFeedComputedAdapter,    // ai_job_anxiety from social_feed_curated
 
   // Static seeds (annual refresh)
   oecdHousingAdapter,           // housing_affordability
   referenceSeedAdapter,         // 11 indicators including per-country temperature_anomaly (Berkeley Earth 2024)
+
+  // socialFeedComputedAdapter — DISABLED. Produced a single global value
+  // for ai_job_anxiety that was applied to every country uniformly. Killed
+  // in migration 022 (the indicator was disabled at the catalog level) and
+  // removed from the adapter chain here in Faz 17.4 (live-site audit found
+  // stale measurements still surfacing in Pulse generation). Re-enable when
+  // we have a real per-country sentiment source.
 
   // nasaGissAdapter — DISABLED. Single global value didn't differentiate
   // countries. Replaced by referenceSeed's per-country Berkeley Earth values
   // which capture geographical reality (NH amplification, equatorial drift).
 ];
 
-// Suppress unused-import warning while we keep nasaGiss source file around
-// for future re-enable when we have a per-country live API.
+// Suppress unused-import warnings while we keep these source files around
+// for future re-enable when we have per-country live APIs.
 void nasaGissAdapter;
+void socialFeedComputedAdapter;
 
 export interface NormalizedMeasurement extends IndicatorMeasurement {
   normalizedValue: number | null;

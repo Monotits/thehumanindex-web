@@ -5,9 +5,9 @@ import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { META_INDEXES, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 
 export const metadata: Metadata = {
-  title: 'All 31 indicators tracked | The Human Index',
+  title: 'Every indicator we track | The Human Index',
   description:
-    'Every indicator we track across 25 countries, grouped by meta-index domain. From AI job anxiety to housing affordability to temperature anomaly — each links to a full country ranking.',
+    'Every indicator we track across 25 countries, grouped by meta-index domain. From housing affordability to inflation to automation exposure to temperature anomaly — each links to a full country ranking.',
   alternates: { canonical: 'https://thehumanindex.org/indicators' },
 };
 
@@ -107,6 +107,69 @@ export default async function IndicatorsIndexPage() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* ── WHAT WE DON'T MEASURE (yet) ── */}
+      {/* Honest disclosure block. If a user wonders 'why isn't X here?',
+          this is where they find the answer — not in a missing indicator
+          row that contradicts an article. */}
+      <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+        <div className="max-w-3xl">
+          <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-3">
+            What we don&apos;t measure — yet.
+          </h2>
+          <p className="text-foreground-muted text-sm leading-relaxed mb-6">
+            Tried, didn&apos;t make the bar. We keep this list public so
+            articles never reference a metric the catalog can&apos;t back up.
+          </p>
+          <ul className="space-y-4 text-sm">
+            <li className="border-l-2 border-foreground-subtle/30 pl-4">
+              <div className="font-medium text-foreground">
+                AI Job Anxiety
+              </div>
+              <div className="text-foreground-muted leading-relaxed">
+                Computed from social-feed sentiment. Produced one global
+                value (≈79.8) applied to every country — no per-country
+                discriminating power. Disabled in our internal audit
+                (migration 022). Will re-enable when we have a real
+                per-country sentiment source.
+              </div>
+            </li>
+            <li className="border-l-2 border-foreground-subtle/30 pl-4">
+              <div className="font-medium text-foreground">
+                Civil unrest events
+              </div>
+              <div className="text-foreground-muted leading-relaxed">
+                ACLED/GDELT integrations were prototyped early on but the
+                normalization story (one protest ≠ one protest across
+                contexts) never converged. The Social meta-index currently
+                relies on homicide rate, suicide rate, and trust in
+                institutions instead — fewer signals, cleaner attribution.
+              </div>
+            </li>
+            <li className="border-l-2 border-foreground-subtle/30 pl-4">
+              <div className="font-medium text-foreground">
+                Per-country temperature trend (live)
+              </div>
+              <div className="text-foreground-muted leading-relaxed">
+                NASA GISS gives one global anomaly; that&apos;s not per-country
+                signal. We currently seed from Berkeley Earth&apos;s 2024
+                per-country dataset (refreshed annually). Switching to a
+                truly live per-country temperature API is on the list.
+              </div>
+            </li>
+          </ul>
+          <p className="text-xs text-foreground-subtle mt-6 leading-relaxed">
+            Read the full audit trail and per-source health in{' '}
+            <Link
+              href="/transparency"
+              className="underline underline-offset-2 decoration-foreground-subtle/40 hover:text-foreground"
+            >
+              Transparency
+            </Link>
+            .
+          </p>
         </div>
       </section>
 
