@@ -11,18 +11,41 @@
     "methodology": "Methodology",
     "confidence": "Confidence",
     "stress": "stress",
-    "deltaSuffix": "vs. previous"
+    "deltaSuffix": "vs. previous",
+    "readMore": "Read more →",
+    "back": "Back",
+    "today": "Today",
+    "thisWeek": "This week"
   },
   "nav": {
-    "dashboard": "Dashboard",
-    "global": "Global",
-    "layoffs": "Layoffs",
+    "home": "Home",
+    "countries": "Countries",
+    "topics": "Topics",
     "pulse": "Pulse",
-    "glossary": "Glossary",
     "research": "Research",
-    "data": "Data",
+    "glossary": "Glossary",
+    "methodology": "Methodology",
+    "transparency": "Transparency",
     "about": "About",
-    "contact": "Contact"
+    "contact": "Contact",
+    "dataset": "Dataset"
+  },
+  "footer": {
+    "theProject": "The Project",
+    "data": "Data",
+    "read": "Read",
+    "tools": "Tools",
+    "contact": "Contact",
+    "poweredBy": "Powered by data from",
+    "cronCadence": "Cron refreshes every 12h",
+    "indicatorCount": "25 countries · 31 indicators",
+    "license": "Data CC BY-NC 4.0. Code MIT.",
+    "newsletter": {
+      "heading": "Weekly brief",
+      "body": "The stress signals that moved this week, every Sunday.",
+      "placeholder": "you@example.com",
+      "cta": "Subscribe"
+    }
   },
   "bands": {
     "low": "Low",
@@ -32,36 +55,56 @@
     "critical": "Critical"
   },
   "metaIndexes": {
-    "economic": "Economic Stress",
-    "social": "Social Stress",
-    "mental": "Mental Stress",
-    "technological": "Technological Stress",
-    "environmental": "Environmental Stress"
+    "economic": "Economic",
+    "social": "Social",
+    "mental": "Mental",
+    "technological": "Technological",
+    "environmental": "Environmental"
   },
   "tiers": {
     "verified": "Verified",
     "reported": "Reported",
     "rumored": "Unconfirmed"
   },
+  "freshness": {
+    "fresh": "Fresh",
+    "aging": "Aging",
+    "stale": "Stale",
+    "veryStale": "Very stale"
+  },
   "home": {
-    "title": "The Human Index",
-    "subtitle": "Civilizational stress, measured.",
-    "ctaQuiz": "Take the 2-minute risk quiz",
-    "ctaGlobal": "Compare countries"
+    "todaysStory": "Today's story",
+    "compositeAverage": "Global average",
+    "countries": "Countries",
+    "lastUpdate": "Last update",
+    "ctaRanking": "View full ranking",
+    "ctaHowItWorks": "How it works",
+    "whereStressLives": "Where stress lives, on the map.",
+    "whereStressLivesSub": "Twenty-five countries colored by their composite stress score. Hover any tracked country for a full readout — click to dive in.",
+    "highestStress": "Highest stress",
+    "lowestStress": "Lowest stress",
+    "fiveDimensions": "Five dimensions of stress",
+    "latestAnalysis": "Latest analysis",
+    "allPulses": "All Pulses →",
+    "newsletter": {
+      "kicker": "Weekly stress brief",
+      "headline": "Five minutes a week. Every social, economic, and technological stress signal worth knowing.",
+      "body": "One email every Sunday. The data, the movements, the framing — distilled.",
+      "fineprint": "No spam. Unsubscribe in one click.",
+      "cta": "Subscribe"
+    }
   },
-  "dashboard": {
-    "compositeIndex": "Composite Index",
-    "domainsActive": "{active}/{total} domains active",
-    "thisWeeksMovers": "This Week's Movers",
-    "historicalTrend": "Historical Trend"
-  },
-  "global": {
-    "title": "Global Dashboard",
-    "subtitle": "Human stress score across 5 meta-indexes for tracked countries.",
-    "country": "Country",
-    "indicatorDetail": "Indicator Detail",
-    "allCountriesRanking": "All Countries — Stress Ranking",
-    "rankingHelp": "Sorted by composite stress score. Click any row to switch.",
-    "aboutTitle": "About this view"
+  "country": {
+    "backToCountries": "← All countries",
+    "compositeStress": "Composite stress",
+    "lastUpdated": "Last updated",
+    "stressByDomain": "Stress by domain",
+    "stressByDomainSub": "Five weighted meta-indexes. Together they constitute the composite.",
+    "compositeTrend": "Composite trend, 90 days",
+    "compositeTrendSub": "Daily-bucketed composite stress score. Dashed gridlines mark the band thresholds (25 / 45 / 65 / 80) — crossing one signals a category change.",
+    "latestPulse": "Latest Pulse",
+    "indicatorsInDetail": "Indicators in detail",
+    "indicatorsInDetailSub": "The raw measurements feeding into each meta-index, grouped by domain. Click any indicator to read the underlying source.",
+    "weight": "weight {pct}%"
   }
 }

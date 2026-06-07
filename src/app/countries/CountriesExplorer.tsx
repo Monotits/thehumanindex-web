@@ -1,13 +1,34 @@
 'use client';
 
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { cn } from '@/lib/ui/cn';
 import { StressBand } from '@/components/ui/StressBand';
 import { SparklineMini } from '@/components/ui/SparklineMini';
-import { WorldMap, type WorldMapCountry } from '@/components/ui/WorldMap';
-import { StressHeatmap, type HeatmapCountry } from '@/components/ui/StressHeatmap';
+import type { WorldMapCountry } from '@/components/ui/WorldMap';
+import type { HeatmapCountry } from '@/components/ui/StressHeatmap';
+
+// Heavy data-viz components: lazy-loaded on demand. Cards/Table users
+// never have react-simple-maps + topojson in their bundle. Saves
+// ~80KB gzipped on the default surface.
+const WorldMap = dynamic(
+  () => import('@/components/ui/WorldMap').then((m) => m.WorldMap),
+  { ssr: false, loading: () => <ViewLoading label="Loading map…" /> },
+);
+const StressHeatmap = dynamic(
+  () => import('@/components/ui/StressHeatmap').then((m) => m.StressHeatmap),
+  { ssr: false, loading: () => <ViewLoading label="Loading heatmap…" /> },
+);
+
+function ViewLoading({ label }: { label: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-background-alt/30 p-12 text-center text-sm text-foreground-muted">
+      {label}
+    </div>
+  );
+}
 import {
   bandFor,
   META_INDEXES,

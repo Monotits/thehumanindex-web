@@ -11,57 +11,100 @@
     "methodology": "Metodoloji",
     "confidence": "Güven",
     "stress": "stres",
-    "deltaSuffix": "önceki haftaya göre"
+    "deltaSuffix": "önceki haftaya göre",
+    "readMore": "Devamını oku →",
+    "back": "Geri",
+    "today": "Bugün",
+    "thisWeek": "Bu hafta"
   },
   "nav": {
-    "dashboard": "Panel",
-    "global": "Küresel",
-    "layoffs": "İşten Çıkarmalar",
+    "home": "Ana sayfa",
+    "countries": "Ülkeler",
+    "topics": "Konular",
     "pulse": "Nabız",
-    "glossary": "Sözlük",
     "research": "Araştırma",
-    "data": "Veri",
+    "glossary": "Sözlük",
+    "methodology": "Metodoloji",
+    "transparency": "Şeffaflık",
     "about": "Hakkında",
-    "contact": "İletişim"
+    "contact": "İletişim",
+    "dataset": "Veri seti"
+  },
+  "footer": {
+    "theProject": "Proje",
+    "data": "Veri",
+    "read": "Okumalar",
+    "tools": "Araçlar",
+    "contact": "İletişim",
+    "poweredBy": "Veri kaynakları",
+    "cronCadence": "12 saatte bir yenileniyor",
+    "indicatorCount": "25 ülke · 31 indikatör",
+    "license": "Veri CC BY-NC 4.0. Kod MIT.",
+    "newsletter": {
+      "heading": "Haftalık bülten",
+      "body": "Bu hafta hareket eden stres sinyalleri, her pazar.",
+      "placeholder": "siz@ornek.com",
+      "cta": "Abone ol"
+    }
   },
   "bands": {
     "low": "Düşük",
     "moderate": "Orta",
-    "elevated": "Yüksek",
-    "high": "Çok Yüksek",
+    "elevated": "Yükselmiş",
+    "high": "Yüksek",
     "critical": "Kritik"
   },
   "metaIndexes": {
-    "economic": "Ekonomik Stres",
-    "social": "Sosyal Stres",
-    "mental": "Zihinsel Stres",
-    "technological": "Teknolojik Stres",
-    "environmental": "Çevresel Stres"
+    "economic": "Ekonomik",
+    "social": "Sosyal",
+    "mental": "Zihinsel",
+    "technological": "Teknolojik",
+    "environmental": "Çevresel"
   },
   "tiers": {
-    "verified": "Doğrulandı",
-    "reported": "Bildirildi",
-    "rumored": "Doğrulanmadı"
+    "verified": "Doğrulanmış",
+    "reported": "Raporlanan",
+    "rumored": "Doğrulanmamış"
+  },
+  "freshness": {
+    "fresh": "Güncel",
+    "aging": "Yaşlanıyor",
+    "stale": "Eskimiş",
+    "veryStale": "Çok eski"
   },
   "home": {
-    "title": "İnsanlık Endeksi",
-    "subtitle": "Medeniyet stresi, ölçülebilir hâliyle.",
-    "ctaQuiz": "2 dakikalık risk testini al",
-    "ctaGlobal": "Ülkeleri karşılaştır"
+    "todaysStory": "Bugünün hikayesi",
+    "compositeAverage": "Küresel ortalama",
+    "countries": "Ülke",
+    "lastUpdate": "Son güncelleme",
+    "ctaRanking": "Tam sıralamayı gör",
+    "ctaHowItWorks": "Nasıl çalışıyor",
+    "whereStressLives": "Stres haritada nerede yaşıyor.",
+    "whereStressLivesSub": "Bileşik stres skoruna göre renklendirilmiş yirmi beş ülke. Takip edilen herhangi bir ülkenin üzerine gel — tam okuma için tıkla.",
+    "highestStress": "En yüksek stres",
+    "lowestStress": "En düşük stres",
+    "fiveDimensions": "Stresin beş boyutu",
+    "latestAnalysis": "Son analiz",
+    "allPulses": "Tüm Nabızlar →",
+    "newsletter": {
+      "kicker": "Haftalık stres bülteni",
+      "headline": "Haftada beş dakika. Bilmeye değer her sosyal, ekonomik ve teknolojik stres sinyali.",
+      "body": "Her pazar tek bir e-posta. Veri, hareketler, çerçeveleme — özetlenmiş halde.",
+      "fineprint": "Spam yok. Tek tıklamayla aboneliği iptal et.",
+      "cta": "Abone ol"
+    }
   },
-  "dashboard": {
-    "compositeIndex": "Bileşik Endeks",
-    "domainsActive": "{active}/{total} alan aktif",
-    "thisWeeksMovers": "Bu Haftanın Öne Çıkanları",
-    "historicalTrend": "Tarihsel Eğilim"
-  },
-  "global": {
-    "title": "Küresel Panel",
-    "subtitle": "Takip edilen ülkeler için 5 meta-endeks üzerinden insanlık stres skoru.",
-    "country": "Ülke",
-    "indicatorDetail": "Gösterge Detayı",
-    "allCountriesRanking": "Tüm Ülkeler — Stres Sıralaması",
-    "rankingHelp": "Bileşik stres skoruna göre sıralı. Değiştirmek için bir satıra tıkla.",
-    "aboutTitle": "Bu sayfa hakkında"
+  "country": {
+    "backToCountries": "← Tüm ülkeler",
+    "compositeStress": "Bileşik stres",
+    "lastUpdated": "Son güncelleme",
+    "stressByDomain": "Alana göre stres",
+    "stressByDomainSub": "Beş ağırlıklı meta-indeks. Birlikte bileşiği oluştururlar.",
+    "compositeTrend": "Bileşik trend, 90 gün",
+    "compositeTrendSub": "Günlük olarak gruplanmış bileşik stres skoru. Kesik çizgili ızgaralar band eşiklerini (25 / 45 / 65 / 80) işaretliyor — birini geçmek kategori değişimi anlamına gelir.",
+    "latestPulse": "Son Nabız",
+    "indicatorsInDetail": "İndikatörlerin detayı",
+    "indicatorsInDetailSub": "Her meta-indekse beslenen ham ölçümler, alana göre gruplandırılmış. Altta yatan kaynağı okumak için herhangi bir indikatöre tıkla.",
+    "weight": "ağırlık %{pct}"
   }
 }

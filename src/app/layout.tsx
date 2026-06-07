@@ -148,6 +148,9 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="google-site-verification" content="iLceQwDotiKddHWJtUP3iatXZEtY9e0l789bQonpBWw" />
+        {/* Preconnect to perf-critical third-party origins */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         {/* Pre-hydration theme bootstrap — prevents flash of incorrect theme */}
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
       </head>
