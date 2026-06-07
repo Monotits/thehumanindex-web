@@ -27,6 +27,7 @@ const PRIMARY_NAV: NavLink[] = [
   { href: '/topics',      label: 'Topics' },
   { href: '/pulse',       label: 'Pulse' },
   { href: '/research',    label: 'Research' },
+  { href: '/layoffs',     label: 'Layoffs' },
   { href: '/methodology', label: 'Methodology', shortLabel: 'Method' },
   { href: '/transparency',label: 'Transparency', shortLabel: 'Trust' },
 ];

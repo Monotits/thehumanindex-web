@@ -533,6 +533,31 @@ export default async function CountryDetailPage({
         </div>
       </section>
 
+      {/* ── PERSONAL EXPOSURE CTA ── */}
+      <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+        <div className="rounded-lg border border-border bg-background-alt/30 p-6 sm:p-8 flex flex-wrap items-center justify-between gap-6">
+          <div className="max-w-xl">
+            <p className="text-xs uppercase tracking-wider text-foreground-muted mb-2 font-medium">
+              60-second assessment
+            </p>
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold leading-snug mb-2 text-balance">
+              How exposed are you to {country.name}&apos;s stress signals?
+            </h2>
+            <p className="text-sm text-foreground-muted leading-relaxed">
+              Five quick questions on your sector, age, and concerns — we map
+              your answers to the live numbers above and rank the five domains
+              by personal relevance.
+            </p>
+          </div>
+          <Link
+            href="/quiz"
+            className="inline-flex items-center gap-2 rounded-md bg-accent text-accent-fg px-5 py-2.5 text-sm font-medium hover:bg-accent-hover transition-colors shrink-0"
+          >
+            Take the assessment →
+          </Link>
+        </div>
+      </section>
+
       {/* ── TRUST FOOTER ── */}
       <section className="border-t border-border bg-background-alt/40">
         <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-wrap items-center justify-between gap-4">

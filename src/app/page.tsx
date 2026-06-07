@@ -48,6 +48,15 @@ interface FeaturedPulse extends PulsePreview {
   fallbackUsed: boolean;
 }
 
+interface LayoffPreview {
+  id: string;
+  company: string;
+  people_affected: number | null;
+  is_ai_driven: boolean;
+  country_code: string | null;
+  announcement_date: string;
+}
+
 async function loadHomeData(locale: string) {
   const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -56,6 +65,8 @@ async function loadHomeData(locale: string) {
       countries: [] as CountrySummary[],
       mapData: [] as WorldMapCountry[],
       featured: null as FeaturedPulse | null,
+      layoffs: [] as LayoffPreview[],
+      layoffsTotal30d: 0,
       metaAvgs: [] as MetaAvg[],
       pulses: [] as PulsePreview[],
       globalAvg: null,
@@ -169,7 +180,20 @@ async function loadHomeData(locale: string) {
     : null;
   const pulses = allPulses.slice(1, 5) as PulsePreview[];
 
-  return { countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate };
+  // 4. Recent layoff signals — 6 most recent corporate events for the
+  //    homepage 'Live labor signals' preview band.
+  const layoffsRes = await sb
+    .from('corporate_layoffs_curated')
+    .select('id, company, people_affected, is_ai_driven, country_code, announcement_date')
+    .order('announcement_date', { ascending: false })
+    .limit(6);
+  const layoffs = (layoffsRes.data ?? []) as LayoffPreview[];
+  const layoffsTotal30d = layoffs.reduce((s, l) => s + (l.people_affected ?? 0), 0);
+
+  return {
+    countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate,
+    layoffs, layoffsTotal30d,
+  };
 }
 
 function formatRelativeTime(iso: string | null): string {
@@ -206,9 +230,16 @@ function readingMinutes(body: string | null | undefined): number {
   return Math.max(1, Math.round(body.trim().split(/\s+/).length / 220));
 }
 
+function formatLayoffCount(n: number | null): string {
+  if (n === null || n === undefined || n === 0) return '—';
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k`;
+  return n.toLocaleString();
+}
+
 export default async function HomePage() {
   const locale = await getActiveLocale();
-  const { countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate } = await loadHomeData(locale);
+  const { countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate, layoffs, layoffsTotal30d } = await loadHomeData(locale);
 
   // Country name lookup for the featured Pulse byline
   const featuredCountry = featured
@@ -291,6 +322,12 @@ export default async function HomePage() {
                 className="inline-flex items-center gap-2 rounded-md bg-accent text-accent-fg px-5 py-2.5 text-sm font-medium hover:bg-accent-hover transition-colors"
               >
                 View full ranking
+              </Link>
+              <Link
+                href="/quiz"
+                className="inline-flex items-center gap-2 rounded-md border border-foreground/70 px-5 py-2.5 text-sm font-medium hover:bg-background-alt transition-colors"
+              >
+                Take the 60-sec assessment
               </Link>
               <Link
                 href="/methodology"
@@ -445,6 +482,86 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
+        </section>
+      )}
+
+      {/* ── LIVE LABOR SIGNALS (layoff preview) ── */}
+      {layoffs.length > 0 && (
+        <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-14 border-t border-border">
+          <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-2 mb-2 text-xs uppercase tracking-wider text-foreground-muted font-medium">
+                <MetaCategoryBadge meta="economic" variant="dot" size="sm" />
+                <span>·</span>
+                <span>Live labor signals</span>
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">
+                Where the labor market is breaking, this week.
+              </h2>
+              <p className="text-foreground-muted">
+                Corporate layoff announcements aggregated from SEC EDGAR,
+                WARN Act filings, and verified news — feeding the Economic
+                meta-index.
+              </p>
+            </div>
+            <Link
+              href="/layoffs"
+              className="inline-flex items-center gap-2 rounded-md border border-foreground/70 px-5 py-2.5 text-sm font-medium hover:bg-background-alt transition-colors shrink-0"
+            >
+              See all signals →
+            </Link>
+          </div>
+          <ul className="divide-y divide-border border-y border-border">
+            {layoffs.map((l) => (
+              <li
+                key={l.id}
+                className="py-3 flex items-center gap-3 sm:gap-4 flex-wrap sm:flex-nowrap"
+              >
+                <Link
+                  href={l.country_code ? `/country/${l.country_code.toLowerCase()}` : '/layoffs'}
+                  className="shrink-0 text-lg hover:opacity-80 transition-opacity w-7 text-center"
+                  aria-hidden={l.country_code ? undefined : true}
+                  title={l.country_code ?? undefined}
+                >
+                  {countries.find((c) => c.country_code === l.country_code)?.flag_emoji ?? '🌐'}
+                </Link>
+                <span className="font-serif text-base sm:text-lg font-semibold flex-1 min-w-0 truncate">
+                  {l.company}
+                </span>
+                {l.is_ai_driven && (
+                  <span
+                    className="inline-flex items-center text-[10px] uppercase tracking-wide font-medium px-1.5 py-0.5 rounded shrink-0"
+                    style={{
+                      backgroundColor: 'var(--band-elevated-bg)',
+                      color: 'var(--band-elevated)',
+                    }}
+                  >
+                    AI-driven
+                  </span>
+                )}
+                <div className="text-right shrink-0">
+                  <div className="font-mono tabular-nums text-base sm:text-lg font-semibold">
+                    {formatLayoffCount(l.people_affected)}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-wider text-foreground-subtle">
+                    affected
+                  </div>
+                </div>
+                <time
+                  dateTime={l.announcement_date}
+                  className="text-xs text-foreground-subtle tabular-nums shrink-0 ml-2 sm:ml-4 w-20 text-right"
+                >
+                  {new Date(l.announcement_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </time>
+              </li>
+            ))}
+          </ul>
+          {layoffsTotal30d > 0 && (
+            <p className="mt-4 text-xs text-foreground-subtle">
+              <span className="font-mono font-medium text-foreground">{formatLayoffCount(layoffsTotal30d)}</span>{' '}
+              people affected across these signals.
+            </p>
+          )}
         </section>
       )}
 
