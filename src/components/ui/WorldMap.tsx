@@ -11,6 +11,7 @@ import {
   META_BG_CLASS,
   type MetaIndex,
 } from '@/lib/ui/tokens';
+import { trackCountryNavigate } from '@/lib/analytics';
 
 // World atlas via jsdelivr CDN — small (~110KB), public/topology, ISO_A2 codes.
 const GEO_URL =
@@ -136,6 +137,7 @@ export function WorldMap({ countries, className }: WorldMapProps) {
 
   function handleClick(iso2: string) {
     if (!byIso2.has(iso2)) return;
+    trackCountryNavigate(iso2, 'world_map');
     router.push(`/country/${iso2.toLowerCase()}`);
   }
 

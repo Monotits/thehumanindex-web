@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react';
 import { cn } from '@/lib/ui/cn';
 import { StressBand } from '@/components/ui/StressBand';
 import { SparklineMini } from '@/components/ui/SparklineMini';
+import { trackViewModeChange } from '@/lib/analytics';
 import type { WorldMapCountry } from '@/components/ui/WorldMap';
 import type { HeatmapCountry } from '@/components/ui/StressHeatmap';
 
@@ -74,6 +75,7 @@ export function CountriesExplorer({ rows }: { rows: ExplorerRow[] }) {
   const [view, setView] = useState<View>(isView(initial) ? initial : 'grid');
 
   function changeView(next: View) {
+    if (next !== view) trackViewModeChange(next);
     setView(next);
     const params = new URLSearchParams(searchParams.toString());
     if (next === 'grid') params.delete('view');

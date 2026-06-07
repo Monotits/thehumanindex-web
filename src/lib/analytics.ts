@@ -81,3 +81,38 @@ export function trackIndicatorView(indicator_id: string) {
   if (typeof window === 'undefined') return
   posthog.capture('indicator_viewed', { indicator_id })
 }
+
+// ── Click / interaction tracking ───────────────────────────────────
+
+/**
+ * Generic CTA click. Use for hero buttons, in-content CTAs, banner
+ * conversions where naming the button matters.
+ */
+export function trackCTAClick(name: string, source: string, extra?: Record<string, unknown>) {
+  if (typeof window === 'undefined') return
+  posthog.capture('cta_clicked', { name, source, ...(extra ?? {}) })
+}
+
+/** Layoff row click on the homepage labor-signals strip or /layoffs page. */
+export function trackLayoffClick(company: string, source: string) {
+  if (typeof window === 'undefined') return
+  posthog.capture('layoff_clicked', { company, source })
+}
+
+/** Country navigation event with explicit source attribution. */
+export function trackCountryNavigate(country_code: string, source: string) {
+  if (typeof window === 'undefined') return
+  posthog.capture('country_navigated', { country_code, source })
+}
+
+/** Countries explorer view-mode toggle. */
+export function trackViewModeChange(view: 'grid' | 'table' | 'map' | 'heatmap') {
+  if (typeof window === 'undefined') return
+  posthog.capture('countries_view_changed', { view })
+}
+
+/** Quiz variant landing chosen from /quiz picker. */
+export function trackQuizVariantSelected(slug: string, source: string) {
+  if (typeof window === 'undefined') return
+  posthog.capture('quiz_variant_selected', { slug, source })
+}

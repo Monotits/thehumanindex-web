@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { SourceAttribution } from '@/components/ui/SourceAttribution';
 import { CompositeLineChart, type CompositePoint } from '@/components/ui/CompositeLineChart';
+import { PageViewBeacon } from '@/components/PageViewBeacon';
 import { bandFor, freshnessFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 
 export const revalidate = 3600;
@@ -273,6 +274,15 @@ export default async function IndicatorPage({
 
   return (
     <article className="min-h-screen">
+      <PageViewBeacon
+        event="indicator_viewed"
+        properties={{
+          indicator_id: indicator.id,
+          indicator_name: indicator.name,
+          meta_index: indicator.meta_index,
+          global_avg_stress: meanStress,
+        }}
+      />
       {/* ── HEADER ── */}
       <header className="border-b border-border bg-background-alt/40">
         <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">

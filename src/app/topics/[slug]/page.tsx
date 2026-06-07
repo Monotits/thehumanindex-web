@@ -7,6 +7,7 @@ import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { bandFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 import { TOPIC_CATALOG, getTopicEntry, type TopicEntry } from '@/lib/ui/topic-catalog';
 import { getActiveLocale } from '@/lib/ui/locale';
+import { PageViewBeacon } from '@/components/PageViewBeacon';
 
 export const dynamic = 'force-dynamic';
 
@@ -195,6 +196,10 @@ export default async function TopicPage({
 
   return (
     <article className="min-h-screen">
+      <PageViewBeacon
+        event="topic_viewed"
+        properties={{ slug: entry.slug, meta_index: entry.meta }}
+      />
       {/* ── HEADER ── */}
       <header className="border-b border-border bg-background-alt/40">
         <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">

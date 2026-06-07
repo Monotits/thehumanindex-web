@@ -8,6 +8,7 @@ import { SparklineMini } from '@/components/ui/SparklineMini';
 import { bandFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 import { TOP_10_CATALOG, getTop10Entry, type Top10Entry } from '@/lib/ui/top10-catalog';
 import { loadCompositeHistory, pointsToDenseSeries } from '@/lib/ui/history';
+import { PageViewBeacon } from '@/components/PageViewBeacon';
 
 export const revalidate = 3600;
 
@@ -164,6 +165,14 @@ export default async function Top10Page({
 
   return (
     <article className="min-h-screen">
+      <PageViewBeacon
+        event="top_10_viewed"
+        properties={{
+          slug: entry.slug,
+          source_kind: entry.source.kind,
+          direction: entry.direction,
+        }}
+      />
       {/* ── HEADER ── */}
       <header className="border-b border-border bg-background-alt/40">
         <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">

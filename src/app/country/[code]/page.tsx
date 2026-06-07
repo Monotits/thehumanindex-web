@@ -7,6 +7,7 @@ import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { SourceAttribution } from '@/components/ui/SourceAttribution';
 import { SparklineMini } from '@/components/ui/SparklineMini';
 import { CompositeLineChart, type CompositePoint } from '@/components/ui/CompositeLineChart';
+import { PageViewBeacon } from '@/components/PageViewBeacon';
 import { cn } from '@/lib/ui/cn';
 import { loadCompositeHistory, pointsToDenseSeries, trendSummary, type CompositeHistoryPoint } from '@/lib/ui/history';
 import {
@@ -298,6 +299,10 @@ export default async function CountryDetailPage({
 
   return (
     <div className="min-h-screen">
+      <PageViewBeacon
+        event="country_viewed"
+        properties={{ country_code: country.code, country_name: country.name, composite }}
+      />
       {/* ── HERO ── */}
       <section className="border-b border-border bg-background-alt/40">
         <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
