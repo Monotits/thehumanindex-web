@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { CountriesExplorer, type ExplorerRow } from './CountriesExplorer';
 import { type MetaIndex } from '@/lib/ui/tokens';
@@ -67,6 +68,25 @@ async function loadData(): Promise<ExplorerRow[]> {
     .sort((a, b) => b.composite - a.composite);
 }
 
+/** Light skeleton shown during Suspense — matches Cards default view spacing. */
+function ExplorerSkeleton() {
+  return (
+    <div>
+      <div className="mb-8 border-b border-border">
+        <div className="flex gap-1 h-10" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="rounded-lg border border-border bg-background h-44 animate-pulse"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default async function CountriesPage() {
   const rows = await loadData();
 
@@ -92,13 +112,18 @@ export default async function CountriesPage() {
       </section>
 
       {/* ── EXPLORER ── */}
-      <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-8" id="explore">
         {rows.length === 0 ? (
           <p className="text-foreground-muted text-sm">
             No data available right now. Try again shortly.
           </p>
         ) : (
-          <CountriesExplorer rows={rows} />
+          // Suspense boundary required because CountriesExplorer uses
+          // useSearchParams() — Next.js needs this to statically prerender
+          // the page without bailing out to client-side rendering.
+          <Suspense fallback={<ExplorerSkeleton />}>
+            <CountriesExplorer rows={rows} />
+          </Suspense>
         )}
       </section>
     </div>
