@@ -65,6 +65,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ['/countries',     'daily',   0.95],
     ['/indicators',    'weekly',  0.9],
     ['/top-10',        'weekly',  0.9],
+    ['/topics',        'weekly',  0.9],
+    ['/dataset',       'monthly', 0.75],
     ['/pulse',         'weekly',  0.85],
     ['/research',      'weekly',  0.75],
     ['/glossary',      'weekly',  0.7],
@@ -140,6 +142,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const t of TOP_10_CATALOG) {
     out.push({
       url: `${BASE}/top-10/${t.slug}`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.85,
+    });
+  }
+
+  // ── Topic hub pages ──
+  const { TOPIC_CATALOG } = await import('@/lib/ui/topic-catalog');
+  for (const t of TOPIC_CATALOG) {
+    out.push({
+      url: `${BASE}/topics/${t.slug}`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.85,

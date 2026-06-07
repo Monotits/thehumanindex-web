@@ -70,7 +70,7 @@ export function SiteFooter() {
               <li><Link href="/top-10" className="hover:text-foreground">Country rankings</Link></li>
               <li><Link href="/countries?view=table" className="hover:text-foreground">Sortable table</Link></li>
               <li><Link href="/data-sources" className="hover:text-foreground">Data sources</Link></li>
-              <li><Link href="/api/transparency" className="hover:text-foreground">API access</Link></li>
+              <li><Link href="/dataset" className="hover:text-foreground">Dataset & API</Link></li>
             </ul>
           </div>
 
