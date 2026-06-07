@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/ui/cn';
+import { trackQuizCompleted } from '@/lib/analytics';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { StressBand } from '@/components/ui/StressBand';
 import {
@@ -154,6 +155,20 @@ export function QuizExperience({ countries }: { countries: QuizCountry[] }) {
     if (step !== 'result' || !countryCode || !sector || !age) return null;
     return computeProfile({ countryCode, sector, age, concerns, countries });
   }, [step, countryCode, sector, age, concerns, countries]);
+
+  // Fire analytics once when reaching the result step
+  useEffect(() => {
+    if (step === 'result' && result) {
+      trackQuizCompleted({
+        country: result.country.code,
+        sector: String(sector),
+        age: String(age),
+        concerns: concerns.map(String),
+        personalExposure: result.personalExposure,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, result?.country.code]);
 
   function reset() {
     setCountryCode('');

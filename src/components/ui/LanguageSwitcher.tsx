@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/ui/cn';
+import { trackLanguageChange } from '@/lib/analytics';
 import {
   LOCALES,
   LOCALE_LABELS,
@@ -79,6 +80,7 @@ export function LanguageSwitcher() {
   }, [open]);
 
   function selectLocale(locale: Locale) {
+    const previous = current;
     setCurrent(locale);
     setOpen(false);
     writeLocaleCookie(locale);
@@ -86,6 +88,9 @@ export function LanguageSwitcher() {
       localStorage.setItem('thi-locale', locale);
     } catch {
       /* ignore */
+    }
+    if (previous !== locale) {
+      trackLanguageChange(previous, locale);
     }
     // Force server re-render so content surfaces pick up new locale
     router.refresh();

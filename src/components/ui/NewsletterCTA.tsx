@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { cn } from '@/lib/ui/cn';
+import { trackNewsletterSubscribe } from '@/lib/analytics';
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -48,6 +49,7 @@ export function NewsletterCTA({ variant = 'hero', className }: NewsletterCTAProp
         throw new Error(body.error ?? 'Could not subscribe. Try again later.');
       }
       setState('success');
+      trackNewsletterSubscribe(variant, email);
       setEmail('');
     } catch (err) {
       setState('error');
