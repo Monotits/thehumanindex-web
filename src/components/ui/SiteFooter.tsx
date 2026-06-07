@@ -127,7 +127,7 @@ export function SiteFooter() {
             © {new Date().getFullYear()} The Human Index. Data CC BY-NC 4.0. Code MIT.
           </div>
           <div className="flex items-center gap-3">
-            <span>Cron refreshes every 12h</span>
+            <span>Pipeline checks every 12h</span>
             <span aria-hidden="true">·</span>
             <span>25 countries · 31 indicators</span>
           </div>

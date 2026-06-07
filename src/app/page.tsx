@@ -13,7 +13,7 @@ import { loadCompositeHistory, pointsToDenseSeries, trendSummary } from '@/lib/u
 export const metadata: Metadata = {
   title: 'The Human Index — Civilizational Stress Tracker',
   description:
-    'Real-time civilizational stress measurement across 25 countries and 31 indicators. Composite scores updated continuously. Editorial overlay in 9 languages.',
+    'Civilizational stress composite across 25 countries and 31 indicators. Five meta-indexes: economic, social, mental, technological, environmental. Every score traceable to its source.',
   alternates: { canonical: 'https://thehumanindex.org' },
 };
 
@@ -280,8 +280,9 @@ export default async function HomePage() {
             </h1>
             <p className="mt-6 text-lg text-foreground-muted text-pretty max-w-2xl">
               The Human Index tracks 25 countries across 31 indicators in five domains —
-              economic, social, mental, technological, environmental. Updated every 12 hours.
-              Every number is traceable to its source.
+              economic, social, mental, technological, environmental. The pipeline
+              checks every 12 hours; sources publish on their own cadence. Every
+              number traceable.
             </p>
             {globalAvg !== null && (
               <div className="mt-8 flex flex-wrap items-center gap-6 sm:gap-10">
@@ -569,10 +570,10 @@ export default async function HomePage() {
       <section className="border-t border-border bg-background-alt/40">
         <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="grid md:grid-cols-4 gap-8">
-            <TrustStat label="Indicators" value="31" caption="Active per cron run" />
-            <TrustStat label="Data sources" value="6" caption="WB · Eurostat · IMF · OECD · WRI · IHME" />
-            <TrustStat label="Languages" value="9" caption="Per-country editorial framing" />
-            <TrustStat label="Cron cadence" value="12h" caption="Continuous composite refresh" />
+            <TrustStat label="Countries" value="25" caption="Each with composite + 5 meta-index breakdown" />
+            <TrustStat label="Indicators" value="31" caption="Normalized to a 0–100 stress scale" />
+            <TrustStat label="Meta-indexes" value="5" caption="Economic · Social · Mental · Tech · Environ" />
+            <TrustStat label="Pipeline check" value="12h" caption="Source cadence varies; see methodology" />
           </div>
           <div className="mt-10 flex flex-wrap gap-4 text-sm">
             <Link href="/methodology" className="text-foreground-muted hover:text-foreground underline underline-offset-2 decoration-foreground-subtle/40">

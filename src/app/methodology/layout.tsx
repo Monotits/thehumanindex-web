@@ -3,11 +3,11 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Methodology — How We Measure Civilizational Stress',
   description:
-    'Learn how The Human Index measures AI displacement risk across seven domains: work risk, inequality, unrest, institutional decay, wellbeing, policy response, and public sentiment.',
+    'How we compute the composite — five meta-indexes (economic, social, mental, technological, environmental), 31 normalized indicators across 25 countries, every step documented.',
   openGraph: {
     title: 'Methodology — The Human Index',
     description:
-      'Transparent methodology behind the civilizational stress index. Seven domains, weighted composite scoring, updated weekly.',
+      'The formula, the normalization, the weights, the freshness tiers, the fallback chain. Every choice we made, in the open.',
   },
   alternates: { canonical: 'https://thehumanindex.org/methodology' },
 }

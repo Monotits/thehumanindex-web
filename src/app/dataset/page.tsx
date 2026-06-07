@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'The Human Index Dataset — API + CSV access | The Human Index',
   description:
-    '25 countries, 31 indicators, 5 meta-indexes, refreshed every 12 hours. Free programmatic access via REST API. Documentation and example endpoints below.',
+    '25 countries, 31 indicators, 5 meta-indexes. Pipeline checks every 12 hours; underlying sources publish on their own cadence. Free programmatic access via REST API.',
   alternates: { canonical: 'https://thehumanindex.org/dataset' },
 };
 

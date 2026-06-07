@@ -20,7 +20,7 @@ const COMPARES = [
     name: 'OECD Better Life Index',
     doing: 'Mid-decade wellbeing scoreboard, hand-curated by OECD economists.',
     different:
-      'We update every 12 hours from public data and weight five domains. Editorial overlay in 10 languages explains what moved.',
+      'We check the underlying sources every 12 hours and re-aggregate when they refresh. Five meta-indexes, weighted composite, editorial overlay in English.',
   },
   {
     name: 'Trading Economics',
@@ -72,8 +72,9 @@ export default function AboutPage() {
           <ul>
             <li>
               Aggregate indicators from official sources — World Bank, Eurostat,
-              IMF, OECD, WHO, NASA, Berkeley Earth, IHME, WRI, regulators —
-              every 12 hours.
+              IMF, OECD, WHO, NASA, Berkeley Earth, IHME, WRI, regulators.
+              The pipeline checks every 12 hours; each source publishes on its
+              own cadence (some daily, some quarterly, some annual).
             </li>
             <li>
               Normalize each indicator to a 0–100 stress scale and combine into

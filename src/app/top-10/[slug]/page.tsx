@@ -303,7 +303,7 @@ export default async function Top10Page({
       <section className="border-t border-border bg-background-alt/40">
         <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-foreground-muted max-w-md">
-            Rankings update every 12 hours from the live indicator pipeline.
+            The pipeline re-checks every 12 hours; underlying sources publish on their own cadence.
             Every number traces back to its source on the country page.
           </p>
           <div className="flex flex-wrap gap-4 text-sm">

@@ -3,11 +3,11 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'Learn how The Human Index tracks civilizational stress across seven domains — from AI job displacement to institutional trust — using real-time data from BLS, FRED, WHO, OECD, and more.',
+    'How we built it, what it measures, what it isn\'t. Five meta-indexes, 31 indicators, 25 countries — every score traceable to its source.',
   openGraph: {
     title: 'About — The Human Index',
     description:
-      'How we measure civilizational stress across seven domains using live government and institutional data sources.',
+      'A civilizational stress composite — economic, social, mental, technological, environmental — across 25 countries. Live, sourced, traceable.',
     url: 'https://thehumanindex.org/about',
   },
   alternates: {

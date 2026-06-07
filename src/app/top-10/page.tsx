@@ -6,7 +6,7 @@ import { TOP_10_CATALOG } from '@/lib/ui/top10-catalog';
 export const metadata: Metadata = {
   title: 'Country rankings | The Human Index',
   description:
-    'Live data-driven country rankings — most stressed countries, best for mental health, most exposed to AI, housing crisis severity, and more. Updated every 12 hours.',
+    'Live data-driven country rankings — most stressed countries, best for mental health, most exposed to AI, housing crisis severity, and more. Pipeline re-checks every 12 hours.',
   alternates: { canonical: 'https://thehumanindex.org/top-10' },
 };
 
@@ -27,7 +27,7 @@ export default function Top10IndexPage() {
             </h1>
             <p className="mt-5 text-base sm:text-lg text-foreground-muted text-pretty max-w-2xl">
               Live, data-driven rankings across the dimensions that shape
-              everyday life. Each list updates every 12 hours from the same
+              everyday life. The pipeline re-checks every 12 hours from the same
               indicator pipeline that powers the composite score.
             </p>
           </div>

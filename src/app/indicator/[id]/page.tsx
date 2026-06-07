@@ -82,7 +82,7 @@ export async function generateMetadata({
   const title = `${data.name} by country | The Human Index`;
   const description =
     data.description ??
-    `Live ranking of ${data.name.toLowerCase()} across 25 tracked countries. ${data.source_org ? `Sourced from ${data.source_org}.` : ''} Updated every 12 hours.`;
+    `Live ranking of ${data.name.toLowerCase()} across 25 tracked countries. ${data.source_org ? `Sourced from ${data.source_org}.` : ''} Re-checked every 12 hours; source publishes on its own cadence.`;
 
   return {
     title,

@@ -35,7 +35,7 @@ export function WebSiteJsonLd() {
         name: 'The Human Index',
         url: 'https://thehumanindex.org',
         description:
-          'Real-time civilizational stress tracker measuring AI displacement exposure across seven domains.',
+          'A civilizational stress composite across 25 countries and 31 indicators, grouped into five meta-indexes: economic, social, mental, technological, environmental.',
       }}
     />
   )
@@ -140,7 +140,7 @@ export function DatasetJsonLd() {
         '@type': 'Dataset',
         name: 'The Human Index — Civilizational Stress Dataset',
         description:
-          'Weekly composite index tracking civilizational stress across seven domains: AI Work Displacement, Income Inequality, Social Unrest, Institutional Decay, Social Wellbeing, Policy Response, and Public Sentiment. Data sourced from FRED, World Bank, ACLED, GDELT, and OECD.',
+          'Civilizational stress composite across 25 countries and 31 indicators, grouped into five meta-indexes (economic, social, mental, technological, environmental). Sourced from World Bank, Eurostat, IMF WEO, OECD, WHO, NASA GISS, Berkeley Earth, IHME GBD, WRI Aqueduct, and Gallup.',
         url: 'https://thehumanindex.org',
         license: 'https://creativecommons.org/licenses/by/4.0/',
         creator: {
