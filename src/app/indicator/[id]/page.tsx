@@ -6,6 +6,7 @@ import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { SourceAttribution } from '@/components/ui/SourceAttribution';
 import { CompositeLineChart, type CompositePoint } from '@/components/ui/CompositeLineChart';
 import { PageViewBeacon } from '@/components/PageViewBeacon';
+import { ShareButton } from '@/components/ui/ShareButton';
 import { bandFor, freshnessFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 
 export const revalidate = 3600;
@@ -294,9 +295,18 @@ export default async function IndicatorPage({
             <MetaCategoryBadge meta={indicator.meta_index} variant="dot" size="sm" />
           </div>
 
-          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight tracking-tight text-balance">
-            {indicator.name} by country
-          </h1>
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight tracking-tight text-balance">
+              {indicator.name} by country
+            </h1>
+            <ShareButton
+              url={`/indicator/${indicator.id}`}
+              title={`${indicator.name} by country — The Human Index`}
+              text={indicator.description ?? `${indicator.name} across 25 tracked countries`}
+              surface="indicator_detail"
+              variant="full"
+            />
+          </div>
 
           {indicator.description && (
             <p className="mt-5 text-base sm:text-lg text-foreground-muted text-pretty max-w-2xl leading-relaxed">

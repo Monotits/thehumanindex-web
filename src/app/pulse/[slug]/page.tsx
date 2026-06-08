@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { renderMarkdown } from '@/lib/ui/markdown';
 import { getActiveLocale } from '@/lib/ui/locale';
 import { NewsletterCTA } from '@/components/ui/NewsletterCTA';
+import { ShareButton } from '@/components/ui/ShareButton';
 import { bandFor, BAND_LABELS } from '@/lib/ui/tokens';
 
 export const dynamic = 'force-dynamic';
@@ -193,12 +194,21 @@ export default async function PulseReaderPage({
           </h1>
 
           {/* Byline */}
-          <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-foreground-muted">
-            <time dateTime={pulse.published_at} className="tabular-nums">
-              {formatLongDate(pulse.published_at)}
-            </time>
-            <span aria-hidden="true">·</span>
-            <span>{readingMin} min read</span>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm text-foreground-muted">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <time dateTime={pulse.published_at} className="tabular-nums">
+                {formatLongDate(pulse.published_at)}
+              </time>
+              <span aria-hidden="true">·</span>
+              <span>{readingMin} min read</span>
+            </div>
+            <ShareButton
+              url={`/pulse/${pulse.slug}`}
+              title={pulse.title}
+              text={`${pulse.title} — The Human Index`}
+              surface="pulse_reader"
+              variant="full"
+            />
           </div>
         </div>
       </header>

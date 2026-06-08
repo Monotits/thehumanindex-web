@@ -8,6 +8,7 @@ import { bandFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 import { TOPIC_CATALOG, getTopicEntry, type TopicEntry } from '@/lib/ui/topic-catalog';
 import { getActiveLocale } from '@/lib/ui/locale';
 import { PageViewBeacon } from '@/components/PageViewBeacon';
+import { ShareButton } from '@/components/ui/ShareButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -210,13 +211,22 @@ export default async function TopicPage({
             <span aria-hidden="true">·</span>
             <MetaCategoryBadge meta={entry.meta} variant="dot" size="sm" />
           </div>
-          <div className="flex items-start gap-4 mb-3">
-            <span className="text-5xl" aria-hidden="true">
-              {entry.emoji}
-            </span>
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight tracking-tight text-balance">
-              {entry.title}
-            </h1>
+          <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
+            <div className="flex items-start gap-4">
+              <span className="text-5xl" aria-hidden="true">
+                {entry.emoji}
+              </span>
+              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight tracking-tight text-balance">
+                {entry.title}
+              </h1>
+            </div>
+            <ShareButton
+              url={`/topics/${entry.slug}`}
+              title={entry.title}
+              text={entry.subhead}
+              surface="topic_hub"
+              variant="full"
+            />
           </div>
           <p className="mt-3 text-base sm:text-lg text-foreground-muted text-pretty max-w-2xl leading-relaxed">
             {entry.subhead}

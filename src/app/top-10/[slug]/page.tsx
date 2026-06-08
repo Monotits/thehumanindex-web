@@ -9,6 +9,7 @@ import { bandFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 import { TOP_10_CATALOG, getTop10Entry, type Top10Entry } from '@/lib/ui/top10-catalog';
 import { loadCompositeHistory, pointsToDenseSeries } from '@/lib/ui/history';
 import { PageViewBeacon } from '@/components/PageViewBeacon';
+import { ShareButton } from '@/components/ui/ShareButton';
 
 export const revalidate = 3600;
 
@@ -187,9 +188,18 @@ export default async function Top10Page({
               </>
             )}
           </div>
-          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight tracking-tight text-balance">
-            {entry.title}
-          </h1>
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight tracking-tight text-balance">
+              {entry.title}
+            </h1>
+            <ShareButton
+              url={`/top-10/${entry.slug}`}
+              title={entry.title}
+              text={entry.subhead}
+              surface="top10_ranking"
+              variant="full"
+            />
+          </div>
           <p className="mt-5 text-base sm:text-lg text-foreground-muted text-pretty max-w-2xl leading-relaxed">
             {entry.subhead}
           </p>

@@ -8,6 +8,7 @@ import { SourceAttribution } from '@/components/ui/SourceAttribution';
 import { SparklineMini } from '@/components/ui/SparklineMini';
 import { CompositeLineChart, type CompositePoint } from '@/components/ui/CompositeLineChart';
 import { PageViewBeacon } from '@/components/PageViewBeacon';
+import { ShareButton } from '@/components/ui/ShareButton';
 import { cn } from '@/lib/ui/cn';
 import { loadCompositeHistory, pointsToDenseSeries, trendSummary, type CompositeHistoryPoint } from '@/lib/ui/history';
 import {
@@ -318,13 +319,24 @@ export default async function CountryDetailPage({
             )}
           </div>
 
-          <div className="flex flex-wrap items-end gap-4 mt-6">
-            <span className="text-5xl sm:text-6xl" aria-hidden="true">
-              {country.flag_emoji ?? '🏳️'}
-            </span>
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold leading-none tracking-tight">
-              {country.name}
-            </h1>
+          <div className="flex flex-wrap items-end justify-between gap-4 mt-6">
+            <div className="flex flex-wrap items-end gap-4">
+              <span className="text-5xl sm:text-6xl" aria-hidden="true">
+                {country.flag_emoji ?? '🏳️'}
+              </span>
+              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold leading-none tracking-tight">
+                {country.name}
+              </h1>
+            </div>
+            <ShareButton
+              url={`/country/${country.code.toLowerCase()}`}
+              title={`${country.name} — civilizational stress on The Human Index`}
+              text={composite !== null
+                ? `${country.name}: composite ${composite.toFixed(1)}${band ? ` (${band})` : ''} — see the 5 meta-indexes`
+                : `${country.name} on The Human Index`}
+              surface="country_detail"
+              variant="full"
+            />
           </div>
 
           {composite !== null && (
