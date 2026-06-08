@@ -212,14 +212,6 @@ export default function DatasetPage() {
             >
               Indicator catalog
             </Link>
-            <a
-              href="https://github.com/Monotits/thehumanindex-web"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground-muted hover:text-foreground underline underline-offset-2 decoration-foreground-subtle/40"
-            >
-              Source code (GitHub)
-            </a>
           </div>
         </div>
       </section>

@@ -286,15 +286,6 @@ export default async function TransparencyPage() {
             >
               All sources
             </Link>
-            <span className="text-foreground-subtle">·</span>
-            <a
-              href="https://github.com/Monotits/thehumanindex-web"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground-muted hover:text-foreground underline underline-offset-2 decoration-foreground-subtle/40"
-            >
-              Source code
-            </a>
           </div>
         </div>
       </section>

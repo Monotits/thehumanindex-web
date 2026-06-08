@@ -45,7 +45,7 @@ export function SiteFooter() {
       </div>
 
       <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Column 1 — About */}
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-3 font-serif">The Project</h3>
@@ -53,16 +53,6 @@ export function SiteFooter() {
               <li><Link href="/about" className="hover:text-foreground">About</Link></li>
               <li><Link href="/methodology" className="hover:text-foreground">Methodology</Link></li>
               <li><Link href="/transparency" className="hover:text-foreground">Transparency</Link></li>
-              <li>
-                <a
-                  href="https://github.com/Monotits/thehumanindex-web"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-foreground"
-                >
-                  Source code
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -79,7 +69,7 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Column 3 — Content */}
+          {/* Column 3 — Read */}
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-3 font-serif">Read</h3>
             <ul className="space-y-2 text-sm text-foreground-muted">
@@ -88,25 +78,29 @@ export function SiteFooter() {
               <li><Link href="/glossary" className="hover:text-foreground">Glossary</Link></li>
               <li><a href="/feed.xml" className="hover:text-foreground">RSS feed</a></li>
             </ul>
-            <h3 className="text-sm font-semibold text-foreground mt-6 mb-3 font-serif">Tools</h3>
+          </div>
+
+          {/* Column 4 — Tools */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-3 font-serif">Tools</h3>
             <ul className="space-y-2 text-sm text-foreground-muted">
               <li><Link href="/quiz" className="hover:text-foreground">Personal exposure quiz</Link></li>
               <li><Link href="/layoffs" className="hover:text-foreground">Labor stress signals</Link></li>
             </ul>
           </div>
 
-          {/* Column 4 — Contact */}
+          {/* Column 5 — Contact */}
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-3 font-serif">Contact</h3>
             <ul className="space-y-2 text-sm text-foreground-muted">
               <li><Link href="/contact" className="hover:text-foreground">Contact</Link></li>
               <li>
-                <a href="mailto:hello@thehumanindex.org" className="hover:text-foreground">
+                <a href="mailto:hello@thehumanindex.org" className="hover:text-foreground break-all">
                   hello@thehumanindex.org
                 </a>
               </li>
               <li>
-                <a href="mailto:press@thehumanindex.org" className="hover:text-foreground">
+                <a href="mailto:press@thehumanindex.org" className="hover:text-foreground break-all">
                   press@thehumanindex.org
                 </a>
               </li>
