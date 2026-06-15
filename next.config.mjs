@@ -23,6 +23,25 @@ const nextConfig = {
   // closest new surfaces are /country/us (US-focused detail) and
   // /countries (multi-country index).
   async redirects() {
+    // Retired locale prefixes (Faz 13 wind-down): The site used to advertise
+    // 10 locales via next-intl. Per Buğra's call after observing 'UI says it
+    // supports Turkish but most data is English', we wound the surface back
+    // to English-only and the [locale] folder was never built out. Google
+    // Search Console (2026-06-13) reports 404s + 'discovered not indexed'
+    // for some of these legacy paths — Google still remembers them from
+    // older crawls. 301-redirecting them to the canonical English path
+    // preserves SEO equity from any inbound links AND tells Google
+    // 'the URL moved here permanently' so the old ones eventually drop.
+    //
+    // The middleware in src/middleware.ts also matches /tr, /de, etc. but
+    // returns 404 because there's no [locale] route group. These redirects
+    // fire BEFORE middleware, so the matcher never sees them.
+    const STALE_LOCALES = ['tr', 'de', 'es', 'fr', 'ja', 'pt-br', 'pl', 'it', 'nl'];
+    const localeRedirects = STALE_LOCALES.flatMap((l) => [
+      { source: `/${l}`,           destination: '/',         permanent: true },
+      { source: `/${l}/:path*`,    destination: '/:path*',   permanent: true },
+    ]);
+
     return [
       { source: '/dashboard',           destination: '/country/us', permanent: true },
       { source: '/dashboard/:path*',    destination: '/country/us', permanent: true },
@@ -36,6 +55,8 @@ const nextConfig = {
       // toggle in Faz 6.3. /rankings → /countries?view=table preserves
       // SEO equity and the analytical user's mental model.
       { source: '/rankings',            destination: '/countries?view=table', permanent: true },
+      // Retired locale prefixes — see comment above.
+      ...localeRedirects,
     ]
   },
   async headers() {
