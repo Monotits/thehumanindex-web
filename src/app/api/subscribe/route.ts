@@ -49,6 +49,7 @@ export async function POST(request: Request) {
     // resending welcome emails on resubscribe doesn't invalidate old
     // unsubscribe links in earlier issues.
     let storedToken = unsubscribeToken
+    let dbPersisted = true
     if (!supabaseAdmin) {
       console.error('[subscribe] SUPABASE_SERVICE_ROLE_KEY missing — cannot persist subscriber')
     }
@@ -86,13 +87,18 @@ export async function POST(request: Request) {
       // Don't fail the user-facing request on a DB hiccup — they'll still
       // see 'subscribed', just won't get a welcome email this time.
       console.error('[subscribe] supabase error:', dbErr)
+      dbPersisted = false
     }
 
     // Send the welcome email via Resend. We have a verified domain (used
     // by /api/contact). The unsubscribe URL is the same shape as every
     // future weekly brief, so users get a consistent flow.
+    // NOT: DB yazımı başarısızsa e-posta GÖNDERME — aksi halde e-postadaki
+    // unsubscribe token'ı hiçbir satıra karşılık gelmez ve tek tık
+    // unsubscribe (RFC 8058) sessizce çalışmaz (uyumluluk sorunu).
     const unsubscribeUrl = `${BASE_URL}/api/unsubscribe?token=${storedToken}`
     try {
+      if (!dbPersisted) throw new Error('Skipping welcome email: subscriber row not persisted')
       const { Resend } = await import('resend')
       const resend = new Resend(process.env.RESEND_API_KEY)
       const tpl = welcomeEmail(unsubscribeUrl)

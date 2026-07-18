@@ -9,6 +9,14 @@ export const metadata: Metadata = {
   title: 'Glossary — The Human Index',
   description:
     'Definitions for every indicator, meta-index, and concept used by The Human Index. Every term traceable to its source.',
+  openGraph: {
+    title: 'Glossary — The Human Index',
+    description:
+      'Definitions for every indicator, meta-index, and concept used by The Human Index.',
+    url: 'https://thehumanindex.org/glossary',
+    type: 'website',
+    siteName: 'The Human Index',
+  },
   alternates: { canonical: 'https://thehumanindex.org/glossary' },
 };
 

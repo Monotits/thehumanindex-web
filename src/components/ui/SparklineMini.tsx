@@ -45,6 +45,12 @@ export function SparklineMini({
   className,
   ariaLabel,
 }: SparklineMiniProps) {
+  // Gradient id for fill (stable across SSR + hydration via useId).
+  // Rules-of-hooks: erken return'den ÖNCE çağrılmalı — koşullu hook çağrısı
+  // veri "yok→var" değişiminde hook sırasını bozup render hatası üretebilir.
+  const uniqueId = useId();
+  const gradId = `spark-grad-${uniqueId.replace(/:/g, '')}`;
+
   // Strip nulls but remember their positions for gap rendering
   const cleanData = data.filter((d): d is number => d !== null && Number.isFinite(d));
   if (cleanData.length < 2) {
@@ -88,10 +94,6 @@ export function SparklineMini({
     filled && firstValidX !== null && lastValidX !== null
       ? `M${firstValidX},${height} L${pointsStr} L${lastValidX},${height} Z`
       : '';
-
-  // Gradient id for fill (stable across SSR + hydration via useId)
-  const uniqueId = useId();
-  const gradId = `spark-grad-${uniqueId.replace(/:/g, '')}`;
 
   return (
     <svg

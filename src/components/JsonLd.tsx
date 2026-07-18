@@ -18,14 +18,14 @@ export function OrganizationJsonLd() {
         url: 'https://thehumanindex.org',
         logo: 'https://thehumanindex.org/logo-icon.svg',
         description:
-          'Tracking civilization\'s proximity to irreversible AI-driven structural transformation across seven key domains.',
+          'A daily-refreshed civilizational stress index tracking 25 countries across 31 indicators grouped into five meta-indexes: economic, social, mental, technological, environmental.',
         sameAs: [],
       }}
     />
   )
 }
 
-// WebSite schema with SearchAction
+// WebSite schema
 export function WebSiteJsonLd() {
   return (
     <JsonLd
@@ -151,17 +151,15 @@ export function DatasetJsonLd() {
         temporalCoverage: '2024/..',
         spatialCoverage: {
           '@type': 'Place',
-          name: 'Global (focus: United States)',
+          name: 'Global — 25 countries',
         },
         variableMeasured: [
           { '@type': 'PropertyValue', name: 'Composite Stress Index', unitText: 'score 0-100' },
-          { '@type': 'PropertyValue', name: 'AI Work Displacement', unitText: 'score 0-100' },
-          { '@type': 'PropertyValue', name: 'Income Inequality', unitText: 'score 0-100' },
-          { '@type': 'PropertyValue', name: 'Social Unrest', unitText: 'score 0-100' },
-          { '@type': 'PropertyValue', name: 'Institutional Decay', unitText: 'score 0-100' },
-          { '@type': 'PropertyValue', name: 'Social Wellbeing', unitText: 'score 0-100' },
-          { '@type': 'PropertyValue', name: 'Policy Response', unitText: 'score 0-100' },
-          { '@type': 'PropertyValue', name: 'Public Sentiment', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'Economic Stress Meta-Index', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'Social Stress Meta-Index', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'Mental Stress Meta-Index', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'Technological Stress Meta-Index', unitText: 'score 0-100' },
+          { '@type': 'PropertyValue', name: 'Environmental Stress Meta-Index', unitText: 'score 0-100' },
         ],
         distribution: {
           '@type': 'DataDownload',
@@ -169,15 +167,75 @@ export function DatasetJsonLd() {
           contentUrl: 'https://thehumanindex.org/api/data',
         },
         keywords: [
-          'civilizational stress',
-          'AI displacement',
-          'economic inequality',
-          'social unrest',
-          'institutional decay',
-          'public sentiment',
+          'human stress index',
+          'country stress rankings',
+          'economic stress',
+          'social stress',
+          'mental health statistics',
+          'technological stress',
+          'environmental stress',
           'composite index',
-          'weekly tracker',
+          'open dataset',
+          'daily tracker',
         ],
+      }}
+    />
+  )
+}
+
+// DefinedTerm schema — glossary entries (ideal for answer-engine extraction)
+export function DefinedTermJsonLd({
+  term,
+  definition,
+  slug,
+}: {
+  term: string
+  definition: string
+  slug: string
+}) {
+  return (
+    <JsonLd
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'DefinedTerm',
+        name: term,
+        description: definition,
+        url: `https://thehumanindex.org/glossary/${slug}`,
+        inDefinedTermSet: {
+          '@type': 'DefinedTermSet',
+          name: 'The Human Index Glossary',
+          url: 'https://thehumanindex.org/glossary',
+        },
+      }}
+    />
+  )
+}
+
+// ItemList schema — top-10 ranking pages
+export function ItemListJsonLd({
+  name,
+  url,
+  items,
+}: {
+  name: string
+  url: string
+  items: { name: string; url?: string }[]
+}) {
+  return (
+    <JsonLd
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name,
+        url,
+        numberOfItems: items.length,
+        itemListOrder: 'https://schema.org/ItemListOrderDescending',
+        itemListElement: items.map((item, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: item.name,
+          ...(item.url ? { url: item.url } : {}),
+        })),
       }}
     />
   )

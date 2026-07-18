@@ -20,26 +20,13 @@
 
 import { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
-import { LOCALES, DEFAULT_LOCALE } from '@/i18n/config';
+import { DEFAULT_LOCALE } from '@/i18n/config';
 
 export const revalidate = 3600; // 1 hour
 
 const BASE = 'https://thehumanindex.org';
 
-function localizedUrl(path: string, locale: string): string {
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  if (locale === DEFAULT_LOCALE) return `${BASE}${cleanPath}`;
-  return `${BASE}/${locale}${cleanPath}`;
-}
-
-function buildAlternates(path: string): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const l of LOCALES) out[l] = localizedUrl(path, l);
-  return out;
-}
-
 interface MinPulse {
-  country_code: string | null;
   locale: string | null;
   slug: string;
   published_at: string;
@@ -52,7 +39,11 @@ interface MinGlossary {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date().toISOString();
+  // lastModified olarak "şu an" yerine günün tarihi kullanılıyor: sitemap
+  // saatlik yeniden üretildiğinde her URL'nin lastmod'unun sahte biçimde
+  // oynaması Google'ın sinyale güvenini aşındırıyor. Veri günde bir kez
+  // (cron) tazelendiği için gün bazlı lastmod dürüst bir sinyal.
+  const today = new Date().toISOString().split('T')[0];
   const out: MetadataRoute.Sitemap = [];
 
   // ── Static pages × locales with hreflang ──
@@ -86,9 +77,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const [path, changeFrequency, priority] of staticPaths) {
     out.push({
       url: `${BASE}${path}`,
-      lastModified: now,
+      lastModified: today,
       changeFrequency,
       priority,
+    });
+  }
+
+  // ── Quiz variant landing pages (statik katalog) ──
+  const { QUIZ_VARIANTS } = await import('@/lib/ui/quiz-variants');
+  for (const v of QUIZ_VARIANTS) {
+    out.push({
+      url: `${BASE}/quiz/${v.slug}`,
+      changeFrequency: 'monthly',
+      priority: 0.6,
     });
   }
 
@@ -120,7 +121,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const c of countries) {
     out.push({
       url: `${BASE}/country/${c.code.toLowerCase()}`,
-      lastModified: now,
+      lastModified: today,
       changeFrequency: 'daily',
       priority: 0.9,
     });
@@ -131,7 +132,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const i of indicators) {
     out.push({
       url: `${BASE}/indicator/${i.id}`,
-      lastModified: now,
+      lastModified: today,
       changeFrequency: 'daily',
       priority: 0.85,
     });
@@ -143,7 +144,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const t of TOP_10_CATALOG) {
     out.push({
       url: `${BASE}/top-10/${t.slug}`,
-      lastModified: now,
+      lastModified: today,
       changeFrequency: 'daily',
       priority: 0.85,
     });
@@ -154,7 +155,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const t of TOPIC_CATALOG) {
     out.push({
       url: `${BASE}/topics/${t.slug}`,
-      lastModified: now,
+      lastModified: today,
       changeFrequency: 'daily',
       priority: 0.85,
     });

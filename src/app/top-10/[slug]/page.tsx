@@ -10,6 +10,7 @@ import { TOP_10_CATALOG, getTop10Entry, type Top10Entry } from '@/lib/ui/top10-c
 import { loadCompositeHistory, pointsToDenseSeries } from '@/lib/ui/history';
 import { PageViewBeacon } from '@/components/PageViewBeacon';
 import { ShareButton } from '@/components/ui/ShareButton';
+import { ItemListJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const revalidate = 3600;
 
@@ -164,8 +165,25 @@ export default async function Top10Page({
         ? `${META_LABELS[entry.source.meta_index]} meta-index`
         : 'indicator value';
 
+  const pageUrl = `https://thehumanindex.org/top-10/${entry.slug}`;
+
   return (
     <article className="min-h-screen">
+      <ItemListJsonLd
+        name={entry.title}
+        url={pageUrl}
+        items={ranked.map((r) => ({
+          name: r.country_name,
+          url: `https://thehumanindex.org/country/${r.country_code.toLowerCase()}`,
+        }))}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: 'https://thehumanindex.org' },
+          { name: 'Top 10', url: 'https://thehumanindex.org/top-10' },
+          { name: entry.title, url: pageUrl },
+        ]}
+      />
       <PageViewBeacon
         event="top_10_viewed"
         properties={{

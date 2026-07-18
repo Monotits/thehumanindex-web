@@ -6,6 +6,7 @@ import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { renderMarkdown } from '@/lib/ui/markdown';
 import { getActiveLocale } from '@/lib/ui/locale';
 import { META_INDEXES, type MetaIndex } from '@/lib/ui/tokens';
+import { DefinedTermJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const dynamic = 'force-dynamic';
 
@@ -101,10 +102,24 @@ export async function generateMetadata({
   const data = res.data as { term: string; short_definition: string } | null;
   if (!data) return { title: 'Glossary — The Human Index' };
 
+  const pageUrl = `https://thehumanindex.org/glossary/${slug}`;
+
   return {
     title: `${data.term} — Glossary | The Human Index`,
     description: data.short_definition,
-    alternates: { canonical: `https://thehumanindex.org/glossary/${slug}` },
+    alternates: { canonical: pageUrl },
+    openGraph: {
+      title: `${data.term} — The Human Index Glossary`,
+      description: data.short_definition,
+      url: pageUrl,
+      type: 'article',
+      siteName: 'The Human Index',
+    },
+    twitter: {
+      card: 'summary',
+      title: `${data.term} — The Human Index Glossary`,
+      description: data.short_definition,
+    },
   };
 }
 
@@ -128,6 +143,18 @@ export default async function GlossaryEntryPage({
 
   return (
     <article className="min-h-screen">
+      <DefinedTermJsonLd
+        term={entry.term}
+        definition={entry.short_definition}
+        slug={entry.slug}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: 'https://thehumanindex.org' },
+          { name: 'Glossary', url: 'https://thehumanindex.org/glossary' },
+          { name: entry.term, url: `https://thehumanindex.org/glossary/${entry.slug}` },
+        ]}
+      />
       {/* ── HEADER ── */}
       <header className="border-b border-border bg-background-alt/40">
         <div className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">

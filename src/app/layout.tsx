@@ -109,6 +109,9 @@ export const metadata: Metadata = {
       'application/rss+xml': 'https://thehumanindex.org/feed.xml',
     },
   },
+  verification: {
+    google: 'iLceQwDotiKddHWJtUP3iatXZEtY9e0l789bQonpBWw',
+  },
   robots: {
     index: true,
     follow: true,
@@ -130,7 +133,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="google-site-verification" content="iLceQwDotiKddHWJtUP3iatXZEtY9e0l789bQonpBWw" />
         {/* Preconnect to perf-critical third-party origins */}
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />

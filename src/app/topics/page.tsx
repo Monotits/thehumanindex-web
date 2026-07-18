@@ -7,6 +7,14 @@ export const metadata: Metadata = {
   title: 'Topics | The Human Index',
   description:
     'Browse civilizational stress by topic — AI & jobs, housing, mental health, climate, inequality, social trust. Each topic combines indicators, country rankings, and recent analysis.',
+  openGraph: {
+    title: 'Topics — The Human Index',
+    description:
+      'Civilizational stress by topic — AI & jobs, housing, mental health, climate, inequality, social trust.',
+    url: 'https://thehumanindex.org/topics',
+    type: 'website',
+    siteName: 'The Human Index',
+  },
   alternates: { canonical: 'https://thehumanindex.org/topics' },
 };
 

@@ -5,9 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "next-sitemap",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint src"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.1",
@@ -16,7 +15,6 @@
     "html2canvas": "^1.4.1",
     "next": "^16.2.2",
     "next-intl": "^4.0.0",
-    "next-sitemap": "^4.2.3",
     "posthog-js": "^1.364.7",
     "posthog-node": "^5.28.11",
     "react": "^18",

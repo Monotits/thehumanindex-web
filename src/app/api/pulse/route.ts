@@ -67,6 +67,8 @@ export async function GET(req: Request) {
   if (countryFilter) q = q.eq('country_code', countryFilter);
 
   q = q
+    // İleri tarihli (zamanlanmış) içerik yayına girmeden görünmesin.
+    .lte('published_at', new Date().toISOString())
     .order('published_at', { ascending: false })
     .range(offset, offset + limit - 1);
 

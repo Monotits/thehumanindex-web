@@ -7,6 +7,14 @@ export const metadata: Metadata = {
   title: 'Country rankings | The Human Index',
   description:
     'Live data-driven country rankings — most stressed countries, best for mental health, most exposed to AI, housing crisis severity, and more. Pipeline re-checks every 12 hours.',
+  openGraph: {
+    title: 'Country rankings — The Human Index',
+    description:
+      'Live data-driven country rankings — most stressed countries, mental health, AI exposure, housing, and more.',
+    url: 'https://thehumanindex.org/top-10',
+    type: 'website',
+    siteName: 'The Human Index',
+  },
   alternates: { canonical: 'https://thehumanindex.org/top-10' },
 };
 

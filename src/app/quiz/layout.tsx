@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     title: 'Civilizational stress exposure — The Human Index',
     description:
       'A 60-second personal stress profile against live country-level data across 5 meta-indexes.',
+    url: 'https://thehumanindex.org/quiz',
   },
   alternates: { canonical: 'https://thehumanindex.org/quiz' },
 }

@@ -5,6 +5,14 @@ export const metadata: Metadata = {
   title: 'The Human Index Dataset — API + CSV access | The Human Index',
   description:
     '25 countries, 31 indicators, 5 meta-indexes. Pipeline checks every 12 hours; underlying sources publish on their own cadence. Free programmatic access via REST API.',
+  openGraph: {
+    title: 'The Human Index Dataset — API + CSV access',
+    description:
+      '25 countries, 31 indicators, 5 meta-indexes. Free programmatic access via REST API, CC-BY-4.0.',
+    url: 'https://thehumanindex.org/dataset',
+    type: 'website',
+    siteName: 'The Human Index',
+  },
   alternates: { canonical: 'https://thehumanindex.org/dataset' },
 };
 

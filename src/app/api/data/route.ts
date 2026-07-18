@@ -68,7 +68,8 @@ export async function GET(request: Request) {
         score: sub.value,
         sources: (rd?.sources as string[]) || [],
         dataPoints: (rd?.dataPoints as unknown[]) || [],
-        hasData: rd?.hasData !== false && sub.value > 0,
+        // sub.value NOT NULL — meşru 0 skorlu bir domain "no data" sayılmamalı.
+        hasData: rd?.hasData !== false && sub.value !== null,
       }
     }
 

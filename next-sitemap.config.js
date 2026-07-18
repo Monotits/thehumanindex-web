@@ -1,4 +1,11 @@
-/** @type {import('next-sitemap').IConfig} */
+// RETIRED (Faz 24): next-sitemap postbuild kaldırıldı — sitemap/robots artık
+// yalnızca src/app/sitemap.ts + src/app/robots.ts üzerinden üretiliyor.
+// Bu dosya güvenle silinebilir; sadece tarihsel referans için duruyor.
+/* eslint-disable */
+module.exports = {};
+
+/* — eski config —
+/** @type {import('next-sitemap').IConfig} * /
 module.exports = {
   siteUrl: 'https://thehumanindex.org',
   generateRobotsTxt: true,
@@ -60,3 +67,5 @@ module.exports = {
     }
   },
 }
+
+*/

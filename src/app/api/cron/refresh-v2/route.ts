@@ -19,6 +19,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import { fetchAllIndicatorValues } from '@/lib/indicators/orchestrator';
 import { composeCountryScores } from '@/lib/indicators/composeMetaIndex';
@@ -298,6 +299,32 @@ export async function GET(request: Request) {
 
     const duration = Date.now() - startTime;
     console.log(`[cron-v2] ✓ done in ${duration}ms — ${persistedComposites}/${countries.length} composites persisted`);
+
+    // Total-failure guard: v1'deki gibi, hiçbir ölçüm/composite üretilemediyse
+    // 200 dönmek yerine 502 dön ki Vercel cron log'unda kırmızı görünsün ve
+    // sayfalar sessizce dünkü veride donmasın.
+    if (measurements.length === 0 || persistedComposites === 0) {
+      return NextResponse.json({
+        ok: false,
+        error: 'Pipeline produced zero measurements/composites',
+        measurements_collected: measurements.length,
+        composites_persisted: persistedComposites,
+        adapters_health: health,
+        duration_ms: duration,
+      }, { status: 502 });
+    }
+
+    // v2 tablolarından beslenen ISR sayfalarını tazele — önceden hiçbiri
+    // revalidate edilmediğinden yeni composite'lar 30-60 dk gecikmeli görünüyordu.
+    try {
+      revalidatePath('/');
+      revalidatePath('/countries');
+      revalidatePath('/indicators');
+      revalidatePath('/top-10');
+      revalidatePath('/transparency');
+    } catch (e) {
+      console.warn('[cron-v2] revalidatePath warning:', e);
+    }
 
     return NextResponse.json({
       ok: true,

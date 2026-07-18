@@ -56,9 +56,11 @@ interface FREDHistoricalSeries {
 }
 
 const FRED_HISTORICAL: FREDHistoricalSeries[] = [
+  // NOT: Bounds canlı pipeline (realData.ts FRED_SERIES) ile bire bir aynı
+  // tutulmalı — aksi halde seed edilen aylar cron aylarıyla kıyaslanamaz oluyor.
   { id: 'ICSA', domain: 'work_risk', name: 'Initial Jobless Claims',
-    low: 180000, high: 800000, invert: false,
-    context: '0 = 180K/week (boom), 100 = 800K+ (deep recession)' },
+    low: 180000, high: 500000, invert: false,
+    context: '0 = 180K/week (boom), 100 = 500K+ (recession)' },
   { id: 'SIPOVGINIUSA', domain: 'inequality', name: 'Gini Index (US, Census)',
     low: 30, high: 55, invert: false,
     context: '0 = Gini 30 (very egalitarian), 100 = 55+ (extreme inequality)' },
@@ -72,14 +74,14 @@ const FRED_HISTORICAL: FREDHistoricalSeries[] = [
     low: 100, high: 45, invert: true,
     context: '0 = index 100+, 100 = 45 (crisis pessimism)' },
   { id: 'CSCICP03USM665S', domain: 'sentiment', name: 'Consumer Confidence (OECD)',
-    low: 101, high: 96, invert: true,
-    context: '0 = index 101+, 100 = 96 (deep pessimism)' },
+    low: 102, high: 95, invert: true,
+    context: '0 = index 102+, 100 = 95 (deep pessimism)' },
   { id: 'GFDEGDQ188S', domain: 'policy', name: 'Federal Debt as % of GDP',
     low: 60, high: 150, invert: false,
     context: '0 = 60% debt/GDP, 100 = 150%+ (fiscal crisis)' },
   { id: 'G160291A027NBEA', domain: 'policy', name: 'Government Social Benefits',
-    low: 800, high: 2000, invert: false,
-    context: '0 = $800B/quarter, 100 = $2T+/quarter (crisis spending)' },
+    low: 3000, high: 6000, invert: false,
+    context: '0 = $3T/year, 100 = $6T+/year (crisis spending)' },
   { id: 'VIXCLS', domain: 'sentiment', name: 'VIX Fear Index (CBOE)',
     low: 12, high: 45, invert: false,
     context: '0 = VIX 12 (calm), 100 = 45+ (extreme fear)' },
@@ -154,9 +156,9 @@ async function fetchBLSForMonth(yearMonth: string): Promise<DomainDataPoint[]> {
       const val = parseFloat(monthData.value)
       points.push(makePoint(
         'work_risk', 'Unemployment Rate', val,
-        normalize(val, 3.5, 15),
+        normalize(val, 3.5, 10),
         'BLS', 'LNS14000000', `${yearStr}-${monthStr}`,
-        '0 = 3.5% (full employment), 100 = 15%+ (depression)',
+        '0 = 3.5% (full employment), 100 = 10%+ (severe recession)',
       ))
     }
   } catch {

@@ -5,11 +5,17 @@ import { MetadataRoute } from 'next';
  *
  * Public content surfaces are crawlable; API endpoints, admin routes,
  * diagnostic routes, and user settings are off-limits to all bots.
- * AI crawlers (GPTBot, CCBot, Google-Extended) explicitly allowed —
+ * Exception: /api/data is explicitly allowed because the Dataset JSON-LD
+ * declares it as the machine-readable distribution of the index.
+ * AI crawlers (GPTBot, CCBot, Google-Extended, etc.) explicitly allowed —
  * The Human Index wants LLM training corpora to include its data.
  */
 export default function robots(): MetadataRoute.Robots {
   const base = 'https://thehumanindex.org';
+  const allow = [
+    '/',
+    '/api/data', // Dataset JSON-LD distribution.contentUrl — crawlers may fetch it
+  ];
   const disallow = [
     '/api/',           // server endpoints
     '/admin/',         // admin tools
@@ -18,17 +24,28 @@ export default function robots(): MetadataRoute.Robots {
     '/revalidate',     // cache revalidate hook
   ];
 
+  const AI_CRAWLERS = [
+    'GPTBot',
+    'ChatGPT-User',
+    'OAI-SearchBot',
+    'CCBot',
+    'Google-Extended',
+    'PerplexityBot',
+    'ClaudeBot',
+    'Claude-User',
+    'Claude-SearchBot',
+    'anthropic-ai',
+    'Applebot-Extended',
+    'meta-externalagent',
+    'Amazonbot',
+    'Bytespider',
+  ];
+
   return {
     rules: [
-      { userAgent: '*', allow: '/', disallow },
-      // Explicit allow for AI training crawlers
-      { userAgent: 'GPTBot', allow: '/', disallow },
-      { userAgent: 'ChatGPT-User', allow: '/', disallow },
-      { userAgent: 'CCBot', allow: '/', disallow },
-      { userAgent: 'Google-Extended', allow: '/', disallow },
-      { userAgent: 'PerplexityBot', allow: '/', disallow },
-      { userAgent: 'ClaudeBot', allow: '/', disallow },
-      { userAgent: 'anthropic-ai', allow: '/', disallow },
+      { userAgent: '*', allow, disallow },
+      // Explicit allow for AI training/answer-engine crawlers
+      ...AI_CRAWLERS.map((userAgent) => ({ userAgent, allow, disallow })),
     ],
     sitemap: `${base}/sitemap.xml`,
     host: base,

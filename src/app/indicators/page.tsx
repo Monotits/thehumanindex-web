@@ -8,6 +8,14 @@ export const metadata: Metadata = {
   title: 'Every indicator we track | The Human Index',
   description:
     'Every indicator we track across 25 countries, grouped by meta-index domain. From housing affordability to inflation to automation exposure to temperature anomaly — each links to a full country ranking.',
+  openGraph: {
+    title: 'Every indicator we track — The Human Index',
+    description:
+      'All 31 indicators across 25 countries, grouped by meta-index domain, each with a full country ranking.',
+    url: 'https://thehumanindex.org/indicators',
+    type: 'website',
+    siteName: 'The Human Index',
+  },
   alternates: { canonical: 'https://thehumanindex.org/indicators' },
 };
 

@@ -74,7 +74,9 @@ export async function GET(req: Request) {
       .eq('locale', targetLocale);
 
     if (q.length > 0) {
-      const safeQ = q.replace(/[%_]/g, ''); // strip wildcards from user input
+      // Wildcard'ların yanı sıra PostgREST or() sözdizimi metakarakterlerini
+      // de temizle (virgül/parantez/nokta filtre ifadesini bozabiliyordu).
+      const safeQ = q.replace(/[%_,()."\\]/g, '');
       query = query.or(`term.ilike.%${safeQ}%,short_definition.ilike.%${safeQ}%`);
     }
     if (meta.length > 0) {

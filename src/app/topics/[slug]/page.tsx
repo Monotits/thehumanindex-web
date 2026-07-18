@@ -8,6 +8,7 @@ import { bandFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 import { TOPIC_CATALOG, getTopicEntry, type TopicEntry } from '@/lib/ui/topic-catalog';
 import { getActiveLocale } from '@/lib/ui/locale';
 import { PageViewBeacon } from '@/components/PageViewBeacon';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 import { ShareButton } from '@/components/ui/ShareButton';
 
 export const dynamic = 'force-dynamic';
@@ -53,7 +54,9 @@ export async function generateMetadata({
     openGraph: {
       title: entry.title,
       description: entry.description,
+      url: `https://thehumanindex.org/topics/${slug}`,
       type: 'article',
+      siteName: 'The Human Index',
     },
   };
 }
@@ -197,6 +200,13 @@ export default async function TopicPage({
 
   return (
     <article className="min-h-screen">
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: 'https://thehumanindex.org' },
+          { name: 'Topics', url: 'https://thehumanindex.org/topics' },
+          { name: entry.title, url: `https://thehumanindex.org/topics/${entry.slug}` },
+        ]}
+      />
       <PageViewBeacon
         event="topic_viewed"
         properties={{ slug: entry.slug, meta_index: entry.meta }}

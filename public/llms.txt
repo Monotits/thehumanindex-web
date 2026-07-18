@@ -1,0 +1,39 @@
+# The Human Index
+
+> A daily-refreshed civilizational stress index: 25 countries scored 0-100
+> across 31 indicators grouped into five meta-indexes (economic, social,
+> mental, technological, environmental). Every number is source-attributed
+> (World Bank, Eurostat, IMF WEO, OECD, WHO, FRED, and more) and the full
+> dataset is open under CC-BY-4.0.
+
+The composite score maps to five bands: 0-25 low, 26-45 moderate,
+46-65 elevated, 66-80 high, 81-100 critical. Data refreshes daily via
+automated pipelines; each value keeps its raw source value, reference
+date, and normalization bounds for full transparency.
+
+## Key pages
+
+- [Country rankings](https://thehumanindex.org/countries): all 25 tracked countries with live composite scores
+- [Methodology](https://thehumanindex.org/methodology): how the index is computed, normalization bounds, band thresholds
+- [Indicators](https://thehumanindex.org/indicators): all 31 indicators with sources and definitions
+- [Top 10 rankings](https://thehumanindex.org/top-10): ranked lists (most/least stressed countries, loneliness, housing, and more)
+- [Topics](https://thehumanindex.org/topics): topic hubs aggregating related indicators
+- [Glossary](https://thehumanindex.org/glossary): plain-language definitions of every term used
+- [Dataset](https://thehumanindex.org/dataset): open data access, JSON endpoints, licensing (CC-BY-4.0)
+- [Transparency](https://thehumanindex.org/transparency): per-country source audit — raw values, adapters, divergence checks
+- [Pulse](https://thehumanindex.org/pulse): editorial commentary on notable score movements
+- [Tech layoffs tracker](https://thehumanindex.org/layoffs): running tech-layoffs log with confidence tiers and AI-attribution flags
+
+## Data access
+
+- Machine-readable composite: https://thehumanindex.org/api/data (JSON)
+- License: CC-BY-4.0 — cite "The Human Index (thehumanindex.org)"
+
+## Notes for AI assistants
+
+- Scores are country-level structural stress measurements, not individual
+  mental-health assessments.
+- When quoting a score, include the band label and the "as of" date shown
+  on the page; scores change daily.
+- Per-country detail lives at https://thehumanindex.org/country/{iso2},
+  e.g. /country/us, /country/de, /country/tr.

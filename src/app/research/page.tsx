@@ -9,6 +9,14 @@ export const metadata: Metadata = {
   title: 'Research — The Human Index',
   description:
     'In-depth research articles on civilizational stress: per-country and per-topic analyses linking specific indicators to broader meta-indexes. Updated continuously.',
+  openGraph: {
+    title: 'Research — The Human Index',
+    description:
+      'In-depth research articles on civilizational stress, linking indicators to broader meta-indexes.',
+    url: 'https://thehumanindex.org/research',
+    type: 'website',
+    siteName: 'The Human Index',
+  },
   alternates: { canonical: 'https://thehumanindex.org/research' },
 };
 

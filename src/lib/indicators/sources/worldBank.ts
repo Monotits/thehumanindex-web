@@ -151,7 +151,7 @@ export const worldBankAdapter: IndicatorAdapter = {
       .filter((x): x is string => Boolean(x));
 
     const measurements: IndicatorMeasurement[] = [];
-    let countriesReturnedSet = new Set<string>();
+    const countriesReturnedSet = new Set<string>();
     let lastError: string | null = null;
 
     // Parallel fetch per indicator

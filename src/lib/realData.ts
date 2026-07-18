@@ -204,9 +204,11 @@ const FRED_SERIES = [
     context: '0 = index 100+ (optimistic), 100 = 45 (crisis-level pessimism)' },
 
   // sentiment — Consumer Confidence (Conference Board via FRED)
+  // FIX: eski 101-96 aralığı 5 puanlık bant demekti — 1 endeks puanı skoru
+  // 20 puan oynatıyordu. Serinin gerçekçi tarihsel zarfına genişletildi.
   { id: 'CSCICP03USM665S', domain: 'sentiment', name: 'Consumer Confidence (OECD)',
-    low: 101, high: 96, invert: true,
-    context: '0 = index 101+ (confident), 100 = 96 (deep pessimism)' },
+    low: 102, high: 95, invert: true,
+    context: '0 = index 102+ (confident), 100 = 95 (deep pessimism)' },
 
   // policy — Federal debt as % of GDP (fiscal sustainability)
   // GFDEGDQ188S = "Federal Debt: Total Public Debt as Percent of GDP" (quarterly, ~120%)
@@ -215,10 +217,12 @@ const FRED_SERIES = [
     context: '0 = 60% debt/GDP (sustainable), 100 = 150%+ (fiscal crisis)' },
 
   // policy — Social spending (in billions of dollars)
-  // G160291A027NBEA reports in billions; US social benefits ~$1.2-1.5T quarterly
+  // FIX: G160291A027NBEA YILLIK bir seri (~$4.5-5.0T/yıl); eski 800-2000
+  // "çeyreklik" bandı her gözlemi 100'e sabitliyor ve policy domain'ini
+  // kalıcı olarak "critical" gösteriyordu. Yıllık seriye göre rebase edildi.
   { id: 'G160291A027NBEA', domain: 'policy', name: 'Government Social Benefits',
-    low: 800, high: 2000, invert: false,
-    context: '0 = $800B/quarter (normal), 100 = $2T+/quarter (crisis-level spending)' },
+    low: 3000, high: 6000, invert: false,
+    context: '0 = $3T/year (normal), 100 = $6T+/year (crisis-level spending)' },
 
   // ── NEW INDICATORS ──────────────────────────────────────
 
@@ -575,11 +579,21 @@ export async function fetchACLEDData(): Promise<DomainDataPoint[]> {
     // New API returns array of events directly, or { data: [...] }
     const events = Array.isArray(json) ? json : (json.data || [])
     const count = events.length || 0
+    // FIX: YTD sayımı tam-yıl bandına (500-3000) karşı normalize etmek her
+    // Ocak'ta skoru sıfıra düşürüp yıl boyunca yapay bir rampa üretiyordu.
+    // Yıllıklandır: count / geçenGün * 365 (ilk 2 haftada gürültü yüksek
+    // olduğundan en az 14 günlük payda kullan).
+    const now = new Date()
+    const dayOfYear = Math.max(
+      14,
+      Math.floor((now.getTime() - Date.UTC(currentYear, 0, 1)) / 86_400_000) + 1,
+    )
+    const annualized = Math.round((count / dayOfYear) * 365)
     points.push(makePoint(
-      'unrest', 'US Protests & Riots YTD (ACLED)', count,
-      normalize(count, 500, 3000),
+      'unrest', 'US Protests & Riots (ACLED, annualized)', annualized,
+      normalize(annualized, 500, 3000),
       'ACLED', 'protests_riots_usa', String(currentYear),
-      '0 = ~500/year (normal), 100 = 3000+ (mass civil unrest)',
+      `0 = ~500/year (normal), 100 = 3000+ (mass civil unrest) — annualized from ${count} YTD events`,
     ))
   } catch (err) {
     console.error('ACLED fetch error:', err)
@@ -1200,13 +1214,15 @@ export function computeScores(points: DomainDataPoint[]): ComputedScores {
     ? Math.round((weightedSum / activeWeight) * 100) / 100
     : 0
 
-  // Band thresholds — must match utils.ts getBand() and documentation
-  // 0-25: LOW | 26-45: MODERATE | 46-65: ELEVATED | 66-80: HIGH | 81-100: CRITICAL
-  let band = 'low'
-  if (composite >= 81) band = 'critical'
-  else if (composite >= 66) band = 'high'
-  else if (composite >= 46) band = 'elevated'
-  else if (composite >= 26) band = 'moderate'
+  // Band thresholds — v2 pipeline (composeMetaIndex.ts scoreToBand) ile
+  // hizalandı: <=25 low | <=45 moderate | <=65 elevated | <=80 high | critical.
+  // (Eski >=26/46/66/81 eşikleri 2 ondalıklı skorlarda — örn. 25.5 — iki
+  // pipeline'ın aynı skora farklı bant vermesine yol açıyordu.)
+  let band = 'critical'
+  if (composite <= 25) band = 'low'
+  else if (composite <= 45) band = 'moderate'
+  else if (composite <= 65) band = 'elevated'
+  else if (composite <= 80) band = 'high'
 
   const allSources = ['BLS', 'FRED', 'World Bank', 'OECD', 'ACLED', 'O*NET', 'AI Index']
   const connected = Array.from(connectedSources)

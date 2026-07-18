@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     title: 'Weekly Pulse — The Human Index',
     description:
       'Weekly deep-dive analysis into AI displacement, economic inequality, and civilizational stress trends.',
+    url: 'https://thehumanindex.org/pulse',
   },
   alternates: { canonical: 'https://thehumanindex.org/pulse' },
 }

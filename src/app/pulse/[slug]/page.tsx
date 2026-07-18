@@ -6,6 +6,7 @@ import { getActiveLocale } from '@/lib/ui/locale';
 import { NewsletterCTA } from '@/components/ui/NewsletterCTA';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { bandFor, BAND_LABELS } from '@/lib/ui/tokens';
+import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const dynamic = 'force-dynamic';
 
@@ -151,8 +152,23 @@ export default async function PulseReaderPage({
   const liveBandLabel = liveBand ? BAND_LABELS[liveBand] : null;
   const showLiveStrip = country != null && liveComposite != null && liveBand != null;
 
+  const excerpt = pulse.body_markdown ? pulse.body_markdown.replace(/[#*_>`\[\]()]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200) : '';
+
   return (
     <article className="min-h-screen">
+      <ArticleJsonLd
+        title={pulse.title}
+        description={excerpt}
+        slug={pulse.slug}
+        publishedAt={pulse.published_at}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: 'https://thehumanindex.org' },
+          { name: 'Pulse', url: 'https://thehumanindex.org/pulse' },
+          { name: pulse.title, url: `https://thehumanindex.org/pulse/${pulse.slug}` },
+        ]}
+      />
       {/* ── HEADER ── */}
       <header className="border-b border-border bg-background-alt/40">
         <div className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">

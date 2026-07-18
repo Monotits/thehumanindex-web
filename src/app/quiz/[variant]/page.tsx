@@ -27,7 +27,9 @@ export async function generateMetadata({
     openGraph: {
       title: v.title,
       description: v.description,
+      url: `https://thehumanindex.org/quiz/${variant}`,
       type: 'article',
+      siteName: 'The Human Index',
     },
   };
 }

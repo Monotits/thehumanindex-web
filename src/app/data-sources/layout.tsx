@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     title: 'Data Sources & Reliability — The Human Index',
     description:
       'Transparency dashboard: which APIs are online, how often they succeed, and when they were last refreshed.',
+    url: 'https://thehumanindex.org/data-sources',
   },
   alternates: { canonical: 'https://thehumanindex.org/data-sources' },
 }

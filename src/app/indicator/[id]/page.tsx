@@ -6,6 +6,7 @@ import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { SourceAttribution } from '@/components/ui/SourceAttribution';
 import { CompositeLineChart, type CompositePoint } from '@/components/ui/CompositeLineChart';
 import { PageViewBeacon } from '@/components/PageViewBeacon';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { bandFor, freshnessFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 
@@ -92,7 +93,9 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      type: 'article',
+      url: `https://thehumanindex.org/indicator/${id}`,
+      type: 'website',
+      siteName: 'The Human Index',
     },
   };
 }
@@ -275,6 +278,13 @@ export default async function IndicatorPage({
 
   return (
     <article className="min-h-screen">
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: 'https://thehumanindex.org' },
+          { name: 'Indicators', url: 'https://thehumanindex.org/indicators' },
+          { name: indicator.name, url: `https://thehumanindex.org/indicator/${indicator.id}` },
+        ]}
+      />
       <PageViewBeacon
         event="indicator_viewed"
         properties={{

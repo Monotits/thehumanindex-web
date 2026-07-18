@@ -1,14 +1,15 @@
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
-import { FlatCompat } from '@eslint/eslintrc'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-const compat = new FlatCompat({ baseDirectory: __dirname })
+// Next 16: `next lint` kaldırıldı; eslint-config-next artık doğrudan flat
+// config export ediyor. Eski FlatCompat köprüsü ESLint 9'da
+// "Converting circular structure to JSON" hatasıyla çöküyordu.
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
+import nextTypescript from 'eslint-config-next/typescript'
 
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  {
+    ignores: ['.next/**', 'node_modules/**', 'next-sitemap.config.js'],
+  },
 ]
 
 export default eslintConfig

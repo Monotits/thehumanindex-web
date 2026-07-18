@@ -8,6 +8,7 @@ import {
   BAND_LABELS,
   type StressBand as Band,
 } from '@/lib/ui/tokens';
+import { FAQPageJsonLd } from '@/components/JsonLd';
 
 export const dynamic = 'force-static';
 
@@ -37,6 +38,14 @@ export const metadata = {
   description:
     'How The Human Index turns 31 indicators across 25 countries into a single composite stress score. Sources, normalization, weights, fallback chain, freshness tiers, confidence tiers — all of it.',
   alternates: { canonical: 'https://thehumanindex.org/methodology' },
+  openGraph: {
+    title: 'Methodology — How the composite is computed',
+    description:
+      'The formula, the normalization, the weights, the freshness tiers, the fallback chain. Every choice we made, in the open.',
+    url: 'https://thehumanindex.org/methodology',
+    type: 'website',
+    siteName: 'The Human Index',
+  },
 };
 
 function weightRationale(meta: string): string {
@@ -56,9 +65,37 @@ function weightRationale(meta: string): string {
   }
 }
 
+const FAQ_ITEMS = [
+  {
+    question: 'What is The Human Index composite score?',
+    answer:
+      'A 0-100 stress score per country, computed as the weighted average of five meta-indexes (economic, social, mental, technological, environmental), each built from normalized indicators sourced from official statistics.',
+  },
+  {
+    question: 'What do the score bands mean?',
+    answer: BAND_BOUNDS.map((b) => `${b.min}-${b.max} ${BAND_LABELS[b.band]}: ${b.description}`).join('. ') + '.',
+  },
+  {
+    question: 'How fresh is the data?',
+    answer:
+      'The pipeline re-checks sources every 12 hours. Each data point carries a freshness tier: fresh (within 2 years) counts at full weight; aging (2-3 years) is tagged; stale (3-5 years) is downweighted with a warning; very stale (5+ years) is excluded until refreshed.',
+  },
+  {
+    question: 'How are indicators normalized?',
+    answer:
+      'Each raw value is mapped onto a 0-100 stress scale between documented low/high bounds specific to that indicator, inverting where a higher raw value means less stress. The bounds and direction are published for every indicator.',
+  },
+  {
+    question: 'Can I use the data?',
+    answer:
+      'Yes — the dataset is open under CC-BY-4.0. Machine-readable access is available via the public API and the dataset page. Cite "The Human Index (thehumanindex.org)".',
+  },
+];
+
 export default function MethodologyPage() {
   return (
     <article className="min-h-screen">
+      <FAQPageJsonLd questions={FAQ_ITEMS} />
       {/* ── HEADER ── */}
       <header className="border-b border-border bg-background-alt/40">
         <div className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">

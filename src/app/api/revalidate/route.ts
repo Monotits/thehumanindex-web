@@ -1,17 +1,24 @@
 import { revalidatePath } from 'next/cache'
 
+// Fail-closed auth: if the secret env var is not configured, every request is
+// rejected. Accepts REVALIDATE_SECRET (legacy name) or REVALIDATION_SECRET
+// (the name documented in .env.example) so a deploy with either works.
+function isAuthorized(secret: unknown): boolean {
+  const configured = process.env.REVALIDATE_SECRET || process.env.REVALIDATION_SECRET
+  return Boolean(configured) && secret === configured
+}
+
 export async function POST(request: Request) {
   try {
     const { secret } = await request.json()
 
-    // Validate secret token
-    if (secret !== process.env.REVALIDATE_SECRET) {
+    if (!isAuthorized(secret)) {
       return new Response('Unauthorized', { status: 401 })
     }
 
     // Revalidate paths
     revalidatePath('/')
-    revalidatePath('/dashboard')
+    revalidatePath('/countries')
     revalidatePath('/pulse')
 
     return Response.json({ revalidated: true, now: Date.now() })
@@ -20,9 +27,14 @@ export async function POST(request: Request) {
   }
 }
 
-// GET version — no secret needed, revalidates homepage only
-export async function GET() {
+// GET version — requires the same secret via ?secret= (previously
+// unauthenticated, which allowed anyone to force-bust the homepage cache).
+export async function GET(request: Request) {
   try {
+    const secret = new URL(request.url).searchParams.get('secret')
+    if (!isAuthorized(secret)) {
+      return new Response('Unauthorized', { status: 401 })
+    }
     revalidatePath('/')
     return Response.json({ revalidated: true, path: '/', now: Date.now() })
   } catch {

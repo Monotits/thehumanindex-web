@@ -8,6 +8,14 @@ export const metadata: Metadata = {
   title: 'Transparency — The Human Index',
   description:
     'Trust scoreboard for The Human Index: source health, cross-source validation rates, data freshness distribution, and confidence tier breakdowns. Updated every cron cycle.',
+  openGraph: {
+    title: 'Transparency — The Human Index',
+    description:
+      'Trust scoreboard: source health, cross-source validation rates, freshness and confidence breakdowns.',
+    url: 'https://thehumanindex.org/transparency',
+    type: 'website',
+    siteName: 'The Human Index',
+  },
   alternates: { canonical: 'https://thehumanindex.org/transparency' },
 };
 

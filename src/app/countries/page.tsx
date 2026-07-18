@@ -9,6 +9,14 @@ export const metadata: Metadata = {
   title: 'Countries — The Human Index',
   description:
     'Civilizational stress composite scores across 25 countries. Switch between grid, sortable table, world map, and heatmap views.',
+  openGraph: {
+    title: 'Countries — The Human Index',
+    description:
+      'Civilizational stress composite scores across 25 countries — grid, table, map, and heatmap views.',
+    url: 'https://thehumanindex.org/countries',
+    type: 'website',
+    siteName: 'The Human Index',
+  },
   alternates: { canonical: 'https://thehumanindex.org/countries' },
 };
 

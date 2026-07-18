@@ -53,6 +53,8 @@ export async function GET(
       .eq('slug', slug)
       .eq('country_code', country)
       .eq('locale', targetLocale)
+      // İleri tarihli (zamanlanmış) içerik yayına girmeden görünmesin.
+      .lte('published_at', new Date().toISOString())
       .order('published_at', { ascending: false })
       .limit(1)
       .maybeSingle();

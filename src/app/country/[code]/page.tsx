@@ -8,6 +8,7 @@ import { SourceAttribution } from '@/components/ui/SourceAttribution';
 import { SparklineMini } from '@/components/ui/SparklineMini';
 import { CompositeLineChart, type CompositePoint } from '@/components/ui/CompositeLineChart';
 import { PageViewBeacon } from '@/components/PageViewBeacon';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { cn } from '@/lib/ui/cn';
 import { loadCompositeHistory, pointsToDenseSeries, trendSummary, type CompositeHistoryPoint } from '@/lib/ui/history';
@@ -221,11 +222,28 @@ export async function generateMetadata({
     if (res.data) name = (res.data as { name: string }).name;
   }
 
+  const pageUrl = `https://thehumanindex.org/country/${upper.toLowerCase()}`;
+  const description = `Civilizational stress composite, 5-meta-index breakdown, and 31-indicator detail for ${name}. Every number sourced.`;
+
   return {
     title: `${name} — The Human Index`,
-    description: `Civilizational stress composite, 5-meta-index breakdown, and 31-indicator detail for ${name}. Every number sourced.`,
+    description,
     alternates: {
-      canonical: `https://thehumanindex.org/country/${upper.toLowerCase()}`,
+      canonical: pageUrl,
+    },
+    // openGraph tanımlanmazsa root layout'un og'si (homepage url+title)
+    // olduğu gibi miras alınıyor ve canonical ile çelişiyordu.
+    openGraph: {
+      title: `${name} — The Human Index`,
+      description,
+      url: pageUrl,
+      type: 'website',
+      siteName: 'The Human Index',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${name} — The Human Index`,
+      description,
     },
   };
 }
@@ -300,6 +318,13 @@ export default async function CountryDetailPage({
 
   return (
     <div className="min-h-screen">
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: 'https://thehumanindex.org' },
+          { name: 'Countries', url: 'https://thehumanindex.org/countries' },
+          { name: country.name, url: `https://thehumanindex.org/country/${country.code.toLowerCase()}` },
+        ]}
+      />
       <PageViewBeacon
         event="country_viewed"
         properties={{ country_code: country.code, country_name: country.name, composite }}

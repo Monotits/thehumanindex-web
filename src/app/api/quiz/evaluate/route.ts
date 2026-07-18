@@ -125,8 +125,18 @@ export async function POST(request: Request) {
 
     const input: QuizInput = await request.json()
 
+    // Girdi doğrulama: bozuk gövde 500 yerine 400 dönmeli.
+    if (!input || typeof input !== 'object' || !Array.isArray(input.tasks)) {
+      return Response.json({ error: 'Invalid request body: "tasks" must be an array.' }, { status: 400 })
+    }
+    if (typeof input.experience_years !== 'number' || !Number.isFinite(input.experience_years)) {
+      input.experience_years = 0
+    }
+
     // Match tasks with risk database
-    const taskResults = input.tasks.map(task => matchTask(task))
+    const taskResults = input.tasks
+      .filter((t): t is string => typeof t === 'string' && t.trim().length > 0)
+      .map(task => matchTask(task))
 
     // Base exposure from tasks
     let taskExposure = 0.50
@@ -226,21 +236,27 @@ export async function POST(request: Request) {
       },
     }
 
-    const posthog = getPostHogClient()
-    posthog.capture({
-      distinctId: `anon-quiz-${Date.now()}`,
-      event: 'quiz_evaluated',
-      properties: {
-        job_title: input.job_title,
-        industry: input.industry,
-        exposure_band: band,
-        percentile,
-        final_score: finalScore,
-        task_count: input.tasks.length,
-        country: input.country,
-      },
-    })
-    await posthog.shutdown()
+    // Analitik yazımı sonucu asla düşürmemeli: PostHog anahtarı eksikse veya
+    // capture patlarsa kullanıcı yine sonucunu alır.
+    try {
+      const posthog = getPostHogClient()
+      posthog.capture({
+        distinctId: `anon-quiz-${Date.now()}`,
+        event: 'quiz_evaluated',
+        properties: {
+          job_title: input.job_title,
+          industry: input.industry,
+          exposure_band: band,
+          percentile,
+          final_score: finalScore,
+          task_count: input.tasks.length,
+          country: input.country,
+        },
+      })
+      await posthog.shutdown()
+    } catch (analyticsError) {
+      console.warn('Quiz analytics capture failed (non-fatal):', analyticsError)
+    }
 
     return Response.json(result)
   } catch (error) {

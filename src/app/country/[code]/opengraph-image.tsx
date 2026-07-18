@@ -58,7 +58,7 @@ export default async function CountryOGImage({
   let countryName = code;
   let flag = '🏳️';
   let composite: number | null = null;
-  let metaValues: Partial<Record<MetaIndex, number>> = {};
+  const metaValues: Partial<Record<MetaIndex, number>> = {};
 
   if (sbUrl && sbKey) {
     const sb = createClient(sbUrl, sbKey);
