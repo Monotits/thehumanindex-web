@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 // Locale-aware (Pulse preview varies per NEXT_LOCALE cookie) → dynamic.
 // Composite data is read every request but it's cheap (one view + two simple
-// queries), and the cron updates the underlying data every 12h.
+// queries), and the cron updates the underlying data daily.
 export const dynamic = 'force-dynamic';
 
 interface CountrySummary {
@@ -281,14 +281,14 @@ export default async function HomePage() {
             <p className="mt-6 text-lg text-foreground-muted text-pretty max-w-2xl">
               The Human Index tracks 25 countries across 31 indicators in five domains —
               economic, social, mental, technological, environmental. The pipeline
-              checks every 12 hours; sources publish on their own cadence. Every
+              checks daily; sources publish on their own cadence. Every
               number traceable.
             </p>
             {globalAvg !== null && (
               <div className="mt-8 flex flex-wrap items-center gap-6 sm:gap-10">
                 <div>
                   <div className="text-xs uppercase tracking-wider text-foreground-subtle mb-1">
-                    Global average
+                    Tracked-country average
                   </div>
                   <div className="flex items-baseline gap-3">
                     <span className="font-mono tabular-nums text-4xl sm:text-5xl font-semibold">
@@ -438,7 +438,7 @@ export default async function HomePage() {
           </h2>
           <p className="text-foreground-muted max-w-2xl mb-10">
             Each composite score is a weighted average of five meta-indexes. Below, the
-            global average across all {countries.length} countries for each.
+            unweighted average across the {countries.length} countries we track — not a population-weighted world figure.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {metaAvgs.map((m) => (
@@ -573,7 +573,7 @@ export default async function HomePage() {
             <TrustStat label="Countries" value="25" caption="Each with composite + 5 meta-index breakdown" />
             <TrustStat label="Indicators" value="31" caption="Normalized to a 0–100 stress scale" />
             <TrustStat label="Meta-indexes" value="5" caption="Economic · Social · Mental · Tech · Environ" />
-            <TrustStat label="Pipeline check" value="12h" caption="Source cadence varies; see methodology" />
+            <TrustStat label="Pipeline check" value="Daily" caption="Source cadence varies; see methodology" />
           </div>
           <div className="mt-10 flex flex-wrap gap-4 text-sm">
             <Link href="/methodology" className="text-foreground-muted hover:text-foreground underline underline-offset-2 decoration-foreground-subtle/40">

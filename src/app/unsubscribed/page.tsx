@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Unsubscribed — The Human Index',
+  title: 'Unsubscribed',
   robots: { index: false, follow: false },
 };
 

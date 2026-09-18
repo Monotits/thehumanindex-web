@@ -23,8 +23,8 @@ const BAND_BOUNDS: { band: Band; min: number; max: number; description: string }
 const FRESHNESS_TIERS = [
   { tier: 'Fresh',      window: 'within 2 years',  status: 'Counts at full weight' },
   { tier: 'Aging',      window: '2 to 3 years',    status: 'Counts at full weight, visibly tagged' },
-  { tier: 'Stale',      window: '3 to 5 years',    status: 'Counts with downweight + warning' },
-  { tier: 'Very stale', window: 'over 5 years',    status: 'Excluded or held until refresh' },
+  { tier: 'Stale',      window: '3 to 5 years',    status: 'Counts at half weight + warning' },
+  { tier: 'Very stale', window: 'over 5 years',    status: 'Shown, excluded from scores' },
 ];
 
 const CONFIDENCE_TIERS = [
@@ -34,7 +34,7 @@ const CONFIDENCE_TIERS = [
 ];
 
 export const metadata = {
-  title: 'Methodology — How the composite is computed | The Human Index',
+  title: 'Methodology — How the composite is computed',
   description:
     'How The Human Index turns 31 indicators across 25 countries into a single composite stress score. Sources, normalization, weights, fallback chain, freshness tiers, confidence tiers — all of it.',
   alternates: { canonical: 'https://thehumanindex.org/methodology' },
@@ -78,7 +78,7 @@ const FAQ_ITEMS = [
   {
     question: 'How fresh is the data?',
     answer:
-      'The pipeline re-checks sources every 12 hours. Each data point carries a freshness tier: fresh (within 2 years) counts at full weight; aging (2-3 years) is tagged; stale (3-5 years) is downweighted with a warning; very stale (5+ years) is excluded until refreshed.',
+      'The pipeline re-checks sources daily. Each data point carries a freshness tier: fresh (within 2 years) counts at full weight; aging (2-3 years) is tagged; stale (3-5 years) counts at half weight with a warning; very stale (5+ years) is shown for reference but excluded from scores until refreshed. Forecasts and projections are never used — only completed observation periods.',
   },
   {
     question: 'How are indicators normalized?',
@@ -88,7 +88,7 @@ const FAQ_ITEMS = [
   {
     question: 'Can I use the data?',
     answer:
-      'Yes — the dataset is open under CC-BY-4.0. Machine-readable access is available via the public API and the dataset page. Cite "The Human Index (thehumanindex.org)".',
+      'Yes — the dataset is open under CC BY-NC 4.0 (non-commercial, with attribution). Machine-readable access is available via the public API and the dataset page. Cite "The Human Index (thehumanindex.org)".',
   },
 ];
 

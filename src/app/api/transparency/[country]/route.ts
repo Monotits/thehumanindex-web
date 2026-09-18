@@ -16,6 +16,8 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { adapterPriority } from '@/lib/indicators/adapterRegistry';
+import { freshnessFor } from '@/lib/ui/tokens';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 300; // 5 min
@@ -117,9 +119,17 @@ export async function GET(
   for (const s of streaks) streakByIndicator.set(s.indicator_id, s);
 
   const indicatorReports = indicators.map(ind => {
-    const sources = (byIndicator.get(ind.id) ?? []).sort(
-      (a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime()
-    );
+    // Primary = same rule the score pipeline uses (orchestrator.ts): highest
+    // adapter priority wins, NOT the most recently written row. Future-dated
+    // rows are projections and can never be primary; retired adapters sort last.
+    const now = Date.now() + 24 * 3600 * 1000;
+    const sources = (byIndicator.get(ind.id) ?? [])
+      .filter(sr => new Date(sr.reference_date).getTime() <= now)
+      .sort((a, b) => {
+        const p = adapterPriority(a.adapter_id) - adapterPriority(b.adapter_id);
+        if (p !== 0) return p;
+        return new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime();
+      });
     const primarySource = sources[0] ?? null;
 
     // Cross-source range
@@ -141,16 +151,8 @@ export async function GET(
 
     const streak = streakByIndicator.get(ind.id);
 
-    // Freshness classification for primary source's reference_date
-    let freshness: 'fresh' | 'aging' | 'stale' | 'very_stale' | null = null;
-    if (primarySource) {
-      const refDate = new Date(primarySource.reference_date);
-      const ageYears = (Date.now() - refDate.getTime()) / (365.25 * 24 * 3600 * 1000);
-      if (ageYears > 5) freshness = 'very_stale';
-      else if (ageYears > 3) freshness = 'stale';
-      else if (ageYears > 2) freshness = 'aging';
-      else freshness = 'fresh';
-    }
+    // Same classifier the UI uses — one definition of "fresh".
+    const freshness = primarySource ? freshnessFor(primarySource.reference_date) : null;
 
     return {
       indicator_id: ind.id,

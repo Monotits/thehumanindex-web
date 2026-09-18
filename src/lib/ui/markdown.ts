@@ -115,10 +115,12 @@ function parseBlocks(src: string): Block[] {
     }
 
     // Unordered list (- or *)
-    if (/^[-*]\s+/.test(line)) {
+    // Leading indentation is accepted (AI drafts routinely emit "  - item");
+    // nested lists are flattened into the parent list.
+    if (/^\s*[-*]\s+/.test(line)) {
       const items: string[] = [];
-      while (i < lines.length && /^[-*]\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^[-*]\s+/, ''));
+      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\s*[-*]\s+/, ''));
         i += 1;
       }
       blocks.push({ kind: 'ul', items });
@@ -126,10 +128,10 @@ function parseBlocks(src: string): Block[] {
     }
 
     // Ordered list (1.)
-    if (/^\d+\.\s+/.test(line)) {
+    if (/^\s*\d+\.\s+/.test(line)) {
       const items: string[] = [];
-      while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\d+\.\s+/, ''));
+      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\s*\d+\.\s+/, ''));
         i += 1;
       }
       blocks.push({ kind: 'ol', items });
@@ -141,13 +143,19 @@ function parseBlocks(src: string): Block[] {
     while (
       i < lines.length &&
       lines[i].trim() !== '' &&
-      !/^(#{1,3}\s|---+$|>|\s*[-*]\s+|\d+\.\s+)/.test(lines[i])
+      !/^(#{1,3}\s|---+$|>|\s*[-*]\s+|\s*\d+\.\s+)/.test(lines[i])
     ) {
       buf.push(lines[i]);
       i += 1;
     }
     if (buf.length > 0) {
       blocks.push({ kind: 'p', text: buf.join(' ') });
+    } else {
+      // Progress guarantee: a line the paragraph collector treats as "special"
+      // but no block branch above consumed. Emit it as a paragraph and move on
+      // — never loop on the same index (this hung page renders before).
+      blocks.push({ kind: 'p', text: line.trim() });
+      i += 1;
     }
   }
   return blocks;

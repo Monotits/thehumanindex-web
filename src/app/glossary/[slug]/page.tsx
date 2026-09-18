@@ -105,7 +105,7 @@ export async function generateMetadata({
   const pageUrl = `https://thehumanindex.org/glossary/${slug}`;
 
   return {
-    title: `${data.term} — Glossary | The Human Index`,
+    title: `${data.term} — Glossary`,
     description: data.short_definition,
     alternates: { canonical: pageUrl },
     openGraph: {

@@ -1,7 +1,7 @@
 /**
  * Composite + meta-index history loaders for sparkline rendering.
  *
- * `country_composite_scores` is written once per cron run (every 12h) for
+ * `country_composite_scores` is written once per cron run (daily) for
  * every active country. To produce a sparkline series we bucket those
  * rows by day and take the latest value of the day. Returns an array of
  * (potentially-null) numbers ready to hand to <SparklineMini />.

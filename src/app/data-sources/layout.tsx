@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Data Sources & Reliability — The Human Index',
+  title: 'Data Sources & Reliability',
   description:
     'Live operational status for every data source feeding The Human Index. Per-source uptime over the last 30 days, last successful fetch, and current health.',
   openGraph: {

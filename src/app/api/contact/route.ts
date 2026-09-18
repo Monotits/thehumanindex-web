@@ -69,7 +69,9 @@ export async function POST(request: Request) {
     const safeEmail = escapeHtml(email)
     const safeMessage = escapeHtml(message)
 
-    // Send email via Resend
+    // Send email via Resend. The email IS the delivery — there is no DB copy —
+    // so a failed send must be reported to the user, not swallowed.
+    let delivered = false
     try {
       const { Resend } = await import('resend')
       const resend = new Resend(process.env.RESEND_API_KEY)
@@ -77,7 +79,7 @@ export async function POST(request: Request) {
 
       // Custom domain verified → use branded sender; falls back to Resend default
       const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || 'The Human Index <onboarding@resend.dev>'
-      await resend.emails.send({
+      const { error: sendErr } = await resend.emails.send({
         from: FROM_ADDRESS,
         to: NOTIFY_EMAIL,
         replyTo: email,
@@ -100,8 +102,17 @@ export async function POST(request: Request) {
           </div>
         `,
       })
+      if (sendErr) throw new Error(sendErr.message)
+      delivered = true
     } catch (emailError) {
       console.error('Resend email failed:', emailError)
+    }
+
+    if (!delivered) {
+      return Response.json(
+        { error: 'Your message could not be delivered right now. Please try again shortly.' },
+        { status: 502 }
+      )
     }
 
     return Response.json({ success: true })

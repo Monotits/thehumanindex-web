@@ -7,6 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { isPublishable } from '@/lib/research/publishable';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 300;
@@ -49,11 +50,21 @@ export async function GET(req: Request) {
   }
   const sb = createClient(supabaseUrl, anonKey);
 
+  // `status` exists only after migration 028 — retry without it on error.
   async function fetchFor(targetCountry: string | null, targetLocale: string) {
+    const first = await fetchForCols(targetCountry, targetLocale, true);
+    if (first.error && /status|column/i.test(first.error.message)) {
+      return await fetchForCols(targetCountry, targetLocale, false);
+    }
+    return first;
+  }
+
+  async function fetchForCols(targetCountry: string | null, targetLocale: string, withStatus: boolean) {
     let q = sb
       .from('research_articles')
       .select(
-        'id,slug,country_code,locale,topic_id,title,subtitle,excerpt,related_indicators,related_meta_indexes,word_count,reading_time_min,published_at',
+        'id,slug,country_code,locale,topic_id,title,subtitle,excerpt,related_indicators,related_meta_indexes,word_count,reading_time_min,published_at' +
+          (withStatus ? ',status' : ''),
         { count: 'exact' }
       )
       .eq('locale', targetLocale);
@@ -93,7 +104,8 @@ export async function GET(req: Request) {
       total: result.count ?? (result.data ?? []).length,
       offset,
       limit,
-      articles: (result.data ?? []) as ResearchListRow[],
+      // Publication gate: withdrawn / retired-indicator pieces are never served.
+      articles: ((result.data ?? []) as unknown as ResearchListRow[]).filter(isPublishable),
     },
     {
       headers: { 'Cache-Control': 's-maxage=300, stale-while-revalidate=600' },

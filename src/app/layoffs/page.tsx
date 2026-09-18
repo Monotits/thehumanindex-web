@@ -266,14 +266,14 @@ export default async function LayoffsPage() {
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div className="max-w-xl">
               <h3 className="font-serif text-lg font-semibold mb-2">
-                How this feeds the Economic meta-index
+                How this relates to the index
               </h3>
               <p className="text-sm text-foreground-muted leading-relaxed">
-                Verified layoff announcements (SEC EDGAR + WARN Act filings)
-                contribute to the <em>automation_exposure</em> and{' '}
-                <em>labor_disruption</em> indicators on a per-country basis.
-                Rumored/news-only events are tracked separately and do not
-                affect the score.
+                This tracker is a standalone signal feed. Layoff events do{' '}
+                <strong>not</strong> currently enter any country score or
+                meta-index — scores are built only from the indicators listed
+                in the methodology. Coverage skews toward English-language and
+                US filings, so treat it as a sample, not a global census.
               </p>
             </div>
             <div className="flex flex-wrap gap-4 text-sm">

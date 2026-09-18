@@ -3,7 +3,7 @@ import Link from 'next/link';
 export const dynamic = 'force-static';
 
 export const metadata = {
-  title: 'About — The Human Index',
+  title: 'About',
   description:
     'The Human Index is a civilizational stress scoreboard — 25 countries, 31 indicators, 5 meta-indexes. Built to make abstract pressures legible and traceable.',
   alternates: { canonical: 'https://thehumanindex.org/about' },
@@ -28,7 +28,7 @@ const COMPARES = [
     name: 'OECD Better Life Index',
     doing: 'Mid-decade wellbeing scoreboard, hand-curated by OECD economists.',
     different:
-      'We check the underlying sources every 12 hours and re-aggregate when they refresh. Five meta-indexes, weighted composite, editorial overlay in English.',
+      'We check the underlying sources daily and re-aggregate when they refresh. Five meta-indexes, weighted composite, editorial overlay in English.',
   },
   {
     name: 'Trading Economics',
@@ -81,7 +81,7 @@ export default function AboutPage() {
             <li>
               Aggregate indicators from official sources — World Bank, Eurostat,
               IMF, OECD, WHO, NASA, Berkeley Earth, IHME, WRI, regulators.
-              The pipeline checks every 12 hours; each source publishes on its
+              The pipeline checks daily; each source publishes on its
               own cadence (some daily, some quarterly, some annual).
             </li>
             <li>

@@ -194,5 +194,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
+  // ── Research articles ── only pieces that pass the publication gate.
+  try {
+    const { isPublishable, selectWithStatusFallback } = await import('@/lib/research/publishable');
+    const research = await selectWithStatusFallback<{
+      slug: string; locale: string; published_at: string; updated_at?: string | null;
+      title: string; excerpt: string; related_indicators: string[] | null; status?: string | null;
+    }>(
+      (columns) =>
+        sb
+          .from('research_articles')
+          .select(columns)
+          .eq('locale', DEFAULT_LOCALE)
+          .order('published_at', { ascending: false })
+          .limit(5000),
+      'slug,locale,published_at,title,excerpt,related_indicators',
+    );
+    const seenResearch = new Set<string>();
+    for (const r of research.data) {
+      if (!isPublishable(r) || seenResearch.has(r.slug)) continue;
+      seenResearch.add(r.slug);
+      out.push({
+        url: `${BASE}/research/${r.slug}`,
+        lastModified: r.updated_at ?? r.published_at,
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      });
+    }
+  } catch (e) {
+    console.warn('[sitemap] research articles skipped:', e);
+  }
+
   return out;
 }

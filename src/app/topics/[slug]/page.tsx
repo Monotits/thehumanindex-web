@@ -48,7 +48,7 @@ export async function generateMetadata({
   const entry = getTopicEntry(slug);
   if (!entry) return { title: 'Topic — The Human Index' };
   return {
-    title: `${entry.title} | The Human Index`,
+    title: `${entry.title}`,
     description: entry.description,
     alternates: { canonical: `https://thehumanindex.org/topics/${slug}` },
     openGraph: {

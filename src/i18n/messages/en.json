@@ -37,7 +37,7 @@
     "tools": "Tools",
     "contact": "Contact",
     "poweredBy": "Powered by data from",
-    "cronCadence": "Cron refreshes every 12h",
+    "cronCadence": "Cron refreshes daily",
     "indicatorCount": "25 countries · 31 indicators",
     "license": "Data CC BY-NC 4.0. Code MIT.",
     "newsletter": {

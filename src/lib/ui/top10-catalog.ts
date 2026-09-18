@@ -52,7 +52,7 @@ export const TOP_10_CATALOG: Top10Entry[] = [
     slug: 'least-stressed-countries',
     title: 'The 10 least stressed countries in 2026',
     description:
-      'A live ranking of the world\'s most functional societies by composite civilizational stress score. Updated every 12 hours from public data.',
+      'A live ranking of the world\'s most functional societies by composite civilizational stress score. Updated daily from public data.',
     subhead: 'Lowest composite stress scores worldwide.',
     source: { kind: 'composite' },
     direction: 'least',

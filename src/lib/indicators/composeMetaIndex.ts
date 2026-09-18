@@ -23,6 +23,26 @@ export const DEFAULT_META_WEIGHTS: Record<MetaIndex, number> = {
   environmental: 0.15,
 };
 
+/**
+ * Stale-data policy — MUST match the freshness table on /methodology:
+ *   fresh (<=2y) + aging (2-3y): full weight
+ *   stale (3-5y):                half weight
+ *   very stale (>5y):            excluded from the score (still displayed)
+ * Future-dated values never reach this point (orchestrator drops them), but
+ * are excluded here too as a second line of defence.
+ */
+export const STALE_WEIGHT_FACTOR = 0.5;
+
+export function freshnessWeightFactor(referenceDate: string, now: number = Date.now()): number {
+  const ts = new Date(referenceDate).getTime();
+  if (!Number.isFinite(ts)) return 0;
+  const ageYears = (now - ts) / (365.25 * 24 * 3600 * 1000);
+  if (ageYears < -1 / 365.25) return 0;
+  if (ageYears > 5) return 0;
+  if (ageYears > 3) return STALE_WEIGHT_FACTOR;
+  return 1;
+}
+
 export interface MetaIndexComposition {
   metaIndex: MetaIndex;
   value: number | null;       // 0-100, null when no underlying data
@@ -30,7 +50,18 @@ export interface MetaIndexComposition {
   indicatorsCount: number;
   indicatorsWithData: number;
   rawData: {
-    contributors: { indicatorId: string; normalizedValue: number; weight: number }[];
+    /** weight = effective weight (catalog weight x freshness factor). */
+    contributors: {
+      indicatorId: string;
+      normalizedValue: number;
+      weight: number;
+      baseWeight?: number;
+      freshnessFactor?: number;
+      referenceDate?: string;
+      adapterId?: string;
+    }[];
+    /** Had a value but was kept out of the score (very stale / future-dated). */
+    excluded?: { indicatorId: string; referenceDate: string; reason: 'very_stale_or_future' }[];
   };
 }
 
@@ -81,6 +112,7 @@ export function composeCountryScores(
   }
 
   const out: CountryComposition[] = [];
+  const now = Date.now();
 
   for (const countryCode of countryCodes) {
     const countryMeasurements = byCountry.get(countryCode) ?? new Map();
@@ -96,6 +128,7 @@ export function composeCountryScores(
       totalIndicators += memberIndicators.length;
 
       const contributors: MetaIndexComposition['rawData']['contributors'] = [];
+      const excluded: NonNullable<MetaIndexComposition['rawData']['excluded']> = [];
       let sum = 0;
       let weightSum = 0;
       let withData = 0;
@@ -103,14 +136,23 @@ export function composeCountryScores(
       for (const ind of memberIndicators) {
         const m = countryMeasurements.get(ind.id);
         if (!m || m.normalizedValue === null) continue;
+        const factor = freshnessWeightFactor(m.referenceDate, now);
+        if (factor === 0) {
+          excluded.push({ indicatorId: ind.id, referenceDate: m.referenceDate, reason: 'very_stale_or_future' });
+          continue;
+        }
         withData++;
-        const w = ind.weight_within_meta;
+        const w = ind.weight_within_meta * factor;
         sum += m.normalizedValue * w;
         weightSum += w;
         contributors.push({
           indicatorId: ind.id,
           normalizedValue: m.normalizedValue,
           weight: w,
+          baseWeight: ind.weight_within_meta,
+          freshnessFactor: factor,
+          referenceDate: m.referenceDate,
+          adapterId: m.adapterId,
         });
       }
       totalWithData += withData;
@@ -122,7 +164,7 @@ export function composeCountryScores(
         weight: metaWeights[meta],
         indicatorsCount: memberIndicators.length,
         indicatorsWithData: withData,
-        rawData: { contributors },
+        rawData: excluded.length > 0 ? { contributors, excluded } : { contributors },
       };
       metaCompositions.push(composition);
 

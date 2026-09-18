@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+import { adapterMeta } from '@/lib/indicators/adapterRegistry';
 import { StressBand } from '@/components/ui/StressBand';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { SourceAttribution } from '@/components/ui/SourceAttribution';
@@ -50,6 +51,8 @@ interface IndicatorValueRow {
   raw_value: number | null;
   normalized_value: number | null;
   reference_date: string;
+  /** Adapter whose measurement actually fed the score (migration 028+). */
+  primary_adapter?: string | null;
 }
 
 interface PulsePreview {
@@ -127,7 +130,9 @@ async function loadCountryDetail(
       .order('display_order', { ascending: true }),
     sb
       .from('v_country_latest_indicators')
-      .select('country_code, indicator_id, raw_value, normalized_value, reference_date')
+      // '*' so primary_adapter arrives once migration 028 is applied, without
+      // breaking the query before it is.
+      .select('*')
       .eq('country_code', upper),
   ]);
 
@@ -226,7 +231,7 @@ export async function generateMetadata({
   const description = `Civilizational stress composite, 5-meta-index breakdown, and 31-indicator detail for ${name}. Every number sourced.`;
 
   return {
-    title: `${name} — The Human Index`,
+    title: `${name}: stress score, indicators & sources`,
     description,
     alternates: {
       canonical: pageUrl,
@@ -637,6 +642,17 @@ function IndicatorRowItem({
   const normalized = value?.normalized_value ?? null;
   const band = bandFor(normalized);
   const freshness = freshnessFor(value?.reference_date ?? null);
+  // Attribute the value to the source it actually came from. The catalog's
+  // source_org is only the fallback (static seeds, or pre-028 rows).
+  const adapter = adapterMeta(value?.primary_adapter);
+  const sourceName = adapter?.displayName ?? indicator.source_org;
+  const sourceHref = adapter?.displayName ? adapter.url : indicator.source_url;
+  const scoreNote =
+    freshness === 'very_stale'
+      ? 'Shown for reference — over 5 years old, excluded from the score.'
+      : freshness === 'stale'
+      ? 'Counts at half weight in the score (3–5 years old).'
+      : null;
 
   return (
     <li className="py-4 flex items-start gap-4 flex-wrap sm:flex-nowrap">
@@ -649,15 +665,18 @@ function IndicatorRowItem({
             {indicator.description}
           </p>
         )}
-        {indicator.source_org && (
+        {sourceName && (
           <div className="mt-2">
             <SourceAttribution
-              source={indicator.source_org}
-              href={indicator.source_url ?? undefined}
+              source={sourceName}
+              href={sourceHref ?? undefined}
               referenceDate={value?.reference_date ?? null}
               freshness={freshness}
               variant="inline"
             />
+            {scoreNote && (
+              <p className="mt-1 text-xs text-foreground-subtle">{scoreNote}</p>
+            )}
           </div>
         )}
       </div>

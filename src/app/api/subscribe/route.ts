@@ -56,20 +56,22 @@ export async function POST(request: Request) {
     try {
       if (!supabaseAdmin) throw new Error('Missing service role key')
       // First, look up an existing row so we can preserve its token.
-      const { data: existing } = await supabaseAdmin!
+      const { data: existing, error: lookupErr } = await supabaseAdmin!
         .from('subscribers')
         .select('email, unsubscribe_token, unsubscribed_at')
         .eq('email', email)
         .maybeSingle()
+      if (lookupErr) throw lookupErr
 
       if (existing) {
         storedToken = existing.unsubscribe_token as string
         // If they had unsubscribed, re-activate the row.
         if (existing.unsubscribed_at) {
-          await supabaseAdmin!
+          const { error: reactivateErr } = await supabaseAdmin!
             .from('subscribers')
             .update({ unsubscribed_at: null, subscribed_at: new Date().toISOString(), source })
             .eq('email', email)
+          if (reactivateErr) throw reactivateErr
         }
       } else {
         const { error } = await supabaseAdmin!
@@ -84,10 +86,17 @@ export async function POST(request: Request) {
         if (error) throw error
       }
     } catch (dbErr) {
-      // Don't fail the user-facing request on a DB hiccup — they'll still
-      // see 'subscribed', just won't get a welcome email this time.
       console.error('[subscribe] supabase error:', dbErr)
       dbPersisted = false
+    }
+
+    // No row = not subscribed. Never tell the user otherwise: they would wait
+    // for a newsletter that will not come. Surface a retryable error instead.
+    if (!dbPersisted) {
+      return Response.json(
+        { error: 'We could not save your subscription right now. Please try again in a minute.' },
+        { status: 503 }
+      )
     }
 
     // Send the welcome email via Resend. We have a verified domain (used
@@ -98,11 +107,11 @@ export async function POST(request: Request) {
     // unsubscribe (RFC 8058) sessizce çalışmaz (uyumluluk sorunu).
     const unsubscribeUrl = `${BASE_URL}/api/unsubscribe?token=${storedToken}`
     try {
-      if (!dbPersisted) throw new Error('Skipping welcome email: subscriber row not persisted')
       const { Resend } = await import('resend')
       const resend = new Resend(process.env.RESEND_API_KEY)
       const tpl = welcomeEmail(unsubscribeUrl)
-      await resend.emails.send({
+      // Resend reports API failures in the result object, not by throwing.
+      const { error: sendErr } = await resend.emails.send({
         from: FROM_ADDRESS,
         to: email,
         subject: tpl.subject,
@@ -113,6 +122,7 @@ export async function POST(request: Request) {
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
         },
       })
+      if (sendErr) throw new Error(sendErr.message)
     } catch (emailErr) {
       // Email failure doesn't fail the subscribe — the row is in DB,
       // and the next weekly brief will still go out. Log + carry on.

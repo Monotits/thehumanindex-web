@@ -7,6 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { effectiveStatus } from '@/lib/research/publishable';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 600;
@@ -82,6 +83,14 @@ export async function GET(
     return NextResponse.json(
       { ok: false, error: `Article "${slug}" not found` },
       { status: 404 }
+    );
+  }
+
+  const status = effectiveStatus(result.data as ResearchFullRow);
+  if (status !== 'published') {
+    return NextResponse.json(
+      { ok: false, error: `Article "${slug}" has been withdrawn (${status})`, status },
+      { status: 410 }
     );
   }
 

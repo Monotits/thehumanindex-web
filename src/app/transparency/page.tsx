@@ -5,7 +5,7 @@ import { cn } from '@/lib/ui/cn';
 import { freshnessFor, FRESHNESS_COLOR_VAR, FRESHNESS_LABELS } from '@/lib/ui/tokens';
 
 export const metadata: Metadata = {
-  title: 'Transparency — The Human Index',
+  title: 'Transparency',
   description:
     'Trust scoreboard for The Human Index: source health, cross-source validation rates, data freshness distribution, and confidence tier breakdowns. Updated every cron cycle.',
   openGraph: {
@@ -57,22 +57,41 @@ async function loadTransparencyData() {
   }
   const sb = createClient(url, key);
 
+  // Freshness must describe what is CURRENTLY published: one row per active
+  // (country, indicator) pair from the latest snapshot day. The previous query
+  // ordered all history by reference_date DESC with a row cap, so only the
+  // newest observations were ever sampled and the summary read "100% fresh".
+  const latestDayRes = await sb
+    .from('indicator_snapshots')
+    .select('snapshot_date')
+    .order('snapshot_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const latestDay = (latestDayRes.data as { snapshot_date: string } | null)?.snapshot_date ?? null;
+
   const [healthRes, uptimeRes, snapshotsRes, indicatorsRes, countriesRes] =
     await Promise.all([
       sb.from('v_data_source_health_latest').select('source, status, last_success_at, last_attempt_at, data_points_count, duration_ms'),
       sb.from('v_data_source_uptime_30d').select('source, uptime, total_runs'),
-      sb
-        .from('indicator_snapshots')
-        .select('indicator_id, country_code, reference_date')
-        .order('reference_date', { ascending: false })
-        .limit(2000),
-      sb.from('indicators').select('id', { count: 'exact', head: true }).eq('active', true),
-      sb.from('countries').select('code', { count: 'exact', head: true }).eq('active', true),
+      latestDay
+        ? sb
+            .from('indicator_snapshots')
+            .select('indicator_id, country_code, reference_date')
+            .eq('snapshot_date', latestDay)
+            .limit(1000)
+        : Promise.resolve({ data: [] as IndicatorSnapshotRow[] }),
+      sb.from('indicators').select('id', { count: 'exact' }).eq('active', true),
+      sb.from('countries').select('code', { count: 'exact' }).eq('active', true),
     ]);
 
   const health = (healthRes.data ?? []) as HealthRow[];
   const uptime = (uptimeRes.data ?? []) as UptimeRow[];
-  const snapshots = (snapshotsRes.data ?? []) as IndicatorSnapshotRow[];
+  // Only active pairs count; retired indicators must not pad the denominator.
+  const activeIndicators = new Set(((indicatorsRes.data ?? []) as { id: string }[]).map(r => r.id));
+  const activeCountries = new Set(((countriesRes.data ?? []) as { code: string }[]).map(r => r.code));
+  const snapshots = ((snapshotsRes.data ?? []) as IndicatorSnapshotRow[]).filter(
+    r => activeIndicators.has(r.indicator_id) && activeCountries.has(r.country_code),
+  );
 
   const lastRunAt = health
     .map((r) => r.last_attempt_at)
@@ -124,7 +143,10 @@ export default async function TransparencyPage() {
     const f = freshnessFor(s.reference_date);
     if (f) freshnessBuckets[f] += 1;
   }
-  const totalSnapshots = snapshots.length;
+  const totalSnapshots =
+    freshnessBuckets.fresh + freshnessBuckets.aging + freshnessBuckets.stale + freshnessBuckets.very_stale;
+  const expectedPairs = indicatorCount * countryCount;
+  const missingPairs = Math.max(0, expectedPairs - totalSnapshots);
 
   const sourceList = [...uptime].sort((a, b) => (b.uptime ?? 0) - (a.uptime ?? 0));
 
@@ -172,7 +194,7 @@ export default async function TransparencyPage() {
           />
           <KpiCard
             label="Cron cadence"
-            value="12h"
+            value="Daily"
             caption="continuous refresh"
           />
         </div>
@@ -184,9 +206,20 @@ export default async function TransparencyPage() {
           Data freshness
         </h2>
         <p className="text-foreground-muted max-w-2xl mb-8">
-          How recent are the underlying observations? Fresh means within 2 years,
-          aging 2–3 years, stale 3–5 years, very stale beyond.
+          How recent are the currently published observations — one per active
+          country–indicator pair, from the latest pipeline run. Fresh means within
+          2 years, aging 2–3 years, stale 3–5 years, very stale beyond. Stale values
+          count at half weight; very stale values are shown but excluded from scores.
         </p>
+        {expectedPairs > 0 && (
+          <p className="text-sm text-foreground-muted max-w-2xl mb-8 -mt-4">
+            <span className="font-mono tabular-nums text-foreground">{totalSnapshots}</span> of{' '}
+            <span className="font-mono tabular-nums text-foreground">{expectedPairs}</span> country–indicator
+            pairs have a published observation;{' '}
+            <span className="font-mono tabular-nums text-foreground">{missingPairs}</span> have no data and are
+            not counted in the bar below.
+          </p>
+        )}
 
         <FreshnessBar
           buckets={freshnessBuckets}

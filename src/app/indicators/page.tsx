@@ -5,7 +5,7 @@ import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { META_INDEXES, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 
 export const metadata: Metadata = {
-  title: 'Every indicator we track | The Human Index',
+  title: 'Every indicator we track',
   description:
     'Every indicator we track across 25 countries, grouped by meta-index domain. From housing affordability to inflation to automation exposure to temperature anomaly — each links to a full country ranking.',
   openGraph: {

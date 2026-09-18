@@ -19,9 +19,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { variant } = await params;
   const v = getQuizVariant(variant);
-  if (!v) return { title: 'Quiz — The Human Index' };
+  if (!v) return { title: 'Quiz' };
   return {
-    title: `${v.title} | The Human Index`,
+    title: `${v.title}`,
     description: v.description,
     alternates: { canonical: `https://thehumanindex.org/quiz/${variant}` },
     openGraph: {
@@ -100,7 +100,7 @@ export default async function QuizVariantPage({
             {v.subhead}
           </p>
           <p className="mt-3 text-xs text-foreground-subtle">
-            Nothing is sent to a server. The assessment runs entirely in your browser.
+            Your answers stay in your browser — the assessment runs locally and we never receive what you selected. We only count, anonymously, that a quiz was completed.
           </p>
         </div>
       </section>

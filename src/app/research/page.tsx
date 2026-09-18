@@ -4,9 +4,10 @@ import { createClient } from '@supabase/supabase-js';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { META_INDEXES, type MetaIndex } from '@/lib/ui/tokens';
 import { getActiveLocale } from '@/lib/ui/locale';
+import { isPublishable, selectWithStatusFallback } from '@/lib/research/publishable';
 
 export const metadata: Metadata = {
-  title: 'Research — The Human Index',
+  title: 'Research',
   description:
     'In-depth research articles on civilizational stress: per-country and per-topic analyses linking specific indicators to broader meta-indexes. Updated continuously.',
   openGraph: {
@@ -50,29 +51,29 @@ async function loadResearch(locale: string): Promise<{
 
   const sb = createClient(sbUrl, sbKey);
 
-  // Try requested locale first; if empty, fall back to English
-  let articlesRes = await sb
-    .from('research_articles')
-    .select(
-      'id, slug, country_code, locale, topic_id, title, subtitle, excerpt, related_indicators, related_meta_indexes, reading_time_min, published_at',
-    )
-    .eq('locale', locale)
-    .order('published_at', { ascending: false })
-    .limit(24);
+  const COLUMNS =
+    'id, slug, country_code, locale, topic_id, title, subtitle, excerpt, related_indicators, related_meta_indexes, reading_time_min, published_at';
 
+  // Over-fetch, then apply the publication gate (status + retired-indicator
+  // check) so withdrawn pieces never reach a card.
+  const fetchLocale = (target: string) =>
+    selectWithStatusFallback<ResearchRow>(
+      (columns) =>
+        sb
+          .from('research_articles')
+          .select(columns)
+          .eq('locale', target)
+          .order('published_at', { ascending: false })
+          .limit(60),
+      COLUMNS,
+    );
+
+  // Try requested locale first; if empty, fall back to English
+  let articlesRes = await fetchLocale(locale);
   let fallbackUsed = false;
-  if (!articlesRes.data || articlesRes.data.length === 0) {
-    if (locale !== 'en') {
-      fallbackUsed = true;
-      articlesRes = await sb
-        .from('research_articles')
-        .select(
-          'id, slug, country_code, locale, topic_id, title, subtitle, excerpt, related_indicators, related_meta_indexes, reading_time_min, published_at',
-        )
-        .eq('locale', 'en')
-        .order('published_at', { ascending: false })
-        .limit(24);
-    }
+  if (articlesRes.data.length === 0 && locale !== 'en') {
+    fallbackUsed = true;
+    articlesRes = await fetchLocale('en');
   }
 
   const countriesRes = await sb
@@ -80,7 +81,7 @@ async function loadResearch(locale: string): Promise<{
     .select('code, name, flag_emoji')
     .eq('active', true);
 
-  const articles = (articlesRes.data ?? []) as ResearchRow[];
+  const articles = articlesRes.data.filter(isPublishable).slice(0, 24);
   const countryNames = new Map(
     (countriesRes.data ?? []).map((r) => [
       (r as { code: string }).code,

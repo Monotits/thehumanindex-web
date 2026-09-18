@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "check:regressions": "node scripts/regression-check.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.1",

@@ -6,7 +6,7 @@ import { META_INDEXES, type MetaIndex } from '@/lib/ui/tokens';
 import { getActiveLocale } from '@/lib/ui/locale';
 
 export const metadata: Metadata = {
-  title: 'Glossary — The Human Index',
+  title: 'Glossary',
   description:
     'Definitions for every indicator, meta-index, and concept used by The Human Index. Every term traceable to its source.',
   openGraph: {

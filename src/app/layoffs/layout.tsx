@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Labor stress signals — Live layoff tracker | The Human Index',
+  title: 'Labor stress signals — Live layoff tracker',
   description:
     'Real-time corporate layoff signals from SEC EDGAR, WARN Act filings, and verified news — feeding the Economic meta-index in The Human Index civilizational stress framework.',
   openGraph: {

@@ -185,7 +185,7 @@ export default async function Top10OGImage({
         {/* Footer */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16 }}>
           <div style={{ fontSize: 14, color: PALETTE.fgSubtle, fontFamily: 'sans-serif' }}>
-            Updated every 12 hours · sourced from official statistics
+            Updated daily · sourced from official statistics
           </div>
           <div style={{ fontSize: 14, color: PALETTE.fgSubtle, fontFamily: 'sans-serif', letterSpacing: 0.5 }}>
             thehumanindex.org/top-10/{slug}

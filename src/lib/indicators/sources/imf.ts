@@ -65,6 +65,10 @@ async function fetchOneSeries(
   const url = `https://www.imf.org/external/datamapper/api/v1/${series}`;
   const currentYear = new Date().getFullYear();
   const minYear = currentYear - 5;  // accept any reasonably recent value
+  // WEO series run ~5 years into the FUTURE (projections) and the current
+  // year is itself an estimate. Only completed years count as observations —
+  // without this cap the "latest" value was a 2031 projection served as Fresh.
+  const maxYear = currentYear - 1;
 
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
@@ -94,6 +98,7 @@ async function fetchOneSeries(
         const year = parseInt(yearStr, 10);
         if (!Number.isInteger(year)) continue;
         if (year < minYear) continue;       // skip historical noise
+        if (year > maxYear) continue;       // skip estimates + projections
         if (year > latestYear) {
           latestYear = year;
           latestValue = Number(val);

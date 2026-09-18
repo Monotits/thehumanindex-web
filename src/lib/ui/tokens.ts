@@ -118,6 +118,9 @@ export function freshnessFor(referenceDate: string | Date | null | undefined): F
   const d = referenceDate instanceof Date ? referenceDate : new Date(referenceDate);
   if (!Number.isFinite(d.getTime())) return null;
   const ageYears = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);
+  // A reference date in the future is a projection, not an observation —
+  // never label it Fresh. (1-day slack for timezone/end-of-day dates.)
+  if (ageYears < -1 / 365.25) return null;
   if (ageYears > 5) return 'very_stale';
   if (ageYears > 3) return 'stale';
   if (ageYears > 2) return 'aging';

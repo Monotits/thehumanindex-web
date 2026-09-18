@@ -84,7 +84,7 @@ export async function generateMetadata({
   const title = `${data.name} by country | The Human Index`;
   const description =
     data.description ??
-    `Live ranking of ${data.name.toLowerCase()} across 25 tracked countries. ${data.source_org ? `Sourced from ${data.source_org}.` : ''} Re-checked every 12 hours; source publishes on its own cadence.`;
+    `Live ranking of ${data.name.toLowerCase()} across 25 tracked countries. ${data.source_org ? `Sourced from ${data.source_org}.` : ''} Re-checked daily; source publishes on its own cadence.`;
 
   return {
     title,
@@ -329,7 +329,7 @@ export default async function IndicatorPage({
             {meanStress !== null && (
               <div>
                 <div className="text-xs uppercase tracking-wider text-foreground-subtle mb-1">
-                  Global average stress
+                  Tracked-country average stress
                 </div>
                 <div className="flex items-baseline gap-3">
                   <span className="font-mono tabular-nums text-4xl sm:text-5xl font-semibold">

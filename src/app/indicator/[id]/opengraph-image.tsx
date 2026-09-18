@@ -172,7 +172,7 @@ export default async function IndicatorOGImage({
             {globalAvg !== null && (
               <div style={{ display: 'flex', flexDirection: 'column', marginTop: 'auto' }}>
                 <div style={{ fontSize: 14, color: PALETTE.fgSubtle, letterSpacing: 1.5, textTransform: 'uppercase', fontFamily: 'sans-serif', marginBottom: 6 }}>
-                  Global average stress
+                  Tracked-country average
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
                   <div
@@ -238,7 +238,7 @@ export default async function IndicatorOGImage({
         {/* Bottom: URL */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, borderTop: `1px solid ${PALETTE.border}` }}>
           <div style={{ fontSize: 14, color: PALETTE.fgSubtle, fontFamily: 'sans-serif' }}>
-            Live data · updated every 12 hours
+            Live data · updated daily
           </div>
           <div style={{ fontSize: 14, color: PALETTE.fgSubtle, fontFamily: 'sans-serif', letterSpacing: 0.5 }}>
             thehumanindex.org/indicator/{id}

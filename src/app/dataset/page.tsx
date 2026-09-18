@@ -2,13 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'The Human Index Dataset — API + CSV access | The Human Index',
+  title: 'The Human Index Dataset — API + CSV access',
   description:
-    '25 countries, 31 indicators, 5 meta-indexes. Pipeline checks every 12 hours; underlying sources publish on their own cadence. Free programmatic access via REST API.',
+    '25 countries, 31 indicators, 5 meta-indexes. Pipeline checks daily; underlying sources publish on their own cadence. Free programmatic access via REST API.',
   openGraph: {
     title: 'The Human Index Dataset — API + CSV access',
     description:
-      '25 countries, 31 indicators, 5 meta-indexes. Free programmatic access via REST API, CC-BY-4.0.',
+      '25 countries, 31 indicators, 5 meta-indexes. Free programmatic access via REST API, CC BY-NC 4.0.',
     url: 'https://thehumanindex.org/dataset',
     type: 'website',
     siteName: 'The Human Index',
@@ -91,7 +91,7 @@ export default function DatasetPage() {
             </h1>
             <p className="mt-5 text-base sm:text-lg text-foreground-muted text-pretty max-w-2xl leading-relaxed">
               25 countries. 31 indicators. 5 meta-indexes. The pipeline checks
-              every 12 hours; underlying sources publish on their own cadence.
+              daily; underlying sources publish on their own cadence.
               Every row traces back to a public statistical source.
               Free programmatic access for research, journalism, and AI
               applications.
@@ -106,7 +106,7 @@ export default function DatasetPage() {
           <Stat label="Countries" value="25" caption="Across 6 continents" />
           <Stat label="Indicators" value="31" caption="Five meta-indexes" />
           <Stat label="Sources" value="10" caption="Public statistical bodies" />
-          <Stat label="Pipeline check" value="12h" caption="Source cadence varies" />
+          <Stat label="Pipeline check" value="Daily" caption="Source cadence varies" />
         </div>
       </section>
 

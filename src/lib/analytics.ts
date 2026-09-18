@@ -44,22 +44,16 @@ export function trackLanguageChange(from: string, to: string) {
   posthog.people.set({ preferred_locale: to })
 }
 
-export function trackQuizCompleted(opts: {
-  country: string
-  sector: string
-  age: string
-  concerns: string[]
-  personalExposure: number | null
-}) {
+/**
+ * Quiz completion. PRIVACY CONTRACT: the quiz page promises that answers never
+ * leave the browser. Country, sector, age, concerns (which include health /
+ * mental-health worries) and the resulting score are therefore NOT sent — only
+ * the fact that a quiz was finished. Do not add answer fields here without
+ * changing the on-page promise first.
+ */
+export function trackQuizCompleted(opts: { concernCount: number }) {
   if (typeof window === 'undefined') return
-  posthog.capture('quiz_completed', {
-    country: opts.country,
-    sector: opts.sector,
-    age: opts.age,
-    concerns: opts.concerns,
-    concern_count: opts.concerns.length,
-    personal_exposure: opts.personalExposure,
-  })
+  posthog.capture('quiz_completed', { concern_count: opts.concernCount })
 }
 
 export function trackCountryClick(country_code: string, source: string) {

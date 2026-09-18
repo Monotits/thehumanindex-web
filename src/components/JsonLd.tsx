@@ -47,11 +47,15 @@ export function ArticleJsonLd({
   description,
   slug,
   publishedAt,
+  modifiedAt,
+  section = 'pulse',
 }: {
   title: string
   description: string
   slug: string
   publishedAt: string
+  modifiedAt?: string | null
+  section?: 'pulse' | 'research'
 }) {
   return (
     <JsonLd
@@ -60,9 +64,9 @@ export function ArticleJsonLd({
         '@type': 'Article',
         headline: title,
         description,
-        url: `https://thehumanindex.org/pulse/${slug}`,
+        url: `https://thehumanindex.org/${section}/${slug}`,
         datePublished: publishedAt,
-        dateModified: publishedAt,
+        dateModified: modifiedAt ?? publishedAt,
         author: {
           '@type': 'Organization',
           name: 'The Human Index',
@@ -77,7 +81,7 @@ export function ArticleJsonLd({
         },
         mainEntityOfPage: {
           '@type': 'WebPage',
-          '@id': `https://thehumanindex.org/pulse/${slug}`,
+          '@id': `https://thehumanindex.org/${section}/${slug}`,
         },
       }}
     />

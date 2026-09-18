@@ -29,6 +29,7 @@ import { referenceSeedAdapter } from './sources/referenceSeed';
 import { socialFeedComputedAdapter } from './sources/socialFeedComputed';
 import { eurostatAdapter } from './sources/eurostat';
 import { imfAdapter } from './sources/imf';
+import { ACTIVE_ADAPTER_IDS } from './adapterRegistry';
 
 // Registry of all adapters in PRIORITY ORDER.
 // Earlier entries win for the primary measurement when multiple adapters
@@ -56,6 +57,15 @@ const ADAPTERS: IndicatorAdapter[] = [
   // countries. Replaced by referenceSeed's per-country Berkeley Earth values
   // which capture geographical reality (NH amplification, equatorial drift).
 ];
+
+// adapterRegistry.ts is what the transparency API + country page read to
+// answer "which source was primary". It must mirror ADAPTERS exactly.
+{
+  const live = ADAPTERS.map(a => a.id).join(',');
+  if (live !== ACTIVE_ADAPTER_IDS.join(',')) {
+    throw new Error(`[orchestrator] ADAPTERS (${live}) out of sync with adapterRegistry (${ACTIVE_ADAPTER_IDS.join(',')})`);
+  }
+}
 
 // Suppress unused-import warnings while we keep these source files around
 // for future re-enable when we have per-country live APIs.
@@ -164,8 +174,18 @@ export async function fetchAllIndicatorValues(
   const grouped = new Map<string, NormalizedMeasurement[]>();
   const allMeasurements: NormalizedMeasurement[] = [];
 
+  // Observations only: a reference date in the future is a forecast, whatever
+  // adapter it came from. Drop it before it can become primary or be persisted.
+  const futureCutoff = Date.now() + 24 * 3600 * 1000;
+  let droppedFuture = 0;
+
   for (const run of adapterRuns) {
     for (const m of run.result.measurements) {
+      const refTs = new Date(m.referenceDate).getTime();
+      if (!Number.isFinite(refTs) || refTs > futureCutoff) {
+        droppedFuture++;
+        continue;
+      }
       const meta = indicatorById.get(m.indicatorId);
       const normalized = meta ? normalizeIndicator(m.rawValue, meta) : null;
       const nm: NormalizedMeasurement = { ...m, normalizedValue: normalized, adapterId: run.adapter.id };
@@ -175,6 +195,10 @@ export async function fetchAllIndicatorValues(
       if (!grouped.has(key)) grouped.set(key, []);
       grouped.get(key)!.push(nm);
     }
+  }
+
+  if (droppedFuture > 0) {
+    console.warn(`[orchestrator] dropped ${droppedFuture} measurements with future/invalid reference dates`);
   }
 
   // Adapter priority lookup (lower index = higher priority)

@@ -6,7 +6,7 @@ import { type MetaIndex } from '@/lib/ui/tokens';
 import { loadCompositeHistory, pointsToDenseSeries } from '@/lib/ui/history';
 
 export const metadata: Metadata = {
-  title: 'Countries — The Human Index',
+  title: 'Countries',
   description:
     'Civilizational stress composite scores across 25 countries. Switch between grid, sortable table, world map, and heatmap views.',
   openGraph: {

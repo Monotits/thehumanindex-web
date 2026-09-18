@@ -159,13 +159,8 @@ export function QuizExperience({ countries }: { countries: QuizCountry[] }) {
   // Fire analytics once when reaching the result step
   useEffect(() => {
     if (step === 'result' && result) {
-      trackQuizCompleted({
-        country: result.country.code,
-        sector: String(sector),
-        age: String(age),
-        concerns: concerns.map(String),
-        personalExposure: result.personalExposure,
-      });
+      // Answers stay local (see privacy contract in lib/analytics.ts).
+      trackQuizCompleted({ concernCount: concerns.length });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, result?.country.code]);
