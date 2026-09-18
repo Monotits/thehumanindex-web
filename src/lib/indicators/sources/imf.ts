@@ -79,8 +79,10 @@ async function fetchOneSeries(
       cache: 'no-store',
     });
     if (!res.ok) {
-      console.warn(`[imf] ${series}: HTTP ${res.status}`);
-      return new Map();
+      // Throw so the HTTP status lands in adapters_health.error — returning an
+      // empty Map here made the adapter report "failed" with error: null for
+      // two months, which hid the actual cause.
+      throw new Error(`IMF ${series}: HTTP ${res.status}`);
     }
     const json = (await res.json()) as ImfResponse;
     const seriesData = json.values?.[series];
