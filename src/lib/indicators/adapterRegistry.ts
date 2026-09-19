@@ -20,11 +20,11 @@ export interface AdapterMeta {
 
 export const ADAPTER_REGISTRY: AdapterMeta[] = [
   { id: 'eurostat',      displayName: 'Eurostat',                   url: 'https://ec.europa.eu/eurostat',            active: true },
-  { id: 'imf',           displayName: 'IMF World Economic Outlook', url: 'https://www.imf.org/external/datamapper',  active: true },
   { id: 'worldBank',     displayName: 'World Bank',                 url: 'https://data.worldbank.org',               active: true },
   { id: 'oecdHousing',   displayName: null,                         url: null,                                       active: true },
   { id: 'referenceSeed', displayName: null,                         url: null,                                       active: true },
   // Retired adapters — kept so historical rows still resolve, never primary.
+  { id: 'imf',                 displayName: 'IMF World Economic Outlook', url: 'https://www.imf.org/external/datamapper', active: false },
   { id: 'nasaGiss',            displayName: 'NASA GISS', url: 'https://data.giss.nasa.gov/gistemp/', active: false },
   { id: 'socialFeedComputed',  displayName: null,        url: null,                                   active: false },
   { id: 'whoGho',              displayName: 'WHO GHO',   url: 'https://www.who.int/data/gho',         active: false },

@@ -26,9 +26,15 @@ import {
 
 const PROVIDED_INDICATORS = new Set(['housing_affordability']);
 
-// House price-to-income ratio, indexed to 2015=100 then converted to actual
-// median-house-price / median-annual-income ratio. Values from OECD 2024 housing
-// data + IMF Global Housing Watch for non-OECD entries. Refresh annually.
+// Approximate house-price-to-annual-income LEVEL ratios (years of income).
+//
+// PROVENANCE WARNING: an earlier comment claimed these were "converted" from
+// OECD's 2015=100 price-to-income INDEX. That is not possible — an index
+// carries no level, so it cannot yield "7.3 years of income". OECD does not
+// publish absolute ratios. These numbers are compiled estimates (OECD trends,
+// IMF Global Housing Watch, national statistics) with no per-value citation.
+// The catalog now says so (migration 029). Replace with a citable level source
+// or redefine the indicator before using it in published claims.
 //
 // Source notes:
 //   OECD countries: stats.oecd.org HOUSE_PRICES dataset, real price-to-income
@@ -96,7 +102,7 @@ export const oecdHousingAdapter: IndicatorAdapter = {
         indicatorId: 'housing_affordability',
         rawValue: entry.value,
         referenceDate: `${entry.year}-12-31`,
-        payload: { source: 'OECD HOUSE_PRICES + IMF GHW (static seed)', year: entry.year },
+        payload: { source: 'Compiled estimate (OECD / IMF GHW / national statistics) — static seed, per-value citation missing', year: entry.year },
       });
     }
 

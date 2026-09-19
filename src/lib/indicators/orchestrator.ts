@@ -39,8 +39,7 @@ import { ACTIVE_ADAPTER_IDS } from './adapterRegistry';
 const ADAPTERS: IndicatorAdapter[] = [
   // Live primary sources
   eurostatAdapter,              // 11 EU+ countries: unemployment, youth_unemployment, fertility, gini (fresher than WB)
-  imfAdapter,                   // 25 countries: inflation_rate (primary), unemployment_rate (cross-source with WB+Eurostat)
-  worldBankAdapter,             // 25 countries: 10 indicators
+  worldBankAdapter,             // 25 countries: 15 indicators incl. inflation_rate + unemployment_rate
 
   // Static seeds (annual refresh)
   oecdHousingAdapter,           // housing_affordability
@@ -52,6 +51,12 @@ const ADAPTERS: IndicatorAdapter[] = [
   // removed from the adapter chain here in Faz 17.4 (live-site audit found
   // stale measurements still surfacing in Pulse generation). Re-enable when
   // we have a real per-country sentiment source.
+
+  // imfAdapter — DISABLED (2026-09). www.imf.org/external/datamapper answers
+  // HTTP 403 to Vercel's egress IPs; 0 successful runs in 60+ days. World Bank
+  // serves both of its indicators (inflation_rate, unemployment_rate), so
+  // nothing is lost. Re-enable only behind a proxy/allowed egress, and keep
+  // the completed-year cap in imf.ts (WEO series include projections).
 
   // nasaGissAdapter — DISABLED. Single global value didn't differentiate
   // countries. Replaced by referenceSeed's per-country Berkeley Earth values
@@ -69,6 +74,7 @@ const ADAPTERS: IndicatorAdapter[] = [
 
 // Suppress unused-import warnings while we keep these source files around
 // for future re-enable when we have per-country live APIs.
+void imfAdapter;
 void nasaGissAdapter;
 void socialFeedComputedAdapter;
 

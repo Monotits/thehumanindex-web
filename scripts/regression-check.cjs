@@ -77,8 +77,8 @@ try {
   assert.equal(Math.round(re * 10) / 10, econ.value);
 
   // 4. Source priority: retired adapters can never outrank live ones
-  assert.ok(adapterPriority('eurostat') < adapterPriority('imf'));
-  assert.ok(adapterPriority('imf') < adapterPriority('worldBank'));
+  assert.ok(adapterPriority('eurostat') < adapterPriority('worldBank'));
+  assert.ok(adapterPriority('worldBank') < adapterPriority('imf')); // imf retired (HTTP 403)
   assert.ok(adapterPriority('referenceSeed') < adapterPriority('nasaGiss'));
   assert.ok(adapterPriority('nasaGiss') < adapterPriority('made-up'));
 

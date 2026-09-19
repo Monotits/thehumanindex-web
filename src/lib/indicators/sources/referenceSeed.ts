@@ -14,7 +14,7 @@
  * Indicators served:
  *   - water_stress              (WRI Aqueduct 4.0, 2023)
  *   - air_pollution             (WHO Ambient Air Quality DB 2024)
- *   - burnout                   (Gallup State of the Global Workplace 2024)
+ *   - burnout                   (id kept for URL/history stability; MEASURES Gallup "daily stress", not burnout)
  *   - divorce_rate              (UN Stats Yearbook + OECD Family DB 2023)
  *   - social_trust              (World Values Survey wave 7 + Edelman Trust 2024)
  *   - loneliness                (OECD Better Life Index + Eurobarometer 2023)
@@ -74,8 +74,13 @@ const SEEDS: SeedEntry[] = [
     },
   },
 
-  // ── burnout (Gallup State of the Global Workplace 2024, % engaged inverted) ──
-  // We use "daily stress at work" % from Gallup — higher is worse.
+  // ── daily stress among employees (indicator id is still 'burnout') ──
+  // Gallup asks: "Did you experience stress during A LOT OF THE DAY yesterday?"
+  // That is daily stress, NOT clinical/occupational burnout — the catalog name
+  // and description were corrected in migration 029. The id stays 'burnout' so
+  // /indicator/burnout URLs and snapshot history survive.
+  // PROVENANCE: country values were hand-entered from the 2024 report's country
+  // appendix and have NOT been re-verified against the PDF. Verify before citing.
   {
     indicatorId: 'burnout',
     year: 2024,
