@@ -6,7 +6,9 @@ import { QUIZ_VARIANTS, getQuizVariant } from '@/lib/ui/quiz-variants';
 import type { QuizCountry } from '../page';
 import type { MetaIndex } from '@/lib/ui/tokens';
 
-export const dynamic = 'force-dynamic';
+// ISR: content is English-only (getActiveLocale() is pinned), so nothing here
+// depends on the request. Cached pages answer crawlers in ~100ms instead of 1.5-2s.
+export const revalidate = 3600;
 
 export async function generateStaticParams() {
   return QUIZ_VARIANTS.map((v) => ({ variant: v.slug }));

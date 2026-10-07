@@ -21,8 +21,9 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://thehumanindex.org/research' },
 };
 
-// Locale-aware: dynamic so we re-render per NEXT_LOCALE cookie.
-export const dynamic = 'force-dynamic';
+// ISR: content is English-only (getActiveLocale() is pinned), so nothing here
+// depends on the request. Cached pages answer crawlers in ~100ms instead of 1.5-2s.
+export const revalidate = 1800;
 
 interface ResearchRow {
   id: string;

@@ -22,7 +22,10 @@ import { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { DEFAULT_LOCALE } from '@/i18n/config';
 
-export const revalidate = 3600; // 1 hour
+// Rendered per request. The previous `revalidate = 3600` left the file frozen
+// on the CDN for days (GSC 2026-10-07: newest pulse in sitemap was two weeks
+// behind the live site), so Google never saw new URLs.
+export const dynamic = 'force-dynamic';
 
 const BASE = 'https://thehumanindex.org';
 

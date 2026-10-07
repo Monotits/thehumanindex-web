@@ -49,9 +49,9 @@ function bandColor(band: ReturnType<typeof bandFor>): string {
 export default async function CountryOGImage({
   params,
 }: {
-  params: { code: string };
+  params: Promise<{ code: string }>;
 }) {
-  const code = params.code.toUpperCase();
+  const code = (await params).code.toUpperCase();
   const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -134,7 +134,7 @@ export default async function CountryOGImage({
                 {countryName}
               </div>
               <div style={{ fontSize: 20, color: PALETTE.fgMuted, letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'sans-serif' }}>
-                Civilizational stress · {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                {`Civilizational stress · ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`}
               </div>
             </div>
           </div>
@@ -210,7 +210,7 @@ export default async function CountryOGImage({
             })}
           </div>
           <div style={{ fontSize: 14, color: PALETTE.fgSubtle, fontFamily: 'sans-serif', letterSpacing: 0.5 }}>
-            thehumanindex.org/country/{code.toLowerCase()}
+            {`thehumanindex.org/country/${code.toLowerCase()}`}
           </div>
         </div>
       </div>

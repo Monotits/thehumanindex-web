@@ -8,7 +8,14 @@ import { ShareButton } from '@/components/ui/ShareButton';
 import { bandFor, BAND_LABELS } from '@/lib/ui/tokens';
 import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
-export const dynamic = 'force-dynamic';
+// ISR: content is English-only (getActiveLocale() is pinned), so nothing here
+// depends on the request. Cached pages answer crawlers in ~100ms instead of 1.5-2s.
+export const revalidate = 3600;
+
+// No build-time params: each page is rendered on first hit, then cached.
+export async function generateStaticParams() {
+  return [];
+}
 
 interface PulseRow {
   id: string;
@@ -58,6 +65,12 @@ async function loadPulse(slug: string, locale: string) {
       .eq('slug', slug)
       .eq('locale', 'en')
       .maybeSingle();
+  }
+
+  // Transient failure → throw so ISR keeps the last good page instead of
+  // caching a 404. PGRST116 (no single row) is a genuine not-found.
+  if (res.error && res.error.code !== 'PGRST116') {
+    throw new Error(`pulse lookup failed: ${res.error.message}`);
   }
 
   const pulse = res.data as PulseRow | null;

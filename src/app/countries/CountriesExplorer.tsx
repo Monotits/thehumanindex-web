@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/ui/cn';
 import { StressBand } from '@/components/ui/StressBand';
 import { SparklineMini } from '@/components/ui/SparklineMini';
@@ -70,14 +70,19 @@ const VIEW_DESCRIPTION: Record<View, string> = {
 export function CountriesExplorer({ rows }: { rows: ExplorerRow[] }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const initial = searchParams.get('view');
-  const [view, setView] = useState<View>(isView(initial) ? initial : 'grid');
+  // The ?view= param is read after mount instead of via useSearchParams():
+  // that hook made Next bail out to client-side rendering, so crawlers got a
+  // skeleton with no links to the country pages.
+  const [view, setView] = useState<View>('grid');
+  useEffect(() => {
+    const initial = new URLSearchParams(window.location.search).get('view');
+    if (isView(initial)) setView(initial);
+  }, []);
 
   function changeView(next: View) {
     if (next !== view) trackViewModeChange(next);
     setView(next);
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(window.location.search);
     if (next === 'grid') params.delete('view');
     else params.set('view', next);
     const q = params.toString();

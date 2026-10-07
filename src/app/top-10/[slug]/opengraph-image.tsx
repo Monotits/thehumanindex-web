@@ -41,9 +41,9 @@ interface Ranked {
 export default async function Top10OGImage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = params;
+  const { slug } = await params;
   const entry = getTop10Entry(slug);
   if (!entry) {
     return new ImageResponse(
@@ -136,7 +136,7 @@ export default async function Top10OGImage({
             <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: -0.3 }}>The Human Index</div>
           </div>
           <div style={{ fontSize: 16, color: PALETTE.fgMuted, letterSpacing: 1.5, textTransform: 'uppercase', fontFamily: 'sans-serif' }}>
-            Live ranking · {new Date().getFullYear()}
+            {`Live ranking · ${new Date().getFullYear()}`}
           </div>
         </div>
 
@@ -188,7 +188,7 @@ export default async function Top10OGImage({
             Updated daily · sourced from official statistics
           </div>
           <div style={{ fontSize: 14, color: PALETTE.fgSubtle, fontFamily: 'sans-serif', letterSpacing: 0.5 }}>
-            thehumanindex.org/top-10/{slug}
+            {`thehumanindex.org/top-10/${slug}`}
           </div>
         </div>
 

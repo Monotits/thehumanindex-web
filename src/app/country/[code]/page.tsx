@@ -23,7 +23,14 @@ import {
 } from '@/lib/ui/tokens';
 import { getActiveLocale } from '@/lib/ui/locale';
 
-export const dynamic = 'force-dynamic';
+// ISR: content is English-only (getActiveLocale() is pinned), so nothing here
+// depends on the request. Cached pages answer crawlers in ~100ms instead of 1.5-2s.
+export const revalidate = 3600;
+
+// No build-time params: each page is rendered on first hit, then cached.
+export async function generateStaticParams() {
+  return [];
+}
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -135,6 +142,10 @@ async function loadCountryDetail(
       .select('*')
       .eq('country_code', upper),
   ]);
+
+  // A failed lookup must throw (ISR keeps serving the last good page) instead
+  // of falling through to notFound() and caching a 404.
+  if (countryRes.error) throw new Error(`country lookup failed: ${countryRes.error.message}`);
 
   const country = countryRes.data as CountryRow | null;
   if (!country) return empty;

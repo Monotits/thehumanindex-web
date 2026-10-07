@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { getActiveLocale } from '@/lib/ui/locale';
 
-// Locale-aware: dynamic so we re-render per NEXT_LOCALE cookie.
-export const dynamic = 'force-dynamic';
+// ISR: content is English-only (getActiveLocale() is pinned), so nothing here
+// depends on the request. Cached pages answer crawlers in ~100ms instead of 1.5-2s.
+export const revalidate = 1800;
 
 interface PulseRow {
   id: string;
@@ -56,7 +57,7 @@ async function loadPulses(locale: string): Promise<{
     .eq('type', 'weekly_pulse')
     .eq('locale', locale)
     .order('published_at', { ascending: false })
-    .limit(40);
+    .limit(1000);
 
   let fallbackUsed = false;
   if (!pulsesRes.data || pulsesRes.data.length === 0) {
@@ -68,7 +69,7 @@ async function loadPulses(locale: string): Promise<{
         .eq('type', 'weekly_pulse')
         .eq('locale', 'en')
         .order('published_at', { ascending: false })
-        .limit(40);
+        .limit(1000);
     }
   }
 

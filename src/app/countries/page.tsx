@@ -126,9 +126,8 @@ export default async function CountriesPage() {
             No data available right now. Try again shortly.
           </p>
         ) : (
-          // Suspense boundary required because CountriesExplorer uses
-          // useSearchParams() — Next.js needs this to statically prerender
-          // the page without bailing out to client-side rendering.
+          // Server-rendered in the default (cards) view so every country link is
+          // in the HTML; the boundary only covers the lazy-loaded map view.
           <Suspense fallback={<ExplorerSkeleton />}>
             <CountriesExplorer rows={rows} />
           </Suspense>

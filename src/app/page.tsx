@@ -17,10 +17,9 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://thehumanindex.org' },
 };
 
-// Locale-aware (Pulse preview varies per NEXT_LOCALE cookie) → dynamic.
-// Composite data is read every request but it's cheap (one view + two simple
-// queries), and the cron updates the underlying data daily.
-export const dynamic = 'force-dynamic';
+// ISR: content is English-only (getActiveLocale() is pinned), so nothing here
+// depends on the request. Cached pages answer crawlers in ~100ms instead of 1.5-2s.
+export const revalidate = 1800;
 
 interface CountrySummary {
   country_code: string;

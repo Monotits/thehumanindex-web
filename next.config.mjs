@@ -55,6 +55,11 @@ const nextConfig = {
       // toggle in Faz 6.3. /rankings → /countries?view=table preserves
       // SEO equity and the analytical user's mental model.
       { source: '/rankings',            destination: '/countries?view=table', permanent: true },
+      // Legacy URLs still requested by Googlebot (GSC 404 report, 2026-10-07).
+      { source: '/quiz/result',                    destination: '/quiz',                     permanent: true },
+      { source: '/glossary/ai-work-displacement',  destination: '/glossary/ai-displacement', permanent: true },
+      { source: '/glossary/social-unrest',         destination: '/glossary/social-stress',   permanent: true },
+      { source: '/glossary/public-sentiment',      destination: '/glossary',                 permanent: true },
       // Retired locale prefixes — see comment above.
       ...localeRedirects,
     ]

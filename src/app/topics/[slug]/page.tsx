@@ -11,7 +11,9 @@ import { PageViewBeacon } from '@/components/PageViewBeacon';
 import { BreadcrumbJsonLd } from '@/components/JsonLd';
 import { ShareButton } from '@/components/ui/ShareButton';
 
-export const dynamic = 'force-dynamic';
+// ISR: content is English-only (getActiveLocale() is pinned), so nothing here
+// depends on the request. Cached pages answer crawlers in ~100ms instead of 1.5-2s.
+export const revalidate = 3600;
 
 interface RelatedIndicator {
   id: string;

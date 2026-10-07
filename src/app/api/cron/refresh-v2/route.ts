@@ -322,6 +322,9 @@ export async function GET(request: Request) {
       revalidatePath('/indicators');
       revalidatePath('/top-10');
       revalidatePath('/transparency');
+      revalidatePath('/country/[code]', 'page');
+      revalidatePath('/topics/[slug]', 'page');
+      revalidatePath('/quiz');
     } catch (e) {
       console.warn('[cron-v2] revalidatePath warning:', e);
     }

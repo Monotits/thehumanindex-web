@@ -54,9 +54,9 @@ interface TopCountry {
 export default async function IndicatorOGImage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const id = params.id;
+  const id = (await params).id;
   const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -241,7 +241,7 @@ export default async function IndicatorOGImage({
             Live data · updated daily
           </div>
           <div style={{ fontSize: 14, color: PALETTE.fgSubtle, fontFamily: 'sans-serif', letterSpacing: 0.5 }}>
-            thehumanindex.org/indicator/{id}
+            {`thehumanindex.org/indicator/${id}`}
           </div>
         </div>
       </div>

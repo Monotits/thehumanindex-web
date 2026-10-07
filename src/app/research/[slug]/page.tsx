@@ -11,6 +11,12 @@ import { effectiveStatus, type ResearchStatus } from '@/lib/research/publishable
 // Articles change rarely; 10 min ISR keeps DB load flat without staleness risk.
 export const revalidate = 600;
 
+// No build-time params: each article is rendered on first hit, then cached
+// (without this the route stays fully dynamic and `revalidate` is ignored).
+export async function generateStaticParams() {
+  return [];
+}
+
 const BASE = 'https://thehumanindex.org';
 
 interface ResearchArticle {

@@ -8,7 +8,14 @@ import { getActiveLocale } from '@/lib/ui/locale';
 import { META_INDEXES, type MetaIndex } from '@/lib/ui/tokens';
 import { DefinedTermJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
-export const dynamic = 'force-dynamic';
+// ISR: content is English-only (getActiveLocale() is pinned), so nothing here
+// depends on the request. Cached pages answer crawlers in ~100ms instead of 1.5-2s.
+export const revalidate = 3600;
+
+// No build-time params: each page is rendered on first hit, then cached.
+export async function generateStaticParams() {
+  return [];
+}
 
 interface GlossaryEntry {
   id: string;
