@@ -705,7 +705,7 @@ function MetaCard({ meta, avg }: { meta: MetaIndex; avg: number }) {
         )}
       </div>
       <div className="mt-1 text-xs text-foreground-subtle tabular-nums">
-        weight {META_WEIGHT[meta] * 100}%
+        weight {Math.round(META_WEIGHT[meta] * 100)}%
       </div>
       <div className="mt-2 text-xs text-foreground-muted">
         {META_LABELS[meta]} avg

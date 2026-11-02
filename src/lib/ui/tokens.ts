@@ -85,12 +85,13 @@ export const META_LABELS_TR: Record<MetaIndex, string> = {
   environmental: 'Çevresel',
 };
 
+// Mirrors DEFAULT_META_WEIGHTS in indicators/composeMetaIndex.ts.
 export const META_WEIGHT: Record<MetaIndex, number> = {
-  economic:      0.25,
-  social:        0.20,
-  mental:        0.20,
-  technological: 0.20,
-  environmental: 0.15,
+  economic:      0.28,
+  social:        0.22,
+  mental:        0.22,
+  technological: 0.11,
+  environmental: 0.17,
 };
 
 export const META_TEXT_CLASS: Record<MetaIndex, string> = {

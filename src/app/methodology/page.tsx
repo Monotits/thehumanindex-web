@@ -57,7 +57,7 @@ function weightRationale(meta: string): string {
     case 'mental':
       return 'Population-level mental load — anxiety, suicide, loneliness — measured separately from economic stress.';
     case 'technological':
-      return 'Automation exposure and digital displacement are real but slower to translate into lived stress.';
+      return 'Base weight 20%, temporarily halved: since v2.3 it rests on a single sourced indicator (screen time). Restored once a second citable measure exists.';
     case 'environmental':
       return 'Accumulates over decades; weighted lowest only because year-on-year movement is slow.';
     default:
@@ -144,12 +144,15 @@ export default function MethodologyPage() {
           The composite is a weighted average of the five meta-indexes. The
           weights below were chosen to reflect how immediately each domain
           shows up in daily life — economic stress hits first, environmental
-          stress accumulates last.
+          stress accumulates last. Base weights are 25/20/20/20/15; since v2.3
+          the technological domain counts at half weight while it has only one
+          sourced indicator, and the other four are rescaled to keep the total
+          at 100%.
         </p>
 
         <div className="rounded-lg border border-border bg-background-alt/30 p-6 mb-6">
           <code className="block font-mono text-sm text-foreground-muted">
-            composite = 0.25·economic + 0.20·social + 0.20·mental + 0.20·technological + 0.15·environmental
+            composite = 0.28·economic + 0.22·social + 0.22·mental + 0.11·technological + 0.17·environmental
           </code>
         </div>
 

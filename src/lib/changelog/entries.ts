@@ -15,9 +15,16 @@ export interface ChangeEntry {
   effect?: string;       // what moved, if anything
 }
 
-export const CURRENT_METHOD_VERSION = '2.2';
+export const CURRENT_METHOD_VERSION = '2.3';
 
 export const CHANGELOG: ChangeEntry[] = [
+  {
+    date: '2026-11-02', version: '2.3', kind: 'methodology',
+    title: 'Technological domain at half weight while it has one indicator',
+    detail:
+      'After two untraceable technology indicators were retired, the Technological meta-index rests on daily screen time alone — a single survey item carrying a fifth of every score. Until a second citable measure exists it counts at half its base weight (20% → 10%), the same factor applied to stale data; the other domains are rescaled proportionally: economic 28%, social 22%, mental 22%, technological 11%, environmental 17%.',
+    effect: 'Countries with very high or very low screen time move most.',
+  },
   {
     date: '2026-11-02', version: '2.2', kind: 'methodology',
     title: 'Two untraceable indicators retired; four re-sourced',

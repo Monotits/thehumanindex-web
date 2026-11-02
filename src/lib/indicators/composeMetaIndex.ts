@@ -14,13 +14,17 @@ import { IndicatorRegistryRow, MetaIndex, META_INDEXES } from './types';
 import type { NormalizedMeasurement } from './orchestrator';
 
 // Default composite weights across the 5 meta-indexes. Sums to 1.0.
-// These can be tuned later as we observe correlations + impact research.
+// v2.3 (2026-11-02): Technological is at HALF its base weight (0.20 → 0.10,
+// others rescaled: base 0.25/0.20/0.20/0.10/0.15 ÷ 0.90) while it rests on a
+// single indicator (screen_time) after digital_addiction and
+// automation_exposure were retired. Restore base weights (0.25/0.20/0.20/
+// 0.20/0.15) once it has ≥2 sourced indicators. Keep ui/tokens.ts in sync.
 export const DEFAULT_META_WEIGHTS: Record<MetaIndex, number> = {
-  economic: 0.25,
-  social: 0.20,
-  mental: 0.20,
-  technological: 0.20,
-  environmental: 0.15,
+  economic: 0.28,
+  social: 0.22,
+  mental: 0.22,
+  technological: 0.11,
+  environmental: 0.17,
 };
 
 /**
