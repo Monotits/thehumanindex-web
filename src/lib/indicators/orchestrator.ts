@@ -29,6 +29,7 @@ import { referenceSeedAdapter } from './sources/referenceSeed';
 import { socialFeedComputedAdapter } from './sources/socialFeedComputed';
 import { eurostatAdapter } from './sources/eurostat';
 import { imfAdapter } from './sources/imf';
+import { imfWeoAdapter } from './sources/imfWeo';
 import { ACTIVE_ADAPTER_IDS } from './adapterRegistry';
 
 // Registry of all adapters in PRIORITY ORDER.
@@ -40,6 +41,7 @@ const ADAPTERS: IndicatorAdapter[] = [
   // Live primary sources
   eurostatAdapter,              // 11 EU+ countries: unemployment, youth_unemployment, fertility, gini (fresher than WB)
   worldBankAdapter,             // 25 countries: 15 indicators incl. inflation_rate + unemployment_rate
+  imfWeoAdapter,                // gov_debt_pct_gdp from the IMF WEO snapshot (GitHub Actions); seed stays as cross-check
 
   // Static seeds (annual refresh)
   oecdHousingAdapter,           // housing_affordability

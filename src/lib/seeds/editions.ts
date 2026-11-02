@@ -38,9 +38,14 @@ export interface SeedEditionRow {
   updateDue: boolean;
 }
 
+/** Seeds now served by a live/snapshot adapter (the seed is only a fallback). */
+export const SEEDS_REPLACED: Record<string, string> = {
+  gov_debt_pct_gdp: 'IMF WEO, refreshed daily',
+};
+
 export function seedEditionRows(now = new Date()): SeedEditionRow[] {
   const y = now.getUTCFullYear();
-  return SEED_EDITIONS.map(e => {
+  return SEED_EDITIONS.filter(e => !SEEDS_REPLACED[e.indicatorId]).map(e => {
     const c = CADENCE[e.indicatorId] ?? { kind: 'irregular' as const };
     const cadence = c.kind === 'annual' ? `Annual${c.usually ? ` (usually ${c.usually})` : ''}`
       : c.kind === 'semiannual' ? `Twice a year (${c.usually})`
