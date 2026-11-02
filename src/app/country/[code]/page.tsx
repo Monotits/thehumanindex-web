@@ -20,6 +20,7 @@ import { CompositeLineChart, type CompositePoint } from '@/components/ui/Composi
 import { PageViewBeacon } from '@/components/PageViewBeacon';
 import { BreadcrumbJsonLd } from '@/components/JsonLd';
 import { ShareButton } from '@/components/ui/ShareButton';
+import { CountryShareCard } from '@/components/share-card/CountryShareCard';
 import { cn } from '@/lib/ui/cn';
 import { loadCompositeHistory, pointsToDenseSeries, trendSummary, type CompositeHistoryPoint } from '@/lib/ui/history';
 import {
@@ -394,15 +395,18 @@ export default async function CountryDetailPage({
                 {country.name}
               </h1>
             </div>
-            <ShareButton
-              url={`/country/${country.code.toLowerCase()}`}
-              title={`${country.name} — civilizational stress on The Human Index`}
-              text={composite !== null
-                ? `${country.name}: composite ${composite.toFixed(1)}${band ? ` (${band})` : ''} — see the 5 meta-indexes`
-                : `${country.name} on The Human Index`}
-              surface="country_detail"
-              variant="full"
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <ShareButton
+                url={`/country/${country.code.toLowerCase()}`}
+                title={`${country.name} — civilizational stress on The Human Index`}
+                text={composite !== null
+                  ? `${country.name}: composite ${composite.toFixed(1)}${band ? ` (${band})` : ''} — see the 5 meta-indexes`
+                  : `${country.name} on The Human Index`}
+                surface="country_detail"
+                variant="full"
+              />
+              <CountryShareCard code={country.code} name={country.name} />
+            </div>
           </div>
 
           {composite !== null && (
