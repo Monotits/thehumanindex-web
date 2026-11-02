@@ -137,13 +137,18 @@ const SEEDS: SeedEntry[] = [
   // ── screen_time (avg daily hours per adult, DataReportal Digital 2024) ──
   {
     indicatorId: 'screen_time',
+    // DataReportal Digital 2025 Global Overview, slide 70 "Daily time spent
+    // using the internet" (internet users 16+, GWI Q3 2024), hours decimal.
+    // Last comparable edition: GWI changed its time-spent method in Q4 2024 and
+    // Digital 2026 reports a non-comparable WEEKLY "online media" sum instead.
+    // All 25 values checked against the chart on 2026-11-02.
     year: 2024,
-    source: 'DataReportal Digital 2024',
+    source: 'DataReportal Digital 2025 (GWI Q3 2024)',
     values: {
-      US: 7.0, CA: 6.5, MX: 8.4, GB: 6.0, DE: 5.4, FR: 5.7, ES: 6.3, IT: 6.0,
-      NL: 5.5, SE: 5.8, NO: 6.0, PL: 6.5, TR: 7.5, CH: 5.5,
-      JP: 4.2, KR: 5.8, IN: 7.3, SG: 6.7,
-      AU: 6.1, NZ: 6.0, BR: 9.1, AR: 9.7, ZA: 9.2, IL: 7.2, AE: 7.5,
+      US: 6.7, CA: 6.1, MX: 7.5, GB: 5.6, DE: 5.5, FR: 5.4, ES: 5.7, IT: 5.7,
+      NL: 5.7, SE: 6.0, NO: 5.6, PL: 6.4, TR: 7.2, CH: 5.8,
+      JP: 4.2, KR: 5.4, IN: 6.8, SG: 6.6,
+      AU: 6.1, NZ: 6.5, BR: 9.2, AR: 8.7, ZA: 9.6, IL: 7.4, AE: 8.0,
     },
   },
 

@@ -13,7 +13,7 @@ type Cadence = { kind: 'annual'; usually?: string } | { kind: 'semiannual'; usua
 /** Publisher release pattern, per indicator. */
 const CADENCE: Record<string, Cadence> = {
   burnout: { kind: 'annual', usually: 'mid-year' },                 // Gallup State of the Global Workplace
-  screen_time: { kind: 'annual', usually: 'January–February' },     // DataReportal Digital
+  screen_time: { kind: 'irregular', note: 'metric discontinued after Digital 2025 (GWI method change); last comparable edition in use' },
   gov_debt_pct_gdp: { kind: 'semiannual', usually: 'April & October' }, // IMF WEO
   temperature_anomaly: { kind: 'annual', usually: 'January' },      // Berkeley Earth
   divorce_rate: { kind: 'annual' },                                 // UN Demographic Yearbook
