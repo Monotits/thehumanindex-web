@@ -87,7 +87,9 @@ export function composeCountryScores(
   measurements: NormalizedMeasurement[],
   indicators: IndicatorRegistryRow[],
   countryCodes: string[],
-  metaWeights: Record<MetaIndex, number> = DEFAULT_META_WEIGHTS
+  metaWeights: Record<MetaIndex, number> = DEFAULT_META_WEIGHTS,
+  /** Evaluation time for the stale-data policy. Historical backfills pass the end of the scored year. */
+  now: number = Date.now()
 ): CountryComposition[] {
   // Index: indicator → meta_index + weight
   const indicatorMeta = new Map<string, { meta: MetaIndex; weight: number }>();
@@ -112,7 +114,6 @@ export function composeCountryScores(
   }
 
   const out: CountryComposition[] = [];
-  const now = Date.now();
 
   for (const countryCode of countryCodes) {
     const countryMeasurements = byCountry.get(countryCode) ?? new Map();

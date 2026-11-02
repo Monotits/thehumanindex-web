@@ -21,7 +21,7 @@ import {
 } from '../types';
 
 // ISO 3166-1 alpha-2 → alpha-3 mapping for our 25 active countries
-const ISO2_TO_ISO3: Record<string, string> = {
+export const WB_ISO2_TO_ISO3: Record<string, string> = {
   US: 'USA', CA: 'CAN', MX: 'MEX',
   GB: 'GBR', DE: 'DEU', FR: 'FRA', ES: 'ESP', IT: 'ITA',
   NL: 'NLD', SE: 'SWE', NO: 'NOR', PL: 'POL', TR: 'TUR', CH: 'CHE',
@@ -32,12 +32,12 @@ const ISO2_TO_ISO3: Record<string, string> = {
   IL: 'ISR', AE: 'ARE',
 };
 
-const ISO3_TO_ISO2: Record<string, string> = Object.fromEntries(
-  Object.entries(ISO2_TO_ISO3).map(([k, v]) => [v, k])
+export const WB_ISO3_TO_ISO2: Record<string, string> = Object.fromEntries(
+  Object.entries(WB_ISO2_TO_ISO3).map(([k, v]) => [v, k])
 );
 
 // Indicator ID (our registry) → World Bank series code
-const INDICATOR_TO_WB_CODE: Record<string, string> = {
+export const INDICATOR_TO_WB_CODE: Record<string, string> = {
   unemployment_rate: 'SL.UEM.TOTL.ZS',
   youth_unemployment_rate: 'SL.UEM.1524.ZS',
   gini_index: 'SI.POV.GINI',
@@ -61,7 +61,7 @@ const INDICATOR_TO_WB_CODE: Record<string, string> = {
 
 const PROVIDED_INDICATORS = new Set(Object.keys(INDICATOR_TO_WB_CODE));
 
-interface WBObservation {
+export interface WBObservation {
   date: string;
   value: number | null;
   countryiso3code: string;
@@ -71,7 +71,7 @@ const COUNTRY_CHUNK_SIZE = 5;
 const PER_REQUEST_TIMEOUT_MS = 15_000; // each chunk request
 const MAX_RETRIES = 1;
 
-async function fetchOneChunk(
+export async function fetchOneChunk(
   wbCode: string,
   iso3Chunk: string[],
   startYear: number,
@@ -147,7 +147,7 @@ export const worldBankAdapter: IndicatorAdapter = {
     const startedAt = Date.now();
     const requested = indicatorIds.filter(id => PROVIDED_INDICATORS.has(id));
     const iso3 = countries
-      .map(c => ISO2_TO_ISO3[c.code])
+      .map(c => WB_ISO2_TO_ISO3[c.code])
       .filter((x): x is string => Boolean(x));
 
     const measurements: IndicatorMeasurement[] = [];
@@ -181,7 +181,7 @@ export const worldBankAdapter: IndicatorAdapter = {
       }
 
       byCountry.forEach((o, iso3code) => {
-        const iso2code = ISO3_TO_ISO2[iso3code];
+        const iso2code = WB_ISO3_TO_ISO2[iso3code];
         if (!iso2code) return;
         countriesReturnedSet.add(iso2code);
         measurements.push({

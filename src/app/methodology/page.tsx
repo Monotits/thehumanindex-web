@@ -381,6 +381,39 @@ export default function MethodologyPage() {
         </div>
       </section>
 
+      {/* ── HISTORICAL SERIES ── */}
+      <section id="historical-series" className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border scroll-mt-24">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-4">
+          The historical series (since 2000)
+        </h2>
+        <div className="prose prose-thi">
+          <p>
+            The composite began in 2026, and about half of its indicators come from
+            reports published once with no back series (Gallup, World Values Survey,
+            OECD Better Life Index, DataReportal and others). We do not invent a past
+            for them by holding today&apos;s values constant.
+          </p>
+          <p>
+            Instead, the <strong>historical structural index</strong> is rebuilt for every
+            year since 2000 from the indicators that have genuine annual histories at a
+            single source — World Bank Open Data (unemployment, youth unemployment,
+            inflation, GDP growth, Gini, fertility, adolescent fertility, age dependency,
+            life expectancy, under-5 mortality, suicide, homicide, alcohol, CO₂ per capita,
+            renewable energy share). It uses the same normalisation bounds, within-domain
+            weights and domain weights as the composite.
+          </p>
+          <ul>
+            <li>For each year, each indicator takes its latest value published for that year or earlier. The usual stale-data rule is applied as of that year: up to 3 years old counts in full, 3–5 years at half weight, older is dropped.</li>
+            <li>The technological domain has no World Bank inputs, so the historical series averages the other four domains (weights rescaled).</li>
+            <li>Because the inputs differ, the latest historical value will not equal the current composite. Read it for direction and turning points, not as the same number.</li>
+            <li>World Bank revises past values; the series is rebuilt monthly, so history can shift slightly.</li>
+          </ul>
+          <p>
+            Data: <Link href="/api/historical/us">/api/historical/&#123;iso2&#125;</Link> (add <code>?indicators=1</code> for the underlying observations).
+          </p>
+        </div>
+      </section>
+
       {/* ── WHAT THIS IS NOT ── */}
       <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
         <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-4">

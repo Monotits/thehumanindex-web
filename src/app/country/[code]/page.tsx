@@ -3,7 +3,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { LivePanel } from '@/components/live/LivePanel';
-import { loadLiveCountry } from '@/lib/live/present';
+import { loadLiveCountry, anonClient } from '@/lib/live/present';
+import { AnnualHistoryChart } from '@/components/history/AnnualHistoryChart';
+import { loadHistorical, biggestJump } from '@/lib/history/present';
 import { adapterMeta } from '@/lib/indicators/adapterRegistry';
 import { StressBand } from '@/components/ui/StressBand';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
@@ -315,7 +317,18 @@ export default async function CountryDetailPage({
 }) {
   const { code } = await params;
   const locale = await getActiveLocale();
-  const [data, live] = await Promise.all([loadCountryDetail(code, locale), loadLiveCountry(code)]);
+  const histClient = await anonClient();
+  const [data, live, history] = await Promise.all([
+    loadCountryDetail(code, locale),
+    loadLiveCountry(code),
+    histClient ? loadHistorical(histClient, code) : Promise.resolve([]),
+  ]);
+  const historyPoints = history
+    .filter(h => h.composite !== null)
+    .map(h => ({ year: h.year, value: h.composite as number, meta: Object.fromEntries(Object.entries(h.meta).map(([k, v]) => [k, v.value])) }));
+  const jump = biggestJump(history);
+  const histFirst = historyPoints[0];
+  const histLast = historyPoints[historyPoints.length - 1];
 
   if (!data.country) notFound();
 
@@ -473,6 +486,30 @@ export default async function CountryDetailPage({
             </p>
           </div>
           <CompositeLineChart data={compositeHistoryPoints} height={300} />
+        </section>
+      )}
+
+      {/* ── HISTORICAL STRUCTURAL INDEX ── */}
+      {historyPoints.length >= 5 && (
+        <section id="history" className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border scroll-mt-24">
+          <div className="mb-6 max-w-2xl">
+            <p className="text-xs uppercase tracking-[0.18em] text-foreground-muted font-medium mb-2">Since {histFirst.year}</p>
+            <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">
+              {country.name}, {histFirst.year}–{histLast.year}
+            </h2>
+            <p className="text-foreground-muted text-pretty">
+              Historical structural index: {histFirst.value.toFixed(1)} in {histFirst.year}, {histLast.value.toFixed(1)} in {histLast.year}
+              {jump && <> · sharpest one-year rise {jump.from}→{jump.to} (+{jump.delta.toFixed(1)})</>}.
+              Built from the {history[history.length - 1]?.indicators_used ?? 'World Bank'} indicators with annual World Bank histories, so it is not the same number as the composite above.
+            </p>
+          </div>
+          <AnnualHistoryChart data={historyPoints} highlight={jump} />
+          <p className="mt-3 text-xs text-foreground-subtle">
+            Source: World Bank Open Data (CC BY 4.0) ·{' '}
+            <Link href="/methodology#historical-series" className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground">how it is built</Link>
+            {' · '}
+            <a href={`/api/historical/${country.code.toLowerCase()}?indicators=1`} className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground">JSON</a>
+          </p>
         </section>
       )}
 
