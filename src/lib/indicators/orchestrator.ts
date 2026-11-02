@@ -30,6 +30,7 @@ import { socialFeedComputedAdapter } from './sources/socialFeedComputed';
 import { eurostatAdapter } from './sources/eurostat';
 import { imfAdapter } from './sources/imf';
 import { imfWeoAdapter } from './sources/imfWeo';
+import { era5TemperatureAdapter } from './sources/era5Temperature';
 import { ACTIVE_ADAPTER_IDS } from './adapterRegistry';
 
 // Registry of all adapters in PRIORITY ORDER.
@@ -42,6 +43,7 @@ const ADAPTERS: IndicatorAdapter[] = [
   eurostatAdapter,              // 11 EU+ countries: unemployment, youth_unemployment, fertility, gini (fresher than WB)
   worldBankAdapter,             // 25 countries: 15 indicators incl. inflation_rate + unemployment_rate
   imfWeoAdapter,                // gov_debt_pct_gdp from the IMF WEO snapshot (GitHub Actions); seed stays as cross-check
+  era5TemperatureAdapter,       // temperature_anomaly from ERA5 (World Bank CCKP snapshot); Berkeley seed = cross-check
 
   // Static seeds (annual refresh)
   oecdHousingAdapter,           // housing_affordability
@@ -107,6 +109,10 @@ const DIVERGENCE_THRESHOLDS: Record<string, number> = {
   fertility_rate: 5,
   suicide_rate: 25,        // WHO vs WB methodologies differ historically
   housing_affordability: 20,
+  // ERA5 latest year vs the Berkeley Earth 2024 seed: different datasets AND
+  // different years; single-year anomalies swing ±0.5°C. Only flag big gaps.
+  temperature_anomaly: 60,
+  gov_debt_pct_gdp: 25,
   // Anything not listed uses 20 as fallback.
 };
 const DEFAULT_THRESHOLD = 20;

@@ -22,6 +22,7 @@ export const ADAPTER_REGISTRY: AdapterMeta[] = [
   { id: 'eurostat',      displayName: 'Eurostat',                   url: 'https://ec.europa.eu/eurostat',            active: true },
   { id: 'worldBank',     displayName: 'World Bank',                 url: 'https://data.worldbank.org',               active: true },
   { id: 'imfWeo',        displayName: 'IMF World Economic Outlook', url: 'https://www.imf.org/external/datamapper', active: true },
+  { id: 'era5Cckp',      displayName: 'ERA5 (World Bank Climate Knowledge Portal)', url: 'https://climateknowledgeportal.worldbank.org', active: true },
   { id: 'oecdHousing',   displayName: null,                         url: null,                                       active: true },
   { id: 'referenceSeed', displayName: null,                         url: null,                                       active: true },
   // Retired adapters — kept so historical rows still resolve, never primary.

@@ -41,6 +41,7 @@ export interface SeedEditionRow {
 /** Seeds now served by a live/snapshot adapter (the seed is only a fallback). */
 export const SEEDS_REPLACED: Record<string, string> = {
   gov_debt_pct_gdp: 'IMF WEO, refreshed daily',
+  temperature_anomaly: 'ERA5 via World Bank CCKP, refreshed daily',
 };
 
 export function seedEditionRows(now = new Date()): SeedEditionRow[] {
