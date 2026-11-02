@@ -3,6 +3,7 @@ name: oecd-snapshot
 on:
   schedule:
     - cron: '17 5 * * *'   # daily 05:17 UTC, before the 08:00 UTC Live cron
+    - cron: '47 6 * * *'   # second try — OECD intermittently returns HTTP 500 to cloud IPs
   workflow_dispatch: {}
 permissions:
   contents: write

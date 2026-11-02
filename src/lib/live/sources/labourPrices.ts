@@ -4,6 +4,8 @@
  * Sources (all free, no key):
  *   - OECD Infra-annual Labour Statistics, DF_IALFS_UNE_M (monthly unemployment, SA)
  *   - OECD Prices, DF_PRICES_ALL (CPI, YoY growth, national methodology)
+ *     Both read from data/live/oecd-monthly.json, refreshed daily by GitHub
+ *     Actions, because sdmx.oecd.org answers HTTP 500 to Vercel's IPs.
  *   - Eurostat une_rt_m (monthly unemployment, SA) — fallback where OECD is stale/missing
  *   - Eurostat prc_hicp_minr (HICP YoY, ECOICOP 2018 — replaced prc_hicp_manr in 2026)
  *     — primary inflation source for the European countries it covers.
@@ -15,7 +17,9 @@
 
 import type { LiveAdapter, LiveObservation, LiveSignalId } from '../types';
 import { scoreMomentum, type Point } from '../scoring';
-import { csvRecords, fetchJson, fetchTextRetry, normalizePeriod, ISO2_TO_ISO3, ISO3_TO_ISO2 } from '../http';
+import { fetchJson, normalizePeriod, ISO3_TO_ISO2 } from '../http';
+// Committed daily by .github/workflows/oecd-snapshot.yml — OECD blocks Vercel egress.
+import oecdSnapshot from '../../../../data/live/oecd-monthly.json';
 
 const START = '2010-01';
 const LAG_MONTHS = 6;
@@ -26,16 +30,15 @@ const EUROSTAT_GEOS = ['FR', 'DE', 'IT', 'NL', 'ES', 'SE', 'PL', 'NO', 'CH', 'TR
 
 type SeriesBySource = Map<string, Point[]>; // countryCode → series
 
-async function oecdSeries(url: string, deadline: number, keep: (r: Record<string, string>) => boolean): Promise<SeriesBySource> {
-  const recs = csvRecords(await fetchTextRetry(url, { deadline, accept: 'text/csv', perAttemptMs: 20_000 }));
+type OecdSnapshot = { series: Record<string, { dataflow: string; countries: Record<string, [string, number][]> }> };
+
+function oecdFromSnapshot(key: 'unemployment' | 'cpi_yoy'): SeriesBySource {
   const out: SeriesBySource = new Map();
-  for (const r of recs) {
-    if (!keep(r)) continue;
-    const cc = ISO3_TO_ISO2[r.REF_AREA];
-    const v = parseFloat(r.OBS_VALUE);
-    if (!cc || !Number.isFinite(v) || !r.TIME_PERIOD) continue;
-    if (!out.has(cc)) out.set(cc, []);
-    out.get(cc)!.push({ date: normalizePeriod(r.TIME_PERIOD), value: v });
+  const block = (oecdSnapshot as OecdSnapshot).series[key];
+  if (!block) return out;
+  for (const [iso3, pts] of Object.entries(block.countries)) {
+    const cc = ISO3_TO_ISO2[iso3];
+    if (cc) out.set(cc, pts.map(([p, v]) => ({ date: normalizePeriod(p), value: v })));
   }
   return out;
 }
@@ -83,40 +86,27 @@ export const labourPricesAdapter: LiveAdapter = {
 
   async fetch({ countryCodes, timeoutMs, now }) {
     const started = Date.now();
-    const iso3 = countryCodes.map(c => ISO2_TO_ISO3[c]).filter(Boolean).join('+');
-    const oecdBase = 'https://sdmx.oecd.org/public/rest/data';
-
-    // OECD answered HTTP 500 to two concurrent requests from Vercel on the
-    // first production run (fine from a browser). Run the two OECD queries
-    // sequentially, with retries, inside a shared deadline; Eurostat runs in
-    // parallel alongside.
-    const deadline = started + Math.min(timeoutMs, 48_000);
-    const oecd = (async () => {
-      const une = await oecdSeries(`${oecdBase}/OECD.SDD.TPS,DSD_LFS@DF_IALFS_UNE_M,1.0/${iso3}..._Z.Y._T.Y_GE15..M?startPeriod=${START}&format=csv`,
-        deadline, r => r.MEASURE === 'UNE_LF_M' && r.UNIT_MEASURE === 'PT_LF_SUB').then(v => ({ ok: true as const, v }), e => ({ ok: false as const, e }));
-      const cpi = await oecdSeries(`${oecdBase}/OECD.SDD.TPS,DSD_PRICES@DF_PRICES_ALL,1.0/${iso3}.M.N.CPI.PA._T.N.GY?startPeriod=${START}&format=csv`,
-        deadline, () => true).then(v => ({ ok: true as const, v }), e => ({ ok: false as const, e }));
-      return [une, cpi] as const;
-    })();
-    const [eu, [oUne, oCpi]] = await Promise.all([
-      Promise.allSettled([
-        eurostat('une_rt_m', 's_adj=SA&age=TOTAL&sex=T&unit=PC_ACT', timeoutMs),
-        eurostat('prc_hicp_minr', 'coicop18=TOTAL&unit=RCH_A', timeoutMs),
-      ]),
-      oecd,
+    // OECD comes from the committed snapshot (sdmx.oecd.org returns HTTP 500
+    // to Vercel's egress IPs). Stale snapshots are caught by MAX_AGE_DAYS.
+    const eu = await Promise.allSettled([
+      eurostat('une_rt_m', 's_adj=SA&age=TOTAL&sex=T&unit=PC_ACT', timeoutMs),
+      eurostat('prc_hicp_minr', 'coicop18=TOTAL&unit=RCH_A', timeoutMs),
     ]);
-    const settle = (r: { ok: true; v: SeriesBySource } | { ok: false; e: unknown }): PromiseSettledResult<SeriesBySource> =>
-      r.ok ? { status: 'fulfilled', value: r.v } : { status: 'rejected', reason: r.e };
-    // Same index order as before: 0 OECD unemployment, 1 Eurostat unemployment, 2 Eurostat HICP, 3 OECD CPI
-    const jobs: PromiseSettledResult<SeriesBySource>[] = [settle(oUne), eu[0], eu[1], settle(oCpi)];
+    // Index order: 0 OECD unemployment, 1 Eurostat unemployment, 2 Eurostat HICP, 3 OECD CPI
+    const jobs: PromiseSettledResult<SeriesBySource>[] = [
+      { status: 'fulfilled', value: oecdFromSnapshot('unemployment') },
+      eu[0],
+      eu[1],
+      { status: 'fulfilled', value: oecdFromSnapshot('cpi_yoy') },
+    ];
     const val = (i: number): SeriesBySource => (jobs[i].status === 'fulfilled' ? (jobs[i] as PromiseFulfilledResult<SeriesBySource>).value : new Map());
     const SOURCE_NAMES = ['oecd:une', 'eurostat:une_rt_m', 'eurostat:hicp', 'oecd:cpi'];
     const errors = jobs.flatMap((j, i) => (j.status === 'rejected' ? [`${SOURCE_NAMES[i]}: ${(j.reason as Error)?.message ?? j.reason}`] : []));
 
     // Priority order per signal: first source producing a valid (fresh) score wins.
     const plan: { signal: LiveSignalId; sources: { name: string; data: SeriesBySource }[] }[] = [
-      { signal: 'unemployment_momentum', sources: [{ name: 'oecd:DF_IALFS_UNE_M', data: val(0) }, { name: 'eurostat:une_rt_m', data: val(1) }] },
-      { signal: 'inflation_momentum', sources: [{ name: 'eurostat:prc_hicp_minr', data: val(2) }, { name: 'oecd:DF_PRICES_ALL', data: val(3) }] },
+      { signal: 'unemployment_momentum', sources: [{ name: 'oecd:DF_IALFS_UNE_M (snapshot)', data: val(0) }, { name: 'eurostat:une_rt_m', data: val(1) }] },
+      { signal: 'inflation_momentum', sources: [{ name: 'eurostat:prc_hicp_minr', data: val(2) }, { name: 'oecd:DF_PRICES_ALL (snapshot)', data: val(3) }] },
     ];
 
     const observations: LiveObservation[] = [];

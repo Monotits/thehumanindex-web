@@ -40,7 +40,7 @@ function parseCsv(text) {
   });
 }
 
-async function fetchWithRetry(url, attempts = 3) {
+async function fetchWithRetry(url, attempts = 6) {
   let last;
   for (let i = 0; i < attempts; i++) {
     try {
@@ -50,7 +50,7 @@ async function fetchWithRetry(url, attempts = 3) {
     } catch (e) {
       last = e;
     }
-    await new Promise(r => setTimeout(r, 2000 * 2 ** i));
+    await new Promise(r => setTimeout(r, Math.min(60_000, 3000 * 2 ** i)));
   }
   throw last;
 }
