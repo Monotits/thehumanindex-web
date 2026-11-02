@@ -26,14 +26,12 @@ export interface ReleaseSource {
 }
 
 export const RELEASE_SOURCES: ReleaseSource[] = [
-  { id: 'eurostat-une', short: 'unemployment', name: 'Unemployment (Europe, US, JP, TR)', publisher: 'Eurostat', cadence: 'monthly', lagDays: 31,
-    signalIds: ['unemployment_momentum'], calendarUrl: 'https://ec.europa.eu/eurostat/news/release-calendar' },
   { id: 'eurostat-hicp', short: 'inflation', name: 'Inflation, HICP (Europe, TR)', publisher: 'Eurostat', cadence: 'monthly', lagDays: 17,
     signalIds: ['inflation_momentum'], calendarUrl: 'https://ec.europa.eu/eurostat/news/release-calendar',
     note: 'Euro-area flash estimate ~1 day after month end; country detail ~17 days.' },
-  { id: 'oecd-monthly', short: 'unemployment & CPI', name: 'Unemployment & CPI (other OECD + G20)', publisher: 'OECD', cadence: 'monthly', lagDays: 45,
+  { id: 'oecd-monthly', short: 'unemployment & CPI', name: 'Unemployment (17 countries) & CPI (outside Europe)', publisher: 'OECD', cadence: 'monthly', lagDays: 45,
     calendarUrl: 'https://www.oecd.org/en/data/insights/statistical-releases.html',
-    note: 'Collected daily via GitHub Actions; OECD blocks direct requests from our host.' },
+    note: 'Primary source for unemployment; Eurostat is the fallback. Collected daily via GitHub Actions because OECD blocks direct requests from our host.' },
   { id: 'ecb-fx', short: 'exchange rates', name: 'Exchange rates', publisher: 'European Central Bank', cadence: 'daily',
     signalIds: ['fx_pressure'], calendarUrl: 'https://data.ecb.europa.eu/data/datasets/EXR', note: 'Every TARGET business day, ~16:00 CET.' },
   { id: 'indeed', short: 'job postings', name: 'Job postings', publisher: 'Indeed Hiring Lab', cadence: 'weekly',
