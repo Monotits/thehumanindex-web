@@ -130,7 +130,13 @@ export async function GET(
         if (p !== 0) return p;
         return new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime();
       });
-    const primarySource = sources[0] ?? null;
+    // Only adapters that wrote in the latest run can be primary. A source
+    // that stopped serving this indicator (e.g. World Bank gov debt, retired
+    // in June) keeps an old row forever and would otherwise outrank the
+    // adapter that actually feeds today's score.
+    const newestWrite = Math.max(0, ...sources.map(sr => new Date(sr.recorded_at).getTime()));
+    const current = sources.filter(sr => new Date(sr.recorded_at).getTime() >= newestWrite - 3 * 24 * 3600 * 1000);
+    const primarySource = current[0] ?? sources[0] ?? null;
 
     // Cross-source range
     const numericValues = sources
