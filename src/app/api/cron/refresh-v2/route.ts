@@ -23,6 +23,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import { fetchAllIndicatorValues } from '@/lib/indicators/orchestrator';
 import { composeCountryScores } from '@/lib/indicators/composeMetaIndex';
+import { carryForward, missingPairs, type SnapshotRow } from '@/lib/indicators/carryForward';
 import type { IndicatorRegistryRow, CountryRow } from '@/lib/indicators/types';
 
 export const dynamic = 'force-dynamic';
@@ -221,9 +222,39 @@ export async function GET(request: Request) {
       }
     }
 
+    // ── Carry forward pairs missing because a source failed today ──
+    // (must run AFTER today's snapshot upsert above, which only contains fresh values)
+    let carried: typeof measurements = [];
+    try {
+      const missing = missingPairs(measurements, indicators, countries.map(c => c.code));
+      if (missing.size > 0) {
+        const today = new Date().toISOString().split('T')[0];
+        const since = new Date(Date.now() - 7 * 86_400_000).toISOString().split('T')[0];
+        const missingIndicators = Array.from(new Set(Array.from(missing).map(k => k.split('|')[1])));
+        const prev: SnapshotRow[] = [];
+        for (let from = 0; from < 20_000; from += 1000) {
+          const { data, error } = await sb
+            .from('indicator_snapshots')
+            .select('snapshot_date, country_code, indicator_id, raw_value, primary_adapter, reference_date')
+            .in('indicator_id', missingIndicators)
+            .gte('snapshot_date', since)
+            .lt('snapshot_date', today)
+            .order('snapshot_date', { ascending: false })
+            .range(from, from + 999);
+          if (error) { console.warn('[cron-v2] carry-forward lookup failed:', error.message); break; }
+          prev.push(...((data ?? []) as SnapshotRow[]));
+          if (!data || data.length < 1000) break;
+        }
+        carried = carryForward(missing, prev, indicators);
+        if (carried.length) console.warn(`[cron-v2] carried forward ${carried.length} of ${missing.size} missing pairs`);
+      }
+    } catch (e) {
+      console.warn('[cron-v2] carry-forward skipped:', e);
+    }
+
     // ── Compose per-country scores ──
     const compositions = composeCountryScores(
-      measurements,
+      [...measurements, ...carried],
       indicators,
       countries.map(c => c.code)
     );
