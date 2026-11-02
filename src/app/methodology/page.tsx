@@ -403,7 +403,7 @@ export default function MethodologyPage() {
             weights and domain weights as the composite.
           </p>
           <ul>
-            <li>For each year, each indicator takes its latest value published for that year or earlier. The usual stale-data rule is applied as of that year: up to 3 years old counts in full, 3–5 years at half weight, older is dropped.</li>
+            <li>For each year, each indicator takes its latest value published for that year or earlier, carried forward at full weight for up to 5 years and then dropped. This differs from the composite&apos;s stale-data decay on purpose: slow publishers (suicide and alcohol statistics lag 3–5 years) would otherwise fade out at the end of the series and fake a recent improvement.</li>
             <li>The technological domain has no World Bank inputs, so the historical series averages the other four domains (weights rescaled).</li>
             <li>Because the inputs differ, the latest historical value will not equal the current composite. Read it for direction and turning points, not as the same number.</li>
             <li>World Bank revises past values; the series is rebuilt monthly, so history can shift slightly.</li>

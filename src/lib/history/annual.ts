@@ -10,9 +10,14 @@
  *   - The technological meta-index has no World Bank inputs → absent.
  *
  * For each year Y and (country, indicator): the latest observation dated in
- * a year ≤ Y is used, and the normal stale-data policy is evaluated at the
- * end of year Y (≤3y full weight, 3–5y half, >5y excluded). Normalisation
- * bounds, within-meta weights and meta weights are the live registry's.
+ * a year ≤ Y is carried forward at full weight for up to CARRY_FORWARD_YEARS,
+ * then dropped. Normalisation bounds, within-meta weights and meta weights
+ * are the live registry's.
+ *
+ * Why not the live stale-data decay (≤3y full, 3–5y half, >5y out): slow
+ * publishers (WHO suicide, alcohol) fade out at the END of the series, which
+ * manufactured a fake decline in the most recent years (US mental 31 → 17,
+ * 2023 → 2025, with no new data). Carry-forward keeps "no new data" flat.
  */
 
 import { composeCountryScores, DEFAULT_META_WEIGHTS } from '../indicators/composeMetaIndex';
@@ -20,7 +25,8 @@ import type { NormalizedMeasurement } from '../indicators/orchestrator';
 import { normalizeIndicator, type IndicatorRegistryRow, type MetaIndex } from '../indicators/types';
 import { fetchOneChunk, INDICATOR_TO_WB_CODE, WB_ISO2_TO_ISO3, WB_ISO3_TO_ISO2 } from '../indicators/sources/worldBank';
 
-export const HSI_METHOD_VERSION = 'hsi-1';
+export const HSI_METHOD_VERSION = 'hsi-2';
+export const CARRY_FORWARD_YEARS = 5;
 export const HSI_START_YEAR = 2000;
 
 export interface HistoricalObservation {
@@ -113,11 +119,13 @@ export function composeHistory(
         let best: HistoricalObservation | null = null;
         for (const o of s) if (o.year <= year) best = o; else break;
         if (!best || best.normalizedValue === null) continue;
+        if (year - best.year > CARRY_FORWARD_YEARS) continue;
         measurements.push({
           countryCode: cc,
           indicatorId: ind.id,
           rawValue: best.rawValue,
-          referenceDate: `${best.year}-12-31`,
+          // Dated at the scored year so the composer's freshness decay is neutral (factor 1).
+          referenceDate: `${year}-12-31`,
           normalizedValue: best.normalizedValue,
           adapterId: 'worldBank',
         });
