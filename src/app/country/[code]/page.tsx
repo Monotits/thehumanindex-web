@@ -6,6 +6,8 @@ import { LivePanel } from '@/components/live/LivePanel';
 import { loadLiveCountry, anonClient } from '@/lib/live/present';
 import { AnnualHistoryChart } from '@/components/history/AnnualHistoryChart';
 import { CiteBox } from '@/components/cite/CiteBox';
+import { ScoreDrivers } from '@/components/decompose/ScoreDrivers';
+import { contributionsByCountry, gapsVsAverage, type MetaRow } from '@/lib/decompose';
 import { loadHistorical, biggestJump } from '@/lib/history/present';
 import { adapterMeta } from '@/lib/indicators/adapterRegistry';
 import { StressBand } from '@/components/ui/StressBand';
@@ -324,6 +326,10 @@ export default async function CountryDetailPage({
     loadLiveCountry(code),
     histClient ? loadHistorical(histClient, code) : Promise.resolve([]),
   ]);
+  const metaAll = histClient
+    ? ((await histClient.from('v_country_latest_meta_indexes').select('country_code, meta_index, value, weight, raw_data')).data ?? []) as MetaRow[]
+    : [];
+  const drivers = gapsVsAverage(contributionsByCountry(metaAll), code.toUpperCase());
   const historyPoints = history
     .filter(h => h.composite !== null)
     .map(h => ({ year: h.year, value: h.composite as number, meta: Object.fromEntries(Object.entries(h.meta).map(([k, v]) => [k, v.value])) }));
@@ -554,6 +560,19 @@ export default async function CountryDetailPage({
         </div>
       </section>
 
+      {/* ── SCORE DRIVERS ── */}
+      {drivers && composite !== null && (
+        <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+          <ScoreDrivers
+            countryName={country.name}
+            composite={drivers.composite}
+            avgComposite={drivers.avgComposite}
+            gaps={drivers.gaps}
+            names={Object.fromEntries(indicators.map(i => [i.id, i.name]))}
+          />
+        </div>
+      )}
+
       {/* ── LATEST PULSE FOR COUNTRY ── */}
       {latestPulse && (
         <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
@@ -653,6 +672,9 @@ export default async function CountryDetailPage({
               <li><a className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground" href={`/api/export?dataset=historical&country=${country.code.toLowerCase()}`}>Historical index 2000– (CSV)</a> <span className="text-foreground-subtle">· annual · CC BY-NC 4.0</span></li>
               <li><a className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground" href={`/api/export?dataset=worldbank&country=${country.code.toLowerCase()}`}>World Bank inputs (CSV)</a> <span className="text-foreground-subtle">· raw annual values · World Bank, CC BY 4.0</span></li>
             </ul>
+            <h3 className="text-sm font-medium uppercase tracking-wider text-foreground-muted mt-6 mb-2">Embed</h3>
+            <pre className="whitespace-pre-wrap break-all text-xs font-mono bg-background rounded-md border border-border p-3 select-all">{`<iframe src="https://thehumanindex.org/embed/country/${country.code.toLowerCase()}" width="100%" height="230" style="border:0" loading="lazy" title="${country.name} — The Human Index"></iframe>`}</pre>
+            <p className="mt-1 text-xs text-foreground-subtle">Add <code>?theme=dark</code> for dark backgrounds.</p>
             <p className="mt-4 text-xs text-foreground-subtle text-pretty">
               Values from proprietary reference sources (e.g. Gallup, Edelman, DataReportal) are shown on this page with links to the
               publisher but are not redistributed in bulk. <Link href="/dataset" className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground">All datasets</Link>
