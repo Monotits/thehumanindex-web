@@ -16,10 +16,12 @@ const META_ORDER = ['economic', 'social', 'mental', 'environmental'];
 export function AnnualHistoryChart({
   data,
   highlight,
+  annotations = [],
   height = 260,
 }: {
   data: AnnualPoint[];
   highlight?: { from: number; to: number } | null;
+  annotations?: { year: number; label: string }[];
   height?: number;
 }) {
   const [hover, setHover] = useState<number | null>(null);
@@ -70,6 +72,18 @@ export function AnnualHistoryChart({
         {xTicks.map(({ p, i }) => (
           <text key={p.year} x={x(i)} y={padT + innerH + 16} textAnchor="middle" fontSize="10" fontFamily="var(--font-plex-mono), monospace" fill="var(--foreground-subtle)">{p.year}</text>
         ))}
+        {annotations.map((a, k) => {
+          const i = pts.findIndex(p => p.year === a.year);
+          if (i < 0) return null;
+          const lx = x(i);
+          const anchor = i > pts.length * 0.75 ? 'end' : 'start';
+          return (
+            <g key={`${a.year}-${a.label}`}>
+              <line x1={lx} x2={lx} y1={padT} y2={padT + innerH} stroke="var(--foreground-subtle)" strokeWidth="0.75" strokeDasharray="3 3" opacity="0.6" />
+              <text x={lx + (anchor === 'start' ? 4 : -4)} y={padT + 10 + (k % 2) * 12} textAnchor={anchor} fontSize="10" fill="var(--foreground-muted)">{a.label}</text>
+            </g>
+          );
+        })}
         <path d={line} fill="none" stroke={stroke} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
         {pts.map((p, i) => <circle key={p.year} cx={x(i)} cy={y(p.value)} r={hover === i ? 4 : 2} fill={stroke} />)}
         {h && <line x1={x(hover!)} x2={x(hover!)} y1={padT} y2={padT + innerH} stroke="var(--foreground-subtle)" strokeWidth="0.5" strokeDasharray="2 3" />}

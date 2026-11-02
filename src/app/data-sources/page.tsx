@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
+import { ReleaseCalendar } from '@/components/calendar/ReleaseCalendar';
+import { computeReleases, loadLatestPeriods } from '@/lib/calendar/releases';
 import { cn } from '@/lib/ui/cn';
 
 export const revalidate = 3600;
@@ -129,6 +131,10 @@ function relativeTime(iso: string | null): string {
 
 export default async function DataSourcesPage() {
   const { summaries, lastRunAt, divergences } = await loadSummaries();
+  const calUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const calKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const periods = calUrl && calKey ? await loadLatestPeriods(createClient(calUrl, calKey)) : { bySignal: {}, oecd: null };
+  const releases = computeReleases(periods.bySignal, periods.oecd);
 
   const ok = summaries.filter((s) => s.status === 'ok').length;
   const degraded = summaries.filter((s) => s.status === 'degraded').length;
@@ -183,6 +189,16 @@ export default async function DataSourcesPage() {
             caption="cross-source disagreements"
           />
         </div>
+      </section>
+
+      {/* ── RELEASE CALENDAR ── */}
+      <section id="calendar" className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border scroll-mt-24">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">Release calendar</h2>
+        <p className="text-foreground-muted mb-6 max-w-2xl text-pretty">
+          The pipeline checks every day, but numbers only move when a publisher releases new data. This is what we
+          hold now and when the next release is expected.
+        </p>
+        <ReleaseCalendar rows={releases} />
       </section>
 
       {/* ── PER-SOURCE TABLE ── */}

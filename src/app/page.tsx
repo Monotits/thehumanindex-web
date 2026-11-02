@@ -10,6 +10,7 @@ import { bandFor, META_INDEXES, META_LABELS, META_WEIGHT, type MetaIndex } from 
 import { getActiveLocale } from '@/lib/ui/locale';
 import { loadCompositeHistory, pointsToDenseSeries, trendSummary } from '@/lib/ui/history';
 import { LiveMovers } from '@/components/live/LiveMovers';
+import { computeReleases, loadLatestPeriods } from '@/lib/calendar/releases';
 import { loadLatestLive, newestReference, liveTone, LIVE_TONE_LABEL, LIVE_TONE_TEXT_CLASS, type LiveCountry } from '@/lib/live/present';
 
 export const metadata: Metadata = {
@@ -74,6 +75,7 @@ async function loadHomeData(locale: string) {
       lastUpdate: null,
       liveRows: [] as Array<LiveCountry & { name: string; flag_emoji: string | null }>,
       liveNewest: null as string | null,
+      nextRelease: null as { label: string; at: string } | null,
     };
   }
   const sb = createClient(sbUrl, sbKey);
@@ -200,10 +202,20 @@ async function loadHomeData(locale: string) {
     return { ...l, name: meta?.name ?? l.country_code, flag_emoji: meta?.flag_emoji ?? null };
   });
   const liveNewest = newestReference(liveMap.values());
+  const periods = await loadLatestPeriods(sb);
+  const upcoming = computeReleases(periods.bySignal, periods.oecd)
+    .filter(r => r.status === 'upcoming' && r.expectedAt)
+    .sort((a, b) => a.expectedAt!.localeCompare(b.expectedAt!))[0];
+  const nextRelease = upcoming
+    ? {
+        label: `${upcoming.publisher} ${upcoming.short} (${new Date(upcoming.nextPeriod! + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })})`,
+        at: upcoming.expectedAt!,
+      }
+    : null;
 
   return {
     countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate,
-    layoffs, layoffsTotal30d, liveRows, liveNewest,
+    layoffs, layoffsTotal30d, liveRows, liveNewest, nextRelease,
   };
 }
 
@@ -250,7 +262,7 @@ function formatLayoffCount(n: number | null): string {
 
 export default async function HomePage() {
   const locale = await getActiveLocale();
-  const { countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate, layoffs, layoffsTotal30d, liveRows, liveNewest } = await loadHomeData(locale);
+  const { countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate, layoffs, layoffsTotal30d, liveRows, liveNewest, nextRelease } = await loadHomeData(locale);
   const liveAvg = liveRows.length
     ? Math.round((liveRows.reduce((a, r) => a + (r.live_score_7d ?? r.live_score), 0) / liveRows.length) * 10) / 10
     : null;
@@ -374,7 +386,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── LIVE LAYER: WHAT'S MOVING ── */}
-      <LiveMovers rows={liveRows} newestData={liveNewest} />
+      <LiveMovers rows={liveRows} newestData={liveNewest} nextRelease={nextRelease} />
 
       {/* ── TODAY'S STORY ── */}
       {featured && (

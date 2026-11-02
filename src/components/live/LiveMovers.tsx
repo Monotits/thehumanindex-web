@@ -12,13 +12,15 @@ interface Props {
   rows: Array<LiveCountry & { name: string; flag_emoji: string | null }>;
   /** ISO date of the newest upstream observation (data as of). */
   newestData: string | null;
+  /** Next scheduled release, e.g. { label: 'Eurostat inflation (Oct)', at: '2026-11-17' }. */
+  nextRelease?: { label: string; at: string } | null;
 }
 
 /**
  * "What's moving now" — countries ranked by 7-day Live score.
  * Live = momentum vs each country's own history; 50 = a normal period.
  */
-export function LiveMovers({ rows, newestData }: Props) {
+export function LiveMovers({ rows, newestData, nextRelease }: Props) {
   if (rows.length === 0) return null;
   const sorted = [...rows].sort((a, b) => (b.live_score_7d ?? b.live_score) - (a.live_score_7d ?? a.live_score));
   const rising = sorted.slice(0, 5);
@@ -38,6 +40,14 @@ export function LiveMovers({ rows, newestData }: Props) {
         <p className="mt-3 text-xs text-foreground-subtle tabular-nums">
           Signals checked {new Date(computed).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}
           {newestData && <> · newest data {new Date(newestData).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })}</>}
+          {nextRelease && (
+            <>
+              {' · next: '}
+              <Link href="/data-sources#calendar" className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground">
+                {nextRelease.label} ~{new Date(nextRelease.at + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}
+              </Link>
+            </>
+          )}
           {' · '}
           <Link href="/methodology#live-layer" className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground">
             how it works

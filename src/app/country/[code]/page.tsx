@@ -9,6 +9,7 @@ import { CiteBox } from '@/components/cite/CiteBox';
 import { ScoreDrivers } from '@/components/decompose/ScoreDrivers';
 import { contributionsByCountry, gapsVsAverage, type MetaRow } from '@/lib/decompose';
 import { loadHistorical, biggestJump } from '@/lib/history/present';
+import { eventsFor } from '@/lib/history/events';
 import { adapterMeta } from '@/lib/indicators/adapterRegistry';
 import { StressBand } from '@/components/ui/StressBand';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
@@ -510,7 +511,7 @@ export default async function CountryDetailPage({
               Built from the {history[history.length - 1]?.indicators_used ?? 'World Bank'} indicators with annual World Bank histories, so it is not the same number as the composite above.
             </p>
           </div>
-          <AnnualHistoryChart data={historyPoints} highlight={jump} />
+          <AnnualHistoryChart data={historyPoints} highlight={jump} annotations={eventsFor(country.code)} />
           <p className="mt-3 text-xs text-foreground-subtle">
             Source: World Bank Open Data (CC BY 4.0) ·{' '}
             <Link href="/methodology#historical-series" className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground">how it is built</Link>
