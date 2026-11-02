@@ -1,24 +1,22 @@
 /**
- * GET /share/country/{iso2}?format=story|square → PNG share card.
- * story = 1080×1920 (Instagram/TikTok stories), square = 1080×1080 (feeds).
- * Same rendering stack as the OG image (next/og), so no client-side capture.
+ * GET /share/country/{iso2}?format=story|square → bold PNG share card.
+ * One headline built from real data (rank among tracked countries), a
+ * ranking strip, the Live alert and a "where does your country rank?" hook.
+ * Claims stay factual: every line is computed from the published numbers.
  */
 
 import { ImageResponse } from 'next/og';
 import { createClient } from '@supabase/supabase-js';
-import { bandFor, BAND_LABELS, META_INDEXES, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
-import { describeContributor, liveTone, LIVE_TONE_LABEL, topDriver, type LiveContributor } from '@/lib/live/present';
+import { bandFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
+import { describeContributor, liveTone, topDriver, type LiveContributor } from '@/lib/live/present';
+import { loadGoogleFont } from '@/lib/share/font';
 
 export const runtime = 'edge';
 
-const P = {
-  bg: '#FAFAF8', fg: '#1A1A1A', muted: '#595956', subtle: '#8A8A85', border: '#E0E0DC',
-  low: '#6B8E5A', moderate: '#D6A35C', elevated: '#C97447', high: '#A53E3E', critical: '#5D1F1F',
+const C = {
+  bg: '#0B0B0D', panel: '#17171B', fg: '#F5F3EE', muted: '#A5A29B', dim: '#55534F',
+  hot: '#FF5A36', warm: '#FFA62B', calm: '#3DDC97', mid: '#F5F3EE',
 };
-const META_COLOR: Record<MetaIndex, string> = {
-  economic: '#475569', social: '#4F46E5', mental: '#7C3AED', technological: '#0891B2', environmental: '#059669',
-};
-const toneColor = (t: ReturnType<typeof liveTone>) => (t === 'high' ? P.high : t === 'rising' ? P.elevated : t === 'easing' ? P.low : P.muted);
 
 export async function GET(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const code = (await params).code.toUpperCase();
@@ -29,90 +27,116 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return new Response('Unavailable', { status: 503 });
   const sb = createClient(url, key);
-  const [cRes, allRes, metaRes, liveRes] = await Promise.all([
+  const [cRes, allRes, metaRes, liveRes, black, bold] = await Promise.all([
     sb.from('countries').select('name, flag_emoji').eq('code', code).maybeSingle(),
     sb.from('v_country_latest_composite').select('country_code, score_value'),
     sb.from('v_country_latest_meta_indexes').select('meta_index, value').eq('country_code', code),
-    sb.from('v_country_latest_live').select('live_score, live_score_7d, contributors, snapshot_date').eq('country_code', code).maybeSingle(),
+    sb.from('v_country_latest_live').select('live_score, live_score_7d, contributors').eq('country_code', code).maybeSingle(),
+    loadGoogleFont('Inter', 900),
+    loadGoogleFont('Inter', 600),
   ]);
   if (!cRes.data) return new Response('Not found', { status: 404 });
   const name = cRes.data.name as string;
   const flag = (cRes.data.flag_emoji as string | null) ?? '';
-  const all = ((allRes.data ?? []) as { country_code: string; score_value: number }[]).map(r => ({ cc: r.country_code, v: Number(r.score_value) })).sort((a, b) => b.v - a.v);
+  const all = ((allRes.data ?? []) as { country_code: string; score_value: number }[])
+    .map(r => ({ cc: r.country_code, v: Number(r.score_value) })).sort((a, b) => b.v - a.v);
+  const n = all.length;
   const rank = all.findIndex(r => r.cc === code) + 1;
   const composite = all.find(r => r.cc === code)?.v ?? null;
   const band = bandFor(composite);
-  const bandCol = band ? P[band] : P.subtle;
+
+  // Headline: rank from the stressed end for the upper half, from the calm end otherwise.
+  const stressedSide = rank > 0 && rank <= Math.ceil(n / 2);
+  const shownRank = stressedSide ? rank : n - rank + 1;
+  const accent = stressedSide ? (rank <= 3 ? C.hot : C.warm) : C.calm;
+  const headline = stressedSide ? 'MOST STRESSED' : 'LEAST STRESSED';
+
   const meta: Partial<Record<MetaIndex, number>> = {};
   for (const r of (metaRes.data ?? []) as { meta_index: MetaIndex; value: number | null }[]) if (r.value !== null) meta[r.meta_index] = Number(r.value);
-  const live = liveRes.data as { live_score: number; live_score_7d: number | null; contributors: LiveContributor[]; snapshot_date: string } | null;
+  const worst = (Object.entries(meta) as [MetaIndex, number][]).sort((a, b) => b[1] - a[1])[0];
+
+  const live = liveRes.data as { live_score: number; live_score_7d: number | null; contributors: LiveContributor[] } | null;
   const liveScore = live ? Number(live.live_score_7d ?? live.live_score) : null;
   const tone = liveTone(liveScore);
   const driver = live ? topDriver(live.contributors) : null;
-  const month = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const alert = tone === 'high' || tone === 'rising'
+    ? { label: '▲ PRESSURE RISING', color: C.hot }
+    : tone === 'easing' ? { label: '▼ PRESSURE EASING', color: C.calm } : { label: '● HOLDING STEADY', color: C.muted };
 
-  const big = story ? 300 : 220;
+  const month = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }).toUpperCase();
+  const fonts = [
+    ...(black ? [{ name: 'Inter', data: black, weight: 900 as const, style: 'normal' as const }] : []),
+    ...(bold ? [{ name: 'Inter', data: bold, weight: 600 as const, style: 'normal' as const }] : []),
+  ];
+  const pad = story ? 84 : 72;
+
+  // Ranking strip: one bar per country, most stressed on the left.
+  const strip = (
+    <div style={{ display: 'flex', flexDirection: 'column', marginTop: story ? 70 : 34 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: story ? 150 : 90 }}>
+        {all.map(r => {
+          const me = r.cc === code;
+          const h = Math.max(10, ((r.v - all[n - 1].v) / Math.max(1, all[0].v - all[n - 1].v)) * (story ? 150 : 90));
+          return <div key={r.cc} style={{ display: 'flex', flex: 1, height: h, borderRadius: 6, background: me ? accent : C.dim }} />;
+        })}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 14, fontSize: 24, color: C.muted, letterSpacing: 2 }}>
+        <div style={{ display: 'flex' }}>MOST STRESSED</div>
+        <div style={{ display: 'flex' }}>{`${n} COUNTRIES`}</div>
+        <div style={{ display: 'flex' }}>LEAST</div>
+      </div>
+    </div>
+  );
+
   return new ImageResponse(
     (
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: P.bg, color: P.fg, padding: story ? '110px 90px' : '72px 80px', fontFamily: 'sans-serif' }}>
-        {/* brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 10, background: P.fg, color: P.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700, fontFamily: 'serif' }}>H</div>
-          <div style={{ fontSize: 30, fontWeight: 600, fontFamily: 'serif' }}>The Human Index</div>
+      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: C.bg, color: C.fg, padding: pad, fontFamily: 'Inter' }}>
+        {/* glow */}
+        <div style={{ position: 'absolute', top: -300, right: -300, width: 900, height: 900, borderRadius: 900, background: accent, opacity: 0.16, display: 'flex' }} />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 26, color: C.muted, letterSpacing: 3, fontWeight: 600 }}>
+          <div style={{ display: 'flex' }}>THE HUMAN INDEX</div>
+          <div style={{ display: 'flex' }}>{`STRESS RANKING · ${month}`}</div>
         </div>
 
-        {/* country */}
-        <div style={{ display: 'flex', flexDirection: 'column', marginTop: story ? 140 : 56 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-            <div style={{ fontSize: story ? 120 : 96 }}>{flag}</div>
-            <div style={{ fontSize: story ? 96 : 80, fontWeight: 700, fontFamily: 'serif', letterSpacing: -2, lineHeight: 1 }}>{name}</div>
-          </div>
-          <div style={{ fontSize: 28, color: P.muted, marginTop: 18, letterSpacing: 2, textTransform: 'uppercase' }}>{`Civilizational stress · ${month}`}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginTop: story ? 110 : 48 }}>
+          <div style={{ display: 'flex', fontSize: story ? 110 : 84 }}>{flag}</div>
+          <div style={{ display: 'flex', fontSize: story ? 104 : 84, fontWeight: 900, letterSpacing: -3, lineHeight: 1 }}>{name.toUpperCase()}</div>
         </div>
 
-        {/* composite */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 30, marginTop: story ? 90 : 36 }}>
-          <div style={{ fontSize: big, fontWeight: 700, color: bandCol, lineHeight: 0.9, letterSpacing: -8 }}>{composite === null ? '—' : composite.toFixed(1)}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 18 }}>
-            {band && <div style={{ display: 'flex', background: bandCol, color: '#fff', fontSize: 30, padding: '8px 22px', borderRadius: 999, letterSpacing: 2, textTransform: 'uppercase' }}>{BAND_LABELS[band]}</div>}
-            {rank > 0 && <div style={{ fontSize: 30, color: P.muted }}>{`#${rank} of ${all.length} countries`}</div>}
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 30, marginTop: story ? 40 : 18 }}>
+          <div style={{ display: 'flex', fontSize: story ? 400 : 270, fontWeight: 900, color: accent, letterSpacing: -18, lineHeight: 0.82 }}>{`#${shownRank}`}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', paddingBottom: story ? 30 : 16 }}>
+            <div style={{ display: 'flex', fontSize: story ? 64 : 48, fontWeight: 900, lineHeight: 1, letterSpacing: -1 }}>{headline}</div>
+            <div style={{ display: 'flex', fontSize: story ? 40 : 32, color: C.muted, marginTop: 10, fontWeight: 600 }}>{`of ${n} countries tracked`}</div>
           </div>
         </div>
 
-        {/* live */}
-        {liveScore !== null && (
-          <div style={{ display: 'flex', flexDirection: 'column', marginTop: story ? 90 : 36, borderTop: `2px solid ${P.border}`, paddingTop: story ? 50 : 30 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 20 }}>
-              <div style={{ fontSize: 28, color: P.muted, letterSpacing: 2, textTransform: 'uppercase' }}>Live pulse</div>
-              <div style={{ fontSize: 64, fontWeight: 700, color: toneColor(tone) }}>{liveScore.toFixed(0)}</div>
-              {tone && <div style={{ fontSize: 30, color: toneColor(tone) }}>{LIVE_TONE_LABEL[tone]}</div>}
-            </div>
-            {driver && <div style={{ fontSize: story ? 40 : 34, marginTop: 14, lineHeight: 1.25 }}>{describeContributor(driver)}</div>}
+        {strip}
+
+        {liveScore !== null && driver && (
+          <div style={{ display: 'flex', flexDirection: 'column', marginTop: story ? 70 : 34, background: C.panel, borderRadius: 28, padding: story ? '40px 44px' : '28px 34px', borderLeft: `10px solid ${alert.color}` }}>
+            <div style={{ display: 'flex', fontSize: story ? 34 : 28, fontWeight: 900, color: alert.color, letterSpacing: 2 }}>{alert.label}</div>
+            <div style={{ display: 'flex', fontSize: story ? 50 : 38, fontWeight: 600, marginTop: 12, lineHeight: 1.2 }}>{describeContributor(driver)}</div>
           </div>
         )}
 
-        {/* domains (story only) */}
-        {story && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 26, marginTop: 90 }}>
-            {META_INDEXES.filter(m => meta[m] !== undefined).map(m => (
-              <div key={m} style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-                <div style={{ width: 300, fontSize: 30, color: P.muted }}>{META_LABELS[m]}</div>
-                <div style={{ display: 'flex', flex: 1, height: 18, background: P.border, borderRadius: 9 }}>
-                  <div style={{ width: `${Math.max(2, Math.min(100, meta[m]!))}%`, height: 18, background: META_COLOR[m], borderRadius: 9 }} />
-                </div>
-                <div style={{ width: 90, fontSize: 32, textAlign: 'right' }}>{meta[m]!.toFixed(0)}</div>
-              </div>
-            ))}
+        {story && worst && (
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 20, marginTop: 56 }}>
+            <div style={{ display: 'flex', fontSize: 34, color: C.muted, fontWeight: 600 }}>Highest-stress area:</div>
+            <div style={{ display: 'flex', fontSize: 46, fontWeight: 900 }}>{`${META_LABELS[worst[0]]} ${worst[1].toFixed(0)}/100`}</div>
           </div>
         )}
 
-        {/* footer */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto' }}>
-          <div style={{ fontSize: story ? 34 : 28, fontWeight: 600 }}>{`thehumanindex.org/country/${code.toLowerCase()}`}</div>
-          <div style={{ fontSize: 22, color: P.subtle }}>0–100 · higher = more stress</div>
+        <div style={{ display: 'flex', flexDirection: 'column', marginTop: 'auto' }}>
+          <div style={{ display: 'flex', fontSize: story ? 58 : 44, fontWeight: 900, letterSpacing: -1 }}>Where does your country rank?</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 14 }}>
+            <div style={{ display: 'flex', fontSize: story ? 40 : 34, color: accent, fontWeight: 900 }}>thehumanindex.org</div>
+            <div style={{ display: 'flex', fontSize: 22, color: C.dim }}>{composite !== null && band ? `Composite ${composite.toFixed(1)}/100 · 31 indicators` : '31 indicators'}</div>
+          </div>
         </div>
       </div>
     ),
-    { width: W, height: H, headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } },
+    { width: W, height: H, fonts: fonts.length ? fonts : undefined, headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } },
   );
 }
