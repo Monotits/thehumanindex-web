@@ -76,7 +76,7 @@ export function AnnualHistoryChart({
           const i = pts.findIndex(p => p.year === a.year);
           if (i < 0) return null;
           const lx = x(i);
-          const anchor = i > pts.length * 0.75 ? 'end' : 'start';
+          const anchor = i > (pts.length - 1) * 0.88 ? 'end' : 'start';
           return (
             <g key={`${a.year}-${a.label}`}>
               <line x1={lx} x2={lx} y1={padT} y2={padT + innerH} stroke="var(--foreground-subtle)" strokeWidth="0.75" strokeDasharray="3 3" opacity="0.6" />

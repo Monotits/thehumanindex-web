@@ -462,11 +462,14 @@ export default async function CountryDetailPage({
               </div>
               <div>
                 <div className="text-xs uppercase tracking-wider text-foreground-subtle mb-1">
-                  Last updated
+                  Pipeline checked
                 </div>
                 <div className="text-base sm:text-lg text-foreground-muted">
                   {formatRelative(computedAt)}
                 </div>
+                <Link href="/data-sources#calendar" className="text-xs text-foreground-subtle underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground">
+                  when data changes
+                </Link>
               </div>
             </div>
           )}
