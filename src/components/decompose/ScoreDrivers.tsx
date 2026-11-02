@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { Gap } from '@/lib/decompose';
 
 interface Props {
@@ -6,10 +7,12 @@ interface Props {
   avgComposite: number;
   gaps: Gap[];
   names: Record<string, string>;
+  /** Share of the composite from annual survey/report indicators. */
+  seed?: { share: number; minYear: number | null; maxYear: number | null } | null;
 }
 
 /** "Why is X above/below average?" — per-indicator gaps that sum exactly to the difference. */
-export function ScoreDrivers({ countryName, composite, avgComposite, gaps, names }: Props) {
+export function ScoreDrivers({ countryName, composite, avgComposite, gaps, names, seed }: Props) {
   const diff = composite - avgComposite;
   const up = gaps.filter(g => g.gap > 0.05).sort((a, b) => b.gap - a.gap).slice(0, 5);
   const down = gaps.filter(g => g.gap < -0.05).sort((a, b) => a.gap - b.gap).slice(0, 5);
@@ -38,6 +41,14 @@ export function ScoreDrivers({ countryName, composite, avgComposite, gaps, names
           tracked-country average of {avgComposite.toFixed(1)}. Each bar is one indicator&apos;s share of that gap, in composite
           points; all indicators together add up to it (± rounding).
         </p>
+        {seed && seed.share > 0 && (
+          <p className="mt-3 text-sm text-foreground-muted text-pretty border-l-2 border-border pl-3">
+            About <strong>{Math.round(seed.share * 100)}%</strong> of this score comes from annual surveys and reports
+            {seed.minYear && seed.maxYear ? <> (editions {seed.minYear === seed.maxYear ? seed.minYear : `${seed.minYear}–${seed.maxYear}`})</> : null}.
+            These move at most once a year; the <Link href="#live" className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground">Live layer</Link> shows
+            what changed recently. <Link href="/data-sources#editions" className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground">Which editions we use</Link>.
+          </p>
+        )}
       </div>
       <div className="grid md:grid-cols-2 gap-10">
         <div>

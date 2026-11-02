@@ -287,6 +287,10 @@ const SEEDS: SeedEntry[] = [
 
 const PROVIDED_INDICATORS = new Set(SEEDS.map(s => s.indicatorId));
 
+/** Edition metadata (no values) for disclosure / update tracking. */
+export const SEED_EDITIONS: { indicatorId: string; source: string; year: number }[] =
+  SEEDS.map(s => ({ indicatorId: s.indicatorId, source: s.source, year: s.year }));
+
 export const referenceSeedAdapter: IndicatorAdapter = {
   id: 'referenceSeed',
   name: 'Reference Seed (annual reports)',

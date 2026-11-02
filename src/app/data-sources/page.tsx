@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { ReleaseCalendar } from '@/components/calendar/ReleaseCalendar';
 import { computeReleases, loadLatestPeriods } from '@/lib/calendar/releases';
+import { seedEditionRows } from '@/lib/seeds/editions';
 import { cn } from '@/lib/ui/cn';
 
 export const revalidate = 3600;
@@ -135,6 +136,8 @@ export default async function DataSourcesPage() {
   const calKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const periods = calUrl && calKey ? await loadLatestPeriods(createClient(calUrl, calKey)) : { bySignal: {}, oecd: null };
   const releases = computeReleases(periods.bySignal, periods.oecd);
+  const editions = seedEditionRows();
+  const editionsDue = editions.filter(e => e.updateDue).length;
 
   const ok = summaries.filter((s) => s.status === 'ok').length;
   const degraded = summaries.filter((s) => s.status === 'degraded').length;
@@ -199,6 +202,40 @@ export default async function DataSourcesPage() {
           hold now and when the next release is expected.
         </p>
         <ReleaseCalendar rows={releases} />
+      </section>
+
+      {/* ── SURVEY / REPORT EDITIONS ── */}
+      <section id="editions" className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border scroll-mt-24">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">Survey &amp; report editions</h2>
+        <p className="text-foreground-muted mb-6 max-w-2xl text-pretty">
+          {editions.length} indicators come from annual surveys and reports with no live API. Together they make up
+          roughly two-thirds of a typical composite score and most of the mental and technological domains, so their
+          age matters. {editionsDue > 0 ? <>{editionsDue} are at least two editions behind and are queued for update.</> : <>All are on their latest edition.</>}
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-xs uppercase tracking-wider text-foreground-subtle border-b border-border">
+                <th className="py-2 pr-4 font-medium">Indicator</th>
+                <th className="py-2 pr-4 font-medium">Source (edition used)</th>
+                <th className="py-2 pr-4 font-medium">Year</th>
+                <th className="py-2 pr-4 font-medium">Publisher cadence</th>
+                <th className="py-2 pr-4 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {editions.map(e => (
+                <tr key={e.indicatorId} className="border-b border-border align-top">
+                  <td className="py-3 pr-4 font-mono text-xs">{e.indicatorId}</td>
+                  <td className="py-3 pr-4">{e.source}</td>
+                  <td className="py-3 pr-4 tabular-nums">{e.year}</td>
+                  <td className="py-3 pr-4 text-foreground-muted">{e.cadence}</td>
+                  <td className="py-3 pr-4">{e.updateDue ? <span className="band-text-elevated">Update due</span> : e.cadence.startsWith('Irregular') ? <span className="text-foreground-muted">No fixed schedule</span> : <span className="text-foreground-muted">Current</span>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       {/* ── PER-SOURCE TABLE ── */}

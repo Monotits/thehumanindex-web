@@ -8,6 +8,7 @@ import { AnnualHistoryChart } from '@/components/history/AnnualHistoryChart';
 import { CiteBox } from '@/components/cite/CiteBox';
 import { ScoreDrivers } from '@/components/decompose/ScoreDrivers';
 import { contributionsByCountry, gapsVsAverage, type MetaRow } from '@/lib/decompose';
+import { seedShare } from '@/lib/seeds/editions';
 import { loadHistorical, biggestJump } from '@/lib/history/present';
 import { eventsFor } from '@/lib/history/events';
 import { adapterMeta } from '@/lib/indicators/adapterRegistry';
@@ -331,6 +332,7 @@ export default async function CountryDetailPage({
     ? ((await histClient.from('v_country_latest_meta_indexes').select('country_code, meta_index, value, weight, raw_data')).data ?? []) as MetaRow[]
     : [];
   const drivers = gapsVsAverage(contributionsByCountry(metaAll), code.toUpperCase());
+  const seed = seedShare(metaAll, code.toUpperCase());
   const historyPoints = history
     .filter(h => h.composite !== null)
     .map(h => ({ year: h.year, value: h.composite as number, meta: Object.fromEntries(Object.entries(h.meta).map(([k, v]) => [k, v.value])) }));
@@ -573,6 +575,7 @@ export default async function CountryDetailPage({
             avgComposite={drivers.avgComposite}
             gaps={drivers.gaps}
             names={Object.fromEntries(indicators.map(i => [i.id, i.name]))}
+            seed={seed}
           />
         </div>
       )}
