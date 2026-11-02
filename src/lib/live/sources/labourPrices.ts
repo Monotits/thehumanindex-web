@@ -34,11 +34,12 @@ type OecdSnapshot = { series: Record<string, { dataflow: string; countries: Reco
 
 function oecdFromSnapshot(key: 'unemployment' | 'cpi_yoy'): SeriesBySource {
   const out: SeriesBySource = new Map();
-  const block = (oecdSnapshot as OecdSnapshot).series[key];
+  const block = (oecdSnapshot as unknown as OecdSnapshot).series[key];
   if (!block) return out;
   for (const [iso3, pts] of Object.entries(block.countries)) {
     const cc = ISO3_TO_ISO2[iso3];
-    if (cc) out.set(cc, pts.map(([p, v]) => ({ date: normalizePeriod(p), value: v })));
+    if (!cc) continue;
+    out.set(cc, pts.filter(([p, v]) => typeof p === 'string' && typeof v === 'number').map(([p, v]) => ({ date: normalizePeriod(p), value: v })));
   }
   return out;
 }
