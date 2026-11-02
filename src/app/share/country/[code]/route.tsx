@@ -72,11 +72,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
 
   // Ranking strip: one bar per country, most stressed on the left.
   const strip = (
-    <div style={{ display: 'flex', flexDirection: 'column', marginTop: story ? 70 : 34 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: story ? 150 : 90 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', marginTop: story ? 80 : 34 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: story ? 170 : 90 }}>
         {all.map(r => {
           const me = r.cc === code;
-          const h = Math.max(10, ((r.v - all[n - 1].v) / Math.max(1, all[0].v - all[n - 1].v)) * (story ? 150 : 90));
+          const h = Math.max(10, ((r.v - all[n - 1].v) / Math.max(1, all[0].v - all[n - 1].v)) * (story ? 170 : 90));
           return <div key={r.cc} style={{ display: 'flex', flex: 1, height: h, borderRadius: 6, background: me ? accent : C.dim }} />;
         })}
       </div>
@@ -92,7 +92,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
     (
       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: C.bg, color: C.fg, padding: pad, fontFamily: 'Inter' }}>
         {/* glow */}
-        <div style={{ position: 'absolute', top: -300, right: -300, width: 900, height: 900, borderRadius: 900, background: accent, opacity: 0.16, display: 'flex' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, width: W, height: H, display: 'flex', backgroundImage: `radial-gradient(circle at 85% 12%, ${accent}40 0%, ${accent}00 55%)` }} />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 26, color: C.muted, letterSpacing: 3, fontWeight: 600 }}>
           <div style={{ display: 'flex' }}>THE HUMAN INDEX</div>
@@ -104,11 +104,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
           <div style={{ display: 'flex', fontSize: story ? 104 : 84, fontWeight: 900, letterSpacing: -3, lineHeight: 1 }}>{name.toUpperCase()}</div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 30, marginTop: story ? 40 : 18 }}>
-          <div style={{ display: 'flex', fontSize: story ? 400 : 270, fontWeight: 900, color: accent, letterSpacing: -18, lineHeight: 0.82 }}>{`#${shownRank}`}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', paddingBottom: story ? 30 : 16 }}>
-            <div style={{ display: 'flex', fontSize: story ? 64 : 48, fontWeight: 900, lineHeight: 1, letterSpacing: -1 }}>{headline}</div>
-            <div style={{ display: 'flex', fontSize: story ? 40 : 32, color: C.muted, marginTop: 10, fontWeight: 600 }}>{`of ${n} countries tracked`}</div>
+        <div style={{ display: 'flex', flexDirection: story ? 'column' : 'row', alignItems: story ? 'flex-start' : 'flex-end', gap: story ? 0 : 34, marginTop: story ? 50 : 18 }}>
+          <div style={{ display: 'flex', fontSize: story ? 440 : 260, fontWeight: 900, color: accent, letterSpacing: -14, lineHeight: 0.9 }}>{`#${shownRank}`}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', paddingBottom: story ? 0 : 20, marginTop: story ? 10 : 0 }}>
+            <div style={{ display: 'flex', fontSize: story ? 92 : 52, fontWeight: 900, lineHeight: 1, letterSpacing: -2 }}>{headline}</div>
+            <div style={{ display: 'flex', fontSize: story ? 42 : 30, color: C.muted, marginTop: 12, fontWeight: 600 }}>{`out of ${n} countries tracked`}</div>
           </div>
         </div>
 
