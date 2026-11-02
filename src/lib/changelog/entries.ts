@@ -23,7 +23,7 @@ export const CHANGELOG: ChangeEntry[] = [
     title: 'Technological domain at half weight while it has one indicator',
     detail:
       'After two untraceable technology indicators were retired, the Technological meta-index rests on daily screen time alone — a single survey item carrying a fifth of every score. Until a second citable measure exists it counts at half its base weight (20% → 10%), the same factor applied to stale data; the other domains are rescaled proportionally: economic 28%, social 22%, mental 22%, technological 11%, environmental 17%.',
-    effect: 'Countries with very high or very low screen time move most.',
+    effect: 'South Africa 57.8 → 53.7, Argentina 47.0 → 43.1, Brazil 43.8 → 38.7, Japan 27.3 → 28.5. Türkiye moves to 2nd (43.7). Only South Africa remains in the elevated band.',
   },
   {
     date: '2026-11-02', version: '2.2', kind: 'methodology',
