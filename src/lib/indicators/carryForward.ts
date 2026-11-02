@@ -13,6 +13,8 @@
 import { normalizeIndicator, type IndicatorRegistryRow } from './types';
 import type { NormalizedMeasurement } from './orchestrator';
 
+const STATIC_ADAPTERS = new Set(['referenceSeed', 'oecdHousing']);
+
 export interface SnapshotRow {
   snapshot_date: string;
   country_code: string;
@@ -52,6 +54,9 @@ export function carryForward(
   for (const s of snapshots) {
     const k = `${s.country_code}|${s.indicator_id}`;
     if (!missing.has(k) || !s.reference_date) continue;
+    // Static seeds live in code and cannot fail transiently. If a seed pair is
+    // missing, it was removed on purpose — never resurrect it.
+    if (STATIC_ADAPTERS.has((s.primary_adapter ?? '').replace(/^carryforward:/, ''))) continue;
     const cur = best.get(k);
     if (!cur || s.snapshot_date > cur.snapshot_date) best.set(k, s);
   }
