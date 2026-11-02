@@ -11,7 +11,9 @@ export type LiveSignalId =
   | 'inflation_momentum'
   | 'fx_pressure'
   | 'job_postings_momentum'
-  | 'active_disasters';
+  | 'active_disasters'
+  | 'geopolitical_risk'
+  | 'policy_uncertainty';
 
 export interface LiveObservation {
   countryCode: string;     // ISO 3166-1 alpha-2 (matches countries.code)

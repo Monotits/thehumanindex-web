@@ -48,6 +48,8 @@ export const SIGNAL_LABELS: Record<string, { name: string; source: string; unit:
   fx_pressure:           { name: 'Currency',     source: 'ECB reference rates', unit: 'pct' },
   job_postings_momentum: { name: 'Job postings', source: 'Indeed Hiring Lab', unit: 'pct' },
   active_disasters:      { name: 'Disasters',    source: 'GDACS', unit: 'alert' },
+  geopolitical_risk:     { name: 'Geopolitical risk', source: 'Caldara & Iacoviello GPR', unit: 'pct' },
+  policy_uncertainty:    { name: 'Policy uncertainty', source: 'Economic Policy Uncertainty', unit: 'pct' },
 };
 
 export type LiveTone = 'easing' | 'normal' | 'rising' | 'high';
@@ -90,6 +92,10 @@ export function describeContributor(c: LiveContributor): string {
         : `Currency ${Math.abs(c.raw_value).toFixed(1)}% stronger vs USD in 3 months`;
     case 'job_postings_momentum':
       return `Job postings ${signed(c.raw_value)}% in 90 days`;
+    case 'geopolitical_risk':
+      return c.stress_score >= 60 ? 'Geopolitical risk in the news rising' : c.stress_score <= 40 ? 'Geopolitical risk in the news falling' : 'Geopolitical risk steady';
+    case 'policy_uncertainty':
+      return c.stress_score >= 60 ? 'Economic policy uncertainty rising' : c.stress_score <= 40 ? 'Economic policy uncertainty falling' : 'Economic policy uncertainty steady';
     case 'active_disasters':
       return c.raw_value >= 3 ? 'Red disaster alert (last 30 days)' : c.raw_value >= 2 ? 'Orange disaster alert (last 30 days)' : 'No major disaster alert';
     default:

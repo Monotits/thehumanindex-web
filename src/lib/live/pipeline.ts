@@ -9,8 +9,9 @@ import { labourPricesAdapter } from './sources/labourPrices';
 import { ecbFxAdapter } from './sources/ecbFx';
 import { indeedAdapter } from './sources/indeed';
 import { gdacsAdapter } from './sources/gdacs';
+import { riskIndicesAdapter } from './sources/riskIndices';
 
-export const LIVE_ADAPTERS: LiveAdapter[] = [labourPricesAdapter, ecbFxAdapter, indeedAdapter, gdacsAdapter];
+export const LIVE_ADAPTERS: LiveAdapter[] = [labourPricesAdapter, ecbFxAdapter, indeedAdapter, gdacsAdapter, riskIndicesAdapter];
 
 /** Fallback weights — the live_signals table is the source of truth. */
 export const DEFAULT_SIGNAL_WEIGHTS: Record<string, number> = {
@@ -19,6 +20,8 @@ export const DEFAULT_SIGNAL_WEIGHTS: Record<string, number> = {
   fx_pressure: 1,
   job_postings_momentum: 1,
   active_disasters: 0.5,
+  geopolitical_risk: 0.75,
+  policy_uncertainty: 0.75,
 };
 
 /** Live score needs at least this many SUBSTANTIVE signals (disasters excluded — see below). */

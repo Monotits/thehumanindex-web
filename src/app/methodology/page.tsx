@@ -351,6 +351,8 @@ export default function MethodologyPage() {
             <li><strong>Inflation</strong> — 6-month change in year-on-year consumer price inflation (pp). Eurostat HICP (<code>prc_hicp_minr</code>) for European countries, OECD CPI elsewhere.</li>
             <li><strong>Currency</strong> — ~3-month (63 business days) percent change of the local currency per US dollar, from ECB reference rates. Not computed for the US (reserve currency), Argentina (no ECB rate since 2020) or the UAE (USD peg).</li>
             <li><strong>Job postings</strong> — 90-day percent change in the Indeed Job Postings Index (Indeed Hiring Lab, CC BY 4.0). Falling postings count as stress. Nine countries.</li>
+            <li><strong>Geopolitical risk</strong> — country Geopolitical Risk index (Caldara &amp; Iacoviello; share of newspaper articles on geopolitical tensions). We take the 3-month average, on a log scale, and score its 3-month change. 22 countries. Weight 0.75.</li>
+            <li><strong>Policy uncertainty</strong> — country Economic Policy Uncertainty index (Baker, Bloom &amp; Davis), same treatment. 14 countries; published with a ~3-month lag. Weight 0.75. Both are text-based measures of coverage, not official statistics.</li>
             <li><strong>Disasters</strong> — strongest GDACS alert (earthquake, cyclone, flood, volcano, wildfire) in the last 30 days, fading with age. No alert scores 50. Droughts are excluded: they are slow-onset and span dozens of countries for months. Half weight.</li>
           </ul>
           <h3>Scoring</h3>
