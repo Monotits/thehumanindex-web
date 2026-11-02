@@ -25,7 +25,7 @@
  *   - temperature_anomaly       (Berkeley Earth 2024 per-country)
  *   - automation_exposure       (McKinsey Global Institute 2023)
  *   - life_satisfaction         (OECD Better Life Index 2024)
- *   - work_life_balance         (OECD Employment Database 2024)
+ *   - work_life_balance         (OECD How's Life? 2026, data 2025)
  *   - gov_debt_pct_gdp          (IMF WEO October 2024 — 25-country coverage)
  *
  * Future: replace with live API adapters as upstream sources expose them.
@@ -44,6 +44,8 @@ interface SeedEntry {
   year: number;
   values: CountrySeed;
   source: string;
+  /** Per-country reference years where they differ from `year`. */
+  yearByCountry?: Record<string, number>;
 }
 
 const SEEDS: SeedEntry[] = [
@@ -249,21 +251,28 @@ const SEEDS: SeedEntry[] = [
     },
   },
 
-  // ── work_life_balance (% employees working ≥50 hours/week, OECD 2024) ──
-  // Direct stress: higher = worse. Korea and Türkiye lead; Netherlands and
-  // Sweden near zero. India + China not in OECD; estimated from ILO data.
+  // ── work_life_balance (% employees working ≥50 hours/week, OECD How's Life? 2026) ──
+  // Direct stress: higher = worse. Mexico and Türkiye lead; Netherlands and
+  // Spain lowest.
   {
     indicatorId: 'work_life_balance',
-    year: 2024,
-    source: 'OECD Employment Database 2024',
+    // OECD How's Life? 2026 release ("hil2026", WISE Well-being Data Monitor,
+    // github.com/wise-oecd/data_monitor, cwb_page/data/latest point data.RDS,
+    // measure 2_7 "Long hours in paid work"): % of employees aged 15+ usually
+    // working 50+ hours/week. All values read from the file on 2026-11-02.
+    // No current OECD value for JP, KR, SG, AE, IN — the previous seed values
+    // for them had no traceable source and were dropped rather than kept.
+    // Series breaks in 2021 for CH, SE, NL, NO (values not comparable pre-2021).
+    year: 2025,
+    yearByCountry: { BR: 2024, AR: 2019 },
+    source: "OECD How's Life? 2026 (Well-being Data Monitor)",
     values: {
-      US: 10.0, CA: 3.7, MX: 26.5,
-      GB: 12.2, DE: 5.3, FR: 8.0, ES: 4.0, IT: 9.5,
-      NL: 0.4, SE: 1.0, NO: 2.6, PL: 5.1, TR: 28.1, CH: 4.4,
-      JP: 17.8, KR: 26.5, IN: 14.5, SG: 18.5,
-      AU: 12.5, NZ: 13.2,
-      BR: 7.6, AR: 21.0,
-      ZA: 16.2, IL: 14.6, AE: 18.0,
+      US: 8.9, CA: 3.13, MX: 24.68,
+      GB: 9.06, DE: 2.82, FR: 5.89, ES: 2.23, IT: 2.68,
+      NL: 1.84, SE: 4.94, NO: 4.14, PL: 2.84, TR: 23.4, CH: 4.95,
+      AU: 9.68, NZ: 11.11,
+      BR: 6.26, AR: 15.04,
+      ZA: 14.41, IL: 10.43,
     },
   },
 
@@ -335,8 +344,8 @@ export const referenceSeedAdapter: IndicatorAdapter = {
           countryCode: c.code,
           indicatorId: seed.indicatorId,
           rawValue: v,
-          referenceDate: `${seed.year}-12-31`,
-          payload: { source: seed.source, year: seed.year },
+          referenceDate: `${seed.yearByCountry?.[c.code] ?? seed.year}-12-31`,
+          payload: { source: seed.source, year: seed.yearByCountry?.[c.code] ?? seed.year },
         });
       }
     }
