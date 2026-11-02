@@ -15,7 +15,7 @@
  *   - water_stress              (WRI Aqueduct 4.0, 2023)
  *   - air_pollution             (WHO Ambient Air Quality DB 2024)
  *   - burnout                   (id kept for URL/history stability; MEASURES Gallup "daily stress", not burnout)
- *   - divorce_rate              (UN Stats Yearbook + OECD Family DB 2023)
+ *   - divorce_rate              (national statistics + UN DYB 2023, per-country years)
  *   - social_trust              (World Values Survey wave 7 + Edelman Trust 2024)
  *   - loneliness                (OECD Better Life Index + Eurobarometer 2023)
  *   - screen_time               (DataReportal Digital Report 2024)
@@ -97,16 +97,29 @@ const SEEDS: SeedEntry[] = [
     },
   },
 
-  // ── divorce_rate (per 1000 population, UN + OECD Family DB 2023) ──
+  // ── divorce_rate (crude, per 1000 population, latest official year per country) ──
   {
     indicatorId: 'divorce_rate',
-    year: 2023,
-    source: 'UN Demographic Yearbook + OECD Family Database',
+    // Crude divorce rate, divorces per 1,000 total population, latest official
+    // year per country (researched 2026-11-02). Sources: CDC NCHS (US, excludes
+    // CA/HI/IN/MN/NM), ISTAT (IT), Eurostat (SE, CH), TÜİK 2025 (TR), MHLW 2024
+    // final (JP), Statistics Korea 2025 (KR), UN Demographic Yearbook 2023
+    // Table 25 (CA, MX, GB, DE, NL, NO, PL, SG), Israel CBS (IL). Computed from
+    // official counts ÷ population: ES (INE), AU (ABS), NZ (Stats NZ),
+    // BR (IBGE), ZA (Stats SA; upper bound, pop. "exceeded 63m").
+    // No official national crude rate: FR (last 2016), IN, AR, AE → omitted.
+    // US and IT re-checked by hand.
+    year: 2024,
+    yearByCountry: {
+      CA: 2020, MX: 2022, GB: 2022, DE: 2023, ES: 2025, NL: 2023, NO: 2023,
+      PL: 2023, TR: 2025, CH: 2023, KR: 2025, SG: 2022, NZ: 2025, IL: 2022,
+    },
+    source: 'National statistics offices + UN Demographic Yearbook 2023',
     values: {
-      US: 2.3, CA: 2.0, MX: 1.5, GB: 1.8, DE: 1.7, FR: 1.9, ES: 1.9, IT: 1.5,
-      NL: 1.9, SE: 2.5, NO: 1.9, PL: 1.5, TR: 1.8, CH: 1.9,
-      JP: 1.5, KR: 2.0, IN: 0.1, SG: 1.7,
-      AU: 2.1, NZ: 1.9, BR: 1.6, AR: 1.0, ZA: 0.6, IL: 1.8, AE: 1.7,
+      US: 2.3, CA: 1.1, MX: 1.3, GB: 1.3, DE: 1.5, ES: 1.6, IT: 1.3,
+      NL: 1.4, SE: 2.1, NO: 1.6, PL: 1.5, TR: 2.3, CH: 1.8,
+      JP: 1.55, KR: 1.7, SG: 1.7,
+      AU: 1.74, NZ: 1.48, BR: 2.01, ZA: 0.38, IL: 1.6,
     },
   },
 
