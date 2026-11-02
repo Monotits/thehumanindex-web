@@ -83,14 +83,19 @@ const SEEDS: SeedEntry[] = [
   // appendix and have NOT been re-verified against the PDF. Verify before citing.
   {
     indicatorId: 'burnout',
-    year: 2024,
-    source: 'Gallup State of the Global Workplace 2024',
+    // Gallup State of the Global Workplace 2026 (published Apr 2026; fieldwork
+    // Jan–Dec 2025). "X% of employees experienced stress a lot of the previous
+    // day", from each country's public country-level-data page on gallup.com
+    // (verified 2026-11-02; TR, PL, CA re-checked by hand).
+    year: 2025,
+    source: 'Gallup State of the Global Workplace 2026',
     values: {
-      US: 49, CA: 47, MX: 47, GB: 39, DE: 38, FR: 44, ES: 42, IT: 38,
-      NL: 31, SE: 32, NO: 32, PL: 41, TR: 56, CH: 30,
-      JP: 35, KR: 38, IN: 35, SG: 38,
-      AU: 44, NZ: 42, BR: 41, AR: 40, ZA: 50, IL: 52, AE: 41,
+      US: 50, CA: 58, MX: 41, GB: 46, DE: 38, FR: 39, ES: 39, IT: 51,
+      NL: 30, SE: 34, NO: 43, PL: 22, TR: 66, CH: 34,
+      JP: 39, KR: 39, IN: 28, SG: 43,
+      AU: 50, NZ: 45, BR: 45, AR: 41, ZA: 36, IL: 42, AE: 33,
     },
+  },
   },
 
   // ── divorce_rate (per 1000 population, UN + OECD Family DB 2023) ──
