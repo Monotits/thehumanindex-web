@@ -181,7 +181,7 @@ export async function renderCountryCard(rawCode: string, format: CardFormat): Pr
           <div style={{ display: 'flex', fontSize: story ? 58 : 44, fontWeight: 900, letterSpacing: -1 }}>Where does your country rank?</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 14 }}>
             <div style={{ display: 'flex', fontSize: story ? 40 : 34, color: accent, fontWeight: 900 }}>thehumanindex.org</div>
-            <div style={{ display: 'flex', fontSize: 22, color: C.dim }}>{composite !== null && band ? `Composite ${composite.toFixed(1)}/100 · 31 indicators` : '31 indicators'}</div>
+            <div style={{ display: 'flex', fontSize: 22, color: C.dim }}>{composite !== null && band ? `Composite ${composite.toFixed(1)}/100 · 29 indicators` : '29 indicators'}</div>
           </div>
         </div>
       </div>

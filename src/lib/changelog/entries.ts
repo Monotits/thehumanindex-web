@@ -15,9 +15,31 @@ export interface ChangeEntry {
   effect?: string;       // what moved, if anything
 }
 
-export const CURRENT_METHOD_VERSION = '2.1';
+export const CURRENT_METHOD_VERSION = '2.2';
 
 export const CHANGELOG: ChangeEntry[] = [
+  {
+    date: '2026-11-02', version: '2.2', kind: 'methodology',
+    title: 'Two untraceable indicators retired; four re-sourced',
+    detail:
+      'Digital addiction and automation exposure are no longer scored: no cross-country source exists for the values we had (no multi-country adult survey of problematic device use; the automation figures were a triangulation without per-country citations). The Technological meta-index now rests on daily screen time until citable measures are found. ' +
+      'Air pollution now comes from the World Bank API (PM2.5 population-weighted exposure, IHME GBD 2023) and updates automatically. ' +
+      'Life satisfaction: World Happiness Report 2026 (2023–2025 average) instead of OECD Better Life 2024. ' +
+      'Loneliness: Gallup World Poll 2023 ("lonely a lot of yesterday"), all 25 countries. ' +
+      'Social trust: EVS/WVS wave 7 (fieldwork 2017–2022) via Our World in Data; Israel, South Africa and the UAE have no wave-7 value and were dropped.',
+    effect: 'Composite now uses 29 indicators. Scores move on the next daily refresh; the historical index (hsi-3) gains air pollution.',
+  },
+  {
+    date: '2026-11-02', version: '2.1', kind: 'data',
+    title: 'Depression and anxiety: IHME GBD 2023',
+    detail: 'Age-standardized prevalence from the Global Burden of Disease 2023 round (was GBD 2021). Anxiety values above the 10% normalization bound (e.g. Netherlands 12.4%) score 100.',
+  },
+  {
+    date: '2026-11-02', version: '2.1', kind: 'new',
+    title: 'Live layer: geopolitical risk and policy uncertainty',
+    detail:
+      'Two monthly signals join the live layer: the Caldara–Iacoviello Geopolitical Risk index (22 countries) and the Economic Policy Uncertainty index (14 countries). Scored as momentum of the 3-month average on a log scale against each country’s own history, at 0.75 weight.',
+  },
   {
     date: '2026-11-02', version: '2.1', kind: 'data',
     title: 'Survey and report indicators refreshed to their latest editions',

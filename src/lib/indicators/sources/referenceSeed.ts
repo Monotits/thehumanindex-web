@@ -3,7 +3,7 @@
  *
  * Several indicators in our framework come from research reports published
  * once a year (Gallup State of Global Workplace, OECD social surveys,
- * DataReportal Digital Reports, WHO Ambient Air Quality Database, WRI
+ * DataReportal Digital Reports, WRI
  * Aqueduct). These don't have live REST APIs we can poll on a daily cron.
  *
  * This adapter bundles the most-recent published values for each (country,
@@ -13,18 +13,15 @@
  *
  * Indicators served:
  *   - water_stress              (WRI Aqueduct 4.0, 2023)
- *   - air_pollution             (WHO Ambient Air Quality DB 2024)
  *   - burnout                   (id kept for URL/history stability; MEASURES Gallup "daily stress", not burnout)
  *   - divorce_rate              (national statistics + UN DYB 2023, per-country years)
- *   - social_trust              (World Values Survey wave 7 + Edelman Trust 2024)
- *   - loneliness                (OECD Better Life Index + Eurobarometer 2023)
- *   - screen_time               (DataReportal Digital Report 2024)
- *   - digital_addiction         (Pew Research + Eurostat ICT 2023)
+ *   - social_trust              (EVS/WVS wave 7 via OWID, 2017–2022)
+ *   - loneliness                (Gallup World Poll 2023)
+ *   - screen_time               (DataReportal Digital 2025, data Q3 2024)
  *   - depression_prevalence     (IHME GBD 2023, age-standardized)
  *   - anxiety_prevalence        (IHME GBD 2023, age-standardized)
  *   - temperature_anomaly       (Berkeley Earth 2024 per-country)
- *   - automation_exposure       (McKinsey Global Institute 2023)
- *   - life_satisfaction         (OECD Better Life Index 2024)
+ *   - life_satisfaction         (World Happiness Report 2026, 2023–2025)
  *   - work_life_balance         (OECD How's Life? 2026, data 2025)
  *   - gov_debt_pct_gdp          (IMF WEO October 2024 — 25-country coverage)
  *
@@ -60,19 +57,6 @@ const SEEDS: SeedEntry[] = [
       NL: 32, SE: 8, NO: 6, PL: 38, TR: 60, CH: 18,
       JP: 18, KR: 50, IN: 70, SG: 70,
       AU: 30, NZ: 15, BR: 22, AR: 30, ZA: 65, IL: 80, AE: 90,
-    },
-  },
-
-  // ── air_pollution (WHO Ambient Air Quality 2024, annual mean PM2.5 µg/m³) ──
-  {
-    indicatorId: 'air_pollution',
-    year: 2024,
-    source: 'WHO Ambient Air Quality Database 2024',
-    values: {
-      US: 8.4, CA: 7.3, MX: 20.7, GB: 9.6, DE: 11.2, FR: 11.5, ES: 9.7, IT: 16.8,
-      NL: 11.4, SE: 5.6, NO: 6.0, PL: 22.4, TR: 27.4, CH: 9.2,
-      JP: 9.5, KR: 18.5, IN: 53.3, SG: 11.0,
-      AU: 7.1, NZ: 6.0, BR: 14.0, AR: 14.2, ZA: 24.1, IL: 16.4, AE: 38.0,
     },
   },
 
@@ -123,29 +107,41 @@ const SEEDS: SeedEntry[] = [
     },
   },
 
-  // ── social_trust (% trusting "most people", World Values Survey wave 7 + Edelman) ──
+  // ── social_trust (% agreeing "most people can be trusted") ──
   {
     indicatorId: 'social_trust',
-    year: 2023,
-    source: 'World Values Survey wave 7 + Edelman Trust Barometer',
+    // Integrated Values Surveys v4 (EVS + WVS joint wave 7, fieldwork
+    // 2017–2022), A165 / WVS7 Q57, "don't know" kept in the denominator, as
+    // processed by Our World in Data (ourworldindata.org/grapher/
+    // self-reported-trust-attitudes). Dated to the wave close (2022), as OWID
+    // and IVS do; wave 8 is not yet released. All 22 values read from the
+    // OWID CSV on 2026-11-02. IL (last value 2004), ZA (2014) and AE (never
+    // surveyed) have no wave-7 value and were dropped.
+    year: 2022,
+    source: 'Integrated Values Surveys (EVS/WVS wave 7) via Our World in Data',
     values: {
-      US: 37, CA: 45, MX: 14, GB: 42, DE: 45, FR: 26, ES: 35, IT: 26,
-      NL: 64, SE: 63, NO: 72, PL: 24, TR: 12, CH: 56,
-      JP: 36, KR: 28, IN: 17, SG: 44,
-      AU: 47, NZ: 58, BR: 7, AR: 18, ZA: 24, IL: 33, AE: 27,
+      US: 37.0, CA: 46.7, MX: 10.5, GB: 43.3, DE: 41.6, FR: 26.3, ES: 41.0, IT: 26.6,
+      NL: 57.0, SE: 62.8, NO: 72.1, PL: 24.1, TR: 14.0, CH: 58.5,
+      JP: 33.7, KR: 32.9, IN: 16.9, SG: 34.4,
+      AU: 48.5, NZ: 56.6, BR: 6.5, AR: 19.2,
     },
   },
 
-  // ── loneliness (% reporting frequent loneliness; OECD + Eurobarometer 2023) ──
+  // ── loneliness (% who felt lonely "a lot of the day yesterday") ──
   {
     indicatorId: 'loneliness',
+    // Gallup World Poll 2023: "Did you experience the following feelings during
+    // a lot of the day yesterday? How about loneliness?" — % yes, 142 countries.
+    // Values from Gallup's published map dataset (datawrapper WbKq3 v4, linked
+    // from news.gallup.com/poll/646718), all 25 read on 2026-11-02; PL 11%
+    // matches the article text.
     year: 2023,
-    source: 'OECD Better Life + Eurobarometer Loneliness Survey',
+    source: 'Gallup World Poll 2023 (loneliness a lot of yesterday)',
     values: {
-      US: 22, CA: 18, MX: 12, GB: 21, DE: 19, FR: 18, ES: 17, IT: 16,
-      NL: 14, SE: 18, NO: 16, PL: 20, TR: 24, CH: 14,
-      JP: 23, KR: 26, IN: 8, SG: 19,
-      AU: 17, NZ: 15, BR: 13, AR: 17, ZA: 20, IL: 19, AE: 16,
+      US: 20, CA: 21, MX: 15, GB: 21, DE: 20, FR: 23, ES: 19, IT: 19,
+      NL: 14, SE: 14, NO: 14, PL: 11, TR: 30, CH: 13,
+      JP: 14, KR: 21, IN: 25, SG: 12,
+      AU: 18, NZ: 17, BR: 16, AR: 21, ZA: 24, IL: 19, AE: 27,
     },
   },
 
@@ -164,19 +160,6 @@ const SEEDS: SeedEntry[] = [
       NL: 5.7, SE: 6.0, NO: 5.6, PL: 6.4, TR: 7.2, CH: 5.8,
       JP: 4.2, KR: 5.4, IN: 6.8, SG: 6.6,
       AU: 6.1, NZ: 6.5, BR: 9.2, AR: 8.7, ZA: 9.6, IL: 7.4, AE: 8.0,
-    },
-  },
-
-  // ── digital_addiction (% reporting problematic device use; Pew + Eurostat) ──
-  {
-    indicatorId: 'digital_addiction',
-    year: 2023,
-    source: 'Pew Research + Eurostat ICT Surveys',
-    values: {
-      US: 31, CA: 28, MX: 28, GB: 30, DE: 24, FR: 25, ES: 27, IT: 28,
-      NL: 22, SE: 20, NO: 22, PL: 25, TR: 35, CH: 21,
-      JP: 21, KR: 33, IN: 30, SG: 29,
-      AU: 27, NZ: 25, BR: 32, AR: 30, ZA: 28, IL: 28, AE: 33,
     },
   },
 
@@ -238,41 +221,20 @@ const SEEDS: SeedEntry[] = [
     },
   },
 
-  // ── automation_exposure (% work activities automatable by 2030) ──
-  // Triangulated from McKinsey "Generative AI and the future of work" (2023),
-  // OECD AI Country Dashboard, and PwC AI sector studies. Heavy-service +
-  // digitized economies (KR, AE, SG, TR) score highest; agrarian/informal
-  // labor markets (IN, BR, ZA) lowest.
-  {
-    indicatorId: 'automation_exposure',
-    year: 2023,
-    source: 'McKinsey Global Institute / OECD AI Dashboard / PwC',
-    values: {
-      US: 30, CA: 28, MX: 26,
-      GB: 30, DE: 28, FR: 30, ES: 28, IT: 27,
-      NL: 28, SE: 27, NO: 26, PL: 30, TR: 32, CH: 25,
-      JP: 27, KR: 33, IN: 21, SG: 32,
-      AU: 27, NZ: 25,
-      BR: 24, AR: 26,
-      ZA: 25, IL: 30, AE: 33,
-    },
-  },
-
-  // ── life_satisfaction (Cantril ladder 0-10, OECD Better Life 2024) ──
-  // Nordic countries top the rankings (7.4-7.5); East Asia mid-low; ZA at
-  // floor (4.9). Inverted in normalize: high = low stress, low = high stress.
+  // ── life_satisfaction (Cantril ladder 0-10; inverted in normalize) ──
   {
     indicatorId: 'life_satisfaction',
-    year: 2024,
-    source: 'OECD Better Life Index 2024',
+    // World Happiness Report 2026, Figure 2.1: national average Cantril ladder,
+    // Gallup World Poll 2023–2025 three-year average. Values read from Our World
+    // in Data's WHR series (grapher/happiness-cantril-ladder, year 2025) on
+    // 2026-11-02 and matched to a second WHR 2026 copy to 3 decimals.
+    year: 2025,
+    source: 'World Happiness Report 2026 (Gallup World Poll 2023–2025)',
     values: {
-      US: 6.7, CA: 7.0, MX: 6.5,
-      GB: 6.8, DE: 6.8, FR: 6.6, ES: 6.5, IT: 6.3,
-      NL: 7.1, SE: 7.4, NO: 7.3, PL: 6.1, TR: 5.7, CH: 7.4,
-      JP: 5.9, KR: 5.8, IN: 4.0, SG: 6.5,
-      AU: 7.1, NZ: 7.0,
-      BR: 6.1, AR: 6.0,
-      ZA: 4.9, IL: 7.1, AE: 6.7,
+      US: 6.816, CA: 6.741, MX: 6.972, GB: 6.694, DE: 6.882, FR: 6.586, ES: 6.540, IT: 6.574,
+      NL: 7.223, SE: 7.255, NO: 7.242, PL: 6.768, TR: 5.300, CH: 7.018,
+      JP: 6.130, KR: 6.040, IN: 4.536, SG: 6.585,
+      AU: 6.916, NZ: 6.995, BR: 6.634, AR: 6.430, ZA: 5.009, IL: 7.187, AE: 6.821,
     },
   },
 

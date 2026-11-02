@@ -4,11 +4,11 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'The Human Index Dataset — API + CSV access',
   description:
-    '25 countries, 31 indicators, 5 meta-indexes. Pipeline checks daily; underlying sources publish on their own cadence. Free programmatic access via REST API.',
+    '25 countries, 29 indicators, 5 meta-indexes. Pipeline checks daily; underlying sources publish on their own cadence. Free programmatic access via REST API.',
   openGraph: {
     title: 'The Human Index Dataset — API + CSV access',
     description:
-      '25 countries, 31 indicators, 5 meta-indexes. Free programmatic access via REST API, CC BY-NC 4.0.',
+      '25 countries, 29 indicators, 5 meta-indexes. Free programmatic access via REST API, CC BY-NC 4.0.',
     url: 'https://thehumanindex.org/dataset',
     type: 'website',
     siteName: 'The Human Index',
@@ -29,7 +29,7 @@ const ENDPOINTS = [
     method: 'GET',
     path: '/api/trends/[country]/[indicator]',
     description: 'Daily snapshots — up to 90 days for one (country, indicator) pair.',
-    sample: `curl https://thehumanindex.org/api/trends/us/automation_exposure`,
+    sample: `curl https://thehumanindex.org/api/trends/us/unemployment_rate`,
   },
   {
     method: 'GET',
@@ -108,7 +108,7 @@ export default function DatasetPage() {
               The Human Index Dataset.
             </h1>
             <p className="mt-5 text-base sm:text-lg text-foreground-muted text-pretty max-w-2xl leading-relaxed">
-              25 countries. 31 indicators. 5 meta-indexes. The pipeline checks
+              25 countries. 29 indicators. 5 meta-indexes. The pipeline checks
               daily; underlying sources publish on their own cadence.
               Every row traces back to a public statistical source.
               Free programmatic access for research, journalism, and AI

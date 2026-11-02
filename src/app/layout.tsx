@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     template: '%s | The Human Index',
   },
   description:
-    'A live civilizational stress composite across 25 countries and 31 indicators, grouped into five meta-indexes: economic, social, mental, technological, environmental. Every number traceable to its source.',
+    'A live civilizational stress composite across 25 countries and 29 indicators, grouped into five meta-indexes: economic, social, mental, technological, environmental. Every number traceable to its source.',
   keywords: [
     'civilizational stress index',
     'composite stress score',

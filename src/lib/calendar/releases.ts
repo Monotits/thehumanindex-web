@@ -42,9 +42,9 @@ export const RELEASE_SOURCES: ReleaseSource[] = [
     signalIds: ['job_postings_momentum'], calendarUrl: 'https://github.com/hiring-lab/job_postings_tracker', note: 'Daily series, published in weekly batches.' },
   { id: 'gdacs', short: 'disaster alerts', name: 'Disaster alerts', publisher: 'GDACS (UN OCHA / EC JRC)', cadence: 'event',
     calendarUrl: 'https://www.gdacs.org/', note: 'Continuous; checked daily.' },
-  { id: 'worldbank', short: 'annual indicators', name: 'Annual indicators (15)', publisher: 'World Bank', cadence: 'irregular',
+  { id: 'worldbank', short: 'annual indicators', name: 'Annual indicators (16)', publisher: 'World Bank', cadence: 'irregular',
     calendarUrl: 'https://datatopics.worldbank.org/world-development-indicators/', note: 'World Development Indicators update several times a year; we re-read monthly.' },
-  { id: 'reference', short: 'survey indicators', name: 'Survey & report indicators (14)', publisher: 'Gallup, OECD, WHO, IHME, DataReportal, others', cadence: 'irregular',
+  { id: 'reference', short: 'survey indicators', name: 'Survey & report indicators (11)', publisher: 'Gallup, OECD, IHME, WHR, EVS/WVS, DataReportal, others', cadence: 'irregular',
     calendarUrl: 'https://thehumanindex.org/methodology', note: 'Annual reports; refreshed by hand when a new edition is published.' },
 ];
 

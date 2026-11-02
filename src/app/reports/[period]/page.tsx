@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { anonClient, describeContributor, liveTone, LIVE_TONE_LABEL, LIVE_TONE_TEXT_CLASS, topDriver } from '@/lib/live/present';
 import { loadReportData, REPORTS, reportTitle } from '@/lib/reports';
-import { CHANGELOG, CURRENT_METHOD_VERSION } from '@/lib/changelog/entries';
+import { CHANGELOG } from '@/lib/changelog/entries';
 import { CiteBox } from '@/components/cite/CiteBox';
 import { BAND_LABELS, BAND_TEXT_CLASS, type StressBand } from '@/lib/ui/tokens';
 
@@ -47,7 +47,7 @@ export default async function ReportPage({ params }: { params: Promise<{ period:
       <section className="border-b border-border bg-background-alt/40">
         <div className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <p className="text-xs uppercase tracking-wider text-foreground-muted mb-3 font-medium">
-            Monthly report · No. {r.number} · {published} · methodology v{CURRENT_METHOD_VERSION}
+            Monthly report · No. {r.number} · {published} · methodology v{r.methodVersion}
           </p>
           <h1 className="font-serif text-4xl sm:text-5xl font-semibold tracking-tight text-balance">{reportTitle(r)}</h1>
           <p className="mt-6 font-serif text-xl text-foreground-muted text-pretty leading-relaxed">

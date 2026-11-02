@@ -56,6 +56,7 @@ export const INDICATOR_TO_WB_CODE: Record<string, string> = {
   age_dependency_ratio: 'SP.POP.DPND',        // Dependents as % of working-age (15-64)
   adolescent_fertility_rate: 'SP.ADO.TFRT',   // Births per 1,000 women 15-19
   homicide_rate: 'VC.IHR.PSRC.P5',            // Intentional homicides per 100k
+  air_pollution: 'EN.ATM.PM25.MC.M3',         // PM2.5 mean annual exposure, µg/m³ (IHME GBD 2023)
   // income_share_top_10: 'SI.DST.10TH.10',   // optional future
 };
 

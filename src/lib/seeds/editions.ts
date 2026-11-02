@@ -18,15 +18,12 @@ const CADENCE: Record<string, Cadence> = {
   temperature_anomaly: { kind: 'annual', usually: 'January' },      // Berkeley Earth
   divorce_rate: { kind: 'irregular', note: 'compiled from national statistics offices, latest year per country' },
   work_life_balance: { kind: 'annual', usually: "OECD How's Life? releases" },
-  social_trust: { kind: 'irregular', note: 'WVS waves ~5 years; Edelman annual (January)' },
-  life_satisfaction: { kind: 'irregular', note: 'OECD Better Life Index' },
-  loneliness: { kind: 'irregular' },
-  digital_addiction: { kind: 'irregular' },
+  social_trust: { kind: 'irregular', note: 'EVS/WVS waves ~5 years' },
+  life_satisfaction: { kind: 'annual', usually: 'March (World Happiness Report)' },
+  loneliness: { kind: 'irregular', note: 'Gallup World Poll loneliness item, published irregularly' },
   depression_prevalence: { kind: 'irregular', note: 'IHME GBD rounds every few years' },
   anxiety_prevalence: { kind: 'irregular', note: 'IHME GBD rounds every few years' },
   water_stress: { kind: 'irregular', note: 'WRI Aqueduct versions' },
-  air_pollution: { kind: 'irregular' },
-  automation_exposure: { kind: 'irregular' },
 };
 
 export interface SeedEditionRow {

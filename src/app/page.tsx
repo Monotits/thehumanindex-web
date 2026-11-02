@@ -16,7 +16,7 @@ import { loadLatestLive, newestReference, liveTone, LIVE_TONE_LABEL, LIVE_TONE_T
 export const metadata: Metadata = {
   title: 'The Human Index — Civilizational Stress Tracker',
   description:
-    'Civilizational stress composite across 25 countries and 31 indicators. Five meta-indexes: economic, social, mental, technological, environmental. Every score traceable to its source.',
+    'Civilizational stress composite across 25 countries and 29 indicators. Five meta-indexes: economic, social, mental, technological, environmental. Every score traceable to its source.',
   alternates: { canonical: 'https://thehumanindex.org' },
 };
 
@@ -306,7 +306,7 @@ export default async function HomePage() {
               .
             </h1>
             <p className="mt-6 text-lg text-foreground-muted text-pretty max-w-2xl">
-              The Human Index tracks 25 countries across 31 indicators in five domains —
+              The Human Index tracks 25 countries across 29 indicators in five domains —
               economic, social, mental, technological, environmental. The pipeline
               checks daily; sources publish on their own cadence. Every
               number traceable.

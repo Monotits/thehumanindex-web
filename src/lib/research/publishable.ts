@@ -13,7 +13,9 @@
  * after the indicator itself was removed.
  */
 
-export const RETIRED_INDICATOR_IDS = ['ai_job_anxiety'] as const;
+// digital_addiction + automation_exposure: deactivated in migration 034 (no
+// citable cross-country source for the seeded values).
+export const RETIRED_INDICATOR_IDS = ['ai_job_anxiety', 'digital_addiction', 'automation_exposure'] as const;
 
 const RETIRED_TEXT_PATTERN = /ai[\s-]?(job|employment)[\s-]?anxiety/i;
 

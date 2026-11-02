@@ -18,7 +18,7 @@ export function OrganizationJsonLd() {
         url: 'https://thehumanindex.org',
         logo: 'https://thehumanindex.org/logo-icon.svg',
         description:
-          'A daily-refreshed civilizational stress index tracking 25 countries across 31 indicators grouped into five meta-indexes: economic, social, mental, technological, environmental.',
+          'A daily-refreshed civilizational stress index tracking 25 countries across 29 indicators grouped into five meta-indexes: economic, social, mental, technological, environmental.',
         sameAs: [],
       }}
     />
@@ -35,7 +35,7 @@ export function WebSiteJsonLd() {
         name: 'The Human Index',
         url: 'https://thehumanindex.org',
         description:
-          'A civilizational stress composite across 25 countries and 31 indicators, grouped into five meta-indexes: economic, social, mental, technological, environmental.',
+          'A civilizational stress composite across 25 countries and 29 indicators, grouped into five meta-indexes: economic, social, mental, technological, environmental.',
       }}
     />
   )
@@ -144,7 +144,7 @@ export function DatasetJsonLd() {
         '@type': 'Dataset',
         name: 'The Human Index — Civilizational Stress Dataset',
         description:
-          'Civilizational stress composite across 25 countries and 31 indicators, grouped into five meta-indexes (economic, social, mental, technological, environmental). Sourced from World Bank, Eurostat, IMF WEO, OECD, WHO, NASA GISS, Berkeley Earth, IHME GBD, WRI Aqueduct, and Gallup.',
+          'Civilizational stress composite across 25 countries and 29 indicators, grouped into five meta-indexes (economic, social, mental, technological, environmental). Sourced from World Bank, Eurostat, IMF WEO, OECD, WHO, NASA GISS, Berkeley Earth, IHME GBD, WRI Aqueduct, and Gallup.',
         url: 'https://thehumanindex.org',
         license: 'https://creativecommons.org/licenses/by/4.0/',
         creator: {

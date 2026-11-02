@@ -35,8 +35,10 @@ export const TOPIC_CATALOG: TopicEntry[] = [
     subhead: 'Where automation is reshaping the workforce — and which countries are most exposed.',
     description:
       'Live data on AI displacement, automation exposure, and labor-market disruption across 25 countries. The signals shaping work in 2026 and beyond.',
-    headlineIndicator: 'automation_exposure',
-    relatedIndicators: ['ai_job_anxiety', 'unemployment_rate'],
+    // automation_exposure was deactivated (migration 034: no citable source);
+    // the topic leads with the labour-market outcome until one exists.
+    headlineIndicator: 'unemployment_rate',
+    relatedIndicators: ['youth_unemployment_rate'],
     meta: 'technological',
     pulseKeywords: ['ai', 'automation', 'displacement', 'jobs', 'labor', 'workforce'],
     emoji: '🤖',

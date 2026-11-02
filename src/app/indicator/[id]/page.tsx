@@ -47,7 +47,7 @@ interface PulsePreview {
   published_at: string;
 }
 
-// ── Static params (prerender all 31 indicators) ────────────────────
+// ── Static params (prerender all 29 indicators) ────────────────────
 
 export async function generateStaticParams() {
   const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

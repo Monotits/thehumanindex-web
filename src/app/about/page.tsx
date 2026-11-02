@@ -5,12 +5,12 @@ export const dynamic = 'force-static';
 export const metadata = {
   title: 'About',
   description:
-    'The Human Index is a civilizational stress scoreboard — 25 countries, 31 indicators, 5 meta-indexes. Built to make abstract pressures legible and traceable.',
+    'The Human Index is a civilizational stress scoreboard — 25 countries, 29 indicators, 5 meta-indexes. Built to make abstract pressures legible and traceable.',
   alternates: { canonical: 'https://thehumanindex.org/about' },
   openGraph: {
     title: 'About — The Human Index',
     description:
-      'A civilizational stress scoreboard — 25 countries, 31 indicators, 5 meta-indexes. Live, sourced, traceable.',
+      'A civilizational stress scoreboard — 25 countries, 29 indicators, 5 meta-indexes. Live, sourced, traceable.',
     url: 'https://thehumanindex.org/about',
     type: 'website',
     siteName: 'The Human Index',

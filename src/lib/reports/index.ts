@@ -11,11 +11,12 @@ export interface ReportMeta {
   period: string;       // 'YYYY-MM'
   number: number;
   publishedAt: string;  // ISO timestamp the data is frozen at
+  methodVersion: string; // composite methodology version in force at publishedAt
 }
 
 /** Newest first. Add one entry per month. */
 export const REPORTS: ReportMeta[] = [
-  { period: '2026-11', number: 1, publishedAt: '2026-11-02T16:00:00Z' },
+  { period: '2026-11', number: 1, publishedAt: '2026-11-02T16:00:00Z', methodVersion: '2.1' },
 ];
 
 export function reportTitle(r: ReportMeta): string {

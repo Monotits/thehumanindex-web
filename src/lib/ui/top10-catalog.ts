@@ -41,7 +41,7 @@ export const TOP_10_CATALOG: Top10Entry[] = [
     slug: 'most-stressed-countries',
     title: 'The 10 most stressed countries in 2026',
     description:
-      'A live ranking of the world\'s most stressed countries by composite civilizational stress score across 5 dimensions and 31 indicators.',
+      'A live ranking of the world\'s most stressed countries by composite civilizational stress score across 5 dimensions and 29 indicators.',
     subhead: 'Composite stress score across 25 tracked countries.',
     source: { kind: 'composite' },
     direction: 'most',
@@ -57,7 +57,7 @@ export const TOP_10_CATALOG: Top10Entry[] = [
     source: { kind: 'composite' },
     direction: 'least',
     editorial:
-      'Low composite stress does not mean problem-free — every country has hot spots. But on the weighted aggregate of 31 indicators, these are the most functional societies right now.',
+      'Low composite stress does not mean problem-free — every country has hot spots. But on the weighted aggregate of 29 indicators, these are the most functional societies right now.',
   },
   {
     slug: 'countries-with-highest-loneliness',
@@ -69,17 +69,6 @@ export const TOP_10_CATALOG: Top10Entry[] = [
     direction: 'most',
     editorial:
       'Loneliness is one of the few stress signals that does not move with GDP — wealthy countries can have high loneliness, poor countries can have low loneliness. The pattern reveals something else.',
-  },
-  {
-    slug: 'countries-most-exposed-to-automation',
-    title: 'Countries most exposed to AI and automation',
-    description:
-      'Which workforces face the largest displacement risk from AI and automation. Live ranking sourced from labor-mix exposure models.',
-    subhead: 'Workforce composition exposure to AI displacement.',
-    source: { kind: 'indicator', indicator_id: 'automation_exposure' },
-    direction: 'most',
-    editorial:
-      'Automation exposure ranks countries by how much of their workforce sits in roles that LLMs and automation are closest to replacing. The economies most exposed are usually the most digitized — a counter-intuitive result of being technologically ahead.',
   },
   {
     slug: 'countries-with-housing-crisis',

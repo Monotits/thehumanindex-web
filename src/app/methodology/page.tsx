@@ -36,7 +36,7 @@ const CONFIDENCE_TIERS = [
 export const metadata = {
   title: 'Methodology — How the composite is computed',
   description:
-    'How The Human Index turns 31 indicators across 25 countries into a single composite stress score. Sources, normalization, weights, fallback chain, freshness tiers, confidence tiers — all of it.',
+    'How The Human Index turns 29 indicators across 25 countries into a single composite stress score. Sources, normalization, weights, fallback chain, freshness tiers, confidence tiers — all of it.',
   alternates: { canonical: 'https://thehumanindex.org/methodology' },
   openGraph: {
     title: 'Methodology — How the composite is computed',
@@ -124,7 +124,7 @@ export default function MethodologyPage() {
             For every country we track, on every cron run, the system produces:
           </p>
           <ul>
-            <li>A normalized score for each of <strong>31 indicators</strong> on a 0–100 stress scale (lower means less stress).</li>
+            <li>A normalized score for each of <strong>29 indicators</strong> on a 0–100 stress scale (lower means less stress).</li>
             <li>A score for each of <strong>5 meta-indexes</strong>, averaged from its constituent indicators.</li>
             <li>One <strong>composite</strong> score per country, a weighted average of the 5 meta-indexes.</li>
           </ul>

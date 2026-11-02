@@ -138,7 +138,7 @@ export function SiteFooter() {
           <div className="flex items-center gap-3">
             <span>Pipeline checks daily</span>
             <span aria-hidden="true">·</span>
-            <span>25 countries · 31 indicators</span>
+            <span>25 countries · 29 indicators</span>
           </div>
         </div>
       </div>

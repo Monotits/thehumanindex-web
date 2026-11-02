@@ -25,7 +25,7 @@ import type { NormalizedMeasurement } from '../indicators/orchestrator';
 import { normalizeIndicator, type IndicatorRegistryRow, type MetaIndex } from '../indicators/types';
 import { fetchOneChunk, INDICATOR_TO_WB_CODE, WB_ISO2_TO_ISO3, WB_ISO3_TO_ISO2 } from '../indicators/sources/worldBank';
 
-export const HSI_METHOD_VERSION = 'hsi-2';
+export const HSI_METHOD_VERSION = 'hsi-3';
 export const CARRY_FORWARD_YEARS = 5;
 export const HSI_START_YEAR = 2000;
 

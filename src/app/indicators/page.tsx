@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Every indicator we track — The Human Index',
     description:
-      'All 31 indicators across 25 countries, grouped by meta-index domain, each with a full country ranking.',
+      'All 29 indicators across 25 countries, grouped by meta-index domain, each with a full country ranking.',
     url: 'https://thehumanindex.org/indicators',
     type: 'website',
     siteName: 'The Human Index',
