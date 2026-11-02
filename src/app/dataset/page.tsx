@@ -39,6 +39,18 @@ const ENDPOINTS = [
   },
   {
     method: 'GET',
+    path: '/api/live/[country]',
+    description: 'Live layer — latest fast signals and up to 180 days of daily Live scores.',
+    sample: `curl https://thehumanindex.org/api/live/tr`,
+  },
+  {
+    method: 'GET',
+    path: '/api/historical/[country]',
+    description: 'Historical structural index, annual since 2000 (?indicators=1 adds World Bank inputs).',
+    sample: `curl https://thehumanindex.org/api/historical/tr`,
+  },
+  {
+    method: 'GET',
     path: '/api/pulse',
     description: 'Latest weekly Pulse editorial entries, filterable by country and locale.',
     sample: `curl 'https://thehumanindex.org/api/pulse?locale=en&limit=20'`,
@@ -55,6 +67,12 @@ const ENDPOINTS = [
     description: 'Long-form research article listings, filterable by topic and meta-index.',
     sample: `curl 'https://thehumanindex.org/api/research?locale=en&meta=economic'`,
   },
+];
+
+const DOWNLOADS = [
+  { href: '/api/export?dataset=scores', name: 'Latest scores — all countries', detail: 'Composite, 5 domains, data coverage, Live score. CC BY-NC 4.0.' },
+  { href: '/api/export?dataset=historical', name: 'Historical structural index, 2000–', detail: 'Annual, all countries, 4 domains. CC BY-NC 4.0.' },
+  { href: '/api/export?dataset=worldbank', name: 'World Bank inputs, 2000–', detail: 'Raw annual values + 0–100 stress scores for 15 indicators. World Bank Open Data, CC BY 4.0.' },
 ];
 
 const USE_CASES = [
@@ -130,6 +148,22 @@ export default function DatasetPage() {
       </section>
 
       {/* ── ENDPOINTS ── */}
+      <section id="downloads" className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">Download CSV</h2>
+        <p className="text-foreground-muted mb-6 max-w-2xl">
+          Add <code>&amp;country=tr</code> (any ISO-2 code) for a single country. Raw values from proprietary
+          reference sources are not redistributed in bulk; their normalised scores are included in the composite.
+        </p>
+        <ul className="divide-y divide-border border-y border-border">
+          {DOWNLOADS.map((d) => (
+            <li key={d.href} className="py-4 flex flex-wrap items-baseline justify-between gap-2">
+              <a href={d.href} className="font-medium underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground">{d.name}</a>
+              <span className="text-sm text-foreground-muted">{d.detail}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
         <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">
           Endpoints

@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { LivePanel } from '@/components/live/LivePanel';
 import { loadLiveCountry, anonClient } from '@/lib/live/present';
 import { AnnualHistoryChart } from '@/components/history/AnnualHistoryChart';
+import { CiteBox } from '@/components/cite/CiteBox';
 import { loadHistorical, biggestJump } from '@/lib/history/present';
 import { adapterMeta } from '@/lib/indicators/adapterRegistry';
 import { StressBand } from '@/components/ui/StressBand';
@@ -634,6 +635,29 @@ export default async function CountryDetailPage({
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* ── CITE + DOWNLOAD ── */}
+      <section id="cite" className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border scroll-mt-24">
+        <div className="grid lg:grid-cols-2 gap-8">
+          <CiteBox
+            title={`${country.name} — civilizational stress score`}
+            url={`https://thehumanindex.org/country/${country.code.toLowerCase()}`}
+            accessed={computedAt ?? undefined}
+          />
+          <div className="rounded-lg border border-border bg-background-alt/30 p-5">
+            <h3 className="text-sm font-medium uppercase tracking-wider text-foreground-muted mb-3">Download</h3>
+            <ul className="space-y-2 text-sm">
+              <li><a className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground" href={`/api/export?dataset=scores&country=${country.code.toLowerCase()}`}>Latest scores (CSV)</a> <span className="text-foreground-subtle">· composite, domains, Live · CC BY-NC 4.0</span></li>
+              <li><a className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground" href={`/api/export?dataset=historical&country=${country.code.toLowerCase()}`}>Historical index 2000– (CSV)</a> <span className="text-foreground-subtle">· annual · CC BY-NC 4.0</span></li>
+              <li><a className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground" href={`/api/export?dataset=worldbank&country=${country.code.toLowerCase()}`}>World Bank inputs (CSV)</a> <span className="text-foreground-subtle">· raw annual values · World Bank, CC BY 4.0</span></li>
+            </ul>
+            <p className="mt-4 text-xs text-foreground-subtle text-pretty">
+              Values from proprietary reference sources (e.g. Gallup, Edelman, DataReportal) are shown on this page with links to the
+              publisher but are not redistributed in bulk. <Link href="/dataset" className="underline decoration-foreground-subtle/40 underline-offset-2 hover:text-foreground">All datasets</Link>
+            </p>
+          </div>
         </div>
       </section>
 
