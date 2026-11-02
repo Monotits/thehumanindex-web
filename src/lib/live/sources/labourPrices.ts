@@ -115,7 +115,7 @@ export const labourPricesAdapter: LiveAdapter = {
           observations.push({
             countryCode: cc, signalId: signal, rawValue: s.rawValue, stressScore: s.stressScore,
             referenceDate: s.referenceDate, historyN: s.historyN, adapterId: this.id,
-            payload: { source: src.name, latest_level: latest.value, lag_months: LAG_MONTHS },
+            payload: { source: src.name, z: s.zScore, sigma: s.sigma, latest_level: latest.value, lag_months: LAG_MONTHS },
           });
           break;
         }

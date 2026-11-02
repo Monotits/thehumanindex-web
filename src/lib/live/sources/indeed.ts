@@ -40,7 +40,7 @@ export const indeedAdapter: LiveAdapter = {
         observations.push({
           countryCode: cc, signalId: 'job_postings_momentum', rawValue: s.rawValue, stressScore: s.stressScore,
           referenceDate: s.referenceDate, historyN: s.historyN, adapterId: this.id,
-          payload: { index_sa: series[series.length - 1].value, lag_days: LAG_DAYS, license: 'CC BY 4.0' },
+          payload: { z: s.zScore, sigma: s.sigma, index_sa: series[series.length - 1].value, lag_days: LAG_DAYS, license: 'CC BY 4.0' },
         });
       } catch (e) {
         errors.push(`${cc}: ${(e as Error).message}`);

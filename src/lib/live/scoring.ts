@@ -1,12 +1,17 @@
 /**
  * Live layer scoring — pure functions, no I/O (unit-testable with plain node).
  *
- * Momentum percentile:
+ * Momentum score (zero-centred standardisation):
  *   1. From a series, build the momentum series m_t = f(x_t, x_{t-lag})
  *      (difference for rates, percent change for levels).
- *   2. The latest m is ranked within all historical m (excluding itself).
- *   3. Percentile (mid-rank for ties) → 0-100. invert flips it when a rise
- *      means LESS stress (e.g. job postings).
+ *   2. σ = robust dispersion of the historical m (1.4826 × MAD).
+ *   3. score = 100 × Φ(m_latest / σ). No change → 50; a one-σ rise → 84;
+ *      a one-σ fall → 16. invert flips it when a rise means LESS stress.
+ *
+ * Why not a plain percentile rank: it is centred on the historical median.
+ * Where a series trended for a decade (Spain's unemployment fell from 26% to
+ * 10%), "no change" ranks high and reads as stress. Centring on zero keeps
+ * "nothing happened" at 50 while still scaling by the country's own volatility.
  */
 
 export type Point = { date: string; value: number };
@@ -29,7 +34,28 @@ export function momentumSeries(series: Point[], lag: number, kind: MomentumKind)
   return out;
 }
 
-/** Mid-rank percentile of x within hist, 0-100. */
+/** Standard normal CDF (Abramowitz–Stegun 7.1.26 erf approximation, |error| < 1.5e-7). */
+export function normCdf(z: number): number {
+  const x = Math.abs(z) / Math.SQRT2;
+  const t = 1 / (1 + 0.3275911 * x);
+  const erf = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+  return z >= 0 ? 0.5 * (1 + erf) : 0.5 * (1 - erf);
+}
+
+/** Robust standard deviation: 1.4826 × median absolute deviation. */
+export function robustSigma(values: number[]): number {
+  if (values.length === 0) return 0;
+  const med = median(values);
+  return 1.4826 * median(values.map(v => Math.abs(v - med)));
+}
+
+function median(values: number[]): number {
+  const a = [...values].sort((x, y) => x - y);
+  const mid = Math.floor(a.length / 2);
+  return a.length % 2 ? a[mid] : (a[mid - 1] + a[mid]) / 2;
+}
+
+/** Mid-rank percentile of x within hist, 0-100 (kept for diagnostics). */
 export function percentileRank(x: number, hist: number[]): number {
   if (hist.length === 0) return 50;
   let below = 0;
@@ -46,6 +72,9 @@ export interface MomentumScore {
   stressScore: number;
   referenceDate: string;
   historyN: number;
+  /** Signed so that positive = more stress (already inverted when invert=true). */
+  zScore: number;
+  sigma: number;
 }
 
 export function scoreMomentum(
@@ -66,13 +95,18 @@ export function scoreMomentum(
   if (m.length < opts.minHistory + 1) return null;
   const latest = m[m.length - 1];
   const hist = m.slice(0, -1).map(p => p.value);
-  let pct = percentileRank(latest.value, hist);
-  if (opts.invert) pct = 100 - pct;
+  const sigma = robustSigma(hist);
+  if (!(sigma > 0)) return null; // flat series (e.g. a pegged currency) carries no signal
+  const z = latest.value / sigma;
+  let score = normCdf(z) * 100;
+  if (opts.invert) score = 100 - score;
   return {
     rawValue: round(latest.value, 4),
-    stressScore: round(clamp(pct, 0, 100), 1),
+    stressScore: round(clamp(score, 0, 100), 1),
     referenceDate: lastDate.slice(0, 10),
     historyN: hist.length,
+    zScore: round(opts.invert ? -z : z, 3),
+    sigma: round(sigma, 4),
   };
 }
 

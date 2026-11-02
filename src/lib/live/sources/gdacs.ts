@@ -2,8 +2,10 @@
  * Active disasters — GDACS (Global Disaster Alert and Coordination System,
  * UN OCHA + European Commission JRC).
  *
- * Orange/Red alerts for earthquakes, tropical cyclones, floods, volcanoes,
- * droughts and wildfires over the last 30 days. Every tracked country gets
+ * Orange/Red alerts for earthquakes, tropical cyclones, floods, volcanoes
+ * and wildfires over the last 30 days. Droughts (DR) are excluded: GDACS
+ * drought events are slow-onset, span dozens of countries and stay "current"
+ * for months, so they would pin a whole continent at Orange. Every tracked country gets
  * a score: no alert = 50 (normal), otherwise the strongest alert decayed by
  * age (see scoreDisasterEvents).
  */
@@ -36,7 +38,7 @@ export const gdacsAdapter: LiveAdapter = {
     const end = now ?? new Date();
     const from = new Date(end.getTime() - WINDOW_DAYS * 86_400_000).toISOString().slice(0, 10);
     const to = end.toISOString().slice(0, 10);
-    const url = `https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH?eventlist=EQ;TC;FL;VO;DR;WF&fromdate=${from}&todate=${to}&alertlevel=Orange;Red`;
+    const url = `https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH?eventlist=EQ;TC;FL;VO;WF&fromdate=${from}&todate=${to}&alertlevel=Orange;Red`;
 
     try {
       const j = await fetchJson<{ features?: GdacsFeature[] }>(url, timeoutMs);

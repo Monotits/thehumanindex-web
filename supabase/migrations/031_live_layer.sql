@@ -3,11 +3,11 @@
 -- The composite (migration 007) is built from annual sources, so it barely
 -- moves day to day. The Live layer adds fast signals — monthly labour /
 -- price data, daily FX, job postings, active disasters — scored as
--- MOMENTUM relative to each country's own history:
+-- MOMENTUM relative to each country's own volatility:
 --
---   stress_score = percentile of the latest change within that country's
---                  historical distribution of the same change (0-100).
---                  50 = a normal period for this country.
+--   stress_score = 100 × Φ(latest change / σ), σ = robust std (1.4826 × MAD)
+--                  of the same change over the country's history.
+--                  No change = 50; a one-σ deterioration = 84.
 --
 -- Levels stay in the Baseline composite; Live answers "is it getting worse
 -- faster than usual right now?". Scores are stateless — recomputed from the
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS live_signals (
   source_org text NOT NULL,
   source_url text,
   frequency text NOT NULL CHECK (frequency IN ('daily','weekly','monthly','event')),
-  scoring text NOT NULL CHECK (scoring IN ('momentum_percentile','event')),
+  scoring text NOT NULL CHECK (scoring IN ('momentum_z','event')),
   weight numeric NOT NULL DEFAULT 1 CHECK (weight >= 0),
   active boolean NOT NULL DEFAULT true,
   display_order integer NOT NULL DEFAULT 0
@@ -29,19 +29,19 @@ CREATE TABLE IF NOT EXISTS live_signals (
 
 INSERT INTO live_signals (id, meta_index, name, description, source_org, source_url, frequency, scoring, weight, display_order) VALUES
   ('unemployment_momentum', 'economic', 'Unemployment momentum',
-   '6-month change in the monthly unemployment rate (pp), ranked against the country''s own history since 2010.',
-   'OECD Infra-annual Labour Statistics', 'https://data-explorer.oecd.org/', 'monthly', 'momentum_percentile', 1, 10),
+   '6-month change in the monthly unemployment rate (pp), scaled by the country''s own historical volatility since 2010.',
+   'OECD Infra-annual Labour Statistics', 'https://data-explorer.oecd.org/', 'monthly', 'momentum_z', 1, 10),
   ('inflation_momentum', 'economic', 'Inflation momentum',
-   '6-month change in year-on-year consumer price inflation (pp), ranked against the country''s own history since 2010. Eurostat HICP for European countries, OECD CPI elsewhere.',
-   'Eurostat HICP / OECD Prices', 'https://ec.europa.eu/eurostat/web/hicp', 'monthly', 'momentum_percentile', 1, 20),
+   '6-month change in year-on-year consumer price inflation (pp), scaled by the country''s own historical volatility since 2010. Eurostat HICP for European countries, OECD CPI elsewhere.',
+   'Eurostat HICP / OECD Prices', 'https://ec.europa.eu/eurostat/web/hicp', 'monthly', 'momentum_z', 1, 20),
   ('fx_pressure', 'economic', 'Currency pressure',
-   '63-business-day (~3 month) percent change of the local currency per US dollar, ranked against the country''s own history since 2015. ECB reference rates.',
-   'European Central Bank', 'https://data.ecb.europa.eu/data/datasets/EXR', 'daily', 'momentum_percentile', 1, 30),
+   '63-business-day (~3 month) percent change of the local currency per US dollar, scaled by the country''s own historical volatility since 2015. ECB reference rates.',
+   'European Central Bank', 'https://data.ecb.europa.eu/data/datasets/EXR', 'daily', 'momentum_z', 1, 30),
   ('job_postings_momentum', 'technological', 'Job postings momentum',
-   '90-day percent change in the Indeed Job Postings Index (seasonally adjusted), ranked against the country''s own history since 2020. Falling postings = higher stress. CC BY 4.0.',
-   'Indeed Hiring Lab', 'https://github.com/hiring-lab/job_postings_tracker', 'daily', 'momentum_percentile', 1, 40),
+   '90-day percent change in the Indeed Job Postings Index (seasonally adjusted), scaled by the country''s own historical volatility since 2020. Falling postings = higher stress. CC BY 4.0.',
+   'Indeed Hiring Lab', 'https://github.com/hiring-lab/job_postings_tracker', 'daily', 'momentum_z', 1, 40),
   ('active_disasters', 'environmental', 'Active disasters',
-   'Highest GDACS alert affecting the country in the last 30 days, decayed by age. No alert = 50 (normal), Orange = up to 75, Red = up to 100.',
+   'Highest GDACS alert (earthquake, cyclone, flood, volcano, wildfire; droughts excluded) affecting the country in the last 30 days, decayed by age. No alert = 50 (normal), Orange = up to 75, Red = up to 100.',
    'GDACS (UN / European Commission)', 'https://www.gdacs.org/', 'event', 'event', 0.5, 50)
 ON CONFLICT (id) DO UPDATE SET
   meta_index = EXCLUDED.meta_index, name = EXCLUDED.name, description = EXCLUDED.description,

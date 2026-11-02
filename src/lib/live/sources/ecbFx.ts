@@ -69,7 +69,7 @@ export const ecbFxAdapter: LiveAdapter = {
         observations.push({
           countryCode: cc, signalId: 'fx_pressure', rawValue: s.rawValue, stressScore: s.stressScore,
           referenceDate: s.referenceDate, historyN: s.historyN, adapterId: this.id,
-          payload: { currency: ccy, local_per_usd: series[series.length - 1].value, lag_business_days: LAG },
+          payload: { currency: ccy, z: s.zScore, sigma: s.sigma, local_per_usd: series[series.length - 1].value, lag_business_days: LAG },
         });
       }
       return {
