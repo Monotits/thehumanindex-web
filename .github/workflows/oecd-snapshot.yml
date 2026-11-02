@@ -25,6 +25,11 @@ jobs:
       - name: ERA5 temperature (World Bank CCKP)
         run: node scripts/fetch-climate-snapshot.mjs data/live/era5-temperature.json
         continue-on-error: true
+      - name: Risk indices (GPR, EPU)
+        run: |
+          pip install --quiet pandas openpyxl xlrd
+          python3 scripts/fetch-risk-snapshot.py data/live/risk-indices.json
+        continue-on-error: true
       - name: Commit if changed
         run: |
           git add -N data/live/*.json
@@ -35,5 +40,5 @@ jobs:
           git config user.name "Bugra"
           git config user.email "experlercom@gmail.com"
           git add data/live/*.json
-          git commit -m "data: OECD/IMF/ERA5 snapshot $(date -u +%F) [automated]"
+          git commit -m "data: OECD/IMF/ERA5/risk snapshot $(date -u +%F) [automated]"
           git push
