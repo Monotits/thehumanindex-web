@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { CHANGELOG, CURRENT_METHOD_VERSION, type ChangeKind } from '@/lib/changelog/entries';
 
 export const metadata: Metadata = {
-  title: 'Changelog — methodology & data changes | The Human Index',
+  title: 'Changelog — methodology & data changes',
   description: 'Every change that can move a published number on The Human Index: methodology versions, data refreshes, fixes.',
   alternates: { canonical: 'https://thehumanindex.org/changelog' },
 };

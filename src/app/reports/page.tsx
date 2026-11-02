@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { REPORTS, reportTitle } from '@/lib/reports';
 
 export const metadata: Metadata = {
-  title: 'Monthly reports — State of Human Stress | The Human Index',
+  title: 'Monthly reports — State of Human Stress',
   description: 'Numbered monthly reports on civilizational stress across 25 countries. Each edition is frozen at publication.',
   alternates: { canonical: 'https://thehumanindex.org/reports' },
 };

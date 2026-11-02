@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ period: s
   const r = REPORTS.find(x => x.period === period);
   if (!r) return {};
   return {
-    title: `${reportTitle(r)} (No. ${r.number}) | The Human Index`,
+    title: `${reportTitle(r)} (No. ${r.number})`,
     description: `Monthly report No. ${r.number}: civilizational stress rankings for 25 countries, what moved, and what changed in the data.`,
     alternates: { canonical: `https://thehumanindex.org/reports/${r.period}` },
   };
