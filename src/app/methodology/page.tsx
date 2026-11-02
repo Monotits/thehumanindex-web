@@ -333,6 +333,54 @@ export default function MethodologyPage() {
         </div>
       </section>
 
+      {/* ── LIVE LAYER ── */}
+      <section id="live-layer" className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border scroll-mt-24">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-4">
+          The Live layer — what changed recently
+        </h2>
+        <div className="prose prose-thi">
+          <p>
+            Most composite indicators are published once a year, so the composite
+            barely moves week to week. That is honest, but it hides what is changing
+            now. The Live layer is a separate, faster score built from signals that
+            update monthly or daily. It is shown next to the composite, not mixed into it.
+          </p>
+          <h3>Signals</h3>
+          <ul>
+            <li><strong>Unemployment</strong> — 6-month change in the monthly rate (pp). OECD Infra-annual Labour Statistics; Eurostat <code>une_rt_m</code> as fallback.</li>
+            <li><strong>Inflation</strong> — 6-month change in year-on-year consumer price inflation (pp). Eurostat HICP (<code>prc_hicp_minr</code>) for European countries, OECD CPI elsewhere.</li>
+            <li><strong>Currency</strong> — ~3-month (63 business days) percent change of the local currency per US dollar, from ECB reference rates. Not computed for the US (reserve currency), Argentina (no ECB rate since 2020) or the UAE (USD peg).</li>
+            <li><strong>Job postings</strong> — 90-day percent change in the Indeed Job Postings Index (Indeed Hiring Lab, CC BY 4.0). Falling postings count as stress. Nine countries.</li>
+            <li><strong>Disasters</strong> — strongest GDACS alert (earthquake, cyclone, flood, volcano, wildfire) in the last 30 days, fading with age. No alert scores 50. Droughts are excluded: they are slow-onset and span dozens of countries for months. Half weight.</li>
+          </ul>
+          <h3>Scoring</h3>
+          <p>
+            Each signal is a <em>change</em>, not a level — levels already live in the
+            composite. The change is scaled by how much that signal normally moves in
+            that country: <code>score = 100 × Φ(change ÷ σ)</code>, where σ is a robust
+            standard deviation (1.4826 × median absolute deviation) of the same change
+            over the country&apos;s history (since 2010 for monthly data, 2015 for
+            currencies, 2020 for job postings). No change scores 50; a one-σ
+            deterioration scores 84; a one-σ improvement scores 16.
+          </p>
+          <p>
+            A country&apos;s Live score is the weighted mean of its signals and needs at
+            least two signals other than disasters; otherwise it is not shown. The
+            headline number is a 7-day average. Stale inputs are dropped (monthly data
+            older than ~5 months, daily data older than 10–21 days).
+          </p>
+          <h3>Limits</h3>
+          <ul>
+            <li>Live measures deterioration, not deviation from trend: a currency that keeps sliding keeps registering pressure.</li>
+            <li>Coverage is uneven — some countries have four signals, some none. The number of signals is shown with every score.</li>
+            <li>Monthly releases lag 1–2 months, so &ldquo;live&rdquo; means &ldquo;latest published&rdquo;, and the date of each input is shown.</li>
+          </ul>
+          <p>
+            Data: <Link href="/api/live/us">/api/live/&#123;iso2&#125;</Link> and the <code>live</code> field in <Link href="/api/data">/api/data</Link>.
+          </p>
+        </div>
+      </section>
+
       {/* ── WHAT THIS IS NOT ── */}
       <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
         <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-4">

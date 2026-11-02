@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+import { LivePanel } from '@/components/live/LivePanel';
+import { loadLiveCountry } from '@/lib/live/present';
 import { adapterMeta } from '@/lib/indicators/adapterRegistry';
 import { StressBand } from '@/components/ui/StressBand';
 import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
@@ -313,7 +315,7 @@ export default async function CountryDetailPage({
 }) {
   const { code } = await params;
   const locale = await getActiveLocale();
-  const data = await loadCountryDetail(code, locale);
+  const [data, live] = await Promise.all([loadCountryDetail(code, locale), loadLiveCountry(code)]);
 
   if (!data.country) notFound();
 
@@ -449,6 +451,13 @@ export default async function CountryDetailPage({
           )}
         </div>
       </section>
+
+      {/* ── LIVE LAYER ── */}
+      {live && (
+        <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-b border-border">
+          <LivePanel live={live} countryName={country.name} />
+        </div>
+      )}
 
       {/* ── COMPOSITE LINE CHART ── */}
       {compositeHistoryPoints.length >= 2 && (

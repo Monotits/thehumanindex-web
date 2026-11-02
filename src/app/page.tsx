@@ -9,6 +9,8 @@ import { NewsletterCTA } from '@/components/ui/NewsletterCTA';
 import { bandFor, META_INDEXES, META_LABELS, META_WEIGHT, type MetaIndex } from '@/lib/ui/tokens';
 import { getActiveLocale } from '@/lib/ui/locale';
 import { loadCompositeHistory, pointsToDenseSeries, trendSummary } from '@/lib/ui/history';
+import { LiveMovers } from '@/components/live/LiveMovers';
+import { loadLatestLive, newestReference, liveTone, LIVE_TONE_LABEL, LIVE_TONE_TEXT_CLASS, type LiveCountry } from '@/lib/live/present';
 
 export const metadata: Metadata = {
   title: 'The Human Index — Civilizational Stress Tracker',
@@ -70,9 +72,12 @@ async function loadHomeData(locale: string) {
       pulses: [] as PulsePreview[],
       globalAvg: null,
       lastUpdate: null,
+      liveRows: [] as Array<LiveCountry & { name: string; flag_emoji: string | null }>,
+      liveNewest: null as string | null,
     };
   }
   const sb = createClient(sbUrl, sbKey);
+  const livePromise = loadLatestLive(sb);
 
   // 3 parallel queries — composites, country names, per-country meta scores
   const [compositesRes, countriesRes, metaRes] = await Promise.all([
@@ -189,9 +194,16 @@ async function loadHomeData(locale: string) {
   const layoffs = (layoffsRes.data ?? []) as LayoffPreview[];
   const layoffsTotal30d = layoffs.reduce((s, l) => s + (l.people_affected ?? 0), 0);
 
+  const liveMap = await livePromise;
+  const liveRows = Array.from(liveMap.values()).map((l) => {
+    const meta = countryMeta.get(l.country_code);
+    return { ...l, name: meta?.name ?? l.country_code, flag_emoji: meta?.flag_emoji ?? null };
+  });
+  const liveNewest = newestReference(liveMap.values());
+
   return {
     countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate,
-    layoffs, layoffsTotal30d,
+    layoffs, layoffsTotal30d, liveRows, liveNewest,
   };
 }
 
@@ -238,7 +250,11 @@ function formatLayoffCount(n: number | null): string {
 
 export default async function HomePage() {
   const locale = await getActiveLocale();
-  const { countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate, layoffs, layoffsTotal30d } = await loadHomeData(locale);
+  const { countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate, layoffs, layoffsTotal30d, liveRows, liveNewest } = await loadHomeData(locale);
+  const liveAvg = liveRows.length
+    ? Math.round((liveRows.reduce((a, r) => a + (r.live_score_7d ?? r.live_score), 0) / liveRows.length) * 10) / 10
+    : null;
+  const liveAvgTone = liveTone(liveAvg);
 
   // Country name lookup for the featured Pulse byline
   const featuredCountry = featured
@@ -306,14 +322,31 @@ export default async function HomePage() {
                     {countries.length}
                   </div>
                 </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-foreground-subtle mb-1">
-                    Last update
+                {liveAvg !== null ? (
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-foreground-subtle mb-1">
+                      Live pulse
+                    </div>
+                    <div className="flex items-baseline gap-3">
+                      <span className={`font-mono tabular-nums text-4xl sm:text-5xl font-semibold ${liveAvgTone ? LIVE_TONE_TEXT_CLASS[liveAvgTone] : ''}`}>
+                        {liveAvg.toFixed(1)}
+                      </span>
+                      {liveAvgTone && (
+                        <span className="text-sm text-foreground-muted">{LIVE_TONE_LABEL[liveAvgTone]}</span>
+                      )}
+                    </div>
+                    <div className="text-xs text-foreground-subtle mt-1">50 = normal · 7-day avg</div>
                   </div>
-                  <div className="text-base sm:text-lg text-foreground-muted mt-3">
-                    {formatRelativeTime(lastUpdate)}
+                ) : (
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-foreground-subtle mb-1">
+                      Pipeline checked
+                    </div>
+                    <div className="text-base sm:text-lg text-foreground-muted mt-3">
+                      {formatRelativeTime(lastUpdate)}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
             <div className="mt-10 flex flex-wrap gap-3">
@@ -339,6 +372,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── LIVE LAYER: WHAT'S MOVING ── */}
+      <LiveMovers rows={liveRows} newestData={liveNewest} />
 
       {/* ── TODAY'S STORY ── */}
       {featured && (

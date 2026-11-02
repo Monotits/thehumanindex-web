@@ -9,6 +9,7 @@
  */
 
 import { supabase } from '@/lib/supabase'
+import { loadLatestLive } from '@/lib/live/present'
 import { fetchAllRealData, computeScores } from '@/lib/realData'
 
 export const dynamic = 'force-dynamic'
@@ -135,6 +136,7 @@ async function countriesResponse() {
     }
 
     const compositeBy = new Map((compositesRes.data ?? []).map(r => [r.country_code as string, r]))
+    const liveBy = await loadLatestLive(supabase)
     const metaBy = new Map<string, Record<string, unknown>>()
     for (const m of metaRes.data ?? []) {
       const entry = metaBy.get(m.country_code as string) ?? {}
@@ -162,6 +164,15 @@ async function countriesResponse() {
         data_coverage: comp?.confidence ?? null,
         computed_at: comp?.computed_at ?? null,
         meta_indexes: Object.fromEntries(META_KEYS.map(k => [k, meta[k] ?? null])),
+        live: (() => {
+          const l = liveBy.get(c.code)
+          return l ? {
+            score: l.live_score,
+            score_7d: l.live_score_7d,
+            as_of: l.snapshot_date,
+            signals: l.contributors.map(x => ({ id: x.signal_id, score: x.stress_score, raw: x.raw_value, reference_date: x.reference_date })),
+          } : null
+        })(),
       }
     })
 
@@ -173,6 +184,7 @@ async function countriesResponse() {
         attribution: 'The Human Index (thehumanindex.org)',
         methodology: 'https://thehumanindex.org/methodology',
         per_country_sources: 'https://thehumanindex.org/api/transparency/{iso2}',
+        per_country_live: 'https://thehumanindex.org/api/live/{iso2}',
         scale: '0-100, higher = more stress',
         generated_at: new Date().toISOString(),
         count: countries.length,
