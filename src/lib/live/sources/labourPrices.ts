@@ -15,7 +15,7 @@
 
 import type { LiveAdapter, LiveObservation, LiveSignalId } from '../types';
 import { scoreMomentum, type Point } from '../scoring';
-import { csvRecords, fetchJson, fetchText, normalizePeriod, ISO2_TO_ISO3, ISO3_TO_ISO2 } from '../http';
+import { csvRecords, fetchJson, fetchTextRetry, normalizePeriod, ISO2_TO_ISO3, ISO3_TO_ISO2 } from '../http';
 
 const START = '2010-01';
 const LAG_MONTHS = 6;
@@ -26,8 +26,8 @@ const EUROSTAT_GEOS = ['FR', 'DE', 'IT', 'NL', 'ES', 'SE', 'PL', 'NO', 'CH', 'TR
 
 type SeriesBySource = Map<string, Point[]>; // countryCode → series
 
-async function oecdSeries(url: string, timeoutMs: number, keep: (r: Record<string, string>) => boolean): Promise<SeriesBySource> {
-  const recs = csvRecords(await fetchText(url, timeoutMs, 'text/csv'));
+async function oecdSeries(url: string, deadline: number, keep: (r: Record<string, string>) => boolean): Promise<SeriesBySource> {
+  const recs = csvRecords(await fetchTextRetry(url, { deadline, accept: 'text/csv', perAttemptMs: 20_000 }));
   const out: SeriesBySource = new Map();
   for (const r of recs) {
     if (!keep(r)) continue;
@@ -86,16 +86,32 @@ export const labourPricesAdapter: LiveAdapter = {
     const iso3 = countryCodes.map(c => ISO2_TO_ISO3[c]).filter(Boolean).join('+');
     const oecdBase = 'https://sdmx.oecd.org/public/rest/data';
 
-    const jobs = await Promise.allSettled([
-      oecdSeries(`${oecdBase}/OECD.SDD.TPS,DSD_LFS@DF_IALFS_UNE_M,1.0/${iso3}..._Z.Y._T.Y_GE15..M?startPeriod=${START}&format=csv`,
-        timeoutMs, r => r.MEASURE === 'UNE_LF_M' && r.UNIT_MEASURE === 'PT_LF_SUB'),
-      eurostat('une_rt_m', 's_adj=SA&age=TOTAL&sex=T&unit=PC_ACT', timeoutMs),
-      eurostat('prc_hicp_minr', 'coicop18=TOTAL&unit=RCH_A', timeoutMs),
-      oecdSeries(`${oecdBase}/OECD.SDD.TPS,DSD_PRICES@DF_PRICES_ALL,1.0/${iso3}.M.N.CPI.PA._T.N.GY?startPeriod=${START}&format=csv`,
-        timeoutMs, () => true),
+    // OECD answered HTTP 500 to two concurrent requests from Vercel on the
+    // first production run (fine from a browser). Run the two OECD queries
+    // sequentially, with retries, inside a shared deadline; Eurostat runs in
+    // parallel alongside.
+    const deadline = started + Math.min(timeoutMs, 48_000);
+    const oecd = (async () => {
+      const une = await oecdSeries(`${oecdBase}/OECD.SDD.TPS,DSD_LFS@DF_IALFS_UNE_M,1.0/${iso3}..._Z.Y._T.Y_GE15..M?startPeriod=${START}&format=csv`,
+        deadline, r => r.MEASURE === 'UNE_LF_M' && r.UNIT_MEASURE === 'PT_LF_SUB').then(v => ({ ok: true as const, v }), e => ({ ok: false as const, e }));
+      const cpi = await oecdSeries(`${oecdBase}/OECD.SDD.TPS,DSD_PRICES@DF_PRICES_ALL,1.0/${iso3}.M.N.CPI.PA._T.N.GY?startPeriod=${START}&format=csv`,
+        deadline, () => true).then(v => ({ ok: true as const, v }), e => ({ ok: false as const, e }));
+      return [une, cpi] as const;
+    })();
+    const [eu, [oUne, oCpi]] = await Promise.all([
+      Promise.allSettled([
+        eurostat('une_rt_m', 's_adj=SA&age=TOTAL&sex=T&unit=PC_ACT', timeoutMs),
+        eurostat('prc_hicp_minr', 'coicop18=TOTAL&unit=RCH_A', timeoutMs),
+      ]),
+      oecd,
     ]);
+    const settle = (r: { ok: true; v: SeriesBySource } | { ok: false; e: unknown }): PromiseSettledResult<SeriesBySource> =>
+      r.ok ? { status: 'fulfilled', value: r.v } : { status: 'rejected', reason: r.e };
+    // Same index order as before: 0 OECD unemployment, 1 Eurostat unemployment, 2 Eurostat HICP, 3 OECD CPI
+    const jobs: PromiseSettledResult<SeriesBySource>[] = [settle(oUne), eu[0], eu[1], settle(oCpi)];
     const val = (i: number): SeriesBySource => (jobs[i].status === 'fulfilled' ? (jobs[i] as PromiseFulfilledResult<SeriesBySource>).value : new Map());
-    const errors = jobs.flatMap((j, i) => (j.status === 'rejected' ? [`#${i}: ${(j.reason as Error)?.message ?? j.reason}`] : []));
+    const SOURCE_NAMES = ['oecd:une', 'eurostat:une_rt_m', 'eurostat:hicp', 'oecd:cpi'];
+    const errors = jobs.flatMap((j, i) => (j.status === 'rejected' ? [`${SOURCE_NAMES[i]}: ${(j.reason as Error)?.message ?? j.reason}`] : []));
 
     // Priority order per signal: first source producing a valid (fresh) score wins.
     const plan: { signal: LiveSignalId; sources: { name: string; data: SeriesBySource }[] }[] = [

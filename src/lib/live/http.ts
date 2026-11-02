@@ -11,11 +11,49 @@ export async function fetchText(url: string, timeoutMs: number, accept = '*/*'):
       signal: controller.signal,
       cache: 'no-store',
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status} ${new URL(url).host}`);
+    if (!res.ok) {
+      // Keep a short body snippet: upstream error pages are the only diagnosis we get from Vercel.
+      const body = (await res.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 160);
+      throw new HttpError(res.status, `HTTP ${res.status} ${new URL(url).host}${body ? `: ${body}` : ''}`);
+    }
     return await res.text();
   } finally {
     clearTimeout(t);
   }
+}
+
+export class HttpError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
+/**
+ * fetchText with retries on 5xx / 429 / network errors, bounded by an
+ * absolute deadline (epoch ms) so a flaky upstream cannot eat the whole
+ * function budget.
+ */
+export async function fetchTextRetry(
+  url: string,
+  opts: { deadline: number; accept?: string; attempts?: number; perAttemptMs?: number },
+): Promise<string> {
+  const attempts = opts.attempts ?? 3;
+  let lastErr: unknown = null;
+  for (let i = 0; i < attempts; i++) {
+    const remaining = opts.deadline - Date.now();
+    if (remaining < 2_000) break;
+    try {
+      return await fetchText(url, Math.min(opts.perAttemptMs ?? 20_000, remaining), opts.accept);
+    } catch (e) {
+      lastErr = e;
+      const retryable = !(e instanceof HttpError) || e.status >= 500 || e.status === 429;
+      if (!retryable || i === attempts - 1) break;
+      const wait = 1_500 * 2 ** i; // 1.5s, 3s
+      if (Date.now() + wait > opts.deadline - 2_000) break;
+      await new Promise(r => setTimeout(r, wait));
+    }
+  }
+  throw lastErr ?? new Error(`deadline exceeded: ${new URL(url).host}`);
 }
 
 export async function fetchJson<T>(url: string, timeoutMs: number): Promise<T> {
