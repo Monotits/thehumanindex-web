@@ -79,8 +79,6 @@ const SEEDS: SeedEntry[] = [
   // That is daily stress, NOT clinical/occupational burnout — the catalog name
   // and description were corrected in migration 029. The id stays 'burnout' so
   // /indicator/burnout URLs and snapshot history survive.
-  // PROVENANCE: country values were hand-entered from the 2024 report's country
-  // appendix and have NOT been re-verified against the PDF. Verify before citing.
   {
     indicatorId: 'burnout',
     // Gallup State of the Global Workplace 2026 (published Apr 2026; fieldwork
@@ -95,7 +93,6 @@ const SEEDS: SeedEntry[] = [
       JP: 39, KR: 39, IN: 28, SG: 43,
       AU: 50, NZ: 45, BR: 45, AR: 41, ZA: 36, IL: 42, AE: 33,
     },
-  },
   },
 
   // ── divorce_rate (per 1000 population, UN + OECD Family DB 2023) ──
