@@ -565,7 +565,7 @@ export default async function CountryDetailPage({
         <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border">
           <ScoreDrivers
             countryName={country.name}
-            composite={drivers.composite}
+            composite={composite}
             avgComposite={drivers.avgComposite}
             gaps={drivers.gaps}
             names={Object.fromEntries(indicators.map(i => [i.id, i.name]))}

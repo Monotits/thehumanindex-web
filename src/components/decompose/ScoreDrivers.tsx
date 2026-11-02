@@ -36,7 +36,7 @@ export function ScoreDrivers({ countryName, composite, avgComposite, gaps, names
         <p className="text-foreground-muted text-pretty">
           {countryName} scores {composite.toFixed(1)}, {Math.abs(diff).toFixed(1)} points {diff >= 0 ? 'above' : 'below'} the
           tracked-country average of {avgComposite.toFixed(1)}. Each bar is one indicator&apos;s share of that gap, in composite
-          points; all indicators together add up to it exactly.
+          points; all indicators together add up to it (± rounding).
         </p>
       </div>
       <div className="grid md:grid-cols-2 gap-10">
