@@ -7,7 +7,7 @@
 
 import { ImageResponse } from 'next/og';
 import { createClient } from '@supabase/supabase-js';
-import { bandFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
+import { bandFor } from '@/lib/ui/tokens';
 import { describeContributor, liveTone, topDriver, type LiveContributor } from '@/lib/live/present';
 import { loadGoogleFont } from '@/lib/share/font';
 
@@ -27,10 +27,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return new Response('Unavailable', { status: 503 });
   const sb = createClient(url, key);
-  const [cRes, allRes, metaRes, liveRes, black, bold] = await Promise.all([
+  const [cRes, allRes, liveRes, black, bold] = await Promise.all([
     sb.from('countries').select('name, flag_emoji').eq('code', code).maybeSingle(),
     sb.from('v_country_latest_composite').select('country_code, score_value'),
-    sb.from('v_country_latest_meta_indexes').select('meta_index, value').eq('country_code', code),
     sb.from('v_country_latest_live').select('live_score, live_score_7d, contributors').eq('country_code', code).maybeSingle(),
     loadGoogleFont('Inter', 900),
     loadGoogleFont('Inter', 600),
@@ -51,9 +50,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
   const accent = stressedSide ? (rank <= 3 ? C.hot : C.warm) : C.calm;
   const headline = stressedSide ? 'MOST STRESSED' : 'LEAST STRESSED';
 
-  const meta: Partial<Record<MetaIndex, number>> = {};
-  for (const r of (metaRes.data ?? []) as { meta_index: MetaIndex; value: number | null }[]) if (r.value !== null) meta[r.meta_index] = Number(r.value);
-  const worst = (Object.entries(meta) as [MetaIndex, number][]).sort((a, b) => b[1] - a[1])[0];
 
   const live = liveRes.data as { live_score: number; live_score_7d: number | null; contributors: LiveContributor[] } | null;
   const liveScore = live ? Number(live.live_score_7d ?? live.live_score) : null;
@@ -121,12 +117,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
           </div>
         )}
 
-        {story && worst && (
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 20, marginTop: 56 }}>
-            <div style={{ display: 'flex', fontSize: 34, color: C.muted, fontWeight: 600 }}>Highest-stress area:</div>
-            <div style={{ display: 'flex', fontSize: 46, fontWeight: 900 }}>{`${META_LABELS[worst[0]]} ${worst[1].toFixed(0)}/100`}</div>
-          </div>
-        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 'auto' }}>
           <div style={{ display: 'flex', fontSize: story ? 58 : 44, fontWeight: 900, letterSpacing: -1 }}>Where does your country rank?</div>
