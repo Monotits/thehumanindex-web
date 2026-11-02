@@ -1,0 +1,29 @@
+name: oecd-snapshot
+# OECD blocks Vercel egress IPs (HTTP 500). Fetch here, commit JSON, the Live cron reads it.
+on:
+  schedule:
+    - cron: '17 5 * * *'   # daily 05:17 UTC, before the 08:00 UTC Live cron
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency: { group: oecd-snapshot, cancel-in-progress: false }
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node scripts/fetch-oecd-snapshot.mjs data/live/oecd-monthly.json
+      - name: Commit if changed
+        run: |
+          if git ls-files --error-unmatch data/live/oecd-monthly.json >/dev/null 2>&1 && git diff --quiet -- data/live/oecd-monthly.json; then
+            echo "No new OECD data."; exit 0
+          fi
+          # Commit as the repo owner so Vercel (Hobby) accepts the deployment.
+          git config user.name "Bugra"
+          git config user.email "experlercom@gmail.com"
+          git add data/live/oecd-monthly.json
+          git commit -m "data: OECD monthly snapshot $(date -u +%F) [automated]"
+          git push
