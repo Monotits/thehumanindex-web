@@ -15,7 +15,7 @@ import { loadGoogleFont } from './font';
 
 const C = {
   bg: '#0B0B0D', panel: '#17171B', fg: '#F5F3EE', muted: '#A5A29B', dim: '#55534F',
-  hot: '#FF5A36', warm: '#FFA62B', calm: '#3DDC97', mid: '#F5F3EE',
+  hot: '#FF5A36', warm: '#FFA62B', calm: '#3DDC97', mid: '#D9D3C7',
 };
 
 export type CardFormat = 'story' | 'square' | 'og';
@@ -50,7 +50,10 @@ export async function renderCountryCard(rawCode: string, format: CardFormat): Pr
   // Headline: rank from the stressed end for the upper half, from the calm end otherwise.
   const stressedSide = rank > 0 && rank <= Math.ceil(n / 2);
   const shownRank = stressedSide ? rank : n - rank + 1;
-  const accent = stressedSide ? (rank <= 3 ? C.hot : C.warm) : C.calm;
+  // Colour carries meaning: hot/warm for the stressed end, green only for the 5 calmest, neutral in between.
+  const accent = stressedSide
+    ? (rank <= 3 ? C.hot : rank <= 8 ? C.warm : C.mid)
+    : (shownRank <= 5 ? C.calm : C.mid);
   const headline = stressedSide ? 'MOST STRESSED' : 'LEAST STRESSED';
 
 
