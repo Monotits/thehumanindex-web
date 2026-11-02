@@ -20,8 +20,8 @@
  *   - loneliness                (OECD Better Life Index + Eurobarometer 2023)
  *   - screen_time               (DataReportal Digital Report 2024)
  *   - digital_addiction         (Pew Research + Eurostat ICT 2023)
- *   - depression_prevalence     (IHME GBD 2021)
- *   - anxiety_prevalence        (IHME GBD 2021)
+ *   - depression_prevalence     (IHME GBD 2023, age-standardized)
+ *   - anxiety_prevalence        (IHME GBD 2023, age-standardized)
  *   - temperature_anomaly       (Berkeley Earth 2024 per-country)
  *   - automation_exposure       (McKinsey Global Institute 2023)
  *   - life_satisfaction         (OECD Better Life Index 2024)
@@ -183,26 +183,38 @@ const SEEDS: SeedEntry[] = [
   // ── depression_prevalence (% adults with depressive disorder; IHME GBD 2021) ──
   {
     indicatorId: 'depression_prevalence',
-    year: 2021,
-    source: 'IHME Global Burden of Disease 2021',
+    // IHME Global Burden of Disease 2023 (published 2025), estimate year 2023,
+    // both sexes, AGE-STANDARDIZED prevalence %, as shown in Our World in Data's
+    // "Prevalence of mental disorders" explorer (retrieved from IHME 2026-02-07).
+    // All 25 values checked against the table on 2026-11-02. Age-standardized so
+    // countries with older populations are comparable. IHME data: non-commercial
+    // use with attribution; not exported in bulk.
+    year: 2023,
+    source: 'IHME Global Burden of Disease 2023 (age-standardized)',
     values: {
-      US: 4.6, CA: 4.7, MX: 4.0, GB: 3.9, DE: 3.6, FR: 4.5, ES: 4.1, IT: 4.0,
-      NL: 4.6, SE: 3.6, NO: 3.7, PL: 3.4, TR: 4.4, CH: 3.6,
-      JP: 2.7, KR: 3.4, IN: 3.5, SG: 3.0,
-      AU: 4.5, NZ: 4.3, BR: 5.6, AR: 5.5, ZA: 4.6, IL: 3.6, AE: 3.4,
+      US: 4.62, CA: 3.66, MX: 3.21, GB: 6.80, DE: 4.35, FR: 3.96, ES: 3.95, IT: 2.47,
+      NL: 6.21, SE: 4.63, NO: 3.21, PL: 2.66, TR: 5.04, CH: 5.21,
+      JP: 3.06, KR: 2.66, IN: 3.71, SG: 1.73,
+      AU: 3.98, NZ: 3.43, BR: 3.89, AR: 4.17, ZA: 3.77, IL: 5.01, AE: 4.06,
     },
   },
 
   // ── anxiety_prevalence (% adults with anxiety disorder; IHME GBD 2021) ──
   {
     indicatorId: 'anxiety_prevalence',
-    year: 2021,
-    source: 'IHME Global Burden of Disease 2021',
+    // IHME Global Burden of Disease 2023 (published 2025), estimate year 2023,
+    // both sexes, AGE-STANDARDIZED prevalence %, as shown in Our World in Data's
+    // "Prevalence of mental disorders" explorer (retrieved from IHME 2026-02-07).
+    // All 25 values checked against the table on 2026-11-02. Age-standardized so
+    // countries with older populations are comparable. IHME data: non-commercial
+    // use with attribution; not exported in bulk.
+    year: 2023,
+    source: 'IHME Global Burden of Disease 2023 (age-standardized)',
     values: {
-      US: 6.6, CA: 6.0, MX: 4.4, GB: 5.4, DE: 5.0, FR: 5.7, ES: 5.5, IT: 5.2,
-      NL: 5.9, SE: 4.6, NO: 4.7, PL: 4.2, TR: 5.9, CH: 5.0,
-      JP: 4.0, KR: 4.0, IN: 4.3, SG: 4.2,
-      AU: 6.4, NZ: 6.1, BR: 9.3, AR: 7.6, ZA: 5.5, IL: 4.8, AE: 5.6,
+      US: 7.06, CA: 7.39, MX: 7.01, GB: 11.27, DE: 6.37, FR: 9.49, ES: 8.65, IT: 8.76,
+      NL: 12.41, SE: 7.54, NO: 9.01, PL: 4.43, TR: 4.98, CH: 8.43,
+      JP: 3.33, KR: 5.20, IN: 5.79, SG: 3.22,
+      AU: 11.46, NZ: 10.05, BR: 11.58, AR: 9.39, ZA: 6.61, IL: 6.17, AE: 4.60,
     },
   },
 
