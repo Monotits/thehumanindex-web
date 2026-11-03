@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
+import { KeyFacts, longDateUTC, ordinal, type Fact } from '@/components/geo/KeyFacts';
+import { formatRaw } from '@/lib/share/rankings';
+import { CURRENT_METHOD_VERSION } from '@/lib/changelog/entries';
 import { latestMethodologyChange } from '@/components/editorial/MethodologyDriftNote';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { LivePanel } from '@/components/live/LivePanel';
-import { loadLiveCountry, anonClient } from '@/lib/live/present';
+import { loadLiveCountry, anonClient, liveTone, topDriver, describeContributor, LIVE_TONE_LABEL } from '@/lib/live/present';
 import { AnnualHistoryChart } from '@/components/history/AnnualHistoryChart';
 import { CiteBox } from '@/components/cite/CiteBox';
 import { ScoreDrivers } from '@/components/decompose/ScoreDrivers';
@@ -238,22 +241,30 @@ export async function generateMetadata({
   const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const sbKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   let name = upper;
+  let rankLine: { score: number; rank: number; n: number } | null = null;
 
   if (sbUrl && sbKey) {
     const sb = createClient(sbUrl, sbKey);
-    const res = await sb
-      .from('countries')
-      .select('name')
-      .eq('code', upper)
-      .maybeSingle();
+    const [res, comp] = await Promise.all([
+      sb.from('countries').select('name').eq('code', upper).maybeSingle(),
+      sb.from('v_country_latest_composite').select('country_code, score_value'),
+    ]);
     if (res.data) name = (res.data as { name: string }).name;
+    const list = ((comp.data ?? []) as { country_code: string; score_value: number }[]).sort((a, b) => b.score_value - a.score_value);
+    const i = list.findIndex(r => r.country_code === upper);
+    if (i >= 0) rankLine = { score: Number(list[i].score_value), rank: i + 1, n: list.length };
   }
 
   const pageUrl = `https://thehumanindex.org/country/${upper.toLowerCase()}`;
-  const description = `Civilizational stress composite, 5-meta-index breakdown, and 29-indicator detail for ${name}. Every number sourced.`;
+  const year = new Date().getUTCFullYear();
+  const description = rankLine
+    ? `${name} scores ${rankLine.score.toFixed(1)}/100 on The Human Index (${bandFor(rankLine.score)}), the ${ordinal(rankLine.rank)} most stressed of ${rankLine.n} countries. Breakdown across 5 domains and 29 indicators, every value sourced.`
+    : `Civilizational stress composite, 5-meta-index breakdown, and 29-indicator detail for ${name}. Every number sourced.`;
 
   return {
-    title: `${name}: stress score, indicators & sources`,
+    title: rankLine
+      ? `${name} stress score ${year}: ${rankLine.score.toFixed(1)}/100, #${rankLine.rank} of ${rankLine.n}`
+      : `${name}: stress score, indicators & sources`,
     description,
     alternates: {
       canonical: pageUrl,
@@ -330,9 +341,16 @@ export default async function CountryDetailPage({
     loadLiveCountry(code),
     histClient ? loadHistorical(histClient, code) : Promise.resolve([]),
   ]);
-  const metaAll = histClient
-    ? ((await histClient.from('v_country_latest_meta_indexes').select('country_code, meta_index, value, weight, raw_data')).data ?? []) as MetaRow[]
-    : [];
+  const [metaAllRes, allCompRes] = histClient
+    ? await Promise.all([
+        histClient.from('v_country_latest_meta_indexes').select('country_code, meta_index, value, weight, raw_data'),
+        histClient.from('v_country_latest_composite').select('country_code, score_value'),
+      ])
+    : [null, null];
+  const metaAll = (metaAllRes?.data ?? []) as MetaRow[];
+  const allComposites = ((allCompRes?.data ?? []) as { country_code: string; score_value: number }[])
+    .map(r => ({ cc: r.country_code, v: Number(r.score_value) }))
+    .sort((a, b) => b.v - a.v);
   const drivers = gapsVsAverage(contributionsByCountry(metaAll), code.toUpperCase());
   const seed = seedShare(metaAll, code.toUpperCase());
   const historyPoints = history
@@ -352,6 +370,47 @@ export default async function CountryDetailPage({
   // Trend arrow ignores days before the latest methodology change (a method
   // change is not a change in conditions); the chart still shows them.
   const trend = trendSummary(afterBreak(compositeHistory, latestMethodologyChange()));
+
+  // ── Key facts (answer-first, quotable; generated from the published numbers) ──
+  const facts: Fact[] = [];
+  {
+    const rank = allComposites.findIndex(r => r.cc === country.code) + 1;
+    const n = allComposites.length;
+    const asOf = longDateUTC(computedAt);
+    if (composite !== null && rank > 0) {
+      facts.push({
+        q: `How stressed is ${country.name}?`,
+        a: `As of ${asOf}, ${country.name} scores ${composite.toFixed(1)} out of 100 on The Human Index composite (${band ?? 'n/a'} band), the ${ordinal(rank)} most stressed of the ${n} countries tracked. The tracked-country average is ${(allComposites.reduce((a, r) => a + r.v, 0) / n).toFixed(1)}.`,
+      });
+    }
+    const metas = (Object.entries(metaValues) as [MetaIndex, number][]).filter(([, v]) => v !== null && Number.isFinite(v)).sort((a, b) => b[1] - a[1]);
+    const ind = indicatorValues
+      .filter(v => v.normalized_value !== null && v.raw_value !== null)
+      .map(v => ({ v, meta: indicators.find(i => i.id === v.indicator_id) }))
+      .filter(x => x.meta)
+      .sort((a, b) => (b.v.normalized_value ?? 0) - (a.v.normalized_value ?? 0))[0];
+    if (metas.length >= 2) {
+      const [hi, lo] = [metas[0], metas[metas.length - 1]];
+      facts.push({
+        q: `What drives stress in ${country.name}?`,
+        a: `${country.name}'s highest-stress domain is ${META_LABELS[hi[0]].toLowerCase()} (${hi[1].toFixed(1)}/100) and its lowest is ${META_LABELS[lo[0]].toLowerCase()} (${lo[1].toFixed(1)}/100).` +
+          (ind ? ` The single indicator furthest into stress is ${ind.meta!.name.toLowerCase()} at ${formatRaw(Number(ind.v.raw_value), ind.meta!.unit)} (${ind.meta!.source_org ?? 'source on page'}, ${ind.v.reference_date.slice(0, 4)}).` : ''),
+      });
+    }
+    if (live) {
+      const s = Number(live.live_score_7d ?? live.live_score);
+      const tone = liveTone(s);
+      const d = topDriver(live.contributors);
+      facts.push({
+        q: `Is pressure rising in ${country.name} right now?`,
+        a: `The Live layer, which compares recent unemployment, inflation, currency, job postings, geopolitical risk, policy uncertainty and disasters with ${country.name}'s own history, reads ${s.toFixed(0)} (50 = normal)${tone ? ` — ${LIVE_TONE_LABEL[tone].toLowerCase()}` : ''}.` + (d ? ` Main driver: ${describeContributor(d)}.` : ''),
+      });
+    }
+    facts.push({
+      q: `How is ${country.name}'s score calculated?`,
+      a: `Up to 29 indicators from sources such as the World Bank, Eurostat, OECD, IMF, IHME and Gallup are normalized to a 0–100 stress scale and averaged into five domains, weighted economic 28%, social 22%, mental 22%, technological 11% and environmental 17% (methodology v${CURRENT_METHOD_VERSION}).`,
+    });
+  }
 
   // Group indicators by meta-index
   const byMeta = new Map<MetaIndex, IndicatorRow[]>();
@@ -484,6 +543,8 @@ export default async function CountryDetailPage({
           )}
         </div>
       </section>
+
+      <KeyFacts facts={facts} title={`${country.name} at a glance`} />
 
       {/* ── LIVE LAYER ── */}
       {live && (

@@ -15,6 +15,7 @@ export default function robots(): MetadataRoute.Robots {
   const allow = [
     '/',
     '/api/data', // Dataset JSON-LD distribution.contentUrl — crawlers may fetch it
+    '/api/export', // CSV distributions declared in the Dataset JSON-LD
   ];
   const disallow = [
     '/api/',           // server endpoints

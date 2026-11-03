@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { DatasetJsonLd } from '@/components/JsonLd';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -97,6 +98,7 @@ const USE_CASES = [
 export default function DatasetPage() {
   return (
     <article className="min-h-screen">
+      <DatasetJsonLd />
       {/* ── HEADER ── */}
       <header className="border-b border-border bg-background-alt/40">
         <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">

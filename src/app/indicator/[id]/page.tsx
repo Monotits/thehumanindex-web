@@ -1,4 +1,8 @@
 import type { Metadata } from 'next';
+import { KeyFacts, type Fact } from '@/components/geo/KeyFacts';
+import { JsonLd } from '@/components/JsonLd';
+import { formatRaw } from '@/lib/share/rankings';
+import { DEFAULT_META_WEIGHTS } from '@/lib/indicators/composeMetaIndex';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
@@ -82,7 +86,7 @@ export async function generateMetadata({
     | null;
   if (!data) return { title: 'Indicator — The Human Index' };
 
-  const title = `${data.name} by country`;
+  const title = `${data.name} by country: ${new Date().getUTCFullYear()} ranking`;
   const description =
     data.description ??
     `Live ranking of ${data.name.toLowerCase()} across 25 tracked countries. ${data.source_org ? `Sourced from ${data.source_org}.` : ''} Re-checked daily; source publishes on its own cadence.`;
@@ -287,6 +291,28 @@ export default async function IndicatorPage({
     ? 'Higher raw value = less stress'
     : 'Higher raw value = more stress';
 
+  // ── Key facts + Dataset JSON-LD (answer-first, quotable) ──
+  const facts: Fact[] = [];
+  const withRaw = values.filter(v => v.raw_value !== null);
+  const years = withRaw.map(v => v.reference_date.slice(0, 4)).sort();
+  const yearSpan = years.length ? (years[0] === years[years.length - 1] ? years[0] : `${years[0]}–${years[years.length - 1]}`) : '';
+  const src = indicator.source_org ?? 'the source shown below';
+  if (withRaw.length >= 2) {
+    const worst = withRaw[0], best = withRaw[withRaw.length - 1];
+    facts.push({
+      q: `Which country is worst on ${indicator.name.toLowerCase()}?`,
+      a: `Among the ${withRaw.length} countries The Human Index tracks, ${worst.country_name} is furthest into stress on ${indicator.name.toLowerCase()} at ${formatRaw(Number(worst.raw_value), indicator.unit)}, and ${best.country_name} is least stressed at ${formatRaw(Number(best.raw_value), indicator.unit)} (${src}, ${yearSpan}).`,
+    });
+  }
+  facts.push({
+    q: `What does ${indicator.name.toLowerCase()} measure?`,
+    a: `${indicator.description ?? indicator.name}${/[.!?]$/.test(indicator.description ?? '') ? '' : '.'} ${directionLabel}. Source: ${src}.`,
+  });
+  facts.push({
+    q: `How does ${indicator.name.toLowerCase()} feed the composite?`,
+    a: `It is one of the indicators in the ${META_LABELS[indicator.meta_index].toLowerCase()} domain, which carries ${Math.round(DEFAULT_META_WEIGHTS[indicator.meta_index] * 100)}% of every country's composite score${indicator.weight_within_meta !== 1 ? `; within that domain it counts at ${indicator.weight_within_meta === 0.5 ? 'half' : `${indicator.weight_within_meta}×`} weight` : ''}. Raw values are normalized to a 0–100 stress scale before averaging.`,
+  });
+
   return (
     <article className="min-h-screen">
       <BreadcrumbJsonLd
@@ -386,6 +412,24 @@ export default async function IndicatorPage({
           </div>
         </div>
       </header>
+
+      <KeyFacts facts={facts} />
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Dataset',
+          name: `${indicator.name} by country — The Human Index`,
+          description: `${indicator.description ?? indicator.name} Latest values for ${withRaw.length} countries${yearSpan ? ` (${yearSpan})` : ''}, normalized to a 0–100 stress scale. Source: ${src}.`,
+          url: `https://thehumanindex.org/indicator/${indicator.id}`,
+          isAccessibleForFree: true,
+          license: 'https://creativecommons.org/licenses/by-nc/4.0/',
+          creator: { '@type': 'Organization', name: 'The Human Index', url: 'https://thehumanindex.org' },
+          ...(indicator.source_url ? { isBasedOn: indicator.source_url } : {}),
+          ...(yearSpan ? { temporalCoverage: years[0] === years[years.length - 1] ? years[0] : `${years[0]}/${years[years.length - 1]}` } : {}),
+          spatialCoverage: { '@type': 'Place', name: `${withRaw.length} countries` },
+          variableMeasured: { '@type': 'PropertyValue', name: indicator.name, ...(indicator.unit ? { unitText: indicator.unit } : {}) },
+        }}
+      />
 
       {/* ── TREND ── */}
       {trend.length >= 2 && (

@@ -5,7 +5,7 @@ import './globals.css'
 import { SiteHeader } from '@/components/ui/SiteHeader'
 import { SiteFooter } from '@/components/ui/SiteFooter'
 import { THEME_BOOTSTRAP_SCRIPT } from '@/components/ui/ThemeProvider'
-import { OrganizationJsonLd, WebSiteJsonLd, DatasetJsonLd } from '@/components/JsonLd'
+import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLd'
 import { Providers } from '@/components/Providers'
 import { Analytics } from '@vercel/analytics/react'
 import { GoogleAnalytics } from '@/components/GoogleAnalytics'
@@ -142,7 +142,6 @@ export default function RootLayout({
         <Providers>
           <OrganizationJsonLd />
           <WebSiteJsonLd />
-          <DatasetJsonLd />
           <SiteHeader />
           <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
           <SiteFooter />

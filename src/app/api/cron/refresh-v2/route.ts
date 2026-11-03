@@ -20,6 +20,7 @@
 
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { changedUrls, submitIndexNow } from '@/lib/seo/indexnow';
 import { createClient } from '@supabase/supabase-js';
 import { fetchAllIndicatorValues } from '@/lib/indicators/orchestrator';
 import { composeCountryScores } from '@/lib/indicators/composeMetaIndex';
@@ -356,9 +357,15 @@ export async function GET(request: Request) {
       revalidatePath('/country/[code]', 'page');
       revalidatePath('/topics/[slug]', 'page');
       revalidatePath('/quiz');
+      revalidatePath('/indicator/[id]', 'page');
+      revalidatePath('/top-10/[slug]', 'page');
+      revalidatePath('/llms-full.txt');
     } catch (e) {
       console.warn('[cron-v2] revalidatePath warning:', e);
     }
+
+    // Ping IndexNow (Bing / ChatGPT search / Copilot) about the refreshed pages.
+    const indexNow = await submitIndexNow(await changedUrls(sb, countries.map(c => c.code)).catch(() => []));
 
     return NextResponse.json({
       ok: true,
@@ -373,6 +380,7 @@ export async function GET(request: Request) {
       divergence_warnings: divergenceWarnings.length,
       divergence_critical: divergences.filter(d => d.status === 'critical').length,
       summary: compositeSummary,
+      indexnow: indexNow,
       duration_ms: duration,
     });
   } catch (err) {

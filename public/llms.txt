@@ -14,6 +14,10 @@ publishers release new editions; a separate Live layer tracks monthly and
 daily signals. Each value keeps its raw source value, reference date and
 normalization bounds.
 
+## Live data
+
+- [Current snapshot](https://thehumanindex.org/llms-full.txt): full ranking, domain scores, Live signals, indicator sources and citation format, regenerated daily
+
 ## Key pages
 
 - [Country rankings](https://thehumanindex.org/countries): all 25 tracked countries with live composite scores

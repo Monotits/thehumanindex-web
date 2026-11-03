@@ -67,9 +67,13 @@ export function ArticleJsonLd({
         url: `https://thehumanindex.org/${section}/${slug}`,
         datePublished: publishedAt,
         dateModified: modifiedAt ?? publishedAt,
+        inLanguage: 'en',
+        image: `https://thehumanindex.org/share/${section}/${slug}?format=square`,
+        isBasedOn: 'https://thehumanindex.org/dataset',
         author: {
           '@type': 'Organization',
           name: 'The Human Index',
+          url: 'https://thehumanindex.org/about',
         },
         publisher: {
           '@type': 'Organization',
@@ -165,11 +169,14 @@ export function DatasetJsonLd() {
           { '@type': 'PropertyValue', name: 'Technological Stress Meta-Index', unitText: 'score 0-100' },
           { '@type': 'PropertyValue', name: 'Environmental Stress Meta-Index', unitText: 'score 0-100' },
         ],
-        distribution: {
-          '@type': 'DataDownload',
-          encodingFormat: 'application/json',
-          contentUrl: 'https://thehumanindex.org/api/data',
-        },
+        isAccessibleForFree: true,
+        dateModified: new Date().toISOString().slice(0, 10),
+        citation: 'The Human Index (thehumanindex.org). Civilizational Stress Dataset. Licensed CC BY-NC 4.0.',
+        distribution: [
+          { '@type': 'DataDownload', encodingFormat: 'application/json', contentUrl: 'https://thehumanindex.org/api/data' },
+          { '@type': 'DataDownload', encodingFormat: 'text/csv', contentUrl: 'https://thehumanindex.org/api/export?dataset=scores' },
+          { '@type': 'DataDownload', encodingFormat: 'text/csv', contentUrl: 'https://thehumanindex.org/api/export?dataset=historical' },
+        ],
         keywords: [
           'human stress index',
           'country stress rankings',
@@ -180,7 +187,8 @@ export function DatasetJsonLd() {
           'environmental stress',
           'composite index',
           'open dataset',
-          'daily tracker',
+          'stress ranking by country',
+          'historical stress index since 2000',
         ],
       }}
     />

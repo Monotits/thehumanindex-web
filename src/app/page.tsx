@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { KeyFacts, longDateUTC } from '@/components/geo/KeyFacts';
+import { DatasetJsonLd } from '@/components/JsonLd';
 import { latestMethodologyChange } from '@/components/editorial/MethodologyDriftNote';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
@@ -295,6 +297,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen">
+      <DatasetJsonLd />
       {/* ── HERO ── */}
       <section className="border-b border-border bg-background-alt/40">
         <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
@@ -490,6 +493,30 @@ export default async function HomePage() {
           />
         </div>
       </section>
+
+      {countries.length >= 3 && globalAvg !== null && (
+        <KeyFacts
+          title="Key facts"
+          facts={[
+            {
+              q: 'Which country is the most stressed?',
+              a: `As of ${longDateUTC(lastUpdate)}, ${countries[0].name} is the most stressed of the ${countries.length} countries The Human Index tracks, with a composite of ${countries[0].composite.toFixed(1)} out of 100, followed by ${countries[1].name} (${countries[1].composite.toFixed(1)}) and ${countries[2].name} (${countries[2].composite.toFixed(1)}).`,
+            },
+            {
+              q: 'Which country is the least stressed?',
+              a: `${countries[countries.length - 1].name} has the lowest composite stress score (${countries[countries.length - 1].composite.toFixed(1)} out of 100), followed by ${countries[countries.length - 2].name} (${countries[countries.length - 2].composite.toFixed(1)}) and ${countries[countries.length - 3].name} (${countries[countries.length - 3].composite.toFixed(1)}). The tracked-country average is ${globalAvg.toFixed(1)}.`,
+            },
+            {
+              q: 'What is The Human Index?',
+              a: `An open civilizational stress index that scores ${countries.length} countries from 0 to 100 using ${indicatorCount ?? 29} indicators in five domains — economic, social, mental, technological and environmental — from sources such as the World Bank, Eurostat, OECD, IMF, IHME and Gallup. Every value links to its source; the derived data is free under CC BY-NC 4.0.`,
+            },
+            {
+              q: 'How often is it updated?',
+              a: 'The pipeline re-checks every source daily. Most inputs are published annually, so the composite moves when publishers release new editions; a separate Live layer tracks monthly and daily signals such as unemployment, inflation, currency moves and job postings.',
+            },
+          ]}
+        />
+      )}
 
       {/* ── META AVERAGES ── */}
       <section className="border-t border-border bg-background-alt/40">
