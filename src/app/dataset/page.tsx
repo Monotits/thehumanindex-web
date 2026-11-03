@@ -74,7 +74,7 @@ const ENDPOINTS = [
 const DOWNLOADS = [
   { href: '/api/export?dataset=scores', name: 'Latest scores — all countries', detail: 'Composite, 5 domains, data coverage, Live score. CC BY-NC 4.0.' },
   { href: '/api/export?dataset=historical', name: 'Historical structural index, 2000–', detail: 'Annual, all countries, 4 domains. CC BY-NC 4.0.' },
-  { href: '/api/export?dataset=worldbank', name: 'World Bank inputs, 2000–', detail: 'Raw annual values + 0–100 stress scores for 15 indicators. World Bank Open Data, CC BY 4.0.' },
+  { href: '/api/export?dataset=worldbank', name: 'World Bank inputs, 2000–', detail: 'Raw annual values + 0–100 stress scores for 16 indicators. World Bank Open Data, CC BY 4.0.' },
 ];
 
 const USE_CASES = [
