@@ -6,11 +6,11 @@ import { TOP_10_CATALOG } from '@/lib/ui/top10-catalog';
 export const metadata: Metadata = {
   title: 'Country rankings',
   description:
-    'Live data-driven country rankings — most stressed countries, best for mental health, most exposed to AI, housing crisis severity, and more. Pipeline re-checks daily.',
+    'Live data-driven country rankings — most and least stressed countries, loneliness, mental health, housing affordability, and more. Pipeline re-checks daily.',
   openGraph: {
     title: 'Country rankings — The Human Index',
     description:
-      'Live data-driven country rankings — most stressed countries, mental health, AI exposure, housing, and more.',
+      'Live data-driven country rankings — most stressed countries, mental health, loneliness, housing, and more.',
     url: 'https://thehumanindex.org/top-10',
     type: 'website',
     siteName: 'The Human Index',

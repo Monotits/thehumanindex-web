@@ -35,9 +35,11 @@ export default async function ReportPage({ params }: { params: Promise<{ period:
   const n = rows.length;
   const avg = rows.reduce((a, x) => a + x.composite, 0) / n;
   const live = rows.filter(x => x.live !== null).sort((a, b) => b.live! - a.live!);
-  const rising = live.slice(0, 5);
-  const easing = live.slice(-3).reverse();
-  const changes = CHANGELOG.filter(e => e.date.slice(0, 7) === r.period);
+  const rising = live.filter(x => (x.live ?? 50) > 60).slice(0, 5);
+  const easing = live.filter(x => (x.live ?? 50) < 40).reverse().slice(0, 3);
+  // Only changes already in force when the report was frozen (same-day
+  // entries are separated by methodology version).
+  const changes = CHANGELOG.filter(e => e.date.slice(0, 7) === r.period && e.date <= r.publishedAt.slice(0, 10) && e.version <= r.methodVersion);
   const published = new Date(r.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
   const [first, second, third] = rows;
   const calm = rows[n - 1];

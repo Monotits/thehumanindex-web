@@ -496,9 +496,8 @@ export default async function IndicatorPage({
           </p>
           {indicator.weight_within_meta !== 1 && (
             <p>
-              Its weight within the {META_LABELS[indicator.meta_index]} meta-index
-              is {(indicator.weight_within_meta * 100).toFixed(0)}% (relative to
-              other indicators in the same domain).
+              It counts at {indicator.weight_within_meta === 0.5 ? 'half' : `${indicator.weight_within_meta}×`} the
+              weight of the other indicators in the {META_LABELS[indicator.meta_index]} meta-index.
             </p>
           )}
           <p>

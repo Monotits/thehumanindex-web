@@ -250,7 +250,7 @@ export async function generateMetadata({
   }
 
   const pageUrl = `https://thehumanindex.org/country/${upper.toLowerCase()}`;
-  const description = `Civilizational stress composite, 5-meta-index breakdown, and 31-indicator detail for ${name}. Every number sourced.`;
+  const description = `Civilizational stress composite, 5-meta-index breakdown, and 29-indicator detail for ${name}. Every number sourced.`;
 
   return {
     title: `${name}: stress score, indicators & sources`,
@@ -708,7 +708,7 @@ export default async function CountryDetailPage({
               How exposed are you to {country.name}&apos;s stress signals?
             </h2>
             <p className="text-sm text-foreground-muted leading-relaxed">
-              Five quick questions on your sector, age, and concerns — we map
+              Four quick questions on your sector, age, and concerns — we map
               your answers to the live numbers above and rank the five domains
               by personal relevance.
             </p>

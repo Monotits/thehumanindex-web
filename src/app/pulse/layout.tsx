@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Weekly Pulse — AI Displacement Analysis & Insights',
+  title: 'Weekly Pulse — country stress briefings',
   description:
-    'Weekly analysis of AI displacement trends, economic shifts, and civilizational stress indicators. Expert commentary on the forces reshaping work and society.',
+    'Weekly per-country briefings on civilizational stress, drafted with AI from The Human Index dataset and reviewed before publication.',
   openGraph: {
     title: 'Weekly Pulse — The Human Index',
     description:
-      'Weekly deep-dive analysis into AI displacement, economic inequality, and civilizational stress trends.',
+      'Weekly per-country briefings on civilizational stress from The Human Index dataset.',
     url: 'https://thehumanindex.org/pulse',
   },
   alternates: { canonical: 'https://thehumanindex.org/pulse' },

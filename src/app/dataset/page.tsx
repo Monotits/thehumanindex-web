@@ -122,7 +122,7 @@ export default function DatasetPage() {
       <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Stat label="Countries" value="25" caption="Across 6 continents" />
-          <Stat label="Indicators" value="31" caption="Five meta-indexes" />
+          <Stat label="Indicators" value="29" caption="Five meta-indexes" />
           <Stat label="Sources" value="10" caption="Public statistical bodies" />
           <Stat label="Pipeline check" value="Daily" caption="Source cadence varies" />
         </div>

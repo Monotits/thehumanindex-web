@@ -31,7 +31,7 @@ export async function GET() {
   <channel>
     <title>The Human Index — Weekly Pulse</title>
     <link>${siteUrl}/pulse</link>
-    <description>Weekly analysis of AI displacement trends, economic shifts, and civilizational stress indicators.</description>
+    <description>Weekly per-country civilizational stress briefings, drafted with AI from The Human Index dataset.</description>
     <language>en-us</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${siteUrl}/feed.xml" rel="self" type="application/rss+xml"/>
@@ -40,7 +40,7 @@ export async function GET() {
       <link>${siteUrl}</link>
       <guid isPermaLink="true">${siteUrl}/launch</guid>
       <pubDate>${new Date().toUTCString()}</pubDate>
-      <description>The Human Index is now computing real scores from BLS, FRED, World Bank, and OECD data. Weekly pulse reports coming soon.</description>
+      <description>Country stress scores across 25 countries. Weekly Pulse briefings at thehumanindex.org/pulse.</description>
     </item>
   </channel>
 </rss>`
@@ -61,7 +61,7 @@ export async function GET() {
       <link>${siteUrl}/pulse/${item.slug}</link>
       <guid isPermaLink="true">${siteUrl}/pulse/${item.slug}</guid>
       <pubDate>${new Date(item.published_at).toUTCString()}</pubDate>
-      <description><![CDATA[${item.body_markdown
+      <description><![CDATA[${(item.body_markdown ?? '')
         .split('\n')
         .find((line) => !line.startsWith('#') && line.trim())
         ?.substring(0, 200) || ''}]]></description>
@@ -74,7 +74,7 @@ export async function GET() {
   <channel>
     <title>The Human Index — Weekly Pulse</title>
     <link>${siteUrl}/pulse</link>
-    <description>Weekly analysis of AI displacement trends, economic shifts, and civilizational stress indicators.</description>
+    <description>Weekly per-country civilizational stress briefings, drafted with AI from The Human Index dataset.</description>
     <language>en-us</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${siteUrl}/feed.xml" rel="self" type="application/rss+xml"/>

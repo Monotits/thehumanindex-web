@@ -14,8 +14,11 @@ interface Props {
 /** "Why is X above/below average?" — per-indicator gaps that sum exactly to the difference. */
 export function ScoreDrivers({ countryName, composite, avgComposite, gaps, names, seed }: Props) {
   const diff = composite - avgComposite;
-  const up = gaps.filter(g => g.gap > 0.05).sort((a, b) => b.gap - a.gap).slice(0, 5);
-  const down = gaps.filter(g => g.gap < -0.05).sort((a, b) => a.gap - b.gap).slice(0, 5);
+  // Missing data is not a driver: a country without a value would otherwise
+  // show that indicator as "holding the score down".
+  const up = gaps.filter(g => !g.missing && g.gap > 0.05).sort((a, b) => b.gap - a.gap).slice(0, 5);
+  const down = gaps.filter(g => !g.missing && g.gap < -0.05).sort((a, b) => a.gap - b.gap).slice(0, 5);
+  const missing = gaps.filter(g => g.missing).length;
   const max = Math.max(0.5, ...[...up, ...down].map(g => Math.abs(g.gap)));
   const shown = [...up, ...down].reduce((a, g) => a + g.gap, 0);
 
@@ -40,6 +43,7 @@ export function ScoreDrivers({ countryName, composite, avgComposite, gaps, names
           {countryName} scores {composite.toFixed(1)}, {Math.abs(diff).toFixed(1)} points {diff >= 0 ? 'above' : 'below'} the
           tracked-country average of {avgComposite.toFixed(1)}. Each bar is one indicator&apos;s share of that gap, in composite
           points; all indicators together add up to it (± rounding).
+          {missing > 0 && <> {missing === 1 ? 'One indicator has' : `${missing} indicators have`} no value for {countryName}; their weight goes to the others, so they are not listed.</>}
         </p>
         {seed && seed.share > 0 && (
           <p className="mt-3 text-sm text-foreground-muted text-pretty border-l-2 border-border pl-3">

@@ -71,7 +71,7 @@ export default function AboutPage() {
           </p>
           <p>
             The Human Index turns that fragmented landscape into a single,
-            comparable, drillable scoreboard. Twenty-five countries, thirty-one
+            comparable, drillable scoreboard. Twenty-five countries, twenty-nine
             indicators, five meta-indexes, one composite. Every value traces
             back to its source.
           </p>
@@ -79,8 +79,9 @@ export default function AboutPage() {
           <h2>What we do</h2>
           <ul>
             <li>
-              Aggregate indicators from official sources — World Bank, Eurostat,
-              IMF, OECD, WHO, NASA, Berkeley Earth, IHME, WRI, regulators.
+              Aggregate indicators from official statistics and published
+              surveys — World Bank, Eurostat, OECD, IMF, ERA5/Copernicus, IHME,
+              Gallup, World Happiness Report, EVS/WVS, DataReportal, WRI.
               The pipeline checks daily; each source publishes on its
               own cadence (some daily, some quarterly, some annual).
             </li>
@@ -89,8 +90,9 @@ export default function AboutPage() {
               five meta-indexes using a published formula.
             </li>
             <li>
-              Surface a weekly editorial layer (Pulse) per country in ten
-              languages, and a long-form Research surface for deeper analyses.
+              Surface a weekly editorial layer (Pulse) per country and a
+              long-form Research surface, both drafted with AI from the dataset
+              and reviewed before publication.
             </li>
             <li>
               Make every number drillable to its raw value, reference date,
@@ -106,10 +108,12 @@ export default function AboutPage() {
             </li>
             <li>
               We do not invent data. Every indicator comes from a published
-              source. When sources disagree, we show the disagreement.
+              source, with one disclosed exception: housing affordability is a
+              compiled estimate and counts at half weight. When sources
+              disagree, we show the disagreement.
             </li>
             <li>
-              We do not personalize beyond country and locale. There is no
+              We do not personalize beyond country. There is no
               behavioral profiling, no tracking-driven content shaping.
             </li>
           </ul>
@@ -185,7 +189,7 @@ export default function AboutPage() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/rankings"
+                href="/countries?view=table"
                 className="inline-flex items-center gap-2 rounded-md bg-accent text-accent-fg px-5 py-2.5 text-sm font-medium hover:bg-accent-hover transition-colors"
               >
                 See the rankings

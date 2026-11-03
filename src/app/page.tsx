@@ -377,7 +377,7 @@ export default async function HomePage() {
                 label="Share the ranking"
               />
               <Link
-                href="/rankings"
+                href="/countries?view=table"
                 className="inline-flex items-center gap-2 rounded-md bg-accent text-accent-fg px-5 py-2.5 text-sm font-medium hover:bg-accent-hover transition-colors"
               >
                 View full ranking

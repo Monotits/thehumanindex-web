@@ -24,8 +24,11 @@ interface Props {
 export function LiveMovers({ rows, newestData, nextRelease }: Props) {
   if (rows.length === 0) return null;
   const sorted = [...rows].sort((a, b) => (b.live_score_7d ?? b.live_score) - (a.live_score_7d ?? a.live_score));
-  const rising = sorted.slice(0, 5);
-  const easing = sorted.slice(-3).reverse();
+  // Only call a country "rising" above the normal band (>60) and "easing"
+  // below it (<40) — the same thresholds liveTone uses.
+  const score = (r: LiveCountry) => r.live_score_7d ?? r.live_score;
+  const rising = sorted.filter(r => score(r) > 60).slice(0, 5);
+  const easing = sorted.filter(r => score(r) < 40).reverse().slice(0, 3);
   const computed = rows.reduce((acc, r) => (r.computed_at > acc ? r.computed_at : acc), rows[0].computed_at);
 
   return (
@@ -38,7 +41,8 @@ export function LiveMovers({ rows, newestData, nextRelease }: Props) {
         </div>
         <p className="text-foreground-muted text-pretty">
           The composite moves slowly — it is built on annual data. The Live layer tracks what changed
-          recently: unemployment, inflation, currency, job postings and disasters, each compared with the
+          recently: unemployment, inflation, currency, job postings, geopolitical risk, policy uncertainty
+          and disasters, each compared with the
           country&apos;s own history. 50 means a normal period.
         </p>
         <p className="mt-3 text-xs text-foreground-subtle tabular-nums">

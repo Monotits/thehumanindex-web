@@ -49,6 +49,8 @@ export interface Gap {
   contribution: number; // this country's points
   average: number;      // mean points across countries
   gap: number;          // contribution − average
+  /** The country has no value for this indicator (its weight went to the others). */
+  missing: boolean;
 }
 
 export function gapsVsAverage(all: Map<string, Contributions>, country: string): { gaps: Gap[]; total: number; avgComposite: number; composite: number } | null {
@@ -63,7 +65,7 @@ export function gapsVsAverage(all: Map<string, Contributions>, country: string):
     for (const c of all.values()) sum += c.get(id) ?? 0;
     const average = sum / n;
     const contribution = mine.get(id) ?? 0;
-    gaps.push({ indicatorId: id, contribution, average, gap: contribution - average });
+    gaps.push({ indicatorId: id, contribution, average, gap: contribution - average, missing: !mine.has(id) });
   }
   const composite = Array.from(mine.values()).reduce((a, b) => a + b, 0);
   let avgComposite = 0;

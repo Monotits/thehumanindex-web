@@ -7,7 +7,7 @@ import { META_INDEXES, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 export const metadata: Metadata = {
   title: 'Every indicator we track',
   description:
-    'Every indicator we track across 25 countries, grouped by meta-index domain. From housing affordability to inflation to automation exposure to temperature anomaly — each links to a full country ranking.',
+    'Every indicator we track across 25 countries, grouped by meta-index domain. From housing affordability to inflation to loneliness to temperature anomaly — each links to a full country ranking.',
   openGraph: {
     title: 'Every indicator we track — The Human Index',
     description:
@@ -151,20 +151,23 @@ export default async function IndicatorsIndexPage() {
               <div className="text-foreground-muted leading-relaxed">
                 ACLED/GDELT integrations were prototyped early on but the
                 normalization story (one protest ≠ one protest across
-                contexts) never converged. The Social meta-index currently
-                relies on homicide rate, suicide rate, and trust in
-                institutions instead — fewer signals, cleaner attribution.
+                contexts) never converged. The Social meta-index relies on
+                homicide, interpersonal trust, loneliness, long working hours,
+                fertility, adolescent fertility and divorce instead — fewer
+                signals, cleaner attribution.
               </div>
             </li>
             <li className="border-l-2 border-foreground-subtle/30 pl-4">
               <div className="font-medium text-foreground">
-                Per-country temperature trend (live)
+                Digital addiction &amp; automation exposure
               </div>
               <div className="text-foreground-muted leading-relaxed">
-                NASA GISS gives one global anomaly; that&apos;s not per-country
-                signal. We currently seed from Berkeley Earth&apos;s 2024
-                per-country dataset (refreshed annually). Switching to a
-                truly live per-country temperature API is on the list.
+                Retired on November 2, 2026 (migration 034). No cross-country
+                source exists for problematic device use among adults, and the
+                automation figures were a triangulation without per-country
+                citations. The Technological meta-index now rests on daily
+                screen time alone and counts at half weight until a second
+                citable measure exists.
               </div>
             </li>
           </ul>

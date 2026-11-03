@@ -297,6 +297,10 @@ export default async function PulseReaderPage({
             </div>
           </aside>
         )}
+        <p className="mb-6 text-xs text-foreground-subtle">
+          Drafted with AI from The Human Index dataset. Numbers are a snapshot at publication; spot an error?{' '}
+          <Link href="/contact" className="underline underline-offset-2">Tell us</Link>.
+        </p>
         <div
           className="prose prose-thi"
           dangerouslySetInnerHTML={{ __html: html }}

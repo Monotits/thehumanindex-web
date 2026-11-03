@@ -22,14 +22,18 @@ import { NewsletterCTA } from './NewsletterCTA';
 const SOURCES = [
   'World Bank',
   'Eurostat',
-  'IMF',
   'OECD',
-  'WHO',
-  'NASA GISS',
-  'Berkeley Earth',
+  'IMF',
+  'ERA5 / Copernicus',
   'IHME GBD',
-  'WRI Aqueduct',
   'Gallup',
+  'World Happiness Report',
+  'EVS / WVS',
+  'DataReportal',
+  'WRI Aqueduct',
+  'ECB',
+  'Indeed Hiring Lab',
+  'GDACS',
 ];
 
 export function SiteFooter() {

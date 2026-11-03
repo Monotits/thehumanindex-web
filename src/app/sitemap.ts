@@ -116,13 +116,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .from('commentary')
       .select('country_code,locale,slug,published_at')
       .eq('type', 'weekly_pulse')
+      .eq('locale', 'en')
       .order('published_at', { ascending: false })
-      .limit(5000),
+      .limit(1000),
     sb
       .from('glossary_entries')
       .select('country_code,locale,slug,published_at')
+      .eq('locale', 'en')
       .order('published_at', { ascending: false })
-      .limit(20000),
+      .limit(1000),
     sb.from('countries').select('code').eq('active', true),
     sb.from('indicators').select('id').eq('active', true),
   ]);

@@ -109,7 +109,7 @@ export function welcomeEmail(unsubscribeUrl: string) {
       <ul style="margin:0 0 16px;padding-left:24px;">
         <li style="margin:0 0 6px;"><strong>The week's biggest mover</strong> — the indicator that shifted the most.</li>
         <li style="margin:0 0 6px;"><strong>A country to watch</strong> — where the composite is breaking.</li>
-        <li style="margin:0 0 6px;"><strong>Labor signals</strong> — corporate layoff totals from SEC EDGAR + WARN filings.</li>
+        <li style="margin:0 0 6px;"><strong>Labor signals</strong> — corporate layoff announcements from SEC filings, WARN notices and news.</li>
         <li style="margin:0;"><strong>One piece of long-form analysis</strong> — the Pulse most worth reading.</li>
       </ul>
       <p style="margin:0 0 16px;">
@@ -132,7 +132,7 @@ You're now subscribed to the Weekly Stress Brief — a short Sunday-morning disp
 Every brief includes:
 - The week's biggest mover (the indicator that shifted the most).
 - A country to watch (where the composite is breaking).
-- Labor signals (corporate layoff totals from SEC EDGAR + WARN).
+- Labor signals (corporate layoff announcements from SEC filings, WARN notices and news).
 - One piece of long-form analysis (the Pulse most worth reading).
 
 Five minutes. Every Sunday. No fluff.

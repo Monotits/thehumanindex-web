@@ -32,14 +32,14 @@ export const TOPIC_CATALOG: TopicEntry[] = [
   {
     slug: 'ai-and-jobs',
     title: 'AI & jobs',
-    subhead: 'Where automation is reshaping the workforce — and which countries are most exposed.',
+    subhead: 'Labour-market strain across 25 countries — what the data can and cannot say about AI.',
     description:
-      'Live data on AI displacement, automation exposure, and labor-market disruption across 25 countries. The signals shaping work in 2026 and beyond.',
+      'Unemployment and youth unemployment across 25 countries, plus Live job-postings momentum. We do not score AI or automation exposure by country: no citable cross-country source exists.',
     // automation_exposure was deactivated (migration 034: no citable source);
     // the topic leads with the labour-market outcome until one exists.
     headlineIndicator: 'unemployment_rate',
     relatedIndicators: ['youth_unemployment_rate'],
-    meta: 'technological',
+    meta: 'economic',
     pulseKeywords: ['ai', 'automation', 'displacement', 'jobs', 'labor', 'workforce'],
     emoji: '🤖',
   },
@@ -50,7 +50,7 @@ export const TOPIC_CATALOG: TopicEntry[] = [
     description:
       'Live housing affordability and cost-of-living data across 25 countries. Headline ratios, country rankings, and editorial framing.',
     headlineIndicator: 'housing_affordability',
-    relatedIndicators: ['gini_index', 'gdp_per_capita_ppp'],
+    relatedIndicators: ['gini_index', 'inflation_rate'],
     meta: 'economic',
     pulseKeywords: ['housing', 'rent', 'affordability', 'mortgage', 'real estate'],
     emoji: '🏠',
@@ -74,7 +74,7 @@ export const TOPIC_CATALOG: TopicEntry[] = [
     description:
       'Environmental stress indicators across 25 countries: temperature anomaly, water stress, air pollution, emissions intensity, renewable share.',
     headlineIndicator: 'temperature_anomaly',
-    relatedIndicators: ['water_stress', 'air_pollution_pm25', 'renewables_share'],
+    relatedIndicators: ['water_stress', 'air_pollution', 'renewable_energy_pct', 'co2_per_capita'],
     meta: 'environmental',
     pulseKeywords: ['climate', 'temperature', 'air', 'water', 'environment', 'emissions'],
     emoji: '🌡️',
@@ -84,9 +84,9 @@ export const TOPIC_CATALOG: TopicEntry[] = [
     title: 'Inequality',
     subhead: 'How concentrated are wealth and opportunity — and what does that mean for stability.',
     description:
-      'Income inequality, wealth concentration, and economic opportunity across 25 countries. Gini coefficients, GDP per capita, and the structural signals behind them.',
+      'Income inequality across 25 countries: Gini coefficients and the labour-market signals around them.',
     headlineIndicator: 'gini_index',
-    relatedIndicators: ['gdp_per_capita_ppp', 'unemployment_rate'],
+    relatedIndicators: ['unemployment_rate', 'youth_unemployment_rate'],
     meta: 'economic',
     pulseKeywords: ['inequality', 'gini', 'wealth', 'income', 'distribution'],
     emoji: '📊',
@@ -94,11 +94,11 @@ export const TOPIC_CATALOG: TopicEntry[] = [
   {
     slug: 'social-trust',
     title: 'Social trust & cohesion',
-    subhead: 'Institutional trust, civic engagement, and social fabric — measured.',
+    subhead: 'Interpersonal trust, loneliness, safety — the social fabric, measured.',
     description:
-      'The social cohesion signals that hold (or fail to hold) societies together: institutional trust, perceived fairness, civic participation, crime.',
-    headlineIndicator: 'homicide_rate',
-    relatedIndicators: ['adolescent_fertility', 'alcohol_consumption'],
+      'The social cohesion signals we track across 25 countries: interpersonal trust, loneliness, homicide and long working hours.',
+    headlineIndicator: 'social_trust',
+    relatedIndicators: ['loneliness', 'homicide_rate', 'work_life_balance'],
     meta: 'social',
     pulseKeywords: ['trust', 'social', 'cohesion', 'civic', 'unrest', 'institutions'],
     emoji: '🤝',

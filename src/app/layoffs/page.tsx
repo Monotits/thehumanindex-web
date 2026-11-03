@@ -106,8 +106,10 @@ export default async function LayoffsPage() {
 
   // Stats — 30 day window
   const now = Date.now();
+  // Stats count corroborated events only (verified/reported), like the
+  // curated 30-day view; rumored rows are listed but not counted.
   const last30 = layoffs.filter(
-    (l) => now - new Date(l.announcement_date).getTime() < 30 * 24 * 60 * 60 * 1000,
+    (l) => l.confidence_tier !== 'rumored' && now - new Date(l.announcement_date).getTime() < 30 * 24 * 60 * 60 * 1000,
   );
   const totalAffected30 = last30.reduce((s, l) => s + (l.people_affected ?? 0), 0);
   const aiDriven30 = last30.filter((l) => l.is_ai_driven).length;

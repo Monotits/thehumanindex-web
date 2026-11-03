@@ -14,10 +14,10 @@ export const dynamic = 'force-static';
 
 const BAND_BOUNDS: { band: Band; min: number; max: number; description: string }[] = [
   { band: 'low',      min: 0,  max: 25, description: 'Functional society — stressors present but bounded' },
-  { band: 'moderate', min: 26, max: 45, description: 'Strain visible in headline indicators' },
-  { band: 'elevated', min: 46, max: 65, description: 'Recurring strain across multiple meta-indexes' },
-  { band: 'high',     min: 66, max: 80, description: 'Acute stress; institutional buffer eroding' },
-  { band: 'critical', min: 81, max: 100, description: 'Sustained crisis-level signals' },
+  { band: 'moderate', min: 25.1, max: 45, description: 'Strain visible in headline indicators' },
+  { band: 'elevated', min: 45.1, max: 65, description: 'Recurring strain across multiple meta-indexes' },
+  { band: 'high',     min: 65.1, max: 80, description: 'Acute stress; institutional buffer eroding' },
+  { band: 'critical', min: 80.1, max: 100, description: 'Sustained crisis-level signals' },
 ];
 
 const FRESHNESS_TIERS = [
@@ -28,9 +28,9 @@ const FRESHNESS_TIERS = [
 ];
 
 const CONFIDENCE_TIERS = [
-  { tier: 'Verified', when: 'Filed with a regulator or official statistical agency (SEC EDGAR, WARN Act, World Bank, Eurostat, IMF, OECD)' },
+  { tier: 'Verified', when: 'Filed with a regulator or official statistical agency (World Bank, Eurostat, IMF, OECD; for the layoff feed: SEC EDGAR, WARN notices)' },
   { tier: 'Reported', when: 'Wire service or established news outlet, single source' },
-  { tier: 'Rumored',  when: 'Tracked but not surfaced to scores until corroborated' },
+  { tier: 'Rumored',  when: 'Tracked but not shown until corroborated' },
 ];
 
 export const metadata = {
@@ -55,7 +55,7 @@ function weightRationale(meta: string): string {
     case 'social':
       return 'Sustained communal trust and cohesion underpin every other meta.';
     case 'mental':
-      return 'Population-level mental load — anxiety, suicide, loneliness — measured separately from economic stress.';
+      return 'Population-level mental load — depression, anxiety, suicide, daily stress — measured separately from economic stress.';
     case 'technological':
       return 'Base weight 20%, temporarily halved: since v2.3 it rests on a single sourced indicator (screen time). Restored once a second citable measure exists.';
     case 'environmental':
@@ -69,7 +69,7 @@ const FAQ_ITEMS = [
   {
     question: 'What is The Human Index composite score?',
     answer:
-      'A 0-100 stress score per country, computed as the weighted average of five meta-indexes (economic, social, mental, technological, environmental), each built from normalized indicators sourced from official statistics.',
+      'A 0-100 stress score per country, computed as the weighted average of five meta-indexes (economic, social, mental, technological, environmental), each built from normalized indicators sourced from official statistics and published surveys.',
   },
   {
     question: 'What do the score bands mean?',
@@ -124,7 +124,7 @@ export default function MethodologyPage() {
             For every country we track, on every cron run, the system produces:
           </p>
           <ul>
-            <li>A normalized score for each of <strong>29 indicators</strong> on a 0–100 stress scale (lower means less stress).</li>
+            <li>A normalized score for each of up to <strong>29 indicators</strong> on a 0–100 stress scale (lower means less stress).</li>
             <li>A score for each of <strong>5 meta-indexes</strong>, averaged from its constituent indicators.</li>
             <li>One <strong>composite</strong> score per country, a weighted average of the 5 meta-indexes.</li>
           </ul>
@@ -311,8 +311,9 @@ export default function MethodologyPage() {
         </h2>
         <div className="prose prose-thi">
           <p>
-            For indicators with more than one independent source (e.g. inflation
-            from IMF WEO and World Bank, temperature from NASA GISS and Berkeley
+            For indicators with more than one independent source (e.g. unemployment
+            from Eurostat and the World Bank, government debt from IMF WEO and the
+            earlier hand-entered IMF values, temperature from ERA5 and Berkeley
             Earth), the orchestrator does three things on every cron run:
           </p>
           <ol>
@@ -395,7 +396,7 @@ export default function MethodologyPage() {
           <p>
             The composite began in 2026, and about half of its indicators come from
             reports published once with no back series (Gallup, World Values Survey,
-            OECD Better Life Index, DataReportal and others). We do not invent a past
+            World Happiness Report, DataReportal and others). We do not invent a past
             for them by holding today&apos;s values constant.
           </p>
           <p>
@@ -404,7 +405,7 @@ export default function MethodologyPage() {
             single source — World Bank Open Data (unemployment, youth unemployment,
             inflation, GDP growth, Gini, fertility, adolescent fertility, age dependency,
             life expectancy, under-5 mortality, suicide, homicide, alcohol, CO₂ per capita,
-            renewable energy share). It uses the same normalisation bounds, within-domain
+            renewable energy share, PM2.5 air pollution). It uses the same normalisation bounds, within-domain
             weights and domain weights as the composite.
           </p>
           <ul>

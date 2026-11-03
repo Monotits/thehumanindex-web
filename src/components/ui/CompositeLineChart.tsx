@@ -134,13 +134,14 @@ export function CompositeLineChart({
   // Date label formatter — short month + day
   const fmtTick = (iso: string) => {
     const d = new Date(iso);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
   };
   const fmtTooltipDate = (iso: string) =>
     new Date(iso).toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
+      timeZone: 'UTC',
     });
 
   // Gradient id (stable per render — we don't need useId here because the

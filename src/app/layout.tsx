@@ -63,7 +63,6 @@ export const metadata: Metadata = {
     'mental health by country',
     'environmental stress',
     'social cohesion measure',
-    'AI automation exposure',
     'loneliness by country',
     'housing affordability index',
   ],

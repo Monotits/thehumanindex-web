@@ -194,6 +194,9 @@ export default async function GlossaryEntryPage({
 
       {/* ── BODY ── */}
       <section className="max-w-prose-wide mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <p className="mb-6 text-xs text-foreground-subtle">
+          Drafted with AI. Figures and citations in this entry are not part of the index and have not all been checked — verify them at the source before quoting.
+        </p>
         <div
           className="prose prose-thi"
           dangerouslySetInnerHTML={{ __html: html }}

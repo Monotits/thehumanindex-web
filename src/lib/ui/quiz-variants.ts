@@ -22,7 +22,7 @@ export const QUIZ_VARIANTS: QuizVariant[] = [
     slug: 'civilizational-stress',
     title: 'How exposed are you to civilizational stress?',
     subhead:
-      'Five quick questions about where you live, what you do, and what worries you. We map your answers to the live indicators we track and tell you which stresses matter most for someone in your situation — with the actual numbers.',
+      'Four quick questions about where you live, what you do, and what worries you. We map your answers to the live indicators we track and tell you which stresses matter most for someone in your situation — with the actual numbers.',
     description:
       'A 60-second personal stress profile against live country-level data across 5 meta-indexes.',
     badge: 'Personal assessment',

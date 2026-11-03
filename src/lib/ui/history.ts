@@ -36,15 +36,23 @@ export async function loadCompositeHistory(
   const sb: SupabaseClient = createClient(sbUrl, sbKey);
   const since = new Date(Date.now() - days * 86400 * 1000).toISOString();
 
-  const res = await sb
-    .from('country_composite_scores')
-    .select('country_code, score_value, computed_at')
-    .in('country_code', countryCodes)
-    .gte('computed_at', since)
-    .order('computed_at', { ascending: true })
-    .limit(5000);
-
-  if (!res.data) return out;
+  // PostgREST returns at most 1000 rows per request (25 countries × 60 days
+  // is more), and ascending order then drops the most recent days — page it.
+  const rows: Array<{ country_code: string; score_value: number; computed_at: string }> = [];
+  for (let from = 0; from < 50000; from += 1000) {
+    const page = await sb
+      .from('country_composite_scores')
+      .select('country_code, score_value, computed_at')
+      .in('country_code', countryCodes)
+      .gte('computed_at', since)
+      .order('computed_at', { ascending: true })
+      .order('country_code', { ascending: true })
+      .range(from, from + 999);
+    if (!page.data) break;
+    rows.push(...(page.data as typeof rows));
+    if (page.data.length < 1000) break;
+  }
+  const res = { data: rows };
 
   // Bucket per (country, YYYY-MM-DD): latest value wins
   const byCountryDate = new Map<string, Map<string, number>>();

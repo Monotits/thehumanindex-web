@@ -119,12 +119,12 @@ export function WebApplicationJsonLd() {
       data={{
         '@context': 'https://schema.org',
         '@type': 'WebApplication',
-        name: 'AI Exposure Assessment Quiz',
+        name: 'Civilizational Stress Exposure Quiz',
         url: 'https://thehumanindex.org/quiz',
         applicationCategory: 'UtilityApplication',
         operatingSystem: 'Any',
         description:
-          'Free AI job displacement exposure assessment. Find out how vulnerable your career is to AI automation.',
+          'Free 60-second assessment: weights five stress domains by your situation against your country\'s current scores.',
         offers: {
           '@type': 'Offer',
           price: '0',
@@ -144,15 +144,15 @@ export function DatasetJsonLd() {
         '@type': 'Dataset',
         name: 'The Human Index — Civilizational Stress Dataset',
         description:
-          'Civilizational stress composite across 25 countries and 29 indicators, grouped into five meta-indexes (economic, social, mental, technological, environmental). Sourced from World Bank, Eurostat, IMF WEO, OECD, WHO, NASA GISS, Berkeley Earth, IHME GBD, WRI Aqueduct, and Gallup.',
+          'Civilizational stress composite across 25 countries and 29 indicators, grouped into five meta-indexes (economic, social, mental, technological, environmental). Sourced from World Bank, Eurostat, OECD, IMF WEO, ERA5 (Copernicus) via World Bank CCKP, IHME GBD, Gallup, World Happiness Report, EVS/WVS, DataReportal, WRI Aqueduct.',
         url: 'https://thehumanindex.org',
-        license: 'https://creativecommons.org/licenses/by/4.0/',
+        license: 'https://creativecommons.org/licenses/by-nc/4.0/',
         creator: {
           '@type': 'Organization',
           name: 'The Human Index',
           url: 'https://thehumanindex.org',
         },
-        temporalCoverage: '2024/..',
+        temporalCoverage: '2000/..',
         spatialCoverage: {
           '@type': 'Place',
           name: 'Global — 25 countries',
