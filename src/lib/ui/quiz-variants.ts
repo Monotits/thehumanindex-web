@@ -30,22 +30,22 @@ export const QUIZ_VARIANTS: QuizVariant[] = [
   },
   {
     slug: 'would-you-thrive',
-    title: 'Would you thrive somewhere else?',
+    title: 'Which of your country’s stresses actually hit you?',
     subhead:
-      'Tell us where you are and what you care about. We compare your country\'s live stress signals to the rest of the 25 we track — and show you which countries are actually less stressed on the dimensions that matter to you.',
+      'Tell us where you live and what you care about. We weight the five stress domains by your answers and show your country\'s current scores on each — so you can see which pressures matter for someone like you. Every country page lets you compare further.',
     description:
-      'See which countries are objectively less stressed on the dimensions that matter to you — based on live data.',
-    badge: 'Country compatibility',
+      'Your concerns × your country\'s current scores on five stress domains — in 60 seconds.',
+    badge: 'Personal relevance',
     duration: '60 seconds',
   },
   {
     slug: 'ai-proof-your-job',
-    title: 'How AI-proof is your job?',
+    title: 'How exposed is your career to stress where you live?',
     subhead:
-      'Pick your country and sector. We pull live automation exposure, AI displacement and technological stress data for your specific situation — and show you where on the global ranking your career sits in 2026.',
+      'Pick your country and sector. We weight the five stress domains by your sector and age and show your country\'s current scores on each. (We do not score automation exposure by country: no citable cross-country source exists.)',
     description:
-      'Live automation + AI displacement signals for your country and sector. See where you actually stand.',
-    badge: 'Job risk',
+      'Your sector × your country\'s current scores on five stress domains, including technological stress.',
+    badge: 'Career lens',
     duration: '60 seconds',
   },
 ];

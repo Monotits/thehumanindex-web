@@ -56,7 +56,7 @@ export default async function ReportPage({ params }: { params: Promise<{ period:
             The tracked-country average is {avg.toFixed(1)} on a 0–100 scale.
             {rising[0] && rising[0].live! > 60 && (
               <> Pressure is building fastest in {rising[0].name}
-                {topDriver(rising[0].liveContributors) ? <> — {describeContributor(topDriver(rising[0].liveContributors)!).toLowerCase()}</> : null}.</>
+                {topDriver(rising[0].liveContributors) ? <> — {(d => d.charAt(0).toLowerCase() + d.slice(1))(describeContributor(topDriver(rising[0].liveContributors)!))}</> : null}.</>
             )}
           </p>
         </div>

@@ -3,11 +3,11 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Labor stress signals — Live layoff tracker',
   description:
-    'Real-time corporate layoff signals from SEC EDGAR, WARN Act filings, and verified news — feeding the Economic meta-index in The Human Index civilizational stress framework.',
+    'Corporate layoff announcements from SEC EDGAR 8-K filings, California WARN notices and news reports — a standalone labor-stress signal feed from The Human Index.',
   openGraph: {
     title: 'Labor stress signals — The Human Index',
     description:
-      'Where the labor market is breaking. Aggregated layoff signals contributing to the Economic meta-index.',
+      'Where the labor market is breaking: layoff announcements from regulatory filings and news.',
     url: 'https://thehumanindex.org/layoffs',
   },
   alternates: {

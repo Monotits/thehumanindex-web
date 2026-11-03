@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { latestMethodologyChange } from '@/components/editorial/MethodologyDriftNote';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { StressBand } from '@/components/ui/StressBand';
@@ -8,7 +9,7 @@ import { WorldMap, type WorldMapCountry } from '@/components/ui/WorldMap';
 import { NewsletterCTA } from '@/components/ui/NewsletterCTA';
 import { bandFor, META_INDEXES, META_LABELS, META_WEIGHT, type MetaIndex } from '@/lib/ui/tokens';
 import { getActiveLocale } from '@/lib/ui/locale';
-import { loadCompositeHistory, pointsToDenseSeries, trendSummary } from '@/lib/ui/history';
+import { afterBreak, loadCompositeHistory, pointsToDenseSeries, trendSummary } from '@/lib/ui/history';
 import { LiveMovers } from '@/components/live/LiveMovers';
 import { ShareCardButton } from '@/components/share-card/ShareCardButton';
 import { computeReleases, loadLatestPeriods } from '@/lib/calendar/releases';
@@ -77,17 +78,20 @@ async function loadHomeData(locale: string) {
       liveRows: [] as Array<LiveCountry & { name: string; flag_emoji: string | null }>,
       liveNewest: null as string | null,
       nextRelease: null as { label: string; at: string } | null,
+      indicatorCount: null as number | null,
     };
   }
   const sb = createClient(sbUrl, sbKey);
   const livePromise = loadLatestLive(sb);
 
   // 3 parallel queries — composites, country names, per-country meta scores
-  const [compositesRes, countriesRes, metaRes] = await Promise.all([
+  const [compositesRes, countriesRes, metaRes, indCountRes] = await Promise.all([
     sb.from('v_country_latest_composite').select('country_code, score_value, computed_at'),
     sb.from('countries').select('code, name, flag_emoji').eq('active', true),
     sb.from('v_country_latest_meta_indexes').select('country_code, meta_index, value'),
+    sb.from('indicators').select('id', { count: 'exact', head: true }).eq('active', true),
   ]);
+  const indicatorCount = indCountRes.count ?? null;
 
   const composites = (compositesRes.data ?? []) as Array<{
     country_code: string;
@@ -216,7 +220,7 @@ async function loadHomeData(locale: string) {
 
   return {
     countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate,
-    layoffs, layoffsTotal30d, liveRows, liveNewest, nextRelease,
+    layoffs, layoffsTotal30d, liveRows, liveNewest, nextRelease, indicatorCount,
   };
 }
 
@@ -263,7 +267,7 @@ function formatLayoffCount(n: number | null): string {
 
 export default async function HomePage() {
   const locale = await getActiveLocale();
-  const { countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate, layoffs, layoffsTotal30d, liveRows, liveNewest, nextRelease } = await loadHomeData(locale);
+  const { countries, mapData, metaAvgs, pulses, featured, globalAvg, lastUpdate, layoffs, layoffsTotal30d, liveRows, liveNewest, nextRelease, indicatorCount } = await loadHomeData(locale);
   const liveAvg = liveRows.length
     ? Math.round((liveRows.reduce((a, r) => a + (r.live_score_7d ?? r.live_score), 0) / liveRows.length) * 10) / 10
     : null;
@@ -307,7 +311,7 @@ export default async function HomePage() {
               .
             </h1>
             <p className="mt-6 text-lg text-foreground-muted text-pretty max-w-2xl">
-              The Human Index tracks 25 countries across 29 indicators in five domains —
+              The Human Index tracks {countries.length || 25} countries across {indicatorCount ?? 29} indicators in five domains —
               economic, social, mental, technological, environmental. The pipeline
               checks daily; sources publish on their own cadence. Every
               number traceable.
@@ -557,9 +561,9 @@ export default async function HomePage() {
                 Where the labor market is breaking, this week.
               </h2>
               <p className="text-foreground-muted">
-                Corporate layoff announcements aggregated from SEC EDGAR,
-                WARN Act filings, and verified news — feeding the Economic
-                meta-index.
+                Corporate layoff announcements from SEC EDGAR filings, WARN
+                notices and news reports. A standalone signal — layoffs do not
+                enter country scores.
               </p>
             </div>
             <Link
@@ -628,7 +632,7 @@ export default async function HomePage() {
         <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="grid md:grid-cols-4 gap-8">
             <TrustStat label="Countries" value="25" caption="Each with composite + 5 meta-index breakdown" />
-            <TrustStat label="Indicators" value="31" caption="Normalized to a 0–100 stress scale" />
+            <TrustStat label="Indicators" value={String(indicatorCount ?? 29)} caption="Normalized to a 0–100 stress scale" />
             <TrustStat label="Meta-indexes" value="5" caption="Economic · Social · Mental · Tech · Environ" />
             <TrustStat label="Pipeline check" value="Daily" caption="Source cadence varies; see methodology" />
           </div>
@@ -666,7 +670,7 @@ function CountryColumn({
       <h2 className="font-serif text-xl sm:text-2xl font-semibold mb-5">{title}</h2>
       <ul className="divide-y divide-border border-y border-border">
         {countries.map((c, i) => {
-          const ts = c.history ? trendSummary(c.history) : null;
+          const ts = c.history ? trendSummary(afterBreak(c.history, latestMethodologyChange())) : null;
           return (
             <li key={c.country_code} className="py-3 flex items-center gap-3 sm:gap-4">
               <span className="text-xs text-foreground-subtle tabular-nums w-6">{i + 1}</span>

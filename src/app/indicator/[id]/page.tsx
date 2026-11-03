@@ -82,7 +82,7 @@ export async function generateMetadata({
     | null;
   if (!data) return { title: 'Indicator — The Human Index' };
 
-  const title = `${data.name} by country | The Human Index`;
+  const title = `${data.name} by country`;
   const description =
     data.description ??
     `Live ranking of ${data.name.toLowerCase()} across 25 tracked countries. ${data.source_org ? `Sourced from ${data.source_org}.` : ''} Re-checked daily; source publishes on its own cadence.`;
@@ -164,13 +164,23 @@ async function loadIndicator(id: string) {
   // 4. Trend: average normalized value across all tracked countries over time.
   //    Pull last 365 days of snapshots for this indicator, bucket by day,
   //    take mean across countries per day.
-  const snapshotsRes = await sb
-    .from('indicator_snapshots')
-    .select('snapshot_date, normalized_value, country_code')
-    .eq('indicator_id', id)
-    .gte('snapshot_date', new Date(Date.now() - 365 * 86400 * 1000).toISOString().slice(0, 10))
-    .order('snapshot_date', { ascending: true });
-  const snapshots = (snapshotsRes.data ?? []) as IndicatorSnapshotRow[];
+  //    PostgREST caps a response at 1000 rows (≈40 days × 25 countries), which
+  //    used to cut the "last 12 months" chart off in early summer — page it.
+  const since = new Date(Date.now() - 365 * 86400 * 1000).toISOString().slice(0, 10);
+  const snapshots: IndicatorSnapshotRow[] = [];
+  for (let from = 0; from < 20000; from += 1000) {
+    const page = await sb
+      .from('indicator_snapshots')
+      .select('snapshot_date, normalized_value, country_code')
+      .eq('indicator_id', id)
+      .gte('snapshot_date', since)
+      .order('snapshot_date', { ascending: true })
+      .order('country_code', { ascending: true })
+      .range(from, from + 999);
+    const rows = (page.data ?? []) as IndicatorSnapshotRow[];
+    snapshots.push(...rows);
+    if (rows.length < 1000) break;
+  }
 
   // Aggregate by day (mean of available countries)
   const byDate = new Map<string, number[]>();
@@ -492,8 +502,9 @@ export default async function IndicatorPage({
             </p>
           )}
           <p>
-            Movements in this indicator are tracked daily and feed into every
-            country&apos;s composite score on the next cron cycle.
+            The pipeline re-reads this indicator every day; the value changes only
+            when the source publishes a new edition (see the &ldquo;as of&rdquo; date).
+            Each daily run feeds every country&apos;s composite score.
           </p>
         </div>
       </section>

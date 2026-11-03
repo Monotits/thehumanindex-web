@@ -6,6 +6,7 @@ import { renderMarkdown } from '@/lib/ui/markdown';
 import { NewsletterCTA } from '@/components/ui/NewsletterCTA';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { ShareCardButton } from '@/components/share-card/ShareCardButton';
+import { MethodologyDriftNote } from '@/components/editorial/MethodologyDriftNote';
 import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 import { effectiveStatus, type ResearchStatus } from '@/lib/research/publishable';
 
@@ -282,6 +283,7 @@ export default async function ResearchArticlePage({
           <Link href="/contact" className="underline underline-offset-2">Tell us</Link>.
         </aside>
 
+        <MethodologyDriftNote publishedAt={dataAsOf} />
         <div className="prose prose-thi" dangerouslySetInnerHTML={{ __html: html }} />
       </section>
 

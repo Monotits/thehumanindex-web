@@ -88,6 +88,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
+  // ── Monthly reports ──
+  const { REPORTS } = await import('@/lib/reports');
+  for (const rep of REPORTS) {
+    out.push({ url: `${BASE}/reports/${rep.period}`, lastModified: rep.publishedAt, changeFrequency: 'yearly', priority: 0.7 });
+  }
+
   // ── Quiz variant landing pages (statik katalog) ──
   const { QUIZ_VARIANTS } = await import('@/lib/ui/quiz-variants');
   for (const v of QUIZ_VARIANTS) {

@@ -137,6 +137,11 @@ export default async function DataSourcesPage() {
   const periods = calUrl && calKey ? await loadLatestPeriods(createClient(calUrl, calKey)) : { bySignal: {}, oecd: null };
   const releases = computeReleases(periods.bySignal, periods.oecd);
   const editions = seedEditionRows();
+  const indNames = new Map<string, string>(
+    calUrl && calKey
+      ? (((await createClient(calUrl, calKey).from('indicators').select('id, name')).data ?? []) as { id: string; name: string }[]).map(r => [r.id, r.name])
+      : [],
+  );
   const editionsDue = editions.filter(e => e.updateDue).length;
 
   const ok = summaries.filter((s) => s.status === 'ok').length;
@@ -226,7 +231,7 @@ export default async function DataSourcesPage() {
             <tbody>
               {editions.map(e => (
                 <tr key={e.indicatorId} className="border-b border-border align-top">
-                  <td className="py-3 pr-4 font-mono text-xs">{e.indicatorId}</td>
+                  <td className="py-3 pr-4 text-sm">{indNames.get(e.indicatorId) ?? e.indicatorId}</td>
                   <td className="py-3 pr-4">{e.source}</td>
                   <td className="py-3 pr-4 tabular-nums">{e.year}</td>
                   <td className="py-3 pr-4 text-foreground-muted">{e.cadence}</td>

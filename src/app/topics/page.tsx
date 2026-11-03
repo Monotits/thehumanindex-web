@@ -4,7 +4,7 @@ import { MetaCategoryBadge } from '@/components/ui/MetaCategoryBadge';
 import { TOPIC_CATALOG } from '@/lib/ui/topic-catalog';
 
 export const metadata: Metadata = {
-  title: 'Topics | The Human Index',
+  title: 'Topics',
   description:
     'Browse civilizational stress by topic — AI & jobs, housing, mental health, climate, inequality, social trust. Each topic combines indicators, country rankings, and recent analysis.',
   openGraph: {

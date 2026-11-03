@@ -107,6 +107,19 @@ export function pointsToDenseSeries(
 }
 
 /**
+ * Blank out the points of a dense day series (ending today) dated on or
+ * before `breakDate` (YYYY-MM-DD) — used to keep a methodology change from
+ * showing up as a real rise or fall in trend arrows.
+ */
+export function afterBreak(series: Array<number | null>, breakDate: string | null): Array<number | null> {
+  if (!breakDate) return series;
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const startMs = today.getTime() - (series.length - 1) * 86400 * 1000;
+  return series.map((v, i) => (new Date(startMs + i * 86400 * 1000).toISOString().slice(0, 10) <= breakDate ? null : v));
+}
+
+/**
  * Trend direction (up / flat / down) and delta over the series window.
  * Useful for inline arrow indicators next to a sparkline.
  */

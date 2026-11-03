@@ -6,6 +6,7 @@ import { getActiveLocale } from '@/lib/ui/locale';
 import { NewsletterCTA } from '@/components/ui/NewsletterCTA';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { ShareCardButton } from '@/components/share-card/ShareCardButton';
+import { MethodologyDriftNote } from '@/components/editorial/MethodologyDriftNote';
 import { bandFor, BAND_LABELS } from '@/lib/ui/tokens';
 import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
@@ -259,6 +260,7 @@ export default async function PulseReaderPage({
             time, but the underlying pipeline keeps moving. Surface the
             current live score so readers can never be misled by editorial
             sticking to a stale number. */}
+        <MethodologyDriftNote publishedAt={pulse.published_at} />
         {showLiveStrip && (
           <aside
             className="mb-8 rounded-lg border border-border bg-background-alt/40 px-4 py-3 text-sm text-foreground-muted flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2"

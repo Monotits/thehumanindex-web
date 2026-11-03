@@ -148,13 +148,14 @@ export default async function LayoffsPage() {
               Where the labor market is breaking.
             </h1>
             <p className="mt-5 text-base sm:text-lg text-foreground-muted text-pretty max-w-2xl">
-              Real-time corporate layoff announcements aggregated from SEC EDGAR
-              filings, WARN Act notices, and verified news. Together these
-              signals feed the <strong className="text-foreground">Economic meta-index</strong>,
-              one of the five dimensions of our composite civilizational stress score.
+              Corporate layoff announcements collected automatically from SEC EDGAR
+              8-K filings (Item 2.05, exit and disposal activities), California WARN
+              notices and news reports. A standalone signal feed: layoff events do
+              not enter any country score.
             </p>
             <p className="mt-3 text-xs text-foreground-subtle">
-              Source data is English-only (US/EU regulatory filings). Per-country
+              Coverage skews heavily toward US regulatory filings, which rarely state
+              a headcount — hence the many “—” values. Per-country
               context is available on{' '}
               <Link href="/countries" className="underline underline-offset-2 hover:text-foreground">
                 each country page

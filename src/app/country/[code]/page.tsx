@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { latestMethodologyChange } from '@/components/editorial/MethodologyDriftNote';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
@@ -22,7 +23,7 @@ import { BreadcrumbJsonLd } from '@/components/JsonLd';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { CountryShareCard } from '@/components/share-card/CountryShareCard';
 import { cn } from '@/lib/ui/cn';
-import { loadCompositeHistory, pointsToDenseSeries, trendSummary, type CompositeHistoryPoint } from '@/lib/ui/history';
+import { afterBreak, loadCompositeHistory, pointsToDenseSeries, trendSummary, type CompositeHistoryPoint } from '@/lib/ui/history';
 import {
   bandFor,
   freshnessFor,
@@ -348,7 +349,9 @@ export default async function CountryDetailPage({
     latestPulse, pulseFallbackUsed, compositeHistory, compositeHistoryPoints,
   } = data;
   const band = bandFor(composite);
-  const trend = trendSummary(compositeHistory);
+  // Trend arrow ignores days before the latest methodology change (a method
+  // change is not a change in conditions); the chart still shows them.
+  const trend = trendSummary(afterBreak(compositeHistory, latestMethodologyChange()));
 
   // Group indicators by meta-index
   const byMeta = new Map<MetaIndex, IndicatorRow[]>();
