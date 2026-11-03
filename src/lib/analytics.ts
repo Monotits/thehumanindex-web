@@ -15,11 +15,11 @@ export function trackFirstVisitTheme(theme: string) {
   posthog.capture('first_visit_theme_selected', { theme })
 }
 
-// Track active theme on each page view for usage analysis
+// Active theme rides along on every event as a super property instead of a
+// separate "theme_session" event per page view (which doubled event volume).
 export function trackThemeSession(theme: string) {
   if (typeof window === 'undefined') return
-  posthog.capture('theme_session', { active_theme: theme })
-  posthog.people.set({ current_theme: theme })
+  posthog.register({ active_theme: theme })
 }
 
 // Track generic events
@@ -34,8 +34,10 @@ export function trackEvent(event: string, properties?: Record<string, unknown>) 
 
 export function trackNewsletterSubscribe(variant: 'hero' | 'inline' | 'footer', email?: string) {
   if (typeof window === 'undefined') return
+  // No email in analytics: the address stays in Supabase only.
+  void email
   posthog.capture('newsletter_subscribed', { variant })
-  if (email) posthog.identify(email, { email })
+  posthog.people.set({ newsletter_subscriber: true })
 }
 
 export function trackLanguageChange(from: string, to: string) {
@@ -109,4 +111,18 @@ export function trackViewModeChange(view: 'grid' | 'table' | 'map' | 'heatmap') 
 export function trackQuizVariantSelected(slug: string, source: string) {
   if (typeof window === 'undefined') return
   posthog.capture('quiz_variant_selected', { slug, source })
+}
+
+
+// ── Share links: tag with UTM so visits from shared posts are measurable ──
+export function withUtm(url: string, source: string, campaign: string, medium = 'social_share'): string {
+  try {
+    const u = new URL(url)
+    u.searchParams.set('utm_source', source)
+    u.searchParams.set('utm_medium', medium)
+    u.searchParams.set('utm_campaign', campaign)
+    return u.toString()
+  } catch {
+    return url
+  }
 }

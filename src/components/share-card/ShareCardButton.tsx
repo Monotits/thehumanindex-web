@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { trackEvent } from '@/lib/analytics';
+import { trackEvent, withUtm } from '@/lib/analytics';
 
 export interface ShareCardButtonProps {
   /** Image route without the format param, e.g. "/share/top10/most-stressed-countries". May contain a query string. */
@@ -26,7 +26,7 @@ export function ShareCardButton({ image, page, title, kind, id, fileStem, label 
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const img = `${image}${image.includes('?') ? '&' : '?'}format=${format}`;
-  const pageUrl = `https://thehumanindex.org${page}`;
+  const pageUrl = withUtm(`https://thehumanindex.org${page}`, 'share_card', kind);
   const file = `thehumanindex-${fileStem}-${format}.png`;
   const ev = (action: string, extra: Record<string, string> = {}) => trackEvent('share_card', { action, kind, ...(id ? { id } : {}), ...extra });
 

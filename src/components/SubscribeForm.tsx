@@ -20,7 +20,6 @@ export default function SubscribeForm({ variant = 'default' }: { variant?: 'defa
         body: JSON.stringify({ email }),
       })
       if (res.ok) {
-        posthog.identify(email, { email })
         posthog.capture('newsletter_subscribed', { variant })
         setStatus('success')
         setEmail('')

@@ -132,11 +132,13 @@ export async function POST(request: Request) {
     // PostHog
     try {
       const posthog = getPostHogClient()
-      posthog.identify({ distinctId: email, properties: { email, source } })
+      // Pseudonymous id: the email itself never goes to analytics.
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email.trim().toLowerCase()))
+      const distinctId = 'sub_' + Array.from(new Uint8Array(digest)).slice(0, 12).map(b => b.toString(16).padStart(2, '0')).join('')
       posthog.capture({
-        distinctId: email,
+        distinctId,
         event: 'newsletter_subscription_created',
-        properties: { email, source },
+        properties: { source },
       })
       await posthog.shutdown()
     } catch {

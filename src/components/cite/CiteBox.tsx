@@ -2,6 +2,7 @@
 
 import { DATASET_CONCEPT_DOI, doiUrl } from '@/lib/seo/doi';
 import { useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 
 interface Props {
   /** e.g. "Turkey — civilizational stress score" */
@@ -25,6 +26,7 @@ export function CiteBox({ title, url, accessed }: Props) {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(label);
+      trackEvent('citation_copied', { format: label, page: url });
       setTimeout(() => setCopied(null), 1600);
     } catch {
       /* clipboard blocked — the text stays selectable */

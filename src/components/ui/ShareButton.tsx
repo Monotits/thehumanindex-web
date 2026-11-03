@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { trackEvent } from '@/lib/analytics';
+import { trackEvent, withUtm } from '@/lib/analytics';
 
 // ──────────────────────────────────────────────────────
 // ShareButton — Faz 21
@@ -58,7 +58,9 @@ export function ShareButton({
   const popRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  const fullUrl = absoluteUrl(url);
+  const pageUrl = absoluteUrl(url);
+  const fullUrl = withUtm(pageUrl, 'share_button', surface);
+  const via = (source: string) => withUtm(pageUrl, source, surface);
   const shareText = text ?? title;
 
   // Close popover on outside click or Escape
@@ -125,27 +127,27 @@ export function ShareButton({
     {
       key: 'twitter',
       label: 'X (Twitter)',
-      href: `https://twitter.com/intent/tweet?text=${enc(title)}&url=${enc(fullUrl)}`,
+      href: `https://twitter.com/intent/tweet?text=${enc(title)}&url=${enc(via('x'))}`,
     },
     {
       key: 'linkedin',
       label: 'LinkedIn',
-      href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(fullUrl)}`,
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(via('linkedin'))}`,
     },
     {
       key: 'reddit',
       label: 'Reddit',
-      href: `https://www.reddit.com/submit?url=${enc(fullUrl)}&title=${enc(title)}`,
+      href: `https://www.reddit.com/submit?url=${enc(via('reddit'))}&title=${enc(title)}`,
     },
     {
       key: 'whatsapp',
       label: 'WhatsApp',
-      href: `https://api.whatsapp.com/send?text=${enc(`${title} ${fullUrl}`)}`,
+      href: `https://api.whatsapp.com/send?text=${enc(`${title} ${via('whatsapp')}`)}`,
     },
     {
       key: 'email',
       label: 'Email',
-      href: `mailto:?subject=${enc(title)}&body=${enc(`${shareText}\n\n${fullUrl}`)}`,
+      href: `mailto:?subject=${enc(title)}&body=${enc(`${shareText}\n\n${via('email')}`)}`,
     },
   ];
 
