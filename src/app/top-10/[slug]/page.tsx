@@ -10,6 +10,7 @@ import { TOP_10_CATALOG, getTop10Entry, type Top10Entry } from '@/lib/ui/top10-c
 import { loadCompositeHistory, pointsToDenseSeries } from '@/lib/ui/history';
 import { PageViewBeacon } from '@/components/PageViewBeacon';
 import { ShareButton } from '@/components/ui/ShareButton';
+import { ShareCardButton } from '@/components/share-card/ShareCardButton';
 import { ItemListJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const revalidate = 3600;
@@ -210,13 +211,23 @@ export default async function Top10Page({
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight tracking-tight text-balance">
               {entry.title}
             </h1>
-            <ShareButton
-              url={`/top-10/${entry.slug}`}
-              title={entry.title}
-              text={entry.subhead}
-              surface="top10_ranking"
-              variant="full"
-            />
+            <div className="flex items-center gap-2 flex-wrap">
+              <ShareCardButton
+                image={`/share/top10/${entry.slug}`}
+                page={`/top-10/${entry.slug}`}
+                title={entry.title}
+                kind="top10"
+                id={entry.slug}
+                fileStem={entry.slug}
+              />
+              <ShareButton
+                url={`/top-10/${entry.slug}`}
+                title={entry.title}
+                text={entry.subhead}
+                surface="top10_ranking"
+                variant="full"
+              />
+            </div>
           </div>
           <p className="mt-5 text-base sm:text-lg text-foreground-muted text-pretty max-w-2xl leading-relaxed">
             {entry.subhead}

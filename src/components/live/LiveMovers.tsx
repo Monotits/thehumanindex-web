@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ShareCardButton } from '@/components/share-card/ShareCardButton';
 import {
   describeContributor,
   liveTone,
@@ -31,7 +32,10 @@ export function LiveMovers({ rows, newestData, nextRelease }: Props) {
     <section className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-14 border-b border-border">
       <div className="mb-8 max-w-2xl">
         <p className="text-xs uppercase tracking-[0.18em] text-foreground-muted font-medium mb-3">Live layer</p>
-        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">What&apos;s moving now.</h2>
+        <div className="flex items-start justify-between gap-4 flex-wrap mb-2">
+          <h2 className="font-serif text-2xl sm:text-3xl font-semibold">What&apos;s moving now.</h2>
+          <ShareCardButton image="/share/live" page="/" title="Share what’s moving" kind="live" fileStem="live" />
+        </div>
         <p className="text-foreground-muted text-pretty">
           The composite moves slowly — it is built on annual data. The Live layer tracks what changed
           recently: unemployment, inflation, currency, job postings and disasters, each compared with the

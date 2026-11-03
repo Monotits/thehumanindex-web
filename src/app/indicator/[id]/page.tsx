@@ -8,6 +8,7 @@ import { CompositeLineChart, type CompositePoint } from '@/components/ui/Composi
 import { PageViewBeacon } from '@/components/PageViewBeacon';
 import { BreadcrumbJsonLd } from '@/components/JsonLd';
 import { ShareButton } from '@/components/ui/ShareButton';
+import { ShareCardButton } from '@/components/share-card/ShareCardButton';
 import { bandFor, freshnessFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 
 export const revalidate = 3600;
@@ -309,6 +310,15 @@ export default async function IndicatorPage({
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight tracking-tight text-balance">
               {indicator.name} by country
             </h1>
+            <div className="flex items-center gap-2 flex-wrap">
+            <ShareCardButton
+              image={`/share/indicator/${indicator.id}`}
+              page={`/indicator/${indicator.id}`}
+              title={`${indicator.name} by country`}
+              kind="indicator"
+              id={indicator.id}
+              fileStem={indicator.id}
+            />
             <ShareButton
               url={`/indicator/${indicator.id}`}
               title={`${indicator.name} by country — The Human Index`}
@@ -316,6 +326,7 @@ export default async function IndicatorPage({
               surface="indicator_detail"
               variant="full"
             />
+            </div>
           </div>
 
           {indicator.description && (

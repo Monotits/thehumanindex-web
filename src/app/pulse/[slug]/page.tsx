@@ -5,6 +5,7 @@ import { renderMarkdown } from '@/lib/ui/markdown';
 import { getActiveLocale } from '@/lib/ui/locale';
 import { NewsletterCTA } from '@/components/ui/NewsletterCTA';
 import { ShareButton } from '@/components/ui/ShareButton';
+import { ShareCardButton } from '@/components/share-card/ShareCardButton';
 import { bandFor, BAND_LABELS } from '@/lib/ui/tokens';
 import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
@@ -231,6 +232,15 @@ export default async function PulseReaderPage({
               <span aria-hidden="true">·</span>
               <span>{readingMin} min read</span>
             </div>
+            <div className="flex items-center gap-2 flex-wrap">
+            <ShareCardButton
+              image={`/share/pulse/${pulse.slug}`}
+              page={`/pulse/${pulse.slug}`}
+              title="Share this Pulse"
+              kind="pulse"
+              id={pulse.slug}
+              fileStem="pulse"
+            />
             <ShareButton
               url={`/pulse/${pulse.slug}`}
               title={pulse.title}
@@ -238,6 +248,7 @@ export default async function PulseReaderPage({
               surface="pulse_reader"
               variant="full"
             />
+            </div>
           </div>
         </div>
       </header>

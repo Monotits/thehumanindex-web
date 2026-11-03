@@ -1,5 +1,6 @@
 'use client';
 
+import { ShareCardButton } from '@/components/share-card/ShareCardButton';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/ui/cn';
@@ -490,9 +491,23 @@ function Result({
         <p className="text-xs uppercase tracking-wider text-foreground-muted mb-2 font-medium">
           Your civilizational stress profile
         </p>
-        <h2 className="font-serif text-3xl sm:text-4xl font-semibold leading-tight tracking-tight text-balance mb-6">
-          {country.flag_emoji} {country.name}
-        </h2>
+        <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+          <h2 className="font-serif text-3xl sm:text-4xl font-semibold leading-tight tracking-tight text-balance">
+            {country.flag_emoji} {country.name}
+          </h2>
+          {personalExposure !== null && (
+            <ShareCardButton
+              image={`/share/quiz?c=${country.code}&x=${personalExposure.toFixed(1)}&m=${ranking.filter(r => r.score !== null).slice(0, 3).map(r => r.meta).join(',')}`}
+              page="/quiz"
+              title="Share my result"
+              kind="quiz"
+              id={country.code}
+              fileStem="my-stress-test"
+              label="Share my result"
+              variant="solid"
+            />
+          )}
+        </div>
 
         {personalExposure !== null && (
           <div className="flex flex-wrap items-baseline gap-x-8 gap-y-4">

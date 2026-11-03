@@ -10,6 +10,7 @@ import { bandFor, META_INDEXES, META_LABELS, META_WEIGHT, type MetaIndex } from 
 import { getActiveLocale } from '@/lib/ui/locale';
 import { loadCompositeHistory, pointsToDenseSeries, trendSummary } from '@/lib/ui/history';
 import { LiveMovers } from '@/components/live/LiveMovers';
+import { ShareCardButton } from '@/components/share-card/ShareCardButton';
 import { computeReleases, loadLatestPeriods } from '@/lib/calendar/releases';
 import { loadLatestLive, newestReference, liveTone, LIVE_TONE_LABEL, LIVE_TONE_TEXT_CLASS, type LiveCountry } from '@/lib/live/present';
 
@@ -362,6 +363,15 @@ export default async function HomePage() {
               </div>
             )}
             <div className="mt-10 flex flex-wrap gap-3">
+              <ShareCardButton
+                image="/share/top10/most-stressed-countries"
+                page="/top-10/most-stressed-countries"
+                title="Share the ranking"
+                kind="top10"
+                id="most-stressed-countries"
+                fileStem="ranking"
+                label="Share the ranking"
+              />
               <Link
                 href="/rankings"
                 className="inline-flex items-center gap-2 rounded-md bg-accent text-accent-fg px-5 py-2.5 text-sm font-medium hover:bg-accent-hover transition-colors"

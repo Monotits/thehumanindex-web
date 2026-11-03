@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { renderMarkdown } from '@/lib/ui/markdown';
 import { NewsletterCTA } from '@/components/ui/NewsletterCTA';
 import { ShareButton } from '@/components/ui/ShareButton';
+import { ShareCardButton } from '@/components/share-card/ShareCardButton';
 import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 import { effectiveStatus, type ResearchStatus } from '@/lib/research/publishable';
 
@@ -239,6 +240,15 @@ export default async function ResearchArticlePage({
                 </>
               )}
             </div>
+            <div className="flex items-center gap-2 flex-wrap">
+            <ShareCardButton
+              image={`/share/research/${article.slug}`}
+              page={`/research/${article.slug}`}
+              title="Share this research"
+              kind="research"
+              id={article.slug}
+              fileStem="research"
+            />
             <ShareButton
               url={`/research/${article.slug}`}
               title={article.title}
@@ -246,6 +256,7 @@ export default async function ResearchArticlePage({
               surface="research_reader"
               variant="full"
             />
+            </div>
           </div>
         </div>
       </header>
