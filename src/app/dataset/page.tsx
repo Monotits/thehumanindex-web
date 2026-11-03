@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { DATASET_CONCEPT_DOI, DATASET_RELEASES, doiUrl } from '@/lib/seo/doi';
 import { DatasetJsonLd } from '@/components/JsonLd';
 import Link from 'next/link';
 
@@ -147,6 +148,30 @@ export default function DatasetPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ── ARCHIVE / DOI ── */}
+      <section id="doi" className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-border scroll-mt-24">
+        <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-2">Archived releases &amp; DOI</h2>
+        <p className="text-foreground-muted mb-4 max-w-2xl">
+          Each data release is archived on Zenodo with a permanent DOI, so a citation keeps pointing at the exact numbers
+          you used. Cite the concept DOI for the latest release, or a release DOI for a fixed snapshot.
+        </p>
+        <p className="font-mono text-sm mb-4">
+          <a href={doiUrl(DATASET_CONCEPT_DOI)} className="underline underline-offset-2">doi.org/{DATASET_CONCEPT_DOI}</a>
+          <span className="text-foreground-muted"> — all releases (resolves to the latest)</span>
+        </p>
+        <ul className="divide-y divide-border border-y border-border">
+          {DATASET_RELEASES.map(r => (
+            <li key={r.doi} className="py-3 flex flex-wrap items-baseline justify-between gap-2 text-sm">
+              <span>Release {r.release} · methodology v{r.method}</span>
+              <a href={doiUrl(r.doi)} className="font-mono underline underline-offset-2">{r.doi}</a>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4 text-sm text-foreground-muted">
+          The Human Index ({DATASET_RELEASES[0].release.slice(0, 4)}). <em>Civilizational Stress Dataset</em> (release {DATASET_RELEASES[0].release}) [Data set]. Zenodo. https://doi.org/{DATASET_RELEASES[0].doi}
+        </p>
       </section>
 
       {/* ── ENDPOINTS ── */}

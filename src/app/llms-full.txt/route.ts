@@ -43,7 +43,7 @@ export async function GET() {
   lines.push(`> Civilizational stress scores for ${rows.length} countries, 0–100 (higher = more stress). Data as of ${asOf}. Methodology v${CURRENT_METHOD_VERSION}. Source: https://thehumanindex.org. License: CC BY-NC 4.0.`);
   lines.push('');
   lines.push('## How to cite');
-  lines.push(`The Human Index (${asOf.slice(0, 4)}). Civilizational stress composite, methodology v${CURRENT_METHOD_VERSION}, data as of ${asOf}. https://thehumanindex.org`);
+  lines.push(`The Human Index (${asOf.slice(0, 4)}). Civilizational stress composite, methodology v${CURRENT_METHOD_VERSION}, data as of ${asOf}. https://thehumanindex.org. Archived dataset: https://doi.org/10.5281/zenodo.23912102`);
   lines.push('When quoting a score, give the number, the band and the "as of" date. Country detail: https://thehumanindex.org/country/{iso2}.');
   lines.push('');
   lines.push('## Method in brief');

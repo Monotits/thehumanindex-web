@@ -1,5 +1,6 @@
 'use client';
 
+import { DATASET_CONCEPT_DOI, doiUrl } from '@/lib/seo/doi';
 import { useState } from 'react';
 
 interface Props {
@@ -17,8 +18,8 @@ export function CiteBox({ title, url, accessed }: Props) {
   const long = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
   const iso = d.toISOString().slice(0, 10);
   const key = `thi${year}${title.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 20)}`;
-  const apa = `The Human Index. (${year}). ${title} [Data set]. Retrieved ${long}, from ${url}`;
-  const bib = `@misc{${key},\n  author       = {{The Human Index}},\n  title        = {${title}},\n  year         = {${year}},\n  howpublished = {\\url{${url}}},\n  note         = {Data set. Accessed ${iso}. CC BY-NC 4.0}\n}`;
+  const apa = `The Human Index. (${year}). ${title} [Data set]. Retrieved ${long}, from ${url}. Archived release: ${doiUrl(DATASET_CONCEPT_DOI)}`;
+  const bib = `@misc{${key},\n  author       = {{The Human Index}},\n  title        = {${title}},\n  year         = {${year}},\n  howpublished = {\\url{${url}}},\n  doi          = {${DATASET_CONCEPT_DOI}},\n  note         = {Data set. Accessed ${iso}. CC BY-NC 4.0}\n}`;
   const [copied, setCopied] = useState<string | null>(null);
   const copy = async (label: string, text: string) => {
     try {

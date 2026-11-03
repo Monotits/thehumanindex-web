@@ -19,7 +19,7 @@ export function OrganizationJsonLd() {
         logo: 'https://thehumanindex.org/logo-icon.svg',
         description:
           'A daily-refreshed civilizational stress index tracking 25 countries across 29 indicators grouped into five meta-indexes: economic, social, mental, technological, environmental.',
-        sameAs: [],
+        sameAs: ['https://zenodo.org/records/23912103'],
       }}
     />
   )
@@ -171,7 +171,9 @@ export function DatasetJsonLd() {
         ],
         isAccessibleForFree: true,
         dateModified: new Date().toISOString().slice(0, 10),
-        citation: 'The Human Index (thehumanindex.org). Civilizational Stress Dataset. Licensed CC BY-NC 4.0.',
+        identifier: 'https://doi.org/10.5281/zenodo.23912102',
+        sameAs: 'https://doi.org/10.5281/zenodo.23912102',
+        citation: 'The Human Index. Civilizational Stress Dataset. Zenodo. https://doi.org/10.5281/zenodo.23912102. Licensed CC BY-NC 4.0.',
         distribution: [
           { '@type': 'DataDownload', encodingFormat: 'application/json', contentUrl: 'https://thehumanindex.org/api/data' },
           { '@type': 'DataDownload', encodingFormat: 'text/csv', contentUrl: 'https://thehumanindex.org/api/export?dataset=scores' },

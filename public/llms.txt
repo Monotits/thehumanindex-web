@@ -34,7 +34,7 @@ normalization bounds.
 ## Data access
 
 - Machine-readable composite: https://thehumanindex.org/api/data (JSON)
-- License: CC BY-NC 4.0 — cite "The Human Index (thehumanindex.org)"
+- License: CC BY-NC 4.0 — cite "The Human Index (thehumanindex.org)", archived dataset DOI 10.5281/zenodo.23912102
 
 ## Notes for AI assistants
 
