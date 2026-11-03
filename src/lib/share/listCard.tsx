@@ -27,7 +27,9 @@ export async function renderListCard(s: ListCardSpec): Promise<Response> {
   const accent = s.tone === 'hot' ? C.hot : C.calm;
   const rows = s.rows.slice(0, story ? 10 : 5);
   const hasSub = rows.some(r => r.sub);
-  const rowH = story ? (hasSub ? 112 : 98) : (hasSub ? 104 : 92);
+  const roomy = story && rows.length <= 6; // few rows: use the height instead of leaving a hole
+  const rowH = story ? (roomy ? (hasSub ? 170 : 150) : hasSub ? 112 : 98) : (hasSub ? 104 : 92);
+  const big = roomy ? 1.25 : 1;
   const titleSize = s.title.length > 34 ? (story ? 78 : 62) : (story ? 96 : 76);
   const rowColor = (i: number) => (s.tone === 'hot' ? (i < 3 ? C.hot : i < 6 ? C.warm : C.mid) : (i < 3 ? C.calm : C.mid));
 
@@ -43,13 +45,13 @@ export async function renderListCard(s: ListCardSpec): Promise<Response> {
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: story ? 60 : 34 }}>
           {rows.map((r, i) => (
             <div key={`${r.name}-${i}`} style={{ display: 'flex', alignItems: 'center', height: rowH, borderBottom: `2px solid ${C.panel}` }}>
-              <div style={{ display: 'flex', width: story ? 90 : 76, fontSize: story ? 50 : 42, fontWeight: 900, color: rowColor(i) }}>{`${i + 1}`}</div>
-              <div style={{ display: 'flex', fontSize: story ? 54 : 46, width: story ? 84 : 70 }}>{r.flag}</div>
+              <div style={{ display: 'flex', width: story ? 90 * big : 76, fontSize: story ? 50 * big : 42, fontWeight: 900, color: rowColor(i) }}>{`${i + 1}`}</div>
+              <div style={{ display: 'flex', fontSize: story ? 54 * big : 46, width: story ? 84 * big : 70 }}>{r.flag}</div>
               <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                <div style={{ display: 'flex', fontSize: story ? 46 : 40, fontWeight: 900, letterSpacing: -1 }}>{r.name}</div>
-                {r.sub && <div style={{ display: 'flex', fontSize: story ? 26 : 22, color: C.muted, fontWeight: 600, marginTop: 4 }}>{r.sub}</div>}
+                <div style={{ display: 'flex', fontSize: story ? 46 * big : 40, fontWeight: 900, letterSpacing: -1 }}>{r.name}</div>
+                {r.sub && <div style={{ display: 'flex', fontSize: story ? 26 * big : 22, color: C.muted, fontWeight: 600, marginTop: 4 }}>{r.sub}</div>}
               </div>
-              <div style={{ display: 'flex', fontSize: story ? 50 : 42, fontWeight: 900, color: rowColor(i) }}>{r.value}</div>
+              <div style={{ display: 'flex', fontSize: story ? 50 * big : 42, fontWeight: 900, color: rowColor(i) }}>{r.value}</div>
             </div>
           ))}
         </div>

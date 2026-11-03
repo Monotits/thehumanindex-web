@@ -22,7 +22,7 @@ export async function renderArticleCard(s: ArticleCardSpec): Promise<Response> {
   const shownRank = c ? (stressed ? c.rank : c.total - c.rank + 1) : 0;
   const accent = c ? (stressed ? (c.rank <= 3 ? C.hot : c.rank <= 8 ? C.warm : C.mid) : (shownRank <= 5 ? C.calm : C.mid)) : C.warm;
   const len = s.title.length;
-  const titleSize = story ? (len > 90 ? 76 : len > 60 ? 88 : 104) : (len > 90 ? 54 : len > 60 ? 62 : 74);
+  const titleSize = story ? (len > 90 ? 84 : len > 60 ? 100 : 118) : (len > 90 ? 54 : len > 60 ? 62 : 74);
 
   return new ImageResponse(
     (
@@ -30,8 +30,9 @@ export async function renderArticleCard(s: ArticleCardSpec): Promise<Response> {
         <Glow format={s.format} color={accent} />
         <TopBar format={s.format} right={`${s.kind} · ${monthLabel()}`} />
 
+        <div style={{ display: 'flex', flexDirection: 'column', flex: story ? 1 : undefined, justifyContent: 'center' }}>
         {c && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: story ? 100 : 44 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: story ? 0 : 44 }}>
             <div style={{ display: 'flex', fontSize: story ? 80 : 60 }}>{c.flag}</div>
             <div style={{ display: 'flex', fontSize: story ? 56 : 44, fontWeight: 900, letterSpacing: -1 }}>{c.name.toUpperCase()}</div>
           </div>
@@ -49,6 +50,7 @@ export async function renderArticleCard(s: ArticleCardSpec): Promise<Response> {
             </div>
           </div>
         )}
+        </div>
 
         <Footer format={s.format} hook={s.kind === 'RESEARCH' ? 'Read the full research' : 'Read this week’s analysis'} accent={accent} path={s.path.length <= 28 ? s.path : undefined} />
       </div>

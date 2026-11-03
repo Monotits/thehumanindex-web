@@ -65,11 +65,9 @@ export function Footer({ format, hook, accent, note, path }: { format: ShareForm
   const { story } = canvas(format);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', marginTop: 'auto' }}>
+      {note && <div style={{ display: 'flex', fontSize: story ? 24 : 20, color: C.dim, marginBottom: 18 }}>{note}</div>}
       <div style={{ display: 'flex', fontSize: story ? 58 : 44, fontWeight: 900, letterSpacing: -1, lineHeight: 1.05 }}>{hook}</div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 14 }}>
-        <div style={{ display: 'flex', fontSize: story ? 40 : 34, color: accent, fontWeight: 900 }}>{`thehumanindex.org${path ?? ''}`}</div>
-        {note && <div style={{ display: 'flex', fontSize: 22, color: C.dim }}>{note}</div>}
-      </div>
+      <div style={{ display: 'flex', fontSize: story ? 40 : 34, color: accent, fontWeight: 900, marginTop: 14 }}>{`thehumanindex.org${path ?? ''}`}</div>
     </div>
   );
 }
