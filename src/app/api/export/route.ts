@@ -26,6 +26,9 @@ function csvResponse(name: string, body: string, license: string) {
       'Content-Disposition': `attachment; filename="${name}"`,
       'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
       'X-License': license,
+      // Open data: let other sites and tools (archives, notebooks) fetch the CSV directly.
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Expose-Headers': 'X-License, Content-Disposition',
       Link: '<https://thehumanindex.org/methodology>; rel="describedby"',
     },
   });
