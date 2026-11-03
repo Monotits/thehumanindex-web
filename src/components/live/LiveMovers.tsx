@@ -43,7 +43,8 @@ export function LiveMovers({ rows, newestData, nextRelease }: Props) {
           The composite moves slowly — it is built on annual data. The Live layer tracks what changed
           recently: unemployment, inflation, currency, job postings, geopolitical risk, policy uncertainty
           and disasters, each compared with the
-          country&apos;s own history. 50 means a normal period.
+          country&apos;s own history. 50 means a normal period. <strong className="text-foreground font-medium">This is not the stress ranking:</strong> a
+          country with a low overall score can still show rising pressure, and the reverse.
         </p>
         <p className="mt-3 text-xs text-foreground-subtle tabular-nums">
           Signals checked {new Date(computed).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}
@@ -64,8 +65,8 @@ export function LiveMovers({ rows, newestData, nextRelease }: Props) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-10">
-        <MoversList title="Rising pressure" rows={rising} />
-        <MoversList title="Easing" rows={easing} />
+        <MoversList title="Rising pressure vs own normal" rows={rising} />
+        <MoversList title="Easing vs own normal" rows={easing} />
       </div>
     </section>
   );
