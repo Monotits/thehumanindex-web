@@ -384,9 +384,9 @@ export default async function CountryDetailPage({
       });
     }
     const metas = (Object.entries(metaValues) as [MetaIndex, number][]).filter(([, v]) => v !== null && Number.isFinite(v)).sort((a, b) => b[1] - a[1]);
-    const ind = indicatorValues
-      .filter(v => v.normalized_value !== null && v.raw_value !== null)
-      .map(v => ({ v, meta: indicators.find(i => i.id === v.indicator_id) }))
+    const ind = Array.from(indicatorValues.values())
+      .filter((v: IndicatorValueRow) => v.normalized_value !== null && v.raw_value !== null)
+      .map((v: IndicatorValueRow) => ({ v, meta: indicators.find(i => i.id === v.indicator_id) }))
       .filter(x => x.meta)
       .sort((a, b) => (b.v.normalized_value ?? 0) - (a.v.normalized_value ?? 0))[0];
     if (metas.length >= 2) {

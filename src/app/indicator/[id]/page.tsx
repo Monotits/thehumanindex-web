@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { KeyFacts, type Fact } from '@/components/geo/KeyFacts';
 import { JsonLd } from '@/components/JsonLd';
-import { formatRaw } from '@/lib/share/rankings';
+import { formatRaw as formatRawShort } from '@/lib/share/rankings';
 import { DEFAULT_META_WEIGHTS } from '@/lib/indicators/composeMetaIndex';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -301,7 +301,7 @@ export default async function IndicatorPage({
     const worst = withRaw[0], best = withRaw[withRaw.length - 1];
     facts.push({
       q: `Which country is worst on ${indicator.name.toLowerCase()}?`,
-      a: `Among the ${withRaw.length} countries The Human Index tracks, ${worst.country_name} is furthest into stress on ${indicator.name.toLowerCase()} at ${formatRaw(Number(worst.raw_value), indicator.unit)}, and ${best.country_name} is least stressed at ${formatRaw(Number(best.raw_value), indicator.unit)} (${src}, ${yearSpan}).`,
+      a: `Among the ${withRaw.length} countries The Human Index tracks, ${worst.country_name} is furthest into stress on ${indicator.name.toLowerCase()} at ${formatRawShort(Number(worst.raw_value), indicator.unit)}, and ${best.country_name} is least stressed at ${formatRawShort(Number(best.raw_value), indicator.unit)} (${src}, ${yearSpan}).`,
     });
   }
   facts.push({
