@@ -19,7 +19,7 @@ export function OrganizationJsonLd() {
         logo: 'https://thehumanindex.org/logo-icon.svg',
         description:
           'A daily-refreshed civilizational stress index tracking 25 countries across 29 indicators grouped into five meta-indexes: economic, social, mental, technological, environmental.',
-        sameAs: ['https://zenodo.org/records/23912103'],
+        sameAs: ['https://www.wikidata.org/wiki/Q141984037', 'https://doi.org/10.5281/zenodo.23912102'],
       }}
     />
   )
