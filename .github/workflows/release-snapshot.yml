@@ -1,0 +1,40 @@
+name: release-snapshot
+
+# Archives the published CSVs for a dated data release (used for the Zenodo
+# DOI deposit and as a permanent, citable copy inside the repo).
+# Run by hand: gh workflow run release-snapshot.yml -f release=2026-11
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release id, e.g. 2026-11'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download published CSVs
+        run: |
+          set -euo pipefail
+          dir="releases/${{ inputs.release }}"
+          mkdir -p "$dir"
+          for ds in scores historical; do
+            curl -fsS --retry 3 "https://thehumanindex.org/api/export?dataset=${ds}" -o "$dir/thehumanindex-${ds}.csv"
+          done
+          curl -fsS --retry 3 "https://thehumanindex.org/llms-full.txt" -o "$dir/snapshot.md"
+          cp releases/README.template.md "$dir/README.md"
+          sed -i "s/{{RELEASE}}/${{ inputs.release }}/g; s/{{DATE}}/$(date -u +%F)/g" "$dir/README.md"
+          wc -l "$dir"/*
+      - name: Commit
+        run: |
+          git config user.name "Bugra"
+          git config user.email "experlercom@gmail.com"
+          git add releases/
+          git commit -m "data: release snapshot ${{ inputs.release }} [automated]" || exit 0
+          git push
