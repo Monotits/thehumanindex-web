@@ -28,7 +28,7 @@ normalization bounds.
 - [Glossary](https://thehumanindex.org/glossary): plain-language definitions of every term used
 - [Dataset](https://thehumanindex.org/dataset): open data access, JSON endpoints, licensing (CC BY-NC 4.0)
 - [Transparency](https://thehumanindex.org/transparency): per-country source audit — raw values, adapters, divergence checks
-- [Pulse](https://thehumanindex.org/pulse): weekly per-country briefings, drafted with AI from the dataset
+- [Pulse](https://thehumanindex.org/pulse): weekly per-country briefings, drafted with AI from the dataset (not indexed; prefer country pages for numbers)
 - [Layoffs tracker](https://thehumanindex.org/layoffs): layoff announcements from SEC filings, WARN notices and news (standalone feed, not part of the scores)
 
 ## Data access

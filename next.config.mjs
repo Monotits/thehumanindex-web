@@ -72,6 +72,16 @@ const nextConfig = {
         headers: [{ key: 'X-Frame-Options', value: 'DENY' }],
       },
       {
+        // Generated images (share cards, OG images) are for social previews,
+        // not search results: keep them out of the index report.
+        source: '/share/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
+      },
+      {
+        source: '/:path*/opengraph-image:rest*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
+      },
+      {
         source: '/:path*',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },

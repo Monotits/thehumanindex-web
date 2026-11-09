@@ -35,6 +35,12 @@ export async function generateMetadata({
     alternates: {
       canonical: `https://thehumanindex.org/pulse/${slug}`,
     },
+    // Weekly AI-drafted country briefings (25 near-identical templates a week).
+    // Google left 61 of them "discovered – not indexed" (GSC 2026-11-09); as
+    // scaled templated content they risk dragging down site-wide quality and
+    // eat crawl budget the country/indicator pages need. Readable and linked,
+    // not indexed.
+    robots: { index: false, follow: true },
   }
 }
 

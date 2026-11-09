@@ -31,11 +31,6 @@ export const revalidate = 21600;
 
 const BASE = 'https://thehumanindex.org';
 
-interface MinPulse {
-  locale: string | null;
-  slug: string;
-  published_at: string;
-}
 interface MinGlossary {
   country_code: string;
   locale: string;
@@ -113,14 +108,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const sb = createClient(supabaseUrl, anonKey);
 
-  const [pulsesRes, glossaryRes, countriesRes, indicatorsRes] = await Promise.all([
-    sb
-      .from('commentary')
-      .select('country_code,locale,slug,published_at')
-      .eq('type', 'weekly_pulse')
-      .eq('locale', 'en')
-      .order('published_at', { ascending: false })
-      .limit(1000),
+  const [glossaryRes, countriesRes, indicatorsRes] = await Promise.all([
     sb
       .from('glossary_entries')
       .select('country_code,locale,slug,published_at')
@@ -176,23 +164,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // ── Pulse pages ──
-  // English-only. The slug is unique per (country, locale='en') in the DB
-  // now that the wind-down cleanup ran.
-  const pulses = (pulsesRes.data ?? []) as MinPulse[];
-  const seenPulse = new Set<string>();
-  for (const p of pulses) {
-    if ((p.locale || DEFAULT_LOCALE) !== DEFAULT_LOCALE) continue;
-    if (seenPulse.has(p.slug)) continue;
-    seenPulse.add(p.slug);
-    out.push({
-      url: `${BASE}/pulse/${p.slug}`,
-      lastModified: p.published_at,
-      changeFrequency: 'monthly',
-      priority: 0.75,
-    });
-  }
-
+  // ── Pulse pages: not listed — they are noindex (see pulse/[slug]/layout.tsx). ──
   // ── Glossary entries ──
   // English-only.
   const glossary = (glossaryRes.data ?? []) as MinGlossary[];
