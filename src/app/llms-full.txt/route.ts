@@ -11,7 +11,7 @@ import { DEFAULT_META_WEIGHTS } from '@/lib/indicators/composeMetaIndex';
 import { CURRENT_METHOD_VERSION } from '@/lib/changelog/entries';
 import { loadLatestLive, describeContributor, topDriver } from '@/lib/live/present';
 
-export const revalidate = 3600;
+export const revalidate = 86400; // daily: data changes once a day; crons revalidate on demand
 
 export async function GET() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -87,6 +87,6 @@ export async function GET() {
   lines.push('- The layoffs tracker is a standalone feed and does not enter the scores.');
 
   return new Response(lines.join('\n') + '\n', {
-    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' },
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' },
   });
 }

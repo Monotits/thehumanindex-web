@@ -39,7 +39,7 @@ export async function cardFonts() {
 
 export function cardOptions(format: ShareFormat, fonts: Awaited<ReturnType<typeof cardFonts>>) {
   const { W, H } = canvas(format);
-  return { width: W, height: H, fonts, headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } };
+  return { width: W, height: H, fonts, headers: { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' } };
 }
 
 export function monthLabel(d = new Date()): string {

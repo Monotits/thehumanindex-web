@@ -190,7 +190,7 @@ async function countriesResponse() {
         count: countries.length,
         countries,
       },
-      { headers: { 'Cache-Control': 's-maxage=300, stale-while-revalidate=600' } },
+      { headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } },
     )
   } catch (error) {
     return Response.json({ ok: false, error: String(error) }, { status: 500 })

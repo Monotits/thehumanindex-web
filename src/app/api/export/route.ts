@@ -15,7 +15,7 @@
 import { anonClient } from '@/lib/live/present';
 import { toCsv } from '@/lib/export/csv';
 
-export const revalidate = 3600;
+export const revalidate = 86400; // daily: data changes once a day; crons revalidate on demand
 
 const META = ['economic', 'social', 'mental', 'technological', 'environmental'] as const;
 
@@ -24,7 +24,7 @@ function csvResponse(name: string, body: string, license: string) {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': `attachment; filename="${name}"`,
-      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
       'X-License': license,
       // Open data: let other sites and tools (archives, notebooks) fetch the CSV directly.
       'Access-Control-Allow-Origin': '*',

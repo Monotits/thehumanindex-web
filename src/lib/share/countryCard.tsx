@@ -91,7 +91,7 @@ export async function renderCountryCard(rawCode: string, format: CardFormat): Pr
   );
 
   const glow = <div style={{ position: 'absolute', top: 0, left: 0, width: W, height: H, display: 'flex', backgroundImage: `radial-gradient(circle at 85% 12%, ${accent}40 0%, ${accent}00 55%)` }} />;
-  const opts = { width: W, height: H, fonts: fonts.length ? fonts : undefined, headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } };
+  const opts = { width: W, height: H, fonts: fonts.length ? fonts : undefined, headers: { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' } };
 
   if (og) {
     const bars = (

@@ -22,10 +22,12 @@ import { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { DEFAULT_LOCALE } from '@/i18n/config';
 
-// Rendered per request. The previous `revalidate = 3600` left the file frozen
-// on the CDN for days (GSC 2026-10-07: newest pulse in sitemap was two weeks
-// behind the live site), so Google never saw new URLs.
-export const dynamic = 'force-dynamic';
+// Was force-dynamic (one function run + several Supabase queries per crawler
+// hit), which counted against the Hobby CPU limit. Now cached 6h and also
+// revalidated by the daily refresh-v2 cron, so new URLs still appear the same
+// day. (2026-10-07 note: a stale CDN copy hid new pulses for two weeks — the
+// on-demand revalidation below is what prevents that now.)
+export const revalidate = 21600;
 
 const BASE = 'https://thehumanindex.org';
 

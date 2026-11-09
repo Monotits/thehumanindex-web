@@ -11,7 +11,7 @@ import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 import { effectiveStatus, type ResearchStatus } from '@/lib/research/publishable';
 
 // Articles change rarely; 10 min ISR keeps DB load flat without staleness risk.
-export const revalidate = 600;
+export const revalidate = 86400; // daily: data changes once a day; crons revalidate on demand
 
 // No build-time params: each article is rendered on first hit, then cached
 // (without this the route stays fully dynamic and `revalidate` is ignored).

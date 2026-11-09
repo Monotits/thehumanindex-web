@@ -15,7 +15,7 @@ import { ShareButton } from '@/components/ui/ShareButton';
 import { ShareCardButton } from '@/components/share-card/ShareCardButton';
 import { bandFor, freshnessFor, META_LABELS, type MetaIndex } from '@/lib/ui/tokens';
 
-export const revalidate = 3600;
+export const revalidate = 86400; // daily: data changes once a day; crons revalidate on demand
 
 interface IndicatorRow {
   id: string;

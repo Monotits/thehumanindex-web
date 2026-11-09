@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://thehumanindex.org/top-10' },
 };
 
-export const revalidate = 3600;
+export const revalidate = 86400; // daily: data changes once a day; crons revalidate on demand
 
 export default function Top10IndexPage() {
   return (

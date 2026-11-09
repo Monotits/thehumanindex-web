@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://thehumanindex.org/transparency' },
 };
 
-export const revalidate = 1800;
+export const revalidate = 86400; // daily: data changes once a day; crons revalidate on demand
 
 interface HealthRow {
   source: string;

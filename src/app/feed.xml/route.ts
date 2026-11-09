@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { Commentary } from '@/lib/types'
 
-export const revalidate = 3600
+export const revalidate = 21600; // 6h: PD publishes Pulse/Research/layoffs during the day
 
 export async function GET() {
   const siteUrl = 'https://thehumanindex.org'

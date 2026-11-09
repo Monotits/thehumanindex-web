@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://thehumanindex.org/indicators' },
 };
 
-export const revalidate = 3600;
+export const revalidate = 86400; // daily: data changes once a day; crons revalidate on demand
 
 interface IndicatorRow {
   id: string;

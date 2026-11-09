@@ -6,7 +6,7 @@ import type { MetaIndex } from '@/lib/ui/tokens';
 
 // ISR: content is English-only (getActiveLocale() is pinned), so nothing here
 // depends on the request. Cached pages answer crawlers in ~100ms instead of 1.5-2s.
-export const revalidate = 3600;
+export const revalidate = 86400; // daily: data changes once a day; crons revalidate on demand
 
 export interface QuizCountry {
   code: string;

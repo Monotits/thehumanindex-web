@@ -360,6 +360,15 @@ export async function GET(request: Request) {
       revalidatePath('/indicator/[id]', 'page');
       revalidatePath('/top-10/[slug]', 'page');
       revalidatePath('/llms-full.txt');
+      // Previously done by the legacy v1 cron (removed from vercel.json):
+      revalidatePath('/pulse');
+      revalidatePath('/pulse/[slug]', 'page');
+      revalidatePath('/research');
+      revalidatePath('/layoffs');
+      revalidatePath('/glossary');
+      revalidatePath('/data-sources');
+      revalidatePath('/sitemap.xml');
+      revalidatePath('/feed.xml');
     } catch (e) {
       console.warn('[cron-v2] revalidatePath warning:', e);
     }

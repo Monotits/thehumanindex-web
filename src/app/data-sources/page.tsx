@@ -5,7 +5,7 @@ import { computeReleases, loadLatestPeriods } from '@/lib/calendar/releases';
 import { seedEditionRows } from '@/lib/seeds/editions';
 import { cn } from '@/lib/ui/cn';
 
-export const revalidate = 3600;
+export const revalidate = 86400; // daily: data changes once a day; crons revalidate on demand
 
 // ── Types ──────────────────────────────────────────────────────────
 

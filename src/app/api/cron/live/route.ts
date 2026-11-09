@@ -142,6 +142,7 @@ export async function GET(request: Request) {
 
     revalidatePath('/');
     revalidatePath('/data-sources');
+    revalidatePath('/country/[code]', 'page'); // Live panel
 
     return NextResponse.json({
       ok: true,

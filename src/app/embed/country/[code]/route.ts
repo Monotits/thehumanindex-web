@@ -8,7 +8,7 @@ import { anonClient, loadLatestLive, liveTone, LIVE_TONE_LABEL } from '@/lib/liv
 import { loadHistorical } from '@/lib/history/present';
 import { bandFor, BAND_LABELS } from '@/lib/ui/tokens';
 
-export const revalidate = 3600;
+export const revalidate = 86400; // daily: data changes once a day; crons revalidate on demand
 
 const esc = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
@@ -69,7 +69,7 @@ ${spark}
   return new Response(html, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
       'Content-Security-Policy': "frame-ancestors *",
     },
   });
