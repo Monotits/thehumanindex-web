@@ -12,7 +12,7 @@ export const INDEXNOW_KEY = 'ba451426f175e5032b25b7496470e4f9';
 const HOST = 'thehumanindex.org';
 const BASE = `https://${HOST}`;
 
-/** URLs whose numbers change when the daily scores change, plus content published in the last 2 days. */
+/** URLs whose numbers change when the daily scores change, plus research published in the last 2 days. */
 export async function changedUrls(sb: SupabaseClient, countryCodes: string[]): Promise<string[]> {
   const urls = [
     `${BASE}/`, `${BASE}/countries`, `${BASE}/indicators`, `${BASE}/top-10`, `${BASE}/llms-full.txt`,
@@ -20,11 +20,8 @@ export async function changedUrls(sb: SupabaseClient, countryCodes: string[]): P
     ...countryCodes.map(c => `${BASE}/country/${c.toLowerCase()}`),
   ];
   const since = new Date(Date.now() - 2 * 86400 * 1000).toISOString();
-  const [pulses, research] = await Promise.all([
-    sb.from('commentary').select('slug').eq('type', 'weekly_pulse').eq('locale', 'en').gte('published_at', since).limit(100),
-    sb.from('research_articles').select('slug, status').gte('published_at', since).limit(50),
-  ]);
-  for (const p of (pulses.data ?? []) as { slug: string }[]) urls.push(`${BASE}/pulse/${p.slug}`);
+  // Pulse articles are noindex, so they are not submitted.
+  const research = await sb.from('research_articles').select('slug, status').gte('published_at', since).limit(50);
   for (const r of (research.data ?? []) as { slug: string; status?: string | null }[]) {
     if (!r.status || r.status === 'published') urls.push(`${BASE}/research/${r.slug}`);
   }
