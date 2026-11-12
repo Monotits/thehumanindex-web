@@ -110,7 +110,6 @@ export function ShareCardButton({ image, page, title, kind, id, fileStem, label 
       <dialog
         ref={dialogRef}
         aria-labelledby={titleId}
-        // @ts-expect-error — `closedby` is a valid HTML attribute not yet in React's types
         closedby="any"
         onClose={() => setOpen(false)}
         className="share-dialog w-[calc(100%-2rem)] max-w-md rounded-xl bg-background text-foreground border border-border p-0 max-h-[92vh]"
