@@ -144,11 +144,12 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Custom scrollbar ── */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--background-alt); }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--foreground-subtle); }
+/* ── Scrollbar (standard properties; Modern Web Guidance replaced ::-webkit-scrollbar) ── */
+html { scrollbar-color: var(--border-strong) var(--background-alt); scrollbar-width: thin; }
+
+/* ── Native modal dialogs (share cards) ── */
+dialog.share-dialog:modal { overscroll-behavior: contain; margin: auto; }
+dialog.share-dialog::backdrop { background: rgb(0 0 0 / 0.6); overflow: hidden; overscroll-behavior: contain; }
 
 /* ── Selection ── */
 ::selection {

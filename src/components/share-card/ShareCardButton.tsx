@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { trackEvent, withUtm } from '@/lib/analytics';
 
 export interface ShareCardButtonProps {
@@ -30,12 +30,32 @@ export function ShareCardButton({ image, page, title, kind, id, fileStem, label 
   const file = `thehumanindex-${fileStem}-${format}.png`;
   const ev = (action: string, extra: Record<string, string> = {}) => trackEvent('share_card', { action, kind, ...(id ? { id } : {}), ...extra });
 
+  // Native modal <dialog> (Modern Web Guidance "dialog", Rule 1): the browser
+  // provides the inert page, focus containment, Esc/back-gesture dismissal and
+  // focus return to the button — no hand-rolled trap or key handler.
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    const d = dialogRef.current;
+    if (!d) return;
+    if (open && !d.open) d.showModal();
+    if (!open && d.open) d.close();
   }, [open]);
+  // Light dismiss where `closedby` is unsupported (Safari): press + release outside the box.
+  useEffect(() => {
+    const d = dialogRef.current;
+    if (!d || 'closedBy' in HTMLDialogElement.prototype) return;
+    const outside = (e: PointerEvent) => {
+      const r = d.getBoundingClientRect();
+      return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+    };
+    let pressedOutside = false;
+    const down = (e: PointerEvent) => { pressedOutside = outside(e); };
+    const up = (e: PointerEvent) => { if (pressedOutside && outside(e)) d.close(); };
+    d.addEventListener('pointerdown', down);
+    d.addEventListener('pointerup', up);
+    return () => { d.removeEventListener('pointerdown', down); d.removeEventListener('pointerup', up); };
+  }, []);
 
   const getFile = async () => {
     const res = await fetch(img);
@@ -87,12 +107,21 @@ export function ShareCardButton({ image, page, title, kind, id, fileStem, label 
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="9" cy="9" r="2" /><path d="M21 15l-5-5L5 21" /></svg>
         {label}
       </button>
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-label="Share card" onClick={() => setOpen(false)}>
-          <div className="w-full max-w-md rounded-xl bg-background border border-border p-5 max-h-[92vh] overflow-auto" onClick={e => e.stopPropagation()}>
+      <dialog
+        ref={dialogRef}
+        aria-labelledby={titleId}
+        // @ts-expect-error — `closedby` is a valid HTML attribute not yet in React's types
+        closedby="any"
+        onClose={() => setOpen(false)}
+        className="share-dialog w-[calc(100%-2rem)] max-w-md rounded-xl bg-background text-foreground border border-border p-0 max-h-[92vh]"
+      >
+        {open && (
+          <div className="p-5">
             <div className="flex items-center justify-between gap-4 mb-4">
-              <h2 className="font-serif text-xl font-semibold leading-tight">{title}</h2>
-              <button type="button" onClick={() => setOpen(false)} className="text-foreground-muted hover:text-foreground text-sm shrink-0">Close</button>
+              <h2 id={titleId} className="font-serif text-xl font-semibold leading-tight">{title}</h2>
+              <form method="dialog">
+                <button className="text-foreground-muted hover:text-foreground text-sm shrink-0">Close</button>
+              </form>
             </div>
             <div className="flex gap-2 mb-4">
               {(['story', 'square'] as const).map(f => (
@@ -105,14 +134,14 @@ export function ShareCardButton({ image, page, title, kind, id, fileStem, label 
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img} alt={`${title} share card`} className={`mx-auto rounded-lg border border-border ${format === 'story' ? 'max-h-[52vh]' : 'max-h-[40vh]'} w-auto`} />
             <div className="grid grid-cols-3 gap-2 mt-4">
-              <button type="button" onClick={share} disabled={busy} className="rounded-md bg-accent text-accent-fg px-3 py-2 text-sm font-medium hover:bg-accent-hover disabled:opacity-60">Share</button>
+              <button type="button" onClick={share} disabled={busy} autoFocus className="rounded-md bg-accent text-accent-fg px-3 py-2 text-sm font-medium hover:bg-accent-hover disabled:opacity-60">Share</button>
               <button type="button" onClick={() => download()} className="rounded-md border border-border px-3 py-2 text-sm hover:bg-background-alt">Download</button>
               <button type="button" onClick={copy} className="rounded-md border border-border px-3 py-2 text-sm hover:bg-background-alt">Copy link</button>
             </div>
-            {msg && <p className="mt-3 text-xs text-foreground-muted text-center">{msg}</p>}
+            {msg && <p className="mt-3 text-xs text-foreground-muted text-center" role="status">{msg}</p>}
           </div>
-        </div>
-      )}
+        )}
+      </dialog>
     </>
   );
 }

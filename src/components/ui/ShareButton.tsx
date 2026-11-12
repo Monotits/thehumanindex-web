@@ -158,7 +158,6 @@ export function ShareButton({
         ref={btnRef}
         type="button"
         onClick={handleClick}
-        aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Share this page"
         className={
@@ -173,12 +172,12 @@ export function ShareButton({
       {open && (
         <div
           ref={popRef}
-          role="menu"
+         
           aria-label="Share options"
           className="absolute right-0 mt-2 w-56 z-50 rounded-lg border border-border bg-background shadow-lg p-1.5"
         >
           <button
-            role="menuitem"
+           
             onClick={handleCopy}
             className="w-full text-left px-3 py-2 rounded-md text-sm text-foreground hover:bg-background-alt flex items-center justify-between"
           >
@@ -191,7 +190,7 @@ export function ShareButton({
           {channels.map((c) => (
             <a
               key={c.key}
-              role="menuitem"
+             
               href={c.href}
               target="_blank"
               rel="noopener noreferrer"
